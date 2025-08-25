@@ -19,7 +19,14 @@
             "documentTypes": ["powerhouse/workstream"]
         }
     ],
-    "apps": [],
+    "apps": [
+        {
+            "id": "powerhouse/network-admin",
+            "name": "Network Admin Drive Explorer",
+            "description": "Custom drive explorer for managing and organizing network administration documents and workstreams",
+            "documentTypes": ["powerhouse/document-drive"]
+        }
+    ],
     "subgraphs": [
         {
             "id": "powerhouse/workstream-subgraph",
