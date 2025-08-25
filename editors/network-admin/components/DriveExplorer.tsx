@@ -160,7 +160,11 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
           </h2>
 
           {/* Folder tree navigation component */}
-          <FolderTree folders={allFolders} onSelectNode={setSelectedNode} />
+          <FolderTree 
+            folders={allFolders} 
+            files={fileChildren}
+            onSelectNode={setSelectedNode} 
+          />
         </div>
       </div>
 

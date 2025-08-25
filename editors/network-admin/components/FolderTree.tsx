@@ -1,8 +1,9 @@
-import type { FolderNode } from "document-drive";
+import type { FolderNode, FileNode } from "document-drive";
 import { useState } from "react";
 
 interface FolderTreeProps {
   folders: FolderNode[];
+  files: FileNode[];
   selectedNodeId?: string;
   onSelectNode: (nodeId: string | undefined) => void;
 }
@@ -13,6 +14,7 @@ interface FolderTreeProps {
  */
 export function FolderTree({
   folders,
+  files,
   selectedNodeId,
   onSelectNode,
 }: FolderTreeProps) {
@@ -36,7 +38,9 @@ export function FolderTree({
 
   // Recursive function to render folder tree structure
   const renderFolder = (folder: FolderNode, level = 0) => {
-    const hasChildren = folders.some((f) => f.parentFolder === folder.id);
+    const hasChildFolders = folders.some((f) => f.parentFolder === folder.id);
+    const hasChildFiles = files.some((f) => f.parentFolder === folder.id);
+    const hasChildren = hasChildFolders || hasChildFiles;
     const isExpanded = expandedFolders.has(folder.id);
     const isSelected = selectedNodeId === folder.id;
 
@@ -65,12 +69,29 @@ export function FolderTree({
           {/* Customize folder icon and styling here */}
           <span>📁 {folder.name}</span>
         </div>
-        {/* Recursively render child folders when expanded */}
+        {/* Recursively render child folders and files when expanded */}
         {isExpanded && hasChildren && (
           <div>
+            {/* Render child folders */}
             {folders
               .filter((f) => f.parentFolder === folder.id)
               .map((child) => renderFolder(child, level + 1))}
+            {/* Render child files */}
+            {files
+              .filter((f) => f.parentFolder === folder.id)
+              .map((file) => (
+                <div
+                  key={file.id}
+                  className={`flex cursor-pointer items-center rounded px-2 py-1 text-sm hover:bg-gray-100 ${
+                    selectedNodeId === file.id ? "bg-blue-100 text-blue-800" : ""
+                  }`}
+                  style={{ paddingLeft: `${(level + 1) * 16 + 8}px` }}
+                  onClick={() => onSelectNode(file.id)}
+                >
+                  <div className="mr-1 w-5" />
+                  <span>📄 {file.name}</span>
+                </div>
+              ))}
           </div>
         )}
       </div>
@@ -94,6 +115,23 @@ export function FolderTree({
       {folders
         .filter((folder) => !folder.parentFolder)
         .map((folder) => renderFolder(folder))}
+      
+      {/* Render root-level files (no parent folder) */}
+      {files
+        .filter((file) => !file.parentFolder)
+        .map((file) => (
+          <div
+            key={file.id}
+            className={`flex cursor-pointer items-center rounded px-2 py-1 text-sm hover:bg-gray-100 ${
+              selectedNodeId === file.id ? "bg-blue-100 text-blue-800" : ""
+            }`}
+            style={{ paddingLeft: "8px" }}
+            onClick={() => onSelectNode(file.id)}
+          >
+            <div className="mr-1 w-5" />
+            <span>📄 {file.name}</span>
+          </div>
+        ))}
     </div>
   );
 }
