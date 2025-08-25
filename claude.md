@@ -457,3 +457,85 @@ export default function Editor(props) {
 - **Warning Messages**: Use `toast.warning()` for validation warnings
 - **Info Messages**: Use `toast.info()` for informational feedback
 - **Consistent Messaging**: Use clear, user-friendly messages that explain what happened
+
+## Custom Drive Explorer Creation Workflow
+
+### Problem Statement
+You need a custom, application-like interface to browse, organize, or interact with specific types of documents stored within a Powerhouse drive, going beyond the standard file listing.
+
+### Prerequisites
+- Powerhouse CLI (ph-cmd) installed
+- A Powerhouse project initialized (ph init)
+- MCP server connection available
+
+### Step 1: Generate Drive Explorer Template
+Navigate to your project root and run the generate command with the `--drive-editor` flag:
+
+```bash
+# Replace <drive-app-name> with your desired name (e.g., network-admin)
+ph generate --drive-editor <drive-app-name>
+```
+
+### Step 2: Update Module Configuration
+After generation, customize the module configuration in `editors/<drive-app-name>/index.ts`:
+
+```typescript
+export const module: DriveEditorModule = {
+  Component: Editor,
+  documentTypes: ["powerhouse/document-drive"],
+  config: {
+    id: "<drive-app-name>", // Use clean, simple ID
+    disableExternalControls: true,
+    documentToolbarEnabled: true,
+    showSwitchboardLink: true,
+  },
+};
+```
+
+### Step 3: Customize UI Components
+- **Main Explorer** (`components/DriveExplorer.tsx`): Update sidebar title and empty state messages
+- **Document Creation** (`components/CreateDocument.tsx`): Customize document type filtering if needed
+- **Folder Tree** (`components/FolderTree.tsx`): Customize navigation behavior
+- **Editor Container** (`components/EditorContainer.tsx`): Customize toolbar actions
+
+### Step 4: Update Powerhouse Manifest
+Add the drive explorer to the `apps` section in `powerhouse.manifest.json`:
+
+```json
+{
+  "apps": [
+    {
+      "id": "powerhouse/<drive-app-name>",
+      "name": "<Display Name> Drive Explorer",
+      "description": "Custom drive explorer for managing and organizing <specific use case> documents",
+      "documentTypes": ["powerhouse/document-drive"]
+    }
+  ]
+}
+```
+
+### Step 5: Update Module Exports
+Ensure the drive explorer is exported in `editors/index.ts`:
+
+```typescript
+export { module as <PascalCaseName>DriveExplorer } from "./<drive-app-name>/index.js";
+```
+
+### Key Customization Points
+- **Sidebar Title**: Brand the explorer for your specific use case
+- **Empty State Messages**: Provide context-specific guidance
+- **Document Filtering**: Filter available document types if needed
+- **UI Styling**: Customize layout, colors, and spacing using TailwindCSS
+- **Folder Operations**: Customize folder creation and organization behavior
+
+### Expected Outcome
+- A new directory `editors/<drive-app-name>/` with complete drive explorer implementation
+- Customizable interface for browsing, creating, and managing documents within drives
+- Integration with existing document editors for seamless workflow
+- Proper registration in powerhouse.manifest.json as an app module
+
+### Notes
+- Drive explorers target `powerhouse/document-drive` document type
+- They provide specialized interfaces for managing documents of any type within drives
+- Unlike document editors (which edit specific document types), drive explorers manage collections of documents
+- The generated template includes responsive layout, folder navigation, and document creation workflows
