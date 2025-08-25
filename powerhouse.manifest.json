@@ -1,0 +1,25 @@
+{
+    "name": "",
+    "description": "",
+    "category": "",
+    "publisher": {
+        "name": "",
+        "url": ""
+    },
+    "documentModels": [
+        {
+            "id": "your-model-id",
+            "name": "your-model-name"
+        }
+    ],
+    "editors": [
+        {
+            "id": "your-editor-id",
+            "name": "your-editor-name",
+            "documentTypes": ["your-model-id"]
+        }
+    ],
+    "apps": [],
+    "subgraphs": [],
+    "importScripts": []
+}
