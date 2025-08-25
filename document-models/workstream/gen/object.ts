@@ -1,11 +1,15 @@
 import {
   BaseDocumentClass,
-  type ExtendedState,
+  type BaseStateFromDocument,
   type PartialState,
   applyMixins,
   type SignalDispatch,
 } from "document-model";
-import { type WorkstreamState, type WorkstreamLocalState } from "./types.js";
+import {
+  type WorkstreamState,
+  type WorkstreamLocalState,
+  type WorkstreamDocument,
+} from "./types.js";
 import { type WorkstreamAction } from "./actions.js";
 import { reducer } from "./reducer.js";
 import utils from "./utils.js";
@@ -27,12 +31,7 @@ class Workstream extends BaseDocumentClass<
   static fileExtension = "";
 
   constructor(
-    initialState?: Partial<
-      ExtendedState<
-        PartialState<WorkstreamState>,
-        PartialState<WorkstreamLocalState>
-      >
-    >,
+    initialState?: Partial<BaseStateFromDocument<WorkstreamDocument>>,
     dispatch?: SignalDispatch,
   ) {
     super(reducer, utils.createDocument(initialState), dispatch);

@@ -35,10 +35,10 @@ describe("Proposals Operations", () => {
     );
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe(
+    expect((updatedDocument.operations.global[0] as any).type).toBe(
       "EDIT_INITIAL_PROPOSAL",
     );
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle addAlternativeProposal operation", () => {
@@ -52,10 +52,10 @@ describe("Proposals Operations", () => {
     );
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe(
+    expect((updatedDocument.operations.global[0] as any).type).toBe(
       "ADD_ALTERNATIVE_PROPOSAL",
     );
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editAlternativeProposal operation", () => {
@@ -69,10 +69,10 @@ describe("Proposals Operations", () => {
     );
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe(
+    expect((updatedDocument.operations.global[0] as any).type).toBe(
       "EDIT_ALTERNATIVE_PROPOSAL",
     );
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle removeAlternativeProposal operation", () => {
@@ -86,10 +86,10 @@ describe("Proposals Operations", () => {
     );
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe(
+    expect((updatedDocument.operations.global[0] as any).type).toBe(
       "REMOVE_ALTERNATIVE_PROPOSAL",
     );
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
 });

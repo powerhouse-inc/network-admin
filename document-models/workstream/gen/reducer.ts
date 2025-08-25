@@ -1,3 +1,6 @@
+// TODO: remove eslint-disable rules once refactor is done
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   type StateReducer,
   isDocumentAction,
@@ -21,8 +24,8 @@ const stateReducer: StateReducer<WorkstreamDocument> = (
     case "EDIT_WORKSTREAM":
       z.EditWorkstreamInputSchema().parse(action.input);
       WorkstreamReducer.editWorkstreamOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -30,8 +33,8 @@ const stateReducer: StateReducer<WorkstreamDocument> = (
     case "EDIT_CLIENT_INFO":
       z.EditClientInfoInputSchema().parse(action.input);
       WorkstreamReducer.editClientInfoOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -39,8 +42,8 @@ const stateReducer: StateReducer<WorkstreamDocument> = (
     case "SET_REQUEST_FOR_PROPOSAL":
       z.SetRequestForProposalInputSchema().parse(action.input);
       WorkstreamReducer.setRequestForProposalOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -48,8 +51,8 @@ const stateReducer: StateReducer<WorkstreamDocument> = (
     case "ADD_PAYMENT_REQUEST":
       z.AddPaymentRequestInputSchema().parse(action.input);
       WorkstreamReducer.addPaymentRequestOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -57,8 +60,8 @@ const stateReducer: StateReducer<WorkstreamDocument> = (
     case "REMOVE_PAYMENT_REQUEST":
       z.RemovePaymentRequestInputSchema().parse(action.input);
       WorkstreamReducer.removePaymentRequestOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -66,8 +69,8 @@ const stateReducer: StateReducer<WorkstreamDocument> = (
     case "EDIT_INITIAL_PROPOSAL":
       z.EditInitialProposalInputSchema().parse(action.input);
       ProposalsReducer.editInitialProposalOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -75,8 +78,8 @@ const stateReducer: StateReducer<WorkstreamDocument> = (
     case "ADD_ALTERNATIVE_PROPOSAL":
       z.AddAlternativeProposalInputSchema().parse(action.input);
       ProposalsReducer.addAlternativeProposalOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -84,8 +87,8 @@ const stateReducer: StateReducer<WorkstreamDocument> = (
     case "EDIT_ALTERNATIVE_PROPOSAL":
       z.EditAlternativeProposalInputSchema().parse(action.input);
       ProposalsReducer.editAlternativeProposalOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -93,8 +96,8 @@ const stateReducer: StateReducer<WorkstreamDocument> = (
     case "REMOVE_ALTERNATIVE_PROPOSAL":
       z.RemoveAlternativeProposalInputSchema().parse(action.input);
       ProposalsReducer.removeAlternativeProposalOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;

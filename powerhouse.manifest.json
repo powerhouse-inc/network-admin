@@ -1,25 +1,31 @@
 {
-    "name": "",
-    "description": "",
-    "category": "",
+    "name": "Network Admin",
+    "description": "Powerhouse document models and editors for network administration and workstream management",
+    "category": "Administration",
     "publisher": {
-        "name": "",
-        "url": ""
+        "name": "Powerhouse",
+        "url": "https://powerhouse.inc"
     },
     "documentModels": [
         {
-            "id": "your-model-id",
-            "name": "your-model-name"
+            "id": "powerhouse/workstream",
+            "name": "Workstream"
         }
     ],
     "editors": [
         {
-            "id": "your-editor-id",
-            "name": "your-editor-name",
-            "documentTypes": ["your-model-id"]
+            "id": "powerhouse/workstream-editor",
+            "name": "Workstream Editor",
+            "documentTypes": ["powerhouse/workstream"]
         }
     ],
     "apps": [],
-    "subgraphs": [],
+    "subgraphs": [
+        {
+            "id": "powerhouse/workstream-subgraph",
+            "name": "Workstream Subgraph",
+            "documentTypes": ["powerhouse/workstream"]
+        }
+    ],
     "importScripts": []
 }

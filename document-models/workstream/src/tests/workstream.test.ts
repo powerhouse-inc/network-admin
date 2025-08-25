@@ -33,9 +33,9 @@ describe("Workstream Operations", () => {
     const updatedDocument = reducer(document, creators.editWorkstream(input));
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe("EDIT_WORKSTREAM");
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
+    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_WORKSTREAM");
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).index).toEqual(0);
   });
   it("should handle editClientInfo operation", () => {
     const input: EditClientInfoInput = generateMock(
@@ -45,9 +45,9 @@ describe("Workstream Operations", () => {
     const updatedDocument = reducer(document, creators.editClientInfo(input));
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe("EDIT_CLIENT_INFO");
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
+    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_CLIENT_INFO");
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).index).toEqual(0);
   });
   it("should handle setRequestForProposal operation", () => {
     const input: SetRequestForProposalInput = generateMock(
@@ -60,11 +60,11 @@ describe("Workstream Operations", () => {
     );
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe(
+    expect((updatedDocument.operations.global[0] as any).type).toBe(
       "SET_REQUEST_FOR_PROPOSAL",
     );
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).index).toEqual(0);
   });
   it("should handle addPaymentRequest operation", () => {
     const input: AddPaymentRequestInput = generateMock(
@@ -77,11 +77,11 @@ describe("Workstream Operations", () => {
     );
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe(
+    expect((updatedDocument.operations.global[0] as any).type).toBe(
       "ADD_PAYMENT_REQUEST",
     );
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).index).toEqual(0);
   });
   it("should handle removePaymentRequest operation", () => {
     const input: RemovePaymentRequestInput = generateMock(
@@ -94,10 +94,10 @@ describe("Workstream Operations", () => {
     );
 
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].type).toBe(
+    expect((updatedDocument.operations.global[0] as any).type).toBe(
       "REMOVE_PAYMENT_REQUEST",
     );
-    expect(updatedDocument.operations.global[0].input).toStrictEqual(input);
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
+    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect((updatedDocument.operations.global[0] as any).index).toEqual(0);
   });
 });

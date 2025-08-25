@@ -395,7 +395,7 @@ describe("Proposals Reducers - State Changes", () => {
 
       expect(updatedDocument.state.global.alternativeProposals).toHaveLength(2);
       
-      const remainingIds = updatedDocument.state.global.alternativeProposals.map(p => p.id);
+      const remainingIds = updatedDocument.state.global.alternativeProposals.map((p: any) => p.id);
       expect(remainingIds).toContain("alt-proposal-1");
       expect(remainingIds).toContain("alt-proposal-3");
       expect(remainingIds).not.toContain("alt-proposal-2");
@@ -414,7 +414,7 @@ describe("Proposals Reducers - State Changes", () => {
       // All original proposals should remain
       expect(updatedDocument.state.global.alternativeProposals).toHaveLength(3);
       
-      const remainingIds = updatedDocument.state.global.alternativeProposals.map(p => p.id);
+      const remainingIds = updatedDocument.state.global.alternativeProposals.map((p: any) => p.id);
       expect(remainingIds).toContain("alt-proposal-1");
       expect(remainingIds).toContain("alt-proposal-2");
       expect(remainingIds).toContain("alt-proposal-3");

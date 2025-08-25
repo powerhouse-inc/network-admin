@@ -1,4 +1,4 @@
-import { type BaseAction } from "document-model";
+import { type Action } from "document-model";
 import type {
   EditInitialProposalInput,
   AddAlternativeProposalInput,
@@ -6,26 +6,22 @@ import type {
   RemoveAlternativeProposalInput,
 } from "../types.js";
 
-export type EditInitialProposalAction = BaseAction<
-  "EDIT_INITIAL_PROPOSAL",
-  EditInitialProposalInput,
-  "global"
->;
-export type AddAlternativeProposalAction = BaseAction<
-  "ADD_ALTERNATIVE_PROPOSAL",
-  AddAlternativeProposalInput,
-  "global"
->;
-export type EditAlternativeProposalAction = BaseAction<
-  "EDIT_ALTERNATIVE_PROPOSAL",
-  EditAlternativeProposalInput,
-  "global"
->;
-export type RemoveAlternativeProposalAction = BaseAction<
-  "REMOVE_ALTERNATIVE_PROPOSAL",
-  RemoveAlternativeProposalInput,
-  "global"
->;
+export type EditInitialProposalAction = Action & {
+  type: "EDIT_INITIAL_PROPOSAL";
+  input: EditInitialProposalInput;
+};
+export type AddAlternativeProposalAction = Action & {
+  type: "ADD_ALTERNATIVE_PROPOSAL";
+  input: AddAlternativeProposalInput;
+};
+export type EditAlternativeProposalAction = Action & {
+  type: "EDIT_ALTERNATIVE_PROPOSAL";
+  input: EditAlternativeProposalInput;
+};
+export type RemoveAlternativeProposalAction = Action & {
+  type: "REMOVE_ALTERNATIVE_PROPOSAL";
+  input: RemoveAlternativeProposalInput;
+};
 
 export type WorkstreamProposalsAction =
   | EditInitialProposalAction
