@@ -3,8 +3,8 @@ import {
   useDocumentModelModules,
   useSelectedDriveId,
   useSelectedFolder,
-  type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";
+import type { DocumentModelModule } from "document-model";
 import { Button } from "@powerhousedao/design-system";
 
 /**
@@ -16,7 +16,7 @@ export const CreateDocument = () => {
   const selectedFolder = useSelectedFolder();
   const documentModelModules = useDocumentModelModules();
 
-  async function handleAddDocument(module: VetraDocumentModelModule) {
+  async function handleAddDocument(module: DocumentModelModule) {
     if (!selectedDriveId) {
       return;
     }
@@ -36,24 +36,26 @@ export const CreateDocument = () => {
       </h3>
       {/* Customize layout by changing flex-wrap, gap, or grid layout */}
       <div className="flex w-full flex-wrap gap-4">
-        {documentModelModules?.map((documentModelModule) => {
-          return (
-            <Button
-              key={documentModelModule.documentModel.id}
-              color="light" // Customize button appearance
-              size="small"
-              className="cursor-pointer"
-              title={documentModelModule.documentModel.name}
-              aria-description={documentModelModule.documentModel.description}
-              onClick={() => handleAddDocument(documentModelModule)}
-            >
-              {/* Customize document type display format */}
-              <span className="text-sm">
-                {documentModelModule.documentModel.name}
-              </span>
-            </Button>
-          );
-        })}
+        {documentModelModules
+          ?.filter((module) => module.documentModel.id === "powerhouse/workstream")
+          .map((documentModelModule) => {
+            return (
+              <Button
+                key={documentModelModule.documentModel.id}
+                color="light" // Customize button appearance
+                size="small"
+                className="cursor-pointer"
+                title={documentModelModule.documentModel.name}
+                aria-description={documentModelModule.documentModel.description}
+                onClick={() => handleAddDocument(documentModelModule)}
+              >
+                {/* Customize document type display format */}
+                <span className="text-sm">
+                  {documentModelModule.documentModel.name}
+                </span>
+              </Button>
+            );
+          })}
       </div>
     </div>
   );
