@@ -51,6 +51,7 @@ If the `reactor-mcp` server is unavailable, ask the user to run `ph vetra` on a 
 - Reducer code goes into SET_OPERATION_REDUCER action (no function header needed)
 - Reducers are wrapped with Mutative - you can mutate the state object directly
 - External imports go at the beginning of the actual reducer file in `src/`
+- Ensure that the reducer code of each operation in the document model schema is applied in `document-models/<document-model-name>/src/reducers/<module-name>.ts`
 
 ### 4. Quality assurance
 
@@ -61,13 +62,16 @@ After doing changes to the code, or after creating a new document model or a new
 
 ## Document editor creation flow
 
-When the user requests to create a new document editor, follow these steps:
+When the user requests to create or make changes on a document editor, follow these steps:
 
-- Create a new editor document on the "vetra" drive if available, of type `powerhouse/document-editor`
+- Check if the document editor already exists and if it does, ask the user if a new one should be created or if the existing one should be reimplemented
+- If it's a new editor, create a new editor document on the "vetra" drive if available, of type `powerhouse/document-editor`
 - Check the document editor schema and comply with it
 - After adding the editor document to the `vetra` drive, a new editor will be generated in the `editors` folder
-- Implement the editor using a style tag or tailwind classes. If using a style tag, make sure to make the selectors specific to only apply to the editor component.
-- Create modular components for the UI elements to make it easier to maintain and update
+- Read the schema of the document model that the editor is for to know how to interact with it
+- Style the editor using tailwind classes or a style tag. If using a style tag, make sure to make the selectors specific to only apply to the editor component.
+- Create modular components for the UI elements and place them on separate files to make it easier to maintain and update
+- Consider using the React Components exported by `@powerhousedao/design-system` and `@powerhousedao/document-engineering`
 - Separate business logic from presentation logic
 - Use TypeScript for type safety, avoid using any and type casting
 - Always check for type and lint errors after creating or modifying the editor
@@ -93,6 +97,7 @@ Use `mcp__reactor-mcp__addActions` with operations like:
 #### Step 2: Update Existing Source Files
 
 **ALSO manually update existing reducer files in `src/` folder** - these are NOT auto-generated.
+Make sure to check if the operation reducer code needs to be updated after changing the state schema.
 
 ### ⚠️ Critical Reminder
 
@@ -236,7 +241,6 @@ throw new MissingIdError("message");
 - **Specifications**: Versioned specs with `version`, `changeLog`, `state` (global/local with schema, initialValue, examples)
 - **Modules**: Operational modules containing their operations
 
-
 ## Available Document Model Operations (37 total)
 
 | Category                         | Operations                                                                                                                                                                                                       | Count |
@@ -348,7 +352,7 @@ const columns = useMemo<Array<ColumnDef<T>>>(
       },
     },
   ],
-  [dispatch]
+  []
 );
 ```
 
@@ -370,6 +374,31 @@ const columns = useMemo<Array<ColumnDef<T>>>(
   }}
 />
 ```
+
+#### Select Component Usage
+**MANDATORY**: Use the `Select` component from `@powerhousedao/document-engineering` for dropdown selections:
+
+```typescript
+<Select
+  label="Field Label"
+  options={[
+    { label: "Option 1", value: "OPTION_1" },
+    { label: "Option 2", value: "OPTION_2" },
+    { label: "Option 3", value: "OPTION_3" },
+  ]}
+  value={state.fieldValue}
+  onChange={(value) => {
+    dispatch(actions.updateField({ field: value as FieldType }));
+  }}
+/>
+```
+
+**Key Select Component Properties:**
+- **`label`**: String - The field label displayed above the select
+- **`options`**: Array of `{ label: string, value: string }` - Dropdown options
+- **`value`**: String - Currently selected value from state
+- **`onChange`**: Function - Handler that receives the selected value
+- **No external wrapper needed** - Component includes its own label and styling
 
 #### Navigation Components
 - Use `SidebarProvider` and `Sidebar` for hierarchical navigation
@@ -404,59 +433,6 @@ const columns = useMemo<Array<ColumnDef<T>>>(
 - **Mobile Support**: Ensure components work on mobile devices
 - **Dynamic Layouts**: Adapt layouts based on available screen space
 
-### Error Handling in UI
-
-**MANDATORY**: Implement proper error handling using the Powerhouse design system:
-
-- **Toast Notifications**: Use `toast` from `@powerhousedao/design-system` for user feedback
-- **Toast Container**: Include `ToastContainer` component in your editor root
-- **Validation Feedback**: Show validation errors inline with form fields
-- **Loading States**: Display loading indicators during async operations
-- **Error Boundaries**: Wrap components in error boundaries for graceful failure
-
-#### Toast Implementation Pattern
-
-```typescript
-import { toast, ToastContainer } from "@powerhousedao/design-system";
-
-// Success notifications
-const handleSave = async () => {
-  try {
-    dispatch(actions.updateEntity(data));
-    toast.success("Changes saved successfully");
-  } catch (error) {
-    toast.error("Failed to save changes");
-  }
-};
-
-// Error notifications
-const handleDelete = async () => {
-  try {
-    dispatch(actions.removeEntity({ id }));
-    toast.success("Item deleted successfully");
-  } catch (error) {
-    toast.error("Failed to delete item");
-  }
-};
-
-// Include ToastContainer in editor root
-export default function Editor(props) {
-  return (
-    <div className="html-defaults-container">
-      <SidebarMenu {...props} />
-      <ToastContainer />
-    </div>
-  );
-}
-```
-
-#### Toast Usage Guidelines
-
-- **Success Messages**: Use `toast.success()` for successful operations
-- **Error Messages**: Use `toast.error()` for failed operations
-- **Warning Messages**: Use `toast.warning()` for validation warnings
-- **Info Messages**: Use `toast.info()` for informational feedback
-- **Consistent Messaging**: Use clear, user-friendly messages that explain what happened
 
 ## Custom Drive Explorer Creation Workflow
 
