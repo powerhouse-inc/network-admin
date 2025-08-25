@@ -1,0 +1,143 @@
+{
+    "author": {
+        "name": "",
+        "website": ""
+    },
+    "description": "",
+    "extension": "",
+    "id": "powerhouse/workstream",
+    "name": "Workstream",
+    "specifications": [
+        {
+            "changeLog": [],
+            "modules": [
+                {
+                    "id": "efcc5289-aa8c-42a1-932c-355fb3f96891",
+                    "name": "workstream",
+                    "description": "",
+                    "operations": [
+                        {
+                            "id": "69650c50-8ac1-48aa-b64c-6d73281f9bd0",
+                            "name": "EDIT_WORKSTREAM",
+                            "description": "",
+                            "schema": "input EditWorkstreamInput {\n  code: String\n  title: String\n  status: WorkstreamStatusInput\n  sowId: PHID\n  paymentTerms: PHID\n}\n\nenum WorkstreamStatusInput {\n  RFP_DRAFT\n  PREWORK_RFC # RFP status change to RFC\n  RFP_CANCELLED\n  OPEN_FOR_PROPOSALS\n  PROPOSAL_SUBMITTED\n  NOT_AWARDED\n  AWARDED \n  IN_PROGRESS\n  FINISHED\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "636e852b-644b-49c0-8237-d1a3ea70bc34",
+                            "name": "EDIT_CLIENT_INFO",
+                            "description": "",
+                            "schema": "input EditClientInfoInput {\n  clientId: PHID!\n  name: String\n  icon: String\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "321c30ea-ae51-4168-9283-effbb45c50ac",
+                            "name": "SET_REQUEST_FOR_PROPOSAL",
+                            "description": "",
+                            "schema": "input SetRequestForProposalInput {\n  rfpId: PHID!\n  title: String!\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "1c85b689-0d69-425d-9f9c-f32cee64d11c",
+                            "name": "ADD_PAYMENT_REQUEST",
+                            "description": "",
+                            "schema": "input AddPaymentRequestInput {\n  id: PHID!\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "56bd5bba-a9f9-4c5e-87f8-a50fe9b69195",
+                            "name": "REMOVE_PAYMENT_REQUEST",
+                            "description": "",
+                            "schema": "input RemovePaymentRequestInput {\n  id: PHID!\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        }
+                    ]
+                },
+                {
+                    "id": "0658410c-8028-4fc7-a22a-6f7860c0ee36",
+                    "name": "proposals",
+                    "description": "",
+                    "operations": [
+                        {
+                            "id": "91382ea4-ce79-4910-8096-d7a433e2de1f",
+                            "name": "EDIT_INITIAL_PROPOSAL",
+                            "description": "",
+                            "schema": "input EditInitialProposalInput {\n  id: ID!\n  sowId: PHID\n  paymentTermsId: PHID\n  status: ProposalStatusInput\n  proposalAuthor: ProposalAuthorInput\n}\n\nenum ProposalStatusInput {\n  DRAFT\n  SUBMITTED\n  ACCEPTED\n  REJECTED\n}\n\ninput ProposalAuthorInput {\n  id: PHID!\n  name: String\n  icon: URL\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "8e3c8121-5210-466d-83d9-21ba7ff84690",
+                            "name": "ADD_ALTERNATIVE_PROPOSAL",
+                            "description": "",
+                            "schema": "input AddAlternativeProposalInput {\n  id: ID!\n  sowId: PHID\n  paymentTermsId: PHID\n  status: ProposalStatusInput\n  proposalAuthor: ProposalAuthorInput\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "af1035c9-bd77-4472-a09f-19f2fbbdd8e4",
+                            "name": "EDIT_ALTERNATIVE_PROPOSAL",
+                            "description": "",
+                            "schema": "input EditAlternativeProposalInput {\n  id: ID!\n  sowId: PHID\n  paymentTermsId: PHID\n  status: ProposalStatusInput\n  proposalAuthor: ProposalAuthorInput\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        },
+                        {
+                            "id": "ba85e727-8213-4cd3-b3a8-54d03e952e8b",
+                            "name": "REMOVE_ALTERNATIVE_PROPOSAL",
+                            "description": "",
+                            "schema": "input RemoveAlternativeProposalInput {\n  id: ID!\n}",
+                            "template": "",
+                            "reducer": "",
+                            "errors": [],
+                            "examples": [],
+                            "scope": "global"
+                        }
+                    ]
+                }
+            ],
+            "state": {
+                "global": {
+                    "examples": [],
+                    "initialValue": "{\n  \"code\": null,\n  \"title\": null,\n  \"status\": \"RFP_DRAFT\",\n  \"client\": null,\n  \"rfp\": null,\n  \"initialProposal\": null,\n  \"alternativeProposals\": [],\n  \"sow\": null,\n  \"paymentTerms\": null,\n  \"paymentRequests\": []\n}",
+                    "schema": "type WorkstreamState {\n  code: String\n  title: String\n  status: WorkstreamStatus!\n  client: ClientInfo # eventually tie it to the AID?\n  rfp: RFP\n  initialProposal: Proposal\n  alternativeProposals: [Proposal!]!\n  sow: PHID\n  paymentTerms: PHID\n  paymentRequests: [PHID!]!\n \n}\n\nenum WorkstreamStatus {\n  RFP_DRAFT\n  PREWORK_RFC # RFP status change to RFC\n  RFP_CANCELLED\n  OPEN_FOR_PROPOSALS\n  PROPOSAL_SUBMITTED\n  NOT_AWARDED\n  AWARDED \n  IN_PROGRESS\n  FINISHED\n}\n\ntype Proposal {\n  id: ID!\n  sow: PHID! # a link with a fixed label (i.e, sow)\n  paymentTerms: PHID! # a link with a fixed label (i.e., payment terms)\n  status: ProposalStatus!\n  author: ProposalAuthor! # eventually an AID\n}\n\nenum ProposalStatus {\n  DRAFT\n  SUBMITTED\n  ACCEPTED\n  REJECTED\n}\n\ntype ClientInfo {\n id: PHID!\n name: String\n icon: URL\n}\n\ntype RFP {\n id: PHID!\n title: String!\n}\n\ntype ProposalAuthor {\n id: PHID!\n name: String\n icon: URL\n}\n  "
+                },
+                "local": {
+                    "examples": [],
+                    "initialValue": "",
+                    "schema": ""
+                }
+            },
+            "version": 1
+        }
+    ]
+}

@@ -1,0 +1,161 @@
+scalar Amount_Tokens
+scalar EthereumAddress
+scalar Amount_Percentage
+scalar EmailAddress
+scalar Date
+scalar DateTime
+scalar URL
+scalar Amount_Money
+scalar OLabel
+scalar Currency
+scalar PHID
+scalar OID
+scalar Amount_Fiat
+scalar Amount_Currency
+scalar Amount_Crypto
+scalar Amount
+scalar Upload
+type WorkstreamState {
+  code: String
+  title: String
+  status: WorkstreamStatus!
+  client: ClientInfo # eventually tie it to the AID?
+  rfp: RFP
+  initialProposal: Proposal
+  alternativeProposals: [Proposal!]!
+  sow: PHID
+  paymentTerms: PHID
+  paymentRequests: [PHID!]!
+ 
+}
+
+enum WorkstreamStatus {
+  RFP_DRAFT
+  PREWORK_RFC # RFP status change to RFC
+  RFP_CANCELLED
+  OPEN_FOR_PROPOSALS
+  PROPOSAL_SUBMITTED
+  NOT_AWARDED
+  AWARDED 
+  IN_PROGRESS
+  FINISHED
+}
+
+type Proposal {
+  id: ID!
+  sow: PHID! # a link with a fixed label (i.e, sow)
+  paymentTerms: PHID! # a link with a fixed label (i.e., payment terms)
+  status: ProposalStatus!
+  author: ProposalAuthor! # eventually an AID
+}
+
+enum ProposalStatus {
+  DRAFT
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+}
+
+type ClientInfo {
+ id: PHID!
+ name: String
+ icon: URL
+}
+
+type RFP {
+ id: PHID!
+ title: String!
+}
+
+type ProposalAuthor {
+ id: PHID!
+ name: String
+ icon: URL
+}
+  
+
+
+
+# workstream
+
+input EditWorkstreamInput {
+  code: String
+  title: String
+  status: WorkstreamStatusInput
+  sowId: PHID
+  paymentTerms: PHID
+}
+
+enum WorkstreamStatusInput {
+  RFP_DRAFT
+  PREWORK_RFC # RFP status change to RFC
+  RFP_CANCELLED
+  OPEN_FOR_PROPOSALS
+  PROPOSAL_SUBMITTED
+  NOT_AWARDED
+  AWARDED 
+  IN_PROGRESS
+  FINISHED
+}
+
+input EditClientInfoInput {
+  clientId: PHID!
+  name: String
+  icon: String
+}
+
+input SetRequestForProposalInput {
+  rfpId: PHID!
+  title: String!
+}
+
+input AddPaymentRequestInput {
+  id: PHID!
+}
+
+input RemovePaymentRequestInput {
+  id: PHID!
+}
+
+# proposals
+
+input EditInitialProposalInput {
+  id: ID!
+  sowId: PHID
+  paymentTermsId: PHID
+  status: ProposalStatusInput
+  proposalAuthor: ProposalAuthorInput
+}
+
+enum ProposalStatusInput {
+  DRAFT
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+}
+
+input ProposalAuthorInput {
+  id: PHID!
+  name: String
+  icon: URL
+}
+
+input AddAlternativeProposalInput {
+  id: ID!
+  sowId: PHID
+  paymentTermsId: PHID
+  status: ProposalStatusInput
+  proposalAuthor: ProposalAuthorInput
+}
+
+input EditAlternativeProposalInput {
+  id: ID!
+  sowId: PHID
+  paymentTermsId: PHID
+  status: ProposalStatusInput
+  proposalAuthor: ProposalAuthorInput
+}
+
+input RemoveAlternativeProposalInput {
+  id: ID!
+}
