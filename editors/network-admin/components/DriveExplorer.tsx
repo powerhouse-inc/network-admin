@@ -1,5 +1,6 @@
 import {
   Breadcrumbs,
+  Button,
   CreateDocumentModal,
   useBreadcrumbs,
 } from "@powerhousedao/design-system";
@@ -16,6 +17,7 @@ import {
   getSyncStatusSync,
   setSelectedNode,
   useAllFolderNodes,
+  useDocumentById,
   useDocumentModelModules,
   useDriveContext,
   useDriveSharingType,
@@ -26,12 +28,14 @@ import {
   useSelectedFolder,
   useSelectedNodePath,
   useUserPermissions,
+  useAllDocuments
 } from "@powerhousedao/reactor-browser";
-import type { DocumentModelModule } from "document-model";
+import { actions, type DocumentModelModule } from "document-model";
 import { useCallback, useRef, useState, useMemo } from "react";
 import { CreateDocument } from "./CreateDocument.jsx";
 import { EditorContainer } from "./EditorContainer.jsx";
 import { FolderTree } from "./FolderTree.jsx";
+
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -65,17 +69,26 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
   const selectedFolder = useSelectedFolder(); // Currently selected folder
   const selectedNodePath = useSelectedNodePath();
   const sharingType = useDriveSharingType(selectedDrive?.header.id);
+  const allDocuments = useAllDocuments();
 
   // === NAVIGATION SETUP ===
   // Breadcrumbs for folder navigation
-  const { breadcrumbs, onBreadcrumbSelected } = useBreadcrumbs({
-    selectedNodePath: selectedNodePath as any,
-    setSelectedNode: (node) => setSelectedNode(node as any),
-    getNodeById: (id: string) => (allFolders.find(node => node.id === id) || fileChildren.find(node => node.id === id)) as any || null,
-  });
+  // const { breadcrumbs, onBreadcrumbSelected } = useBreadcrumbs({
+  //   selectedNodePath: selectedNodePath as any,
+  //   setSelectedNode: (node) => setSelectedNode(node as any),
+  //   getNodeById: (id: string) => (allFolders.find(node => node.id === id) || fileChildren.find(node => node.id === id)) as any || null,
+  // });
 
   const folderChildren = useFolderChildNodes();
   const fileChildren = useFileChildNodes();
+  const filesWithDocuments = fileChildren.map(file => {
+    const document = allDocuments?.find((doc: any) => doc.header.id === file.id);
+    const state = document?.state.global;
+    return {
+      ...file,
+      state,
+    };
+  });
 
   // All folders for the sidebar tree view
   const allFolders = useAllFolderNodes();
@@ -83,8 +96,8 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
   // Convert folders and files to SidebarNode format
   const sidebarNodes = useMemo(() => {
     const rootNode: SidebarNode = {
-      id: "root",
-      title: "Root",
+      id: "workstreams",
+      title: "Workstreams",
       children: [
         // Add folders
         ...allFolders
@@ -101,29 +114,29 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
                   title: childFolder.name,
                   children: [
                     // Add files in this folder
-                    ...fileChildren
+                    ...filesWithDocuments
                       .filter(file => file.parentFolder === childFolder.id)
-                      .map(file => ({
-                        id: file.id,
-                        title: file.name,
+                      .map((file: any) => ({
+                        id: `editor-${file.id}`,
+                        title: `${file.state?.code || ''} - ${file.state?.title || file.name}`,
                       }))
                   ]
                 })),
               // Add files directly in this folder
-              ...fileChildren
+              ...filesWithDocuments
                 .filter(file => file.parentFolder === folder.id)
                 .map(file => ({
-                  id: file.id,
+                  id: `editor-${file.id}`,
                   title: file.name,
                 }))
             ]
           })),
         // Add root-level files
-        ...fileChildren
+        ...filesWithDocuments
           .filter(file => !file.parentFolder)
-          .map(file => ({
-            id: file.id,
-            title: file.name,
+          .map((file: any) => ({
+            id: `editor-${file.id}`,
+            title: `${file.state?.code || ''} - ${file.state?.title || file.name}`,
           }))
       ]
     };
@@ -132,88 +145,154 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
 
   // Handle sidebar node selection
   const handleActiveNodeChange = useCallback((newNode: SidebarNode) => {
-    setActiveDocumentId(newNode.id === "root" ? undefined : newNode.id);
-  }, [setActiveDocumentId]);
+    console.log("newNode", newNode);
+    if (newNode.id === "workstreams") {
+      setActiveDocumentId(undefined);
+    } else if (newNode.id.startsWith("editor-")) {
+      // Extract file ID from editor-{file.id} format
+      const fileId = newNode.id.replace("editor-", "");
+      const file = fileChildren.find(f => f.id === fileId);
+      setActiveDocumentId(fileId);
+
+    } else {
+      // Find if it's a folder
+      const folder = allFolders.find(f => f.id === newNode.id);
+
+      if (folder) {
+        setActiveDocumentId(folder.id);
+      }
+    }
+  }, [allFolders, fileChildren, setSelectedNode, setActiveDocumentId]);
 
   // === EVENT HANDLERS ===
 
   // Display function that switches views based on active node ID
   const displayActiveNode = (activeNodeId: string) => {
-    // Check if it's a folder
-    const folder = allFolders.find(f => f.id === activeNodeId);
-    if (folder) {
-      return (
-        <div className="p-4">
-          <div className="space-y-6">
-            {/* === HEADER SECTION === */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">
-                  Contents of "{folder.name}"
-                </h2>
-                {isAllowedToCreateDocuments && (
-                  <button
-                    onClick={() => handleCreateFolder()}
-                    className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
-                  >
-                    + New Folder
-                  </button>
-                )}
-              </div>
+
+    // Determine the type of node and extract the actual ID
+    let nodeType = 'unknown';
+    let actualId = activeNodeId;
+
+    if (activeNodeId === "workstreams") {
+      nodeType = 'workstreams';
+    } else if (activeNodeId.startsWith("editor-")) {
+      nodeType = 'file';
+      actualId = activeNodeId.replace("editor-", "");
+    } else {
+      // Check if it's a folder
+      const folder = allFolders.find(f => f.id === activeNodeId);
+      if (folder) {
+        nodeType = 'folder';
+      } else {
+        // Check if it's a file (direct ID)
+        const file = fileChildren.find(f => f.id === activeNodeId);
+        if (file) {
+          nodeType = 'file';
+          actualId = activeNodeId; // Use the ID as-is for files
+        }
+      }
+    }
+
+    switch (nodeType) {
+      case 'workstreams':
+        return (
+          <div className="mt-20 p-4 flex flex-col items-center justify-center">
+            <div className="space-y-6 flex flex-col items-center justify-center">
+              <h1 className="text-2xl font-bold">Welcome to the Network Admin</h1>
+              <p>Create a new workstream to get started,
+                or select an existing workstream on the left</p>
+              <Button
+                color="dark" // Customize button appearance
+                size="medium"
+                className="cursor-pointer hover:bg-gray-600 hover:text-white"
+                title={"Create Workstream Document"}
+                aria-description={"Create Workstream Document"}
+                onClick={() => setOpenModal(true)}
+              >
+                <span>
+                  {/* {/* {/* <span className="text-sm"> */}
+                  Create Workstream Document
+                </span>
+              </Button>
+              {/* === HEADER SECTION === */}
+              {/* <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Root Contents</h2>
+                  {isAllowedToCreateDocuments && (
+                    <button
+                      onClick={() => handleCreateFolder()}
+                      className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                    >
+                      + New Folder
+                    </button>
+                  )}
+                </div> */}
+
+              {/* Navigation breadcrumbs */}
+              {/* {breadcrumbs.length > 1 && (
+                  <div className="border-b border-gray-200 pb-3">
+                    <Breadcrumbs
+                      breadcrumbs={breadcrumbs}
+                      createEnabled={isAllowedToCreateDocuments}
+                      onCreate={handleCreateFolder}
+                      onBreadcrumbSelected={onBreadcrumbSelected}
+                    />
+                  </div>
+                )} */}
             </div>
 
             {/* === FOLDERS SECTION === */}
-            {folderChildren.length > 0 && (
-              <div>
-                <h3 className="mb-2 text-sm font-medium text-gray-500">
-                  📁 Folders
-                </h3>
-                <div className="grid grid-cols-1 gap-2">
-                  {folderChildren.map((folderNode) =>
-                    folderNode && folderNode.id ? (
-                      <div key={folderNode.id} className="p-2 border rounded">
-                        <div className="font-medium">📁 {folderNode.name}</div>
-                        <div className="text-sm text-gray-500">Folder</div>
-                        <div className="mt-2 flex gap-2">
-                          <button
-                            onClick={() => setSelectedNode(folderNode)}
-                            className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                          >
-                            Open
-                          </button>
-                          <button
-                            onClick={() => {
-                              const newName = prompt("Enter new name:", folderNode.name || "");
-                              if (newName && newName.trim() && newName !== folderNode.name) {
-                                try {
-                                  onRenameNode(newName.trim(), folderNode);
-                                } catch (error) {
-                                  console.error("Failed to rename:", error);
-                                  alert("Failed to rename folder. Please try again.");
+            {/* {folderChildren.length > 0 && (
+                <div>
+                  <h3 className="mb-2 text-sm font-medium text-gray-500">
+                    📁 Folders
+                  </h3>
+                  <div className="grid grid-cols-1 gap-2">
+                    {folderChildren.map((folderNode) =>
+                      folderNode && folderNode.id ? (
+                        <div key={folderNode.id} className="p-2 border rounded">
+                          <div className="font-medium">📁 {folderNode.name}</div>
+                          <div className="text-sm text-gray-500">Folder</div>
+                          <div className="mt-2 flex gap-2">
+                            <button
+                              onClick={() => setSelectedNode(folderNode)}
+                              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                            >
+                              Open
+                            </button>
+                            <button
+                              onClick={() => {
+                                const newName = prompt("Enter new name:", folderNode.name || "");
+                                if (newName && newName.trim() && newName !== folderNode.name) {
+                                  try {
+                                    onRenameNode(newName.trim(), folderNode);
+                                  } catch (error) {
+                                    console.error("Failed to rename:", error);
+                                    alert("Failed to rename folder. Please try again.");
+                                  }
                                 }
-                              }
-                            }}
-                            className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => showDeleteNodeModal(folderNode)}
-                            className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                          >
-                            Delete
-                          </button>
+                              }}
+                              className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => showDeleteNodeModal(folderNode)}
+                              className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ) : null
-                  )}
+                      ) : null
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )} */}
 
             {/* === FILES/DOCUMENTS SECTION === */}
             {fileChildren.length > 0 && (
-              <div>
+              <div className="mt-10">
                 <h3 className="mb-2 text-sm font-medium text-gray-500">
                   📄 Documents
                 </h3>
@@ -261,190 +340,153 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
               </div>
             )}
 
-            {/* === EMPTY STATE === */}
-            {folderChildren.length === 0 && fileChildren.length === 0 && (
-              <div className="py-12 text-center text-gray-500">
-                <p className="text-lg">🗂️ This folder is empty</p>
-                <p className="mt-2 text-sm">
-                  Create your first document or folder below
-                </p>
-              </div>
-            )}
-
-            {/* === DOCUMENT CREATION SECTION === */}
-            <CreateDocument />
-          </div>
-        </div>
-      );
-    }
-
-    // Check if it's a file/document
-    const file = fileChildren.find(f => f.id === activeNodeId);
-    if (file) {
-      const documentModelModule = documentModelModules?.find(
-        (m) => m.documentModel.id === file.documentType,
-      );
-      const editorModule = editorModules?.find((e) =>
-        e.documentTypes.includes(file.documentType),
-      );
-
-      if (documentModelModule && editorModule) {
-        return (
-          <div className="h-full">
-            <EditorContainer
-              handleClose={() => setActiveDocumentId(undefined)}
-              hideToolbar={true}
-            />
           </div>
         );
-      }
-    }
 
-    // Default view (root or unknown node)
-    return (
-      <div className="p-4">
-        <div className="space-y-6">
-          {/* === HEADER SECTION === */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Root Contents</h2>
-              {isAllowedToCreateDocuments && (
-                <button
-                  onClick={() => handleCreateFolder()}
-                  className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
-                >
-                  + New Folder
-                </button>
-              )}
-            </div>
+      case 'folder':
+        const folder = allFolders.find(f => f.id === actualId);
+        if (!folder) return null;
 
-            {/* Navigation breadcrumbs */}
-            {breadcrumbs.length > 1 && (
-              <div className="border-b border-gray-200 pb-3">
-                <Breadcrumbs
-                  breadcrumbs={breadcrumbs}
-                  createEnabled={isAllowedToCreateDocuments}
-                  onCreate={handleCreateFolder}
-                  onBreadcrumbSelected={onBreadcrumbSelected}
-                />
+        return (
+          <div className="p-4">
+            <div className="space-y-6">
+              {/* === HEADER SECTION === */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">
+                    Contents of "{folder.name}"
+                  </h2>
+                  {isAllowedToCreateDocuments && (
+                    <button
+                      onClick={() => handleCreateFolder()}
+                      className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                    >
+                      + New Folder
+                    </button>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
 
-          {/* === FOLDERS SECTION === */}
-          {folderChildren.length > 0 && (
-            <div>
-              <h3 className="mb-2 text-sm font-medium text-gray-500">
-                📁 Folders
-              </h3>
-              <div className="grid grid-cols-1 gap-2">
-                {folderChildren.map((folderNode) =>
-                  folderNode && folderNode.id ? (
-                    <div key={folderNode.id} className="p-2 border rounded">
-                      <div className="font-medium">📁 {folderNode.name}</div>
-                      <div className="text-sm text-gray-500">Folder</div>
-                      <div className="mt-2 flex gap-2">
-                        <button
-                          onClick={() => setSelectedNode(folderNode)}
-                          className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                        >
-                          Open
-                        </button>
-                        <button
-                          onClick={() => {
-                            const newName = prompt("Enter new name:", folderNode.name || "");
-                            if (newName && newName.trim() && newName !== folderNode.name) {
-                              try {
-                                onRenameNode(newName.trim(), folderNode);
-                              } catch (error) {
-                                console.error("Failed to rename:", error);
-                                alert("Failed to rename folder. Please try again.");
-                              }
-                            }
-                          }}
-                          className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => showDeleteNodeModal(folderNode)}
-                          className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ) : null
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* === FILES/DOCUMENTS SECTION === */}
-          {fileChildren.length > 0 && (
-            <div>
-              <h3 className="mb-2 text-sm font-medium text-gray-500">
-                📄 Documents
-              </h3>
-              <div className="grid grid-cols-1 gap-2">
-                {fileChildren.map((fileNode) => (
-                  <div key={fileNode.id} className="p-2 border rounded">
-                    <div className="font-medium">{fileNode.name}</div>
-                    <div className="text-sm text-gray-500">{fileNode.documentType}</div>
-                    <div className="mt-2 flex gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedNode(fileNode);
-                          setActiveDocumentId(fileNode.id);
-                        }}
-                        className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                      >
-                        Open
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (!fileNode || !fileNode.id) return;
-                          const newName = prompt("Enter new name:", fileNode.name || "");
-                          if (newName && newName.trim() && newName !== fileNode.name) {
-                            try {
-                              onRenameNode(newName.trim(), fileNode);
-                            } catch (error) {
-                              alert("Failed to rename document. Please try again.");
-                            }
-                          }
-                        }}
-                        className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => showDeleteNodeModal(fileNode)}
-                        className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                      >
-                        Delete
-                      </button>
-                    </div>
+              {/* === FOLDERS SECTION === */}
+              {folderChildren.length > 0 && (
+                <div>
+                  <h3 className="mb-2 text-sm font-medium text-gray-500">
+                    📁 Folders
+                  </h3>
+                  <div className="grid grid-cols-1 gap-2">
+                    {folderChildren.map((folderNode) =>
+                      folderNode && folderNode.id ? (
+                        <div key={folderNode.id} className="p-2 border rounded">
+                          <div className="font-medium">📁 {folderNode.name}</div>
+                          <div className="text-sm text-gray-500">Folder</div>
+                          <div className="mt-2 flex gap-2">
+                            <button
+                              onClick={() => setSelectedNode(folderNode)}
+                              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                            >
+                              Open
+                            </button>
+                            <button
+                              onClick={() => {
+                                const newName = prompt("Enter new name:", folderNode.name || "");
+                                if (newName && newName.trim() && newName !== folderNode.name) {
+                                  try {
+                                    onRenameNode(newName.trim(), folderNode);
+                                  } catch (error) {
+                                    console.error("Failed to rename:", error);
+                                    alert("Failed to rename folder. Please try again.");
+                                  }
+                                }
+                              }}
+                              className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => showDeleteNodeModal(folderNode)}
+                              className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ) : null
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              )}
 
-          {/* === EMPTY STATE === */}
-          {folderChildren.length === 0 && fileChildren.length === 0 && (
-            <div className="py-12 text-center text-gray-500">
-              <p className="text-lg">🗂️ This folder is empty</p>
-              <p className="mt-2 text-sm">
-                Create your first document or folder below
-              </p>
-            </div>
-          )}
+              {/* === FILES/DOCUMENTS SECTION === */}
+              {fileChildren.length > 0 ? (
+                <div>
+                  <h3 className="mb-2 text-sm font-medium text-gray-500">
+                    📄 Documents
+                  </h3>
+                  <div className="grid grid-cols-1 gap-2">
+                    {fileChildren.map((fileNode) => (
+                      <div key={fileNode.id} className="p-2 border rounded">
+                        <div className="font-medium">{fileNode.name}</div>
+                        <div className="text-sm text-gray-500">{fileNode.documentType}</div>
+                        <div className="mt-2 flex gap-2">
+                          <button
+                            onClick={() => {
+                              setSelectedNode(fileNode);
+                              setActiveDocumentId(fileNode.id);
+                            }}
+                            className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                          >
+                            Open
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (!fileNode || !fileNode.id) return;
+                              const newName = prompt("Enter new name:", fileNode.name || "");
+                              if (newName && newName.trim() && newName !== fileNode.name) {
+                                try {
+                                  onRenameNode(newName.trim(), fileNode);
+                                } catch (error) {
+                                  alert("Failed to rename document. Please try again.");
+                                }
+                              }
+                            }}
+                            className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => showDeleteNodeModal(fileNode)}
+                            className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
-          {/* === DOCUMENT CREATION SECTION === */}
-          <CreateDocument />
-        </div>
-      </div>
-    );
+              {/* === EMPTY STATE === */}
+              {folderChildren.length === 0 && fileChildren.length === 0 && (
+                <div className="py-12 text-center text-gray-500">
+                  <p className="text-lg">🗂️ This folder is empty</p>
+                  <p className="mt-2 text-sm">
+                    Create your first document or folder below
+                  </p>
+                </div>
+              )}
+
+              {/* === DOCUMENT CREATION SECTION === */}
+              {/* <CreateDocument /> */}
+
+            </div>
+          </div>
+        );
+
+
+      default:
+        return <div>Unknown node type: {nodeType}</div>;
+    }
   };
 
   // Handle folder creation with optional name parameter
@@ -474,18 +516,81 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
     async (fileName: string) => {
       setOpenModal(false);
 
-      const documentModel = selectedDocumentModel.current;
-      if (!documentModel || !selectedDrive?.header.id) return;
+      // const documentModel = selectedDocumentModel.current;
+      // if (!documentModel || !selectedDrive?.header.id) return;
+
+      // console.log("creating document", documentModel);
 
       try {
         const node = await addDocument(
-          selectedDrive.header.id,
+          selectedDrive?.header.id || "",
           fileName,
-          documentModel.documentModel.id,
+          "powerhouse/workstream",
           selectedFolder?.id,
+          {
+            header: {
+              name: fileName,
+              documentType: "powerhouse/workstream",
+              createdAtUtcIso: new Date().toISOString(),
+              slug: fileName,
+              branch: "main",
+              id: "",
+              sig: {
+                nonce: "",
+                publicKey: {},
+              },
+              revision: {},
+              lastModifiedAtUtcIso: new Date().toISOString(),
+            },
+            history: {
+              operations: [],
+              clipboard: [],
+            },
+            state: {
+              auth: {},
+              document: {
+                version: "1.0.0",
+              },
+              global: {
+                title: fileName,
+                description: "A new workstream document",
+                createdBy: "network-admin",
+                createdAt: new Date().toISOString(),
+                updatedBy: "network-admin",
+                updatedAt: new Date().toISOString(),
+                status: "draft",
+              },
+              local: {},
+            },
+            initialState: {
+              auth: {},
+              document: {
+                version: "1.0.0",
+              },
+              global: {
+                title: fileName,
+                description: "A new workstream document",
+                createdBy: "network-admin",
+                createdAt: new Date().toISOString(),
+                updatedBy: "network-admin",
+                updatedAt: new Date().toISOString(),
+                status: "draft",
+              },
+              local: {},
+            },
+            operations: {
+              "powerhouse/workstream": [],
+            },
+            clipboard: [],
+            attachments: {},
+          },
+          undefined,
+          "workstream-editor"
         );
 
         selectedDocumentModel.current = null;
+
+        console.log("Created document node", node);
 
         if (node) {
           // Customize: Auto-open created document by uncommenting below
@@ -532,16 +637,18 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
           showSearchBar={true}
           allowPinning={true}
           resizable={true}
-          initialWidth={256}
-          maxWidth={400}
+          initialWidth={300}
+          maxWidth={500}
+          enableMacros={3}
+          handleOnTitleClick={() => setActiveDocumentId(undefined)}
         />
 
         {/* === MAIN CONTENT AREA === */}
         <div className="flex-1 overflow-y-auto">
           {activeDocumentId ? (
-            displayActiveNode(activeDocumentId)
+            <EditorContainer handleClose={() => setActiveDocumentId(undefined)} hideToolbar={false} activeDocumentId={activeDocumentId} />
           ) : (
-            displayActiveNode("root")
+            displayActiveNode("workstreams")
           )}
         </div>
 

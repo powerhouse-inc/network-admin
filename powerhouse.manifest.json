@@ -14,7 +14,7 @@
     ],
     "editors": [
         {
-            "id": "powerhouse/workstream-editor",
+            "id": "workstream-editor",
             "name": "Workstream Editor",
             "documentTypes": ["powerhouse/workstream"]
         }

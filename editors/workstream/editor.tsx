@@ -35,11 +35,9 @@ const statusOptions: Array<{ value: WorkstreamStatusInput; label: string }> = [
 
 export default function Editor(props: any) {
   // Debug: Log props to understand what's available
-  
-  const { document, context } = props;
+  const { document, context, dispatch } = props;
   // Try to get dispatch from context or props
   const state = document.state.global as any;
-  const [selectedDocument, dispatch] = useSelectedDocument();
   
 
   // Handle workstream field changes

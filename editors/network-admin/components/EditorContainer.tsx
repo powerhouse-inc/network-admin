@@ -10,6 +10,8 @@ import {
   useEditorModuleById,
   useSelectedDocument,
   useSelectedDrive,
+  useDocumentById,
+  useEditorModulesForDocumentType
 } from "@powerhousedao/reactor-browser";
 import { Suspense, useCallback, useState } from "react";
 
@@ -18,14 +20,16 @@ import { Suspense, useCallback, useState } from "react";
  * Handles document loading, toolbar, revision history, and dynamic editor loading.
  * Customize toolbar actions and editor context here.
  */
-export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: boolean }) => {
-  const { handleClose, hideToolbar = false } = props;
+export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: boolean; activeDocumentId: string }) => {
+  const { handleClose, hideToolbar = false, activeDocumentId } = props;
   // UI state for revision history and timeline
   const [selectedTimelineItem, setSelectedTimelineItem] =
     useState<TimelineItem | null>(null);
   const [showRevisionHistory, setShowRevisionHistory] = useState(false);
-  const [selectedDocument, dispatch] = useSelectedDocument();
+  const [selectedDocument, dispatch] = useDocumentById(props.activeDocumentId);
   const [selectedDrive] = useSelectedDrive();
+
+
   // Timeline data for revision history
   const timelineItems = useTimelineItems(
     selectedDocument?.header.id,
@@ -33,8 +37,10 @@ export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: 
     selectedDrive?.header.id,
   );
   const editorModule = useEditorModuleById(
-    selectedDocument?.header.meta?.preferredEditor,
+    selectedDocument?.header.meta?.preferredEditor
   );
+
+  console.log("selectedDocument", selectedDocument);
 
   // Document export functionality - customize export behavior here
   const onExport = useCallback(async () => {
@@ -46,9 +52,10 @@ export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: 
   // Loading state component
   const loadingContent = (
     <div className="flex h-full flex-1 items-center justify-center">
-      <DefaultEditorLoader />
+      <div>sth is wrong fix yourself</div>
     </div>
   );
+
 
   if (!selectedDocument) return loadingContent;
 
@@ -56,46 +63,47 @@ export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: 
   const EditorComponent = editorModule?.Component;
   if (!EditorComponent) return loadingContent;
 
-  return showRevisionHistory ? (
-    // Revision history view
-    <RevisionHistory
-      documentId={selectedDocument.header.id}
-      documentTitle={selectedDocument.header.name}
-      globalOperations={selectedDocument.operations.global}
-      key={selectedDocument.header.id}
-      localOperations={selectedDocument.operations.local}
-      onClose={() => setShowRevisionHistory(false)}
-    />
-  ) : (
-    // Main editor view
-    <Suspense fallback={loadingContent}>
-      {/* Document toolbar - only show if not hidden */}
-      {!hideToolbar && (
-        <DocumentToolbar
-          onClose={handleClose}
-          onExport={onExport}
-          onShowRevisionHistory={() => setShowRevisionHistory(true)}
-          onSwitchboardLinkClick={() => {}} // Customize switchboard integration
-          title={selectedDocument.header.name}
-          timelineButtonVisible={editorModule.config.timelineEnabled}
-          timelineItems={timelineItems.data}
-          onTimelineItemClick={setSelectedTimelineItem}
-        />
-      )}
-      {/* Dynamic editor component based on document type */}
-      <EditorComponent
-        context={{
-          readMode: !!selectedTimelineItem,
-          selectedTimelineRevision: getRevisionFromDate(
-            selectedTimelineItem?.startDate,
-            selectedTimelineItem?.endDate,
-            selectedDocument.operations.global,
-          ),
-        }}
-        dispatch={dispatch}
-        document={selectedDocument}
-        error={console.error}
+
+  return <div className="">
+    {showRevisionHistory ? (
+      // Revision history view
+      <RevisionHistory
+        documentId={selectedDocument.header.id}
+        documentTitle={selectedDocument.header.name}
+        globalOperations={selectedDocument.operations.global}
+        key={selectedDocument.header.id}
+        localOperations={selectedDocument.operations.local}
+        onClose={() => setShowRevisionHistory(false)}
       />
-    </Suspense>
-  );
+    ) : (
+      // Main editor view
+      <Suspense fallback={loadingContent}>
+        {!hideToolbar && (
+          <DocumentToolbar
+            onClose={handleClose}
+            onExport={onExport}
+            onShowRevisionHistory={() => setShowRevisionHistory(true)}
+            onSwitchboardLinkClick={() => { }} // Customize switchboard integration
+            title={selectedDocument.header.name}
+            timelineButtonVisible={editorModule.config.timelineEnabled}
+            timelineItems={timelineItems.data}
+            onTimelineItemClick={setSelectedTimelineItem}
+          />
+        )}
+        <EditorComponent
+          context={{
+            readMode: !!selectedTimelineItem,
+            selectedTimelineRevision: getRevisionFromDate(
+              selectedTimelineItem?.startDate,
+              selectedTimelineItem?.endDate,
+              selectedDocument.operations.global,
+            ),
+          }}
+          dispatch={dispatch}
+          document={selectedDocument}
+          error={console.error}
+        />
+      </Suspense>
+    )}
+  </div>
 };

@@ -25,6 +25,9 @@ export const CreateDocument = () => {
       `New ${module.documentModel.name} document`,
       module.documentModel.id,
       selectedFolder?.id,
+      undefined,
+      undefined,
+      "workstream-editor"
     );
   }
 

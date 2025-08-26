@@ -14,7 +14,7 @@ import { DriveExplorer } from "./components/DriveExplorer.js";
 export function BaseEditor(props: DriveEditorProps<any>) {
   const { context, document } = props;
   return (
-    <div className="new-drive-explorer" style={{ height: "100%" }}>
+    <div className="h-full w-full">
       <DriveExplorer document={document} context={context} />
     </div>
   );
