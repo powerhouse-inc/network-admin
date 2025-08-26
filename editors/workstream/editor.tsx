@@ -38,7 +38,7 @@ export default function Editor(props: any) {
   const { document, context, dispatch } = props;
   // Try to get dispatch from context or props
   const state = document.state.global as any;
-  
+
 
   // Handle workstream field changes
   const handleWorkstreamChange = useCallback(
@@ -48,11 +48,11 @@ export default function Editor(props: any) {
         toast(`Failed to update ${field} - no dispatch function`, { type: "error" });
         return;
       }
-      
+
       const action = actions.editWorkstream({
         [field]: value || undefined,
       });
-      
+
       dispatch(action);
     },
     [dispatch]
@@ -66,11 +66,11 @@ export default function Editor(props: any) {
         toast("Failed to update status - no dispatch function", { type: "error" });
         return;
       }
-      
+
       const action = actions.editWorkstream({
         status,
       });
-      
+
       dispatch(action);
     },
     [dispatch]
@@ -84,13 +84,13 @@ export default function Editor(props: any) {
         toast(`Failed to update client ${field} - no dispatch function`, { type: "error" });
         return;
       }
-      
+
       const clientId = state.client?.id || generateId();
       const action = actions.editClientInfo({
         clientId,
         [field]: value || undefined,
       });
-      
+
       dispatch(action);
     },
     [dispatch, state.client?.id]
@@ -104,13 +104,13 @@ export default function Editor(props: any) {
         toast("Failed to update client ID - no dispatch function", { type: "error" });
         return;
       }
-      
+
       const action = actions.editClientInfo({
         clientId,
         name: state.client?.name || undefined,
         icon: state.client?.icon || undefined,
       });
-      
+
       dispatch(action);
     },
     [dispatch, state.client?.name, state.client?.icon]
@@ -119,14 +119,14 @@ export default function Editor(props: any) {
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white">
       {/* Header */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Workstream</h1>
         <nav className="text-sm text-gray-600">
           <span className="text-blue-600 underline cursor-pointer">Home</span>
           <span className="mx-2">›</span>
           <span>Workstream</span>
         </nav>
-      </div>
+      </div> */}
 
       {/* Main Form Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -178,7 +178,7 @@ export default function Editor(props: any) {
       {/* Client Section */}
       <div className="border border-gray-300 rounded-lg p-6">
         <h2 className="text-lg font-medium text-gray-900 mb-4">Client</h2>
-        
+
         <div className="space-y-4">
           {/* Client ID Field */}
           <div>
@@ -250,6 +250,15 @@ export default function Editor(props: any) {
             </div>
           </div>
         </div>
+      </div>
+
+      <h1 className="mt-10 text-2xl text-gray-900 mb-4">Request for Proposal</h1>
+      <div className="mt-8 ">
+        <Button color="light" size="small" className="cursor-pointer hover:bg-gray-600 hover:text-white" title={"Save Workstream"} aria-description={"Save Workstream"} onClick={() => {
+          console.log("creating rfp document");
+        }}>
+          Create RFP Document
+        </Button>
       </div>
 
       {/* Toast Container */}
