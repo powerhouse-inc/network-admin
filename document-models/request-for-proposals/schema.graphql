@@ -1,0 +1,220 @@
+scalar Amount_Tokens
+scalar EthereumAddress
+scalar Amount_Percentage
+scalar EmailAddress
+scalar Date
+scalar DateTime
+scalar URL
+scalar Amount_Money
+scalar OLabel
+scalar Currency
+scalar PHID
+scalar OID
+scalar Amount_Fiat
+scalar Amount_Currency
+scalar Amount_Crypto
+scalar Amount
+scalar Upload
+type RequestForProposalsState {
+  id: OID!
+  issuer: ID!
+  title: String!
+  description: String!
+  rfpCommenter: [RfpCommenter!]!
+  eligibilityCriteria: [String!]!
+  evaluationCriteria: [String!]!
+  budgetRange: BudgetRange! 
+  contextDocuments: [ContextDocument!]!
+  status: RFPStatus!
+  proposals: [Proposal!]!
+  deadline: DateTime
+  tags: [String!]
+}
+
+
+type RfpCommenter {
+  id: ID!
+  rfpCommentatorType: RFPCommentatorType! 
+  agentType: AgentType!
+  name: String!
+  code: String!
+  imageUrl: String
+}
+
+enum RFPCommentatorType {
+ INTERNAL # client team 
+ EXTERNAL  # outsourced (if RGH asks BAI team)
+}
+
+
+enum AgentType {
+  HUMAN
+  GROUP
+  AI
+}
+
+
+
+type BudgetRange {
+  min: Float
+  max: Float
+  currency: String
+}
+
+
+type ContextDocument {
+  name: String!
+  url: URL!
+}
+
+enum RFPStatus {
+DRAFT
+REQUEST_FOR_COMMMENTS
+CANCELED
+OPEN_FOR_PROPOSALS
+AWARDED
+NOT_AWARDED
+CLOSED
+}
+
+type  Proposal {
+
+id: OID! 
+title: String! 
+summary: String! 
+proposalStatus: ProposalStatus! 
+submittedby: OID
+budgetEstimate: String! # a rolled-up total from the payment terms 
+paymentTerms: PaymentTerm! 
+}
+
+enum PaymentTerm {
+
+MILESTONE_BASED_FIXED_PRICE
+MILESTONE_BASED_ADVANCE_PAYMENT
+RETAINER_BASED
+VARIABLE_COST
+ESCROW
+}
+
+enum ProposalStatus {
+SUBMITTED # or received from an RFP issuer POV
+OPENED
+UNDER_REVIEW
+NEEDS_REVISION
+REVISED
+APPROVED
+CONDITIONALLY_APPROVED #
+REJECTED
+WITHDRAWN
+
+  
+}
+
+
+
+
+# rfp_state
+
+input EditRfpInput {
+  rfpId: OID!
+  title: String
+  description: String
+  eligibilityCriteria: [String!]
+  evaluationCriteria: [String!]
+  budgetRange: BudgetRangeInput
+  status: RFPStatusInput!
+  deadline: DateTime
+  tags: [String!]
+}
+
+input BudgetRangeInput {
+  min: Float
+  max: Float
+  currency: String
+}
+
+enum RFPStatusInput {
+  DRAFT
+  REQUEST_FOR_COMMMENTS
+  CANCELED
+  OPEN_FOR_PROPOSALS
+  AWARDED
+  NOT_AWARDED
+  CLOSED
+}
+
+# contex_document
+
+input AddContextDocumentInput {
+  rfpId: OID!
+  name: String!
+  url: URL!
+}
+
+input RemoveContextDocumentInput {
+  rfpId: OID!
+  name: String!
+}
+
+# proposals
+
+input AddProposalInput {
+  rfpId: OID!
+  id: OID!
+  title: String!
+  summary: String!
+  proposalStatus: ProposalStatusInput! 
+  submittedby: OID
+  budgetEstimate: String!
+  paymentTerms: PaymentTermInput!
+}
+
+enum PaymentTermInput {
+
+MILESTONE_BASED_FIXED_PRICE
+MILESTONE_BASED_ADVANCE_PAYMENT
+RETAINER_BASED
+VARIABLE_COST
+ESCROW
+}
+
+enum ProposalStatusInput {
+SUBMITTED # or received from an RFP issuer POV
+OPENED
+UNDER_REVIEW
+NEEDS_REVISION
+REVISED
+APPROVED
+CONDITIONALLY_APPROVED #
+REJECTED
+WITHDRAWN
+
+}
+
+
+
+input ChangeProposalStatusInput {
+  proposalId: OID!
+  status: ProposalStatusInput!
+}
+
+
+enum ProposalStatusInput {
+SUBMITTED # or received from an RFP issuer POV
+OPENED
+UNDER_REVIEW
+NEEDS_REVISION
+REVISED
+APPROVED
+CONDITIONALLY_APPROVED #
+REJECTED
+WITHDRAWN
+
+}
+
+
+input RemoveProposalInput {
+  rfpId: OID!
+  id: OID!
+}
