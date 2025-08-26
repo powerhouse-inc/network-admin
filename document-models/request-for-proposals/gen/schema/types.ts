@@ -65,15 +65,13 @@ export type AddContextDocumentInput = {
 export type AddProposalInput = {
   budgetEstimate: Scalars["String"]["input"];
   id: Scalars["OID"]["input"];
-  paymentTerms: PaymentTermInput | `${PaymentTermInput}`;
-  proposalStatus: ProposalStatusInput | `${ProposalStatusInput}`;
+  paymentTerms: RfpPaymentTermInput | `${RfpPaymentTermInput}`;
+  proposalStatus: RfpProposalStatusInput | `${RfpProposalStatusInput}`;
   rfpId: Scalars["OID"]["input"];
   submittedby?: InputMaybe<Scalars["OID"]["input"]>;
   summary: Scalars["String"]["input"];
   title: Scalars["String"]["input"];
 };
-
-export type AgentType = "AI" | "GROUP" | "HUMAN";
 
 export type BudgetRange = {
   currency: Maybe<Scalars["String"]["output"]>;
@@ -89,7 +87,7 @@ export type BudgetRangeInput = {
 
 export type ChangeProposalStatusInput = {
   proposalId: Scalars["OID"]["input"];
-  status: ProposalStatusInput | `${ProposalStatusInput}`;
+  status: RfpProposalStatusInput | `${RfpProposalStatusInput}`;
 };
 
 export type ContextDocument = {
@@ -103,57 +101,10 @@ export type EditRfpInput = {
   description?: InputMaybe<Scalars["String"]["input"]>;
   eligibilityCriteria?: InputMaybe<Array<Scalars["String"]["input"]>>;
   evaluationCriteria?: InputMaybe<Array<Scalars["String"]["input"]>>;
-  rfpId: Scalars["OID"]["input"];
   status: RfpStatusInput | `${RfpStatusInput}`;
   tags?: InputMaybe<Array<Scalars["String"]["input"]>>;
   title?: InputMaybe<Scalars["String"]["input"]>;
 };
-
-export type PaymentTerm =
-  | "ESCROW"
-  | "MILESTONE_BASED_ADVANCE_PAYMENT"
-  | "MILESTONE_BASED_FIXED_PRICE"
-  | "RETAINER_BASED"
-  | "VARIABLE_COST";
-
-export type PaymentTermInput =
-  | "ESCROW"
-  | "MILESTONE_BASED_ADVANCE_PAYMENT"
-  | "MILESTONE_BASED_FIXED_PRICE"
-  | "RETAINER_BASED"
-  | "VARIABLE_COST";
-
-export type Proposal = {
-  budgetEstimate: Scalars["String"]["output"];
-  id: Scalars["OID"]["output"];
-  paymentTerms: PaymentTerm | `${PaymentTerm}`;
-  proposalStatus: ProposalStatus | `${ProposalStatus}`;
-  submittedby: Maybe<Scalars["OID"]["output"]>;
-  summary: Scalars["String"]["output"];
-  title: Scalars["String"]["output"];
-};
-
-export type ProposalStatus =
-  | "APPROVED"
-  | "CONDITIONALLY_APPROVED"
-  | "NEEDS_REVISION"
-  | "OPENED"
-  | "REJECTED"
-  | "REVISED"
-  | "SUBMITTED"
-  | "UNDER_REVIEW"
-  | "WITHDRAWN";
-
-export type ProposalStatusInput =
-  | "APPROVED"
-  | "CONDITIONALLY_APPROVED"
-  | "NEEDS_REVISION"
-  | "OPENED"
-  | "REJECTED"
-  | "REVISED"
-  | "SUBMITTED"
-  | "UNDER_REVIEW"
-  | "WITHDRAWN";
 
 export type RfpCommentatorType = "EXTERNAL" | "INTERNAL";
 
@@ -192,20 +143,67 @@ export type RequestForProposalsState = {
   description: Scalars["String"]["output"];
   eligibilityCriteria: Array<Scalars["String"]["output"]>;
   evaluationCriteria: Array<Scalars["String"]["output"]>;
-  id: Scalars["OID"]["output"];
   issuer: Scalars["ID"]["output"];
-  proposals: Array<Proposal>;
+  proposals: Array<RfpProposal>;
   rfpCommenter: Array<RfpCommenter>;
   status: RfpStatus | `${RfpStatus}`;
   tags: Maybe<Array<Scalars["String"]["output"]>>;
   title: Scalars["String"]["output"];
 };
 
+export type RfpAgentType = "AI" | "GROUP" | "HUMAN";
+
 export type RfpCommenter = {
-  agentType: AgentType | `${AgentType}`;
+  agentType: RfpAgentType | `${RfpAgentType}`;
   code: Scalars["String"]["output"];
   id: Scalars["ID"]["output"];
   imageUrl: Maybe<Scalars["String"]["output"]>;
   name: Scalars["String"]["output"];
   rfpCommentatorType: RfpCommentatorType | `${RfpCommentatorType}`;
 };
+
+export type RfpPaymentTerm =
+  | "ESCROW"
+  | "MILESTONE_BASED_ADVANCE_PAYMENT"
+  | "MILESTONE_BASED_FIXED_PRICE"
+  | "RETAINER_BASED"
+  | "VARIABLE_COST";
+
+export type RfpPaymentTermInput =
+  | "ESCROW"
+  | "MILESTONE_BASED_ADVANCE_PAYMENT"
+  | "MILESTONE_BASED_FIXED_PRICE"
+  | "RETAINER_BASED"
+  | "VARIABLE_COST";
+
+export type RfpProposal = {
+  budgetEstimate: Scalars["String"]["output"];
+  id: Scalars["OID"]["output"];
+  paymentTerms: RfpPaymentTerm | `${RfpPaymentTerm}`;
+  proposalStatus: RfpProposalStatus | `${RfpProposalStatus}`;
+  submittedby: Maybe<Scalars["OID"]["output"]>;
+  summary: Scalars["String"]["output"];
+  title: Scalars["String"]["output"];
+};
+
+export type RfpProposalStatus =
+  | "APPROVED"
+  | "CONDITIONALLY_APPROVED"
+  | "NEEDS_REVISION"
+  | "OPENED"
+  | "REJECTED"
+  | "REVISED"
+  | "SUBMITTED"
+  | "UNDER_REVIEW"
+  | "WITHDRAWN";
+
+export type RfpProposalStatusInput =
+  | "APPROVED"
+  | "CONDITIONALLY_APPROVED"
+  | "NEEDS_REVISION"
+  | "OPENED"
+  | "REJECTED"
+  | "REVISED"
+  | "SUBMITTED"
+  | "UNDER_REVIEW"
+  | "WITHDRAWN";

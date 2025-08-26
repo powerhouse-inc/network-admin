@@ -16,7 +16,6 @@ scalar Amount_Crypto
 scalar Amount
 scalar Upload
 type RequestForProposalsState {
-  id: OID!
   issuer: ID!
   title: String!
   description: String!
@@ -26,7 +25,7 @@ type RequestForProposalsState {
   budgetRange: BudgetRange! 
   contextDocuments: [ContextDocument!]!
   status: RFPStatus!
-  proposals: [Proposal!]!
+  proposals: [RfpProposal!]!
   deadline: DateTime
   tags: [String!]
 }
@@ -35,7 +34,7 @@ type RequestForProposalsState {
 type RfpCommenter {
   id: ID!
   rfpCommentatorType: RFPCommentatorType! 
-  agentType: AgentType!
+  agentType: RfpAgentType!
   name: String!
   code: String!
   imageUrl: String
@@ -47,13 +46,11 @@ enum RFPCommentatorType {
 }
 
 
-enum AgentType {
+enum RfpAgentType {
   HUMAN
   GROUP
   AI
 }
-
-
 
 type BudgetRange {
   min: Float
@@ -68,47 +65,43 @@ type ContextDocument {
 }
 
 enum RFPStatus {
-DRAFT
-REQUEST_FOR_COMMMENTS
-CANCELED
-OPEN_FOR_PROPOSALS
-AWARDED
-NOT_AWARDED
-CLOSED
+  DRAFT
+  REQUEST_FOR_COMMMENTS
+  CANCELED
+  OPEN_FOR_PROPOSALS
+  AWARDED
+  NOT_AWARDED
+  CLOSED
 }
 
-type  Proposal {
-
-id: OID! 
-title: String! 
-summary: String! 
-proposalStatus: ProposalStatus! 
-submittedby: OID
-budgetEstimate: String! # a rolled-up total from the payment terms 
-paymentTerms: PaymentTerm! 
+type RfpProposal {
+  id: OID! 
+  title: String! 
+  summary: String! 
+  proposalStatus: RfpProposalStatus! 
+  submittedby: OID
+  budgetEstimate: String! # a rolled-up total from the payment terms 
+  paymentTerms: RfpPaymentTerm! 
 }
 
-enum PaymentTerm {
-
-MILESTONE_BASED_FIXED_PRICE
-MILESTONE_BASED_ADVANCE_PAYMENT
-RETAINER_BASED
-VARIABLE_COST
-ESCROW
+enum RfpPaymentTerm {
+  MILESTONE_BASED_FIXED_PRICE
+  MILESTONE_BASED_ADVANCE_PAYMENT
+  RETAINER_BASED
+  VARIABLE_COST
+  ESCROW
 }
 
-enum ProposalStatus {
-SUBMITTED # or received from an RFP issuer POV
-OPENED
-UNDER_REVIEW
-NEEDS_REVISION
-REVISED
-APPROVED
-CONDITIONALLY_APPROVED #
-REJECTED
-WITHDRAWN
-
-  
+enum RfpProposalStatus {
+  SUBMITTED # or received from an RFP issuer POV
+  OPENED
+  UNDER_REVIEW
+  NEEDS_REVISION
+  REVISED
+  APPROVED
+  CONDITIONALLY_APPROVED #
+  REJECTED
+  WITHDRAWN
 }
 
 
@@ -117,7 +110,6 @@ WITHDRAWN
 # rfp_state
 
 input EditRfpInput {
-  rfpId: OID!
   title: String
   description: String
   eligibilityCriteria: [String!]
@@ -164,54 +156,39 @@ input AddProposalInput {
   id: OID!
   title: String!
   summary: String!
-  proposalStatus: ProposalStatusInput! 
+  proposalStatus: RfpProposalStatusInput! 
   submittedby: OID
   budgetEstimate: String!
-  paymentTerms: PaymentTermInput!
+  paymentTerms: RfpPaymentTermInput!
 }
 
-enum PaymentTermInput {
-
-MILESTONE_BASED_FIXED_PRICE
-MILESTONE_BASED_ADVANCE_PAYMENT
-RETAINER_BASED
-VARIABLE_COST
-ESCROW
+enum RfpPaymentTermInput {
+  MILESTONE_BASED_FIXED_PRICE
+  MILESTONE_BASED_ADVANCE_PAYMENT
+  RETAINER_BASED
+  VARIABLE_COST
+  ESCROW
 }
 
-enum ProposalStatusInput {
-SUBMITTED # or received from an RFP issuer POV
-OPENED
-UNDER_REVIEW
-NEEDS_REVISION
-REVISED
-APPROVED
-CONDITIONALLY_APPROVED #
-REJECTED
-WITHDRAWN
-
+enum RfpProposalStatusInput {
+  SUBMITTED # or received from an RFP issuer POV
+  OPENED
+  UNDER_REVIEW
+  NEEDS_REVISION
+  REVISED
+  APPROVED
+  CONDITIONALLY_APPROVED #
+  REJECTED
+  WITHDRAWN
 }
 
 
 
 input ChangeProposalStatusInput {
   proposalId: OID!
-  status: ProposalStatusInput!
+  status: RfpProposalStatusInput!
 }
 
-
-enum ProposalStatusInput {
-SUBMITTED # or received from an RFP issuer POV
-OPENED
-UNDER_REVIEW
-NEEDS_REVISION
-REVISED
-APPROVED
-CONDITIONALLY_APPROVED #
-REJECTED
-WITHDRAWN
-
-}
 
 
 input RemoveProposalInput {

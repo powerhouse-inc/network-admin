@@ -1,3 +1,6 @@
+// TODO: remove eslint-disable rules once refactor is done
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   type StateReducer,
   isDocumentAction,
@@ -21,14 +24,18 @@ const stateReducer: StateReducer<RequestForProposalsDocument> = (
   switch (action.type) {
     case "EDIT_RFP":
       z.EditRfpInputSchema().parse(action.input);
-      RfpStateReducer.editRfpOperation(state[action.scope], action, dispatch);
+      RfpStateReducer.editRfpOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
       break;
 
     case "ADD_CONTEXT_DOCUMENT":
       z.AddContextDocumentInputSchema().parse(action.input);
       ContexDocumentReducer.addContextDocumentOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -36,8 +43,8 @@ const stateReducer: StateReducer<RequestForProposalsDocument> = (
     case "REMOVE_CONTEXT_DOCUMENT":
       z.RemoveContextDocumentInputSchema().parse(action.input);
       ContexDocumentReducer.removeContextDocumentOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -45,8 +52,8 @@ const stateReducer: StateReducer<RequestForProposalsDocument> = (
     case "ADD_PROPOSAL":
       z.AddProposalInputSchema().parse(action.input);
       ProposalsReducer.addProposalOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -54,8 +61,8 @@ const stateReducer: StateReducer<RequestForProposalsDocument> = (
     case "CHANGE_PROPOSAL_STATUS":
       z.ChangeProposalStatusInputSchema().parse(action.input);
       ProposalsReducer.changeProposalStatusOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;
@@ -63,8 +70,8 @@ const stateReducer: StateReducer<RequestForProposalsDocument> = (
     case "REMOVE_PROPOSAL":
       z.RemoveProposalInputSchema().parse(action.input);
       ProposalsReducer.removeProposalOperation(
-        state[action.scope],
-        action,
+        (state as any)[action.scope],
+        action as any,
         dispatch,
       );
       break;

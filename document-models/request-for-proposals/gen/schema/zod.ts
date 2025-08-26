@@ -2,24 +2,24 @@ import { z } from "zod";
 import type {
   AddContextDocumentInput,
   AddProposalInput,
-  AgentType,
   BudgetRange,
   BudgetRangeInput,
   ChangeProposalStatusInput,
   ContextDocument,
   EditRfpInput,
-  PaymentTerm,
-  PaymentTermInput,
-  Proposal,
-  ProposalStatus,
-  ProposalStatusInput,
   RfpCommentatorType,
   RfpStatus,
   RfpStatusInput,
   RemoveContextDocumentInput,
   RemoveProposalInput,
   RequestForProposalsState,
+  RfpAgentType,
   RfpCommenter,
+  RfpPaymentTerm,
+  RfpPaymentTermInput,
+  RfpProposal,
+  RfpProposalStatus,
+  RfpProposalStatusInput,
 } from "./types.js";
 
 type Properties<T> = Required<{
@@ -34,48 +34,6 @@ export const isDefinedNonNullAny = (v: any): v is definedNonNullAny =>
 export const definedNonNullAnySchema = z
   .any()
   .refine((v) => isDefinedNonNullAny(v));
-
-export const AgentTypeSchema = z.enum(["AI", "GROUP", "HUMAN"]);
-
-export const PaymentTermSchema = z.enum([
-  "ESCROW",
-  "MILESTONE_BASED_ADVANCE_PAYMENT",
-  "MILESTONE_BASED_FIXED_PRICE",
-  "RETAINER_BASED",
-  "VARIABLE_COST",
-]);
-
-export const PaymentTermInputSchema = z.enum([
-  "ESCROW",
-  "MILESTONE_BASED_ADVANCE_PAYMENT",
-  "MILESTONE_BASED_FIXED_PRICE",
-  "RETAINER_BASED",
-  "VARIABLE_COST",
-]);
-
-export const ProposalStatusSchema = z.enum([
-  "APPROVED",
-  "CONDITIONALLY_APPROVED",
-  "NEEDS_REVISION",
-  "OPENED",
-  "REJECTED",
-  "REVISED",
-  "SUBMITTED",
-  "UNDER_REVIEW",
-  "WITHDRAWN",
-]);
-
-export const ProposalStatusInputSchema = z.enum([
-  "APPROVED",
-  "CONDITIONALLY_APPROVED",
-  "NEEDS_REVISION",
-  "OPENED",
-  "REJECTED",
-  "REVISED",
-  "SUBMITTED",
-  "UNDER_REVIEW",
-  "WITHDRAWN",
-]);
 
 export const RfpCommentatorTypeSchema = z.enum(["EXTERNAL", "INTERNAL"]);
 
@@ -99,6 +57,48 @@ export const RfpStatusInputSchema = z.enum([
   "REQUEST_FOR_COMMMENTS",
 ]);
 
+export const RfpAgentTypeSchema = z.enum(["AI", "GROUP", "HUMAN"]);
+
+export const RfpPaymentTermSchema = z.enum([
+  "ESCROW",
+  "MILESTONE_BASED_ADVANCE_PAYMENT",
+  "MILESTONE_BASED_FIXED_PRICE",
+  "RETAINER_BASED",
+  "VARIABLE_COST",
+]);
+
+export const RfpPaymentTermInputSchema = z.enum([
+  "ESCROW",
+  "MILESTONE_BASED_ADVANCE_PAYMENT",
+  "MILESTONE_BASED_FIXED_PRICE",
+  "RETAINER_BASED",
+  "VARIABLE_COST",
+]);
+
+export const RfpProposalStatusSchema = z.enum([
+  "APPROVED",
+  "CONDITIONALLY_APPROVED",
+  "NEEDS_REVISION",
+  "OPENED",
+  "REJECTED",
+  "REVISED",
+  "SUBMITTED",
+  "UNDER_REVIEW",
+  "WITHDRAWN",
+]);
+
+export const RfpProposalStatusInputSchema = z.enum([
+  "APPROVED",
+  "CONDITIONALLY_APPROVED",
+  "NEEDS_REVISION",
+  "OPENED",
+  "REJECTED",
+  "REVISED",
+  "SUBMITTED",
+  "UNDER_REVIEW",
+  "WITHDRAWN",
+]);
+
 export function AddContextDocumentInputSchema(): z.ZodObject<
   Properties<AddContextDocumentInput>
 > {
@@ -115,8 +115,8 @@ export function AddProposalInputSchema(): z.ZodObject<
   return z.object({
     budgetEstimate: z.string(),
     id: z.string(),
-    paymentTerms: z.lazy(() => PaymentTermInputSchema),
-    proposalStatus: z.lazy(() => ProposalStatusInputSchema),
+    paymentTerms: z.lazy(() => RfpPaymentTermInputSchema),
+    proposalStatus: z.lazy(() => RfpProposalStatusInputSchema),
     rfpId: z.string(),
     submittedby: z.string().nullish(),
     summary: z.string(),
@@ -148,7 +148,7 @@ export function ChangeProposalStatusInputSchema(): z.ZodObject<
 > {
   return z.object({
     proposalId: z.string(),
-    status: z.lazy(() => ProposalStatusInputSchema),
+    status: z.lazy(() => RfpProposalStatusInputSchema),
   });
 }
 
@@ -169,23 +169,9 @@ export function EditRfpInputSchema(): z.ZodObject<Properties<EditRfpInput>> {
     description: z.string().nullish(),
     eligibilityCriteria: z.array(z.string()).nullish(),
     evaluationCriteria: z.array(z.string()).nullish(),
-    rfpId: z.string(),
     status: z.lazy(() => RfpStatusInputSchema),
     tags: z.array(z.string()).nullish(),
     title: z.string().nullish(),
-  });
-}
-
-export function ProposalSchema(): z.ZodObject<Properties<Proposal>> {
-  return z.object({
-    __typename: z.literal("Proposal").optional(),
-    budgetEstimate: z.string(),
-    id: z.string(),
-    paymentTerms: PaymentTermSchema,
-    proposalStatus: ProposalStatusSchema,
-    submittedby: z.string().nullable(),
-    summary: z.string(),
-    title: z.string(),
   });
 }
 
@@ -218,9 +204,8 @@ export function RequestForProposalsStateSchema(): z.ZodObject<
     description: z.string(),
     eligibilityCriteria: z.array(z.string()),
     evaluationCriteria: z.array(z.string()),
-    id: z.string(),
     issuer: z.string(),
-    proposals: z.array(ProposalSchema()),
+    proposals: z.array(RfpProposalSchema()),
     rfpCommenter: z.array(RfpCommenterSchema()),
     status: RfpStatusSchema,
     tags: z.array(z.string()).nullable(),
@@ -231,11 +216,24 @@ export function RequestForProposalsStateSchema(): z.ZodObject<
 export function RfpCommenterSchema(): z.ZodObject<Properties<RfpCommenter>> {
   return z.object({
     __typename: z.literal("RfpCommenter").optional(),
-    agentType: AgentTypeSchema,
+    agentType: RfpAgentTypeSchema,
     code: z.string(),
     id: z.string(),
     imageUrl: z.string().nullable(),
     name: z.string(),
     rfpCommentatorType: RfpCommentatorTypeSchema,
+  });
+}
+
+export function RfpProposalSchema(): z.ZodObject<Properties<RfpProposal>> {
+  return z.object({
+    __typename: z.literal("RfpProposal").optional(),
+    budgetEstimate: z.string(),
+    id: z.string(),
+    paymentTerms: RfpPaymentTermSchema,
+    proposalStatus: RfpProposalStatusSchema,
+    submittedby: z.string().nullable(),
+    summary: z.string(),
+    title: z.string(),
   });
 }

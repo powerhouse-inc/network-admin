@@ -9,6 +9,21 @@ import type { RequestForProposalsRfpStateOperations } from "../../gen/rfp-state/
 export const reducer: RequestForProposalsRfpStateOperations = {
   editRfpOperation(state, action, dispatch) {
     // TODO: Implement "editRfpOperation" reducer
-    throw new Error('Reducer "editRfpOperation" not yet implemented');
+    if (action.input.title === undefined || action.input.title === null) {
+      throw new Error('RFP title is required');
+    }
+    state.title = action.input.title;
+    state.description = action.input.description || state.description;
+    state.eligibilityCriteria = action.input.eligibilityCriteria || state.eligibilityCriteria;
+    state.evaluationCriteria = action.input.evaluationCriteria || state.evaluationCriteria;
+    state.status = action.input.status || state.status;
+    state.deadline = action.input.deadline || state.deadline;
+    state.tags = action.input.tags || state.tags;
+    state.budgetRange = action.input.budgetRange ? {
+      min: action.input.budgetRange.min ?? null,
+      max: action.input.budgetRange.max ?? null,
+      currency: action.input.budgetRange.currency ?? null,
+    } : state.budgetRange;
+
   },
 };

@@ -1,11 +1,11 @@
 import {
   type DocumentModelUtils,
   baseCreateDocument,
-  baseCreateExtendedState,
   baseSaveToFile,
   baseSaveToFileHandle,
   baseLoadFromFile,
   baseLoadFromInput,
+  defaultBaseState,
   generateId,
 } from "document-model";
 import {
@@ -22,7 +22,13 @@ export const initialGlobalState: RequestForProposalsState = {
   rfpCommenter: [],
   eligibilityCriteria: [],
   evaluationCriteria: [],
+  budgetRange: {
+    min: null,
+    max: null,
+    currency: null,
+  },
   contextDocuments: [],
+  status: "DRAFT",
   proposals: [],
   deadline: null,
   tags: null,
@@ -33,18 +39,13 @@ const utils: DocumentModelUtils<RequestForProposalsDocument> = {
   fileExtension: "",
   createState(state) {
     return {
+      ...defaultBaseState(),
       global: { ...initialGlobalState, ...state?.global },
       local: { ...initialLocalState, ...state?.local },
     };
   },
-  createExtendedState(extendedState) {
-    return baseCreateExtendedState({ ...extendedState }, utils.createState);
-  },
   createDocument(state) {
-    const document = baseCreateDocument(
-      utils.createExtendedState(state),
-      utils.createState,
-    );
+    const document = baseCreateDocument(utils.createState, state);
 
     document.header.documentType = "powerhouse/rfp";
 
@@ -66,5 +67,12 @@ const utils: DocumentModelUtils<RequestForProposalsDocument> = {
     return baseLoadFromInput(input, reducer);
   },
 };
+
+export const createDocument = utils.createDocument;
+export const createState = utils.createState;
+export const saveToFile = utils.saveToFile;
+export const saveToFileHandle = utils.saveToFileHandle;
+export const loadFromFile = utils.loadFromFile;
+export const loadFromInput = utils.loadFromInput;
 
 export default utils;

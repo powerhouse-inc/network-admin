@@ -6,7 +6,6 @@ export const schema: DocumentNode = gql`
   Subgraph definition for RequestForProposals (powerhouse/rfp)
   """
   type RequestForProposalsState {
-    id: OID!
     issuer: ID!
     title: String!
     description: String!
@@ -16,7 +15,7 @@ export const schema: DocumentNode = gql`
     budgetRange: BudgetRange!
     contextDocuments: [ContextDocument!]!
     status: RFPStatus!
-    proposals: [Proposal!]!
+    proposals: [RfpProposal!]!
     deadline: DateTime
     tags: [String!]
   }
@@ -24,7 +23,7 @@ export const schema: DocumentNode = gql`
   type RfpCommenter {
     id: ID!
     rfpCommentatorType: RFPCommentatorType!
-    agentType: AgentType!
+    agentType: RfpAgentType!
     name: String!
     code: String!
     imageUrl: String
@@ -35,7 +34,7 @@ export const schema: DocumentNode = gql`
     EXTERNAL # outsourced (if RGH asks BAI team)
   }
 
-  enum AgentType {
+  enum RfpAgentType {
     HUMAN
     GROUP
     AI
@@ -62,17 +61,17 @@ export const schema: DocumentNode = gql`
     CLOSED
   }
 
-  type Proposal {
+  type RfpProposal {
     id: OID!
     title: String!
     summary: String!
-    proposalStatus: ProposalStatus!
+    proposalStatus: RfpProposalStatus!
     submittedby: OID
     budgetEstimate: String! # a rolled-up total from the payment terms
-    paymentTerms: PaymentTerm!
+    paymentTerms: RfpPaymentTerm!
   }
 
-  enum PaymentTerm {
+  enum RfpPaymentTerm {
     MILESTONE_BASED_FIXED_PRICE
     MILESTONE_BASED_ADVANCE_PAYMENT
     RETAINER_BASED
@@ -80,7 +79,7 @@ export const schema: DocumentNode = gql`
     ESCROW
   }
 
-  enum ProposalStatus {
+  enum RfpProposalStatus {
     SUBMITTED # or received from an RFP issuer POV
     OPENED
     UNDER_REVIEW
@@ -146,7 +145,6 @@ export const schema: DocumentNode = gql`
   Module: RfpState
   """
   input RequestForProposals_EditRfpInput {
-    rfpId: OID!
     title: String
     description: String
     eligibilityCriteria: [String!]
@@ -194,13 +192,13 @@ export const schema: DocumentNode = gql`
     id: OID!
     title: String!
     summary: String!
-    proposalStatus: ProposalStatusInput!
+    proposalStatus: RfpProposalStatusInput!
     submittedby: OID
     budgetEstimate: String!
-    paymentTerms: PaymentTermInput!
+    paymentTerms: RfpPaymentTermInput!
   }
 
-  enum PaymentTermInput {
+  enum RfpPaymentTermInput {
     MILESTONE_BASED_FIXED_PRICE
     MILESTONE_BASED_ADVANCE_PAYMENT
     RETAINER_BASED
@@ -208,7 +206,7 @@ export const schema: DocumentNode = gql`
     ESCROW
   }
 
-  enum ProposalStatusInput {
+  enum RfpProposalStatusInput {
     SUBMITTED # or received from an RFP issuer POV
     OPENED
     UNDER_REVIEW
@@ -222,19 +220,7 @@ export const schema: DocumentNode = gql`
 
   input RequestForProposals_ChangeProposalStatusInput {
     proposalId: OID!
-    status: ProposalStatusInput!
-  }
-
-  enum ProposalStatusInput {
-    SUBMITTED # or received from an RFP issuer POV
-    OPENED
-    UNDER_REVIEW
-    NEEDS_REVISION
-    REVISED
-    APPROVED
-    CONDITIONALLY_APPROVED #
-    REJECTED
-    WITHDRAWN
+    status: RfpProposalStatusInput!
   }
 
   input RequestForProposals_RemoveProposalInput {

@@ -1,25 +1,22 @@
-import { type BaseAction } from "document-model";
+import { type Action } from "document-model";
 import type {
   AddProposalInput,
   ChangeProposalStatusInput,
   RemoveProposalInput,
 } from "../types.js";
 
-export type AddProposalAction = BaseAction<
-  "ADD_PROPOSAL",
-  AddProposalInput,
-  "global"
->;
-export type ChangeProposalStatusAction = BaseAction<
-  "CHANGE_PROPOSAL_STATUS",
-  ChangeProposalStatusInput,
-  "global"
->;
-export type RemoveProposalAction = BaseAction<
-  "REMOVE_PROPOSAL",
-  RemoveProposalInput,
-  "global"
->;
+export type AddProposalAction = Action & {
+  type: "ADD_PROPOSAL";
+  input: AddProposalInput;
+};
+export type ChangeProposalStatusAction = Action & {
+  type: "CHANGE_PROPOSAL_STATUS";
+  input: ChangeProposalStatusInput;
+};
+export type RemoveProposalAction = Action & {
+  type: "REMOVE_PROPOSAL";
+  input: RemoveProposalInput;
+};
 
 export type RequestForProposalsProposalsAction =
   | AddProposalAction
