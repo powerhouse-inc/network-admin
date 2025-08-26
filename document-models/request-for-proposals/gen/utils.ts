@@ -20,8 +20,9 @@ export const initialGlobalState: RequestForProposalsState = {
   title: "",
   description: "",
   rfpCommenter: [],
-  eligibilityCriteria: [],
-  evaluationCriteria: [],
+  eligibilityCriteria: "",
+  evaluationCriteria: "",
+  code: "",
   budgetRange: {
     min: null,
     max: null,

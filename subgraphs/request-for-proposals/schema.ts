@@ -7,11 +7,12 @@ export const schema: DocumentNode = gql`
   """
   type RequestForProposalsState {
     issuer: ID!
+    code: String
     title: String!
     description: String!
     rfpCommenter: [RfpCommenter!]!
-    eligibilityCriteria: [String!]!
-    evaluationCriteria: [String!]!
+    eligibilityCriteria: String!
+    evaluationCriteria: String!
     budgetRange: BudgetRange!
     contextDocuments: [ContextDocument!]!
     status: RFPStatus!
@@ -146,11 +147,12 @@ export const schema: DocumentNode = gql`
   """
   input RequestForProposals_EditRfpInput {
     title: String
+    code: String
     description: String
-    eligibilityCriteria: [String!]
-    evaluationCriteria: [String!]
+    eligibilityCriteria: String
+    evaluationCriteria: String
     budgetRange: BudgetRangeInput
-    status: RFPStatusInput!
+    status: RFPStatusInput
     deadline: DateTime
     tags: [String!]
   }

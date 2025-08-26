@@ -13,8 +13,9 @@ export const reducer: RequestForProposalsRfpStateOperations = {
       throw new Error('RFP title is required');
     }
     state.title = action.input.title;
+    state.code = action.input.code || state.code;
     state.description = action.input.description || state.description;
-    state.eligibilityCriteria = action.input.eligibilityCriteria || state.eligibilityCriteria;
+    state.eligibilityCriteria = action.input.eligibilityCriteria || state.eligibilityCriteria;	
     state.evaluationCriteria = action.input.evaluationCriteria || state.evaluationCriteria;
     state.status = action.input.status || state.status;
     state.deadline = action.input.deadline || state.deadline;

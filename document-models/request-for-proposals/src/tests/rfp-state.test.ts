@@ -24,8 +24,8 @@ describe("RFP State Reducers - State Changes", () => {
       const input: EditRfpInput = {
         title: "New RFP Title",
         description: "Updated description for the RFP",
-        eligibilityCriteria: ["Criteria 1", "Criteria 2"],
-        evaluationCriteria: ["Evaluation 1", "Evaluation 2"],
+        eligibilityCriteria: "Criteria 1",
+        evaluationCriteria: "Evaluation 1",
         status: "OPEN_FOR_PROPOSALS",
         deadline: "2024-12-31T23:59:59Z",
         tags: ["technical", "urgent"],
@@ -61,7 +61,7 @@ describe("RFP State Reducers - State Changes", () => {
           title: "Initial Title",
           description: "Initial description",
           status: "DRAFT",
-          eligibilityCriteria: ["Initial criteria"],
+          eligibilityCriteria: "Initial criteria",
         })
       );
 
@@ -117,8 +117,8 @@ describe("RFP State Reducers - State Changes", () => {
         title: "",
         description: "",
         status: "DRAFT",
-        eligibilityCriteria: [],
-        evaluationCriteria: [],
+        eligibilityCriteria: "",
+        evaluationCriteria: "",
         tags: [],
       };
 
@@ -219,8 +219,8 @@ describe("RFP State Reducers - State Changes", () => {
         title: "RFP with special chars: & < > \" '",
         description: "Description with emojis: 🚀 💡 📊 and symbols: © ® ™",
         status: "DRAFT",
-        eligibilityCriteria: ["Criteria with spaces & symbols!"],
-        evaluationCriteria: ["Evaluation with numbers: 1, 2, 3"],
+        eligibilityCriteria: "Criteria with spaces & symbols!",
+        evaluationCriteria: "Evaluation with numbers: 1, 2, 3",
         tags: ["tag-with-dashes", "tag_with_underscores", "tag with spaces"],
       };
 
@@ -243,8 +243,8 @@ describe("RFP State Reducers - State Changes", () => {
       const input: EditRfpInput = {
         title: "Test Title", // Required by reducer
         status: "DRAFT",
-        eligibilityCriteria: largeCriteria,
-        evaluationCriteria: largeCriteria.slice(0, 50), // Different size
+        eligibilityCriteria: largeCriteria.join(", "),
+        evaluationCriteria: largeCriteria.slice(0, 50).join(", "), // Different size
         tags: largeTags,
       };
 
