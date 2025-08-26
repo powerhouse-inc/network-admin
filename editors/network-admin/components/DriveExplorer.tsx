@@ -118,16 +118,16 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
                       .filter(file => file.parentFolder === childFolder.id)
                       .map((file: any) => ({
                         id: `editor-${file.id}`,
-                        title: `${file.state?.code || ''} - ${file.state?.title || file.name}`,
+                        title: `📄 ${file.state?.code || ''} - ${file.state?.title || file.name}`,
                       }))
                   ]
                 })),
               // Add files directly in this folder
               ...filesWithDocuments
                 .filter(file => file.parentFolder === folder.id)
-                .map(file => ({
+                .map((file: any) => ({
                   id: `editor-${file.id}`,
-                  title: file.name,
+                  title: `📄 ${file.state?.code || ''} - ${file.state?.title || file.name}`,
                 }))
             ]
           })),
@@ -136,7 +136,7 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
           .filter(file => !file.parentFolder)
           .map((file: any) => ({
             id: `editor-${file.id}`,
-            title: `${file.state?.code || ''} - ${file.state?.title || file.name}`,
+            title: `📄 ${file.state?.code || ''} - ${file.state?.title || file.name}`,
           }))
       ]
     };
@@ -159,7 +159,7 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
       const folder = allFolders.find(f => f.id === newNode.id);
 
       if (folder) {
-        setActiveDocumentId(folder.id);
+        setActiveDocumentId(undefined);
       }
     }
   }, [allFolders, fileChildren, setSelectedNode, setActiveDocumentId]);
@@ -183,6 +183,7 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
       const folder = allFolders.find(f => f.id === activeNodeId);
       if (folder) {
         nodeType = 'folder';
+
       } else {
         // Check if it's a file (direct ID)
         const file = fileChildren.find(f => f.id === activeNodeId);
@@ -520,13 +521,14 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
       // if (!documentModel || !selectedDrive?.header.id) return;
 
       // console.log("creating document", documentModel);
+      const folder = await onAddFolder(fileName, selectedFolder);
 
       try {
         const node = await addDocument(
           selectedDrive?.header.id || "",
           fileName,
           "powerhouse/workstream",
-          selectedFolder?.id,
+          folder?.id,
           {
             header: {
               name: fileName,
@@ -644,7 +646,7 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
         />
 
         {/* === MAIN CONTENT AREA === */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto ml-2">
           {activeDocumentId ? (
             <EditorContainer handleClose={() => setActiveDocumentId(undefined)} hideToolbar={false} activeDocumentId={activeDocumentId} />
           ) : (
