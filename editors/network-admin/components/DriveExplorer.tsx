@@ -41,7 +41,7 @@ import { FolderTree } from "./FolderTree.jsx";
  * Main drive explorer component with sidebar navigation and content area.
  * Layout: Left sidebar (folder tree) + Right content area (files/folders + document editor)
  */
-export function DriveExplorer(props: DriveEditorProps<any>) {
+export function DriveExplorer(props: any) {
   // === DOCUMENT EDITOR STATE ===
   // Customize document opening/closing behavior here
   const [activeDocumentId, setActiveDocumentId] = useState<

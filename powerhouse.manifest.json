@@ -10,6 +10,10 @@
         {
             "id": "powerhouse/workstream",
             "name": "Workstream"
+        },
+        {
+            "id": "powerhouse/rfp",
+            "name": "Request for Proposals"
         }
     ],
     "editors": [
@@ -17,6 +21,11 @@
             "id": "workstream-editor",
             "name": "Workstream Editor",
             "documentTypes": ["powerhouse/workstream"]
+        },
+        {
+            "id": "request-for-proposals-editor",
+            "name": "Request for Proposals Editor",
+            "documentTypes": ["powerhouse/rfp"]
         }
     ],
     "apps": [
