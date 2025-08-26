@@ -11,7 +11,7 @@ import { DriveExplorer } from "./components/DriveExplorer.js";
  * Base editor component that renders the drive explorer interface.
  * Customize document opening behavior and drive-level actions here.
  */
-export function BaseEditor(props: DriveEditorProps) {
+export function BaseEditor(props: DriveEditorProps<any>) {
   const { context, document } = props;
   return (
     <div className="new-drive-explorer" style={{ height: "100%" }}>
@@ -23,7 +23,7 @@ export function BaseEditor(props: DriveEditorProps) {
 /**
  * Main editor entry point with required providers.
  */
-export default function Editor(props: DriveEditorProps) {
+export default function Editor(props: DriveEditorProps<any>) {
   const appConfig = useAppConfig();
   const analyticsDatabaseName = appConfig?.analyticsDatabaseName;
   return (

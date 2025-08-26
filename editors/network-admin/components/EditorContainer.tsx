@@ -18,8 +18,8 @@ import { Suspense, useCallback, useState } from "react";
  * Handles document loading, toolbar, revision history, and dynamic editor loading.
  * Customize toolbar actions and editor context here.
  */
-export const EditorContainer = (props: { handleClose: () => void }) => {
-  const { handleClose } = props;
+export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: boolean }) => {
+  const { handleClose, hideToolbar = false } = props;
   // UI state for revision history and timeline
   const [selectedTimelineItem, setSelectedTimelineItem] =
     useState<TimelineItem | null>(null);
@@ -69,17 +69,19 @@ export const EditorContainer = (props: { handleClose: () => void }) => {
   ) : (
     // Main editor view
     <Suspense fallback={loadingContent}>
-      {/* Document toolbar - customize available actions here */}
-      <DocumentToolbar
-        onClose={handleClose}
-        onExport={onExport}
-        onShowRevisionHistory={() => setShowRevisionHistory(true)}
-        onSwitchboardLinkClick={() => {}} // Customize switchboard integration
-        title={selectedDocument.header.name}
-        timelineButtonVisible={editorModule.config.timelineEnabled}
-        timelineItems={timelineItems.data}
-        onTimelineItemClick={setSelectedTimelineItem}
-      />
+      {/* Document toolbar - only show if not hidden */}
+      {!hideToolbar && (
+        <DocumentToolbar
+          onClose={handleClose}
+          onExport={onExport}
+          onShowRevisionHistory={() => setShowRevisionHistory(true)}
+          onSwitchboardLinkClick={() => {}} // Customize switchboard integration
+          title={selectedDocument.header.name}
+          timelineButtonVisible={editorModule.config.timelineEnabled}
+          timelineItems={timelineItems.data}
+          onTimelineItemClick={setSelectedTimelineItem}
+        />
+      )}
       {/* Dynamic editor component based on document type */}
       <EditorComponent
         context={{
@@ -91,7 +93,7 @@ export const EditorContainer = (props: { handleClose: () => void }) => {
           ),
         }}
         dispatch={dispatch}
-        document={document}
+        document={selectedDocument}
         error={console.error}
       />
     </Suspense>

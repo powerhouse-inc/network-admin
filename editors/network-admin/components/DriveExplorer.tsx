@@ -4,6 +4,13 @@ import {
   useBreadcrumbs,
 } from "@powerhousedao/design-system";
 import {
+  SidebarProvider,
+  Sidebar,
+  useSidebar,
+  Icon,
+  type SidebarNode,
+} from "@powerhousedao/document-engineering";
+import {
   addDocument,
   type DriveEditorProps,
   getSyncStatusSync,
@@ -21,7 +28,7 @@ import {
   useUserPermissions,
 } from "@powerhousedao/reactor-browser";
 import type { DocumentModelModule } from "document-model";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useMemo } from "react";
 import { CreateDocument } from "./CreateDocument.jsx";
 import { EditorContainer } from "./EditorContainer.jsx";
 import { FolderTree } from "./FolderTree.jsx";
@@ -72,6 +79,74 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
 
   // All folders for the sidebar tree view
   const allFolders = useAllFolderNodes();
+
+  // Convert folders and files to SidebarNode format
+  const sidebarNodes = useMemo(() => {
+    const rootNode: SidebarNode = {
+      id: "root",
+      title: "Root",
+      children: [
+        // Add folders
+        ...allFolders
+          .filter(folder => !folder.parentFolder) // Only root folders
+          .map(folder => ({
+            id: folder.id,
+            title: folder.name,
+            children: [
+              // Add child folders
+              ...allFolders
+                .filter(childFolder => childFolder.parentFolder === folder.id)
+                .map(childFolder => ({
+                  id: childFolder.id,
+                  title: childFolder.name,
+                  children: [
+                    // Add files in this folder
+                    ...fileChildren
+                      .filter(file => file.parentFolder === childFolder.id)
+                      .map(file => ({
+                        id: file.id,
+                        title: file.name,
+                      }))
+                  ]
+                })),
+              // Add files directly in this folder
+              ...fileChildren
+                .filter(file => file.parentFolder === folder.id)
+                .map(file => ({
+                  id: file.id,
+                  title: file.name,
+                }))
+            ]
+          })),
+        // Add root-level files
+        ...fileChildren
+          .filter(file => !file.parentFolder)
+          .map(file => ({
+            id: file.id,
+            title: file.name,
+          }))
+      ]
+    };
+    return [rootNode];
+  }, [allFolders, fileChildren]);
+
+  // Handle sidebar node selection
+  const handleActiveNodeChange = useCallback((newNode: SidebarNode) => {
+    if (newNode.id === "root") {
+      setSelectedNode(undefined);
+    } else {
+      // Find if it's a folder or file
+      const folder = allFolders.find(f => f.id === newNode.id);
+      const file = fileChildren.find(f => f.id === newNode.id);
+      
+      if (folder) {
+        setSelectedNode(folder);
+      } else if (file) {
+        setSelectedNode(file);
+        setActiveDocumentId(file.id);
+      }
+    }
+  }, [allFolders, fileChildren, setSelectedNode, setActiveDocumentId]);
 
   // === EVENT HANDLERS ===
 
@@ -137,45 +212,37 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
 
   const documentModelModule = activeDocument
     ? documentModelModules?.find(
-        (m) => m.documentModel.id === activeDocument.documentType,
-      )
+      (m) => m.documentModel.id === activeDocument.documentType,
+    )
     : null;
 
   const editorModule = activeDocument
     ? editorModules?.find((e) =>
-        e.documentTypes.includes(activeDocument.documentType),
-      )
+      e.documentTypes.includes(activeDocument.documentType),
+    )
     : null;
 
   // === RENDER ===
   return (
-    <div className="flex h-full">
-      {/* === LEFT SIDEBAR: Folder Navigation === */}
-      {/* Customize sidebar width by changing w-64 */}
-      <div className="w-64 overflow-y-auto border-r border-gray-200 bg-white">
-        <div className="p-4">
-          {/* Network Admin sidebar title */}
-          <h2 className="mb-4 text-lg font-semibold text-gray-700">
-            Network Admin
-          </h2>
+    <SidebarProvider>
+      <div className="flex h-full">
+        {/* === LEFT SIDEBAR: Folder Navigation === */}
+        <Sidebar
+          nodes={sidebarNodes}
+          activeNodeId={selectedFolder?.id || activeDocumentId}
+          onActiveNodeChange={handleActiveNodeChange}
+          sidebarTitle="Network Admin"
+          showSearchBar={true}
+          allowPinning={true}
+          resizable={true}
+          initialWidth={256}
+          maxWidth={400}
+        />
 
-          {/* Folder tree navigation component */}
-          <FolderTree 
-            folders={allFolders} 
-            files={fileChildren}
-            onSelectNode={setSelectedNode} 
-          />
-        </div>
-      </div>
-
-      {/* === RIGHT CONTENT AREA: Files/Folders or Document Editor === */}
-      <div className="flex-1 overflow-y-auto p-4">
-        {/* Conditional rendering: Document editor or folder contents */}
-        {activeDocument && documentModelModule && editorModule ? (
-          // Document editor view
-          <EditorContainer handleClose={() => setActiveDocumentId(undefined)} />
-        ) : (
-          /* Folder contents view */
+      {/* === RIGHT CONTENT AREA: Files/Folders AND Document Editor === */}
+      <div className="flex-1 flex">
+        {/* === FOLDER CONTENTS VIEW - Always visible === */}
+        <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-6">
             {/* === HEADER SECTION === */}
             <div className="space-y-3">
@@ -218,19 +285,19 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
                   📁 Folders
                 </h3>
                 <div className="grid grid-cols-1 gap-2">
-                  {folderChildren.map((folderNode) => 
+                  {folderChildren.map((folderNode) =>
                     folderNode && folderNode.id ? (
                       <div key={folderNode.id} className="p-2 border rounded">
                         <div className="font-medium">📁 {folderNode.name}</div>
                         <div className="text-sm text-gray-500">Folder</div>
                         <div className="mt-2 flex gap-2">
-                          <button 
+                          <button
                             onClick={() => setSelectedNode(folderNode)}
                             className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
                           >
                             Open
                           </button>
-                          <button 
+                          <button
                             onClick={() => {
                               const newName = prompt("Enter new name:", folderNode.name || "");
                               if (newName && newName.trim() && newName !== folderNode.name) {
@@ -246,7 +313,7 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
                           >
                             Edit
                           </button>
-                          <button 
+                          <button
                             onClick={() => showDeleteNodeModal(folderNode)}
                             className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                           >
@@ -277,13 +344,16 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
                       <div className="font-medium">{fileNode.name}</div>
                       <div className="text-sm text-gray-500">{fileNode.documentType}</div>
                       <div className="mt-2 flex gap-2">
-                        <button 
-                          onClick={() => setSelectedNode(fileNode)}
+                        <button
+                          onClick={() => {
+                            setSelectedNode(fileNode);
+                            setActiveDocumentId(fileNode.id);
+                          }}
                           className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
                         >
                           Open
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
                             console.log("FileNode:", fileNode);
                             if (!fileNode || !fileNode.id) {
@@ -303,7 +373,7 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
                         >
                           Edit
                         </button>
-                        <button 
+                        <button
                           onClick={() => showDeleteNodeModal(fileNode)}
                           className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                         >
@@ -331,6 +401,16 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
             {/* Component for creating new documents */}
             <CreateDocument />
           </div>
+        </div>
+
+        {/* === DOCUMENT EDITOR VIEW - Appears on the right when a document is selected === */}
+        {activeDocument && documentModelModule && editorModule && (
+          <div className="w-1/2 border-l border-gray-200">
+            <EditorContainer
+              handleClose={() => setActiveDocumentId(undefined)}
+              hideToolbar={true}
+            />
+          </div>
         )}
       </div>
 
@@ -341,6 +421,7 @@ export function DriveExplorer(props: DriveEditorProps<any>) {
         onOpenChange={(open) => setOpenModal(open)}
         open={openModal}
       />
-    </div>
+      </div>
+    </SidebarProvider>
   );
 }

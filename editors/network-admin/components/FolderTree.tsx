@@ -6,6 +6,7 @@ interface FolderTreeProps {
   files: FileNode[];
   selectedNodeId?: string;
   onSelectNode: (nodeId: string | undefined) => void;
+  onSelectFile: (fileNode: FileNode) => void;
 }
 
 /**
@@ -17,6 +18,7 @@ export function FolderTree({
   files,
   selectedNodeId,
   onSelectNode,
+  onSelectFile,
 }: FolderTreeProps) {
   // Track which folders are expanded
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
@@ -86,7 +88,7 @@ export function FolderTree({
                     selectedNodeId === file.id ? "bg-blue-100 text-blue-800" : ""
                   }`}
                   style={{ paddingLeft: `${(level + 1) * 16 + 8}px` }}
-                  onClick={() => onSelectNode(file.id)}
+                  onClick={() => onSelectFile(file)}
                 >
                   <div className="mr-1 w-5" />
                   <span>📄 {file.name}</span>
@@ -126,7 +128,7 @@ export function FolderTree({
               selectedNodeId === file.id ? "bg-blue-100 text-blue-800" : ""
             }`}
             style={{ paddingLeft: "8px" }}
-            onClick={() => onSelectNode(file.id)}
+            onClick={() => onSelectFile(file)}
           >
             <div className="mr-1 w-5" />
             <span>📄 {file.name}</span>
