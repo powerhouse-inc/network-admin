@@ -242,34 +242,86 @@ export function DriveExplorer(props: any) {
                 )} */}
             </div>
 
-            {/* === FOLDERS SECTION === */}
-            {/* {folderChildren.length > 0 && (
-                <div>
-                  <h3 className="mb-2 text-sm font-medium text-gray-500">
-                    📁 Folders
-                  </h3>
-                  <div className="grid grid-cols-1 gap-2">
-                    {folderChildren.map((folderNode) =>
-                      folderNode && folderNode.id ? (
-                        <div key={folderNode.id} className="p-2 border rounded">
-                          <div className="font-medium">📁 {folderNode.name}</div>
-                          <div className="text-sm text-gray-500">Folder</div>
+            {/* === FOLDERS AND FILES GRID LAYOUT === */}
+            {(folderChildren.length > 0 || fileChildren.length > 0) && (
+              <div className="mt-10">
+                <div className="grid grid-cols-2 gap-6">
+                  {/* === FOLDERS COLUMN === */}
+                  <div>
+                    <h3 className="mb-2 text-sm font-medium text-gray-500">
+                      📁 Folders
+                    </h3>
+                    <div className="space-y-2">
+                      {folderChildren.map((folderNode) =>
+                        folderNode && folderNode.id ? (
+                          <div key={folderNode.id} className="p-2 border rounded">
+                            <div className="font-medium">📁 {folderNode.name}</div>
+                            <div className="text-sm text-gray-500">Folder</div>
+                            <div className="mt-2 flex gap-2">
+                              <button
+                                onClick={() => setSelectedNode(folderNode)}
+                                className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                              >
+                                Open
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const newName = prompt("Enter new name:", folderNode.name || "");
+                                  if (newName && newName.trim() && newName !== folderNode.name) {
+                                    try {
+                                      onRenameNode(newName.trim(), folderNode);
+                                    } catch (error) {
+                                      console.error("Failed to rename:", error);
+                                      alert("Failed to rename folder. Please try again.");
+                                    }
+                                  }
+                                }}
+                                className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => showDeleteNodeModal(folderNode)}
+                                className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        ) : null
+                      )}
+                    </div>
+                  </div>
+
+                  {/* === FILES COLUMN === */}
+                  <div>
+                    <h3 className="mb-2 text-sm font-medium text-gray-500">
+                      📄 Documents
+                    </h3>
+                    <div className="space-y-2">
+                      {fileChildren.map((fileNode) => (
+                        <div key={fileNode.id} className="p-2 border rounded">
+                          <div className="font-medium">{fileNode.name}</div>
+                          <div className="text-sm text-gray-500">{fileNode.documentType}</div>
                           <div className="mt-2 flex gap-2">
                             <button
-                              onClick={() => setSelectedNode(folderNode)}
+                              onClick={() => {
+                                setSelectedNode(fileNode);
+                                setActiveDocumentId(fileNode.id);
+                              }}
                               className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
                             >
                               Open
                             </button>
                             <button
                               onClick={() => {
-                                const newName = prompt("Enter new name:", folderNode.name || "");
-                                if (newName && newName.trim() && newName !== folderNode.name) {
+                                if (!fileNode || !fileNode.id) return;
+                                const newName = prompt("Enter new name:", fileNode.name || "");
+                                if (newName && newName.trim() && newName !== fileNode.name) {
                                   try {
-                                    onRenameNode(newName.trim(), folderNode);
+                                    onRenameNode(newName.trim(), fileNode);
                                   } catch (error) {
-                                    console.error("Failed to rename:", error);
-                                    alert("Failed to rename folder. Please try again.");
+                                    alert("Failed to rename document. Please try again.");
                                   }
                                 }
                               }}
@@ -278,65 +330,16 @@ export function DriveExplorer(props: any) {
                               Edit
                             </button>
                             <button
-                              onClick={() => showDeleteNodeModal(folderNode)}
+                              onClick={() => showDeleteNodeModal(fileNode)}
                               className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                             >
                               Delete
                             </button>
                           </div>
                         </div>
-                      ) : null
-                    )}
-                  </div>
-                </div>
-              )} */}
-
-            {/* === FILES/DOCUMENTS SECTION === */}
-            {fileChildren.length > 0 && (
-              <div className="mt-10">
-                <h3 className="mb-2 text-sm font-medium text-gray-500">
-                  📄 Documents
-                </h3>
-                <div className="grid grid-cols-1 gap-2">
-                  {fileChildren.map((fileNode) => (
-                    <div key={fileNode.id} className="p-2 border rounded">
-                      <div className="font-medium">{fileNode.name}</div>
-                      <div className="text-sm text-gray-500">{fileNode.documentType}</div>
-                      <div className="mt-2 flex gap-2">
-                        <button
-                          onClick={() => {
-                            setSelectedNode(fileNode);
-                            setActiveDocumentId(fileNode.id);
-                          }}
-                          className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                        >
-                          Open
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (!fileNode || !fileNode.id) return;
-                            const newName = prompt("Enter new name:", fileNode.name || "");
-                            if (newName && newName.trim() && newName !== fileNode.name) {
-                              try {
-                                onRenameNode(newName.trim(), fileNode);
-                              } catch (error) {
-                                alert("Failed to rename document. Please try again.");
-                              }
-                            }
-                          }}
-                          className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => showDeleteNodeModal(fileNode)}
-                          className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -521,7 +524,7 @@ export function DriveExplorer(props: any) {
       // if (!documentModel || !selectedDrive?.header.id) return;
 
       // console.log("creating document", documentModel);
-      const folder = await onAddFolder(fileName, selectedFolder);
+      const folder = await onAddFolder(fileName, undefined);
 
       try {
         const node = await addDocument(
