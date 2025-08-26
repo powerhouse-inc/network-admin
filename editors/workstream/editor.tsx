@@ -119,14 +119,14 @@ export default function Editor(props: any) {
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white">
       {/* Header */}
-      {/* <div className="mb-6">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Workstream</h1>
-        <nav className="text-sm text-gray-600">
+        {/* <nav className="text-sm text-gray-600">
           <span className="text-blue-600 underline cursor-pointer">Home</span>
           <span className="mx-2">›</span>
           <span>Workstream</span>
-        </nav>
-      </div> */}
+        </nav> */}
+      </div>
 
       {/* Main Form Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

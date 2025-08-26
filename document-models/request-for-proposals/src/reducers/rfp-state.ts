@@ -9,10 +9,8 @@ import type { RequestForProposalsRfpStateOperations } from "../../gen/rfp-state/
 export const reducer: RequestForProposalsRfpStateOperations = {
   editRfpOperation(state, action, dispatch) {
     // TODO: Implement "editRfpOperation" reducer
-    if (action.input.title === undefined || action.input.title === null) {
-      throw new Error('RFP title is required');
-    }
-    state.title = action.input.title;
+   
+    state.title = action.input.title || state.title;
     state.code = action.input.code || state.code;
     state.description = action.input.description || state.description;
     state.eligibilityCriteria = action.input.eligibilityCriteria || state.eligibilityCriteria;	
