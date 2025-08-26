@@ -39,6 +39,8 @@ export default function Editor(props: any) {
   // Try to get dispatch from context or props
   const state = document.state.global as any;
 
+  const createRfpDocument = props.createRfp;
+  console.log("props", props);
 
   // Handle workstream field changes
   const handleWorkstreamChange = useCallback(
@@ -254,9 +256,13 @@ export default function Editor(props: any) {
 
       <h1 className="mt-10 text-2xl text-gray-900 mb-4">Request for Proposal</h1>
       <div className="mt-8 ">
-        <Button color="light" size="small" className="cursor-pointer hover:bg-gray-600 hover:text-white" title={"Save Workstream"} aria-description={"Save Workstream"} onClick={() => {
-          console.log("creating rfp document");
-        }}>
+        <Button
+          color="light"
+          size="small"
+          className="cursor-pointer hover:bg-gray-600 hover:text-white"
+          title={"Save Workstream"}
+          aria-description={"Save Workstream"}
+          onClick={createRfpDocument}>
           Create RFP Document
         </Button>
       </div>

@@ -21,8 +21,9 @@ const statusOptions = [
   { label: "NOT_AWARDED", value: "NOT_AWARDED" },
   { label: "CLOSED", value: "CLOSED" }];
 
-export default function Editor(props: IProps) {
-  const [document, dispatch] = useSelectedDocument();
+export default function Editor(props: any) {
+  // const [document, dispatch] = useSelectedDocument();
+  const { document, dispatch } = props;
   const state: RequestForProposalsState = document?.state.global as RequestForProposalsState;
 
   if (!document) {

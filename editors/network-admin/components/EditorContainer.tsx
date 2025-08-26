@@ -11,7 +11,9 @@ import {
   useSelectedDocument,
   useSelectedDrive,
   useDocumentById,
-  useEditorModulesForDocumentType
+  useEditorModulesForDocumentType,
+  addDocument,
+  useNodes
 } from "@powerhousedao/reactor-browser";
 import { Suspense, useCallback, useState } from "react";
 
@@ -29,6 +31,27 @@ export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: 
   const [selectedDocument, dispatch] = useDocumentById(props.activeDocumentId);
   const [selectedDrive] = useSelectedDrive();
 
+  const nodes = useNodes();
+  const folderId = nodes?.find(node => node.id === selectedDocument?.header.id)?.parentFolder || undefined;
+  console.log("folderId", folderId);
+
+  const createRfpDocument = useCallback(async () => {
+
+    try {
+      await addDocument(
+        selectedDrive?.header.id || "",
+        selectedDocument?.header.name || "RFP",
+        "powerhouse/rfp",
+        folderId,
+        undefined,
+        undefined,
+        "request-for-proposals-editor"
+      );
+    } catch (error) {
+      console.error("Error creating RFP document", error);
+    }
+  }, [selectedDrive]);
+
 
   // Timeline data for revision history
   const timelineItems = useTimelineItems(
@@ -40,7 +63,6 @@ export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: 
     selectedDocument?.header.meta?.preferredEditor
   );
 
-  console.log("selectedDocument", selectedDocument);
 
   // Document export functionality - customize export behavior here
   const onExport = useCallback(async () => {
@@ -62,6 +84,7 @@ export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: 
   // Dynamically load the appropriate editor component for this document type
   const EditorComponent = editorModule?.Component;
   if (!EditorComponent) return loadingContent;
+
 
 
   return <div className="">
@@ -102,6 +125,7 @@ export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: 
           dispatch={dispatch}
           document={selectedDocument}
           error={console.error}
+          createRfp={createRfpDocument}
         />
       </Suspense>
     )}
