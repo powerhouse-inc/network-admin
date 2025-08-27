@@ -53,6 +53,7 @@ export default function Editor(props: any) {
   const state = document.state.global as any;
   const createRfpDocument = props.createRfp;
   const setActiveDocumentId = props.setActiveDocumentId;
+  const createSowDocument = props.createSow;
 
   // Checking if there is an RFP document for this workstream
   const nodes: Node[] = useNodes() || [];
@@ -617,6 +618,15 @@ export default function Editor(props: any) {
                       }
                     }}
                   />
+                  <button
+                    className="text-sm bg-gray-100 rounded-md p-1 hover:bg-gray-200"
+                    onClick={() => {
+                      console.log("Creating sow");
+                      createSowDocument();
+                    }}
+                  >
+                    Create sow
+                  </button>
                 </div>
                 <div className="flex-1">
                   <TextInput

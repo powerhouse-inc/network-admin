@@ -41,7 +41,7 @@ export const EditorContainer = (props: {
     useState<TimelineItem | null>(null);
 
   const [showRevisionHistory, setShowRevisionHistory] = useState(false);
-  
+
   const [selectedDocument, dispatch] = useDocumentById(
     props.activeDocumentId
   ) as [
@@ -67,6 +67,23 @@ export const EditorContainer = (props: {
         getNewDocumentObject(rfpDocName, "powerhouse/rfp", rfpDocCode),
         undefined,
         "request-for-proposals-editor"
+      );
+    } catch (error) {
+      console.error("Error creating RFP document", error);
+    }
+  }, [selectedDrive]);
+
+  const createSowDocument = useCallback(async () => {
+    const sowDocName = `SOW-${(selectedDocument?.state.global as any)?.title}`;
+    try {
+      await addDocument(
+        selectedDrive?.header.id || "",
+        sowDocName,
+        "powerhouse/scopeofwork",
+        folderId,
+        getNewDocumentObject(sowDocName, "powerhouse/scopeofwork"),
+        undefined,
+        "scope-of-work-editor"
       );
     } catch (error) {
       console.error("Error creating RFP document", error);
@@ -144,6 +161,7 @@ export const EditorContainer = (props: {
             error={console.error}
             createRfp={createRfpDocument}
             setActiveDocumentId={setActiveDocumentId}
+            createSow={createSowDocument}
           />
         </Suspense>
       )}
