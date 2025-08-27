@@ -5,18 +5,31 @@ import {
   Select,
   PHIDInput,
   Icon,
+  ObjectSetTable,
+  ColumnDef,
+  ColumnAlignment,
 } from "@powerhousedao/document-engineering";
 import {
   type WorkstreamDocument,
   actions,
   type WorkstreamStatus,
   type WorkstreamStatusInput,
+  ProposalStatusInput,
 } from "../../document-models/workstream/index.js";
-import { type RequestForProposalsDocument, type RequestForProposalsState } from "../../document-models/request-for-proposals/index.js";
+import {
+  type RequestForProposalsDocument,
+  type RequestForProposalsState,
+} from "../../document-models/request-for-proposals/index.js";
 import { generateId } from "document-model";
-import { useAllDocuments, useNodes, useDocumentById, setSelectedNode } from "@powerhousedao/reactor-browser";
+import {
+  useAllDocuments,
+  useNodes,
+  useDocumentById,
+  setSelectedNode,
+} from "@powerhousedao/reactor-browser";
 import { type Node, type FileNode } from "document-drive";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { fa } from "zod/v4/locales";
 
 export type IProps = EditorProps;
 
@@ -49,10 +62,15 @@ export default function Editor(props: any) {
   const fileNodes = nodes.filter(
     (node): node is FileNode => node.kind === "file"
   );
-  const rfpDocumentNode: FileNode | undefined = fileNodes.find((node: FileNode) => {
-    if (!workstreamDocument && !node.parentFolder) return false;
-    return node.parentFolder === workstreamDocument?.parentFolder && node.documentType === "powerhouse/rfp";
-  });
+  const rfpDocumentNode: FileNode | undefined = fileNodes.find(
+    (node: FileNode) => {
+      if (!workstreamDocument && !node.parentFolder) return false;
+      return (
+        node.parentFolder === workstreamDocument?.parentFolder &&
+        node.documentType === "powerhouse/rfp"
+      );
+    }
+  );
 
   // Get RFP document data using useDocumentById hook - always call with stable ID
   const rfpDocumentId = rfpDocumentNode?.id || "";
@@ -60,18 +78,30 @@ export default function Editor(props: any) {
   const [rfpDocumentDataState] = rfpDocumentData || [];
 
   // State to track RFP document
-  const [rfpDocument, setRfpDocument] = useState<(FileNode & {
-    document: RequestForProposalsState
-  }) | undefined>(undefined);
+  const [rfpDocument, setRfpDocument] = useState<
+    | (FileNode & {
+        document: RequestForProposalsState;
+      })
+    | undefined
+  >(undefined);
 
   // Effect to update RFP document when nodes or document data changes
   useEffect(() => {
-    if (rfpDocumentNode && rfpDocumentNode.id && rfpDocumentNode.id !== "" && rfpDocumentDataState?.state?.global) {
+    if (
+      rfpDocumentNode &&
+      rfpDocumentNode.id &&
+      rfpDocumentNode.id !== "" &&
+      rfpDocumentDataState?.state?.global
+    ) {
       setRfpDocument({
         ...rfpDocumentNode,
-        document: rfpDocumentDataState.state.global as RequestForProposalsState
+        document: rfpDocumentDataState.state.global as RequestForProposalsState,
       });
-    } else if (!rfpDocumentNode || !rfpDocumentNode.id || rfpDocumentNode.id === "") {
+    } else if (
+      !rfpDocumentNode ||
+      !rfpDocumentNode.id ||
+      rfpDocumentNode.id === ""
+    ) {
       setRfpDocument(undefined);
     }
   }, [rfpDocumentNode, rfpDocumentDataState]);
@@ -79,9 +109,9 @@ export default function Editor(props: any) {
   const searchRfpDocuments = (userInput: string) => {
     const results = fileNodes.filter(
       (node): node is FileNode =>
-        node.kind === "file" &&
-        node.documentType === "powerhouse/rfp" &&
-        node.name.toLowerCase().includes(userInput.toLowerCase()) ||
+        (node.kind === "file" &&
+          node.documentType === "powerhouse/rfp" &&
+          node.name.toLowerCase().includes(userInput.toLowerCase())) ||
         node.id.toLowerCase().includes(userInput.toLowerCase())
     );
     return results.map((doc) => ({
@@ -162,6 +192,117 @@ export default function Editor(props: any) {
 
     dispatch(action);
   };
+
+  const alternativeProposalsData = useMemo(() => {
+    return state.alternativeProposals.flatMap((p: any) => [
+      {
+        ...p,
+        authorName: p.author.name,
+        authorId: p.author.id,
+        authorIcon: p.author.icon,
+      },
+    ]);
+  }, [state.alternativeProposals]);
+
+  const alternativeProposalsColumns = useMemo<Array<ColumnDef<any>>>(
+    () => [
+      {
+        field: "authorName",
+        title: "Author",
+        editable: true,
+        onSave: (newValue: any, context: any) => {
+          if (newValue !== context.row.title) {
+            // dispatch(
+            //   actions.editDeliverable({
+            //     id: context.row.id,
+            //     title: newValue as string,
+            //   })
+            // );
+            return true;
+          }
+          return false;
+        },
+        renderCell: (value: any, context: any) => {
+          if (value === "") {
+            return (
+              <div className="font-light italic text-left text-gray-500">
+                + Double-click to add new author
+              </div>
+            );
+          }
+          return <div className="text-left">{value}</div>;
+        },
+      },
+      {
+        field: "sow",
+        title: "SOW",
+        editable: true,
+        align: "center" as ColumnAlignment,
+        onSave: (newValue: any, context: any) => {
+          if (newValue !== context.row.title) {
+            dispatch(
+              actions.editAlternativeProposal({
+                id: context.row.id as string,
+                sowId: newValue as string,
+              })
+            );
+            return true;
+          }
+          return false;
+        },
+      },
+      {
+        field: "paymentTerms",
+        title: "Payment Terms",
+        editable: true,
+        align: "center" as ColumnAlignment,
+        onSave: (newValue: any, context: any) => {
+          if (newValue !== context.row.title) {
+            dispatch(
+              actions.editAlternativeProposal({
+                id: context.row.id as string,
+                paymentTermsId: newValue as string,
+              })
+            );
+            return true;
+          }
+          return false;
+        },
+      },
+      {
+        field: "status",
+        title: "Status",
+        editable: false,
+        align: "center" as ColumnAlignment,
+        width: 100,
+        renderCell: (value: any, context: any) => {
+          if (!value) return null;
+          return (
+            <Select
+              options={[
+                { value: "DRAFT", label: "Draft" },
+                { value: "SUBMITTED", label: "Submitted" },
+                { value: "ACCEPTED", label: "Accepted" },
+                { value: "REJECTED", label: "Rejected" },
+              ]}
+              value={value || "DRAFT"}
+              onChange={(value) => {
+                if (value !== value) {
+                  dispatch(
+                    actions.editAlternativeProposal({
+                      id: context.row.id as string,
+                      status: value as ProposalStatusInput,
+                    })
+                  );
+                }
+              }}
+            />
+          );
+        },
+      },
+    ],
+    []
+  );
 
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white">
@@ -340,7 +481,12 @@ export default function Editor(props: any) {
                 value={state.rfp?.id || ""}
                 onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                   if (e.target.value !== state.rfp?.id) {
-                    dispatch(actions.setRequestForProposal({ rfpId: e.target.value, title: rfpDocument.document.title }));
+                    dispatch(
+                      actions.setRequestForProposal({
+                        rfpId: e.target.value,
+                        title: rfpDocument.document.title,
+                      })
+                    );
                   }
                 }}
                 // search options as the user types
@@ -378,16 +524,18 @@ export default function Editor(props: any) {
                     icon: "File",
                   };
                 }}
-                initialOptions={[{
-                  value: rfpDocument.id,
-                  title: rfpDocument.document.title,
-                  path: {
-                    text: rfpDocument.document.title,
-                    url: rfpDocument.id,
+                initialOptions={[
+                  {
+                    value: rfpDocument.id,
+                    title: rfpDocument.document.title,
+                    path: {
+                      text: rfpDocument.document.title,
+                      url: rfpDocument.id,
+                    },
+                    description: "",
+                    icon: "File",
                   },
-                  description: "",
-                  icon: "File",
-                }]}
+                ]}
               />
             </div>
             <div className="flex items-center">
@@ -424,6 +572,154 @@ export default function Editor(props: any) {
           </div>
         </>
       )}
+      {/* Initial Proposal Section */}
+      {rfpDocument ? (
+        <div>
+          {state.initialProposal ? (
+            <>
+              <h1 className="mt-10 text-2xl text-gray-900 mb-4">
+                Initial Proposal
+              </h1>
+              <div className="flex flex-row gap-4">
+                <div className="flex-1">
+                  <TextInput
+                    label="Author"
+                    defaultValue={state.initialProposal.author.name || ""}
+                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                      if (
+                        e.target.value !== state.initialProposal.author.name
+                      ) {
+                        dispatch(
+                          actions.editInitialProposal({
+                            id: state.initialProposal.id,
+                            proposalAuthor: {
+                              id: generateId(),
+                              name: e.target.value,
+                            },
+                          })
+                        );
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex-1">
+                  <TextInput
+                    label="Sow"
+                    defaultValue={state.initialProposal.sow || ""}
+                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                      if (e.target.value !== state.initialProposal.sowId) {
+                        dispatch(
+                          actions.editInitialProposal({
+                            id: state.initialProposal.id,
+                            sowId: e.target.value,
+                          })
+                        );
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex-1">
+                  <TextInput
+                    label="Payment Terms"
+                    defaultValue={state.initialProposal.paymentTerms || ""}
+                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                      if (
+                        e.target.value !== state.initialProposal.paymentTermsId
+                      ) {
+                        dispatch(
+                          actions.editInitialProposal({
+                            id: state.initialProposal.id,
+                            paymentTermsId: e.target.value,
+                          })
+                        );
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex-1">
+                  <Select
+                    label="Status"
+                    options={[
+                      { value: "DRAFT", label: "Draft" },
+                      { value: "SUBMITTED", label: "Submitted" },
+                      { value: "ACCEPTED", label: "Accepted" },
+                      { value: "REJECTED", label: "Rejected" },
+                    ]}
+                    value={state.initialProposal.status || "DRAFT"}
+                    onChange={(value) => {
+                      if (value !== state.initialProposal.status) {
+                        dispatch(
+                          actions.editInitialProposal({
+                            id: state.initialProposal.id,
+                            status: value as ProposalStatusInput,
+                          })
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="mt-10 mb-10">
+                <h2 className="text-lg font-medium text-gray-900 mb-4">
+                  Alternative Proposals
+                </h2>
+                <ObjectSetTable
+                  columns={alternativeProposalsColumns}
+                  data={alternativeProposalsData}
+                  allowRowSelection={true}
+                  onDelete={(data: any) => {
+                    if (data.length > 0) {
+                      data.forEach((d: any) => {
+                        dispatch(
+                          actions.removeAlternativeProposal({
+                            id: d.id,
+                          })
+                        );
+                      });
+                    }
+                  }}
+                  onAdd={(data) => {
+                    if (data.authorName) {
+                      dispatch(
+                        actions.addAlternativeProposal({
+                          id: generateId(),
+                          proposalAuthor: {
+                            id: generateId(),
+                            name: data.authorName as string,
+                          },
+                        })
+                      );
+                    }
+                  }}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="mt-8 ">
+              <h1 className="mt-10 text-2xl text-gray-900 mb-4">
+                Initial Proposal
+              </h1>
+              <Button
+                color="light"
+                size="small"
+                className="cursor-pointer hover:bg-gray-600 hover:text-white"
+                title={"Create Initial Proposal"}
+                aria-description={"Create Initial Proposal"}
+                onClick={() => {
+                  console.log("Creating initial proposal");
+                  dispatch(
+                    actions.editInitialProposal({
+                      id: generateId(),
+                    })
+                  );
+                }}
+              >
+                Create Initial Proposal
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : null}
 
       {/* Toast Container */}
       <ToastContainer />
