@@ -28,14 +28,14 @@ import {
   useSelectedFolder,
   useSelectedNodePath,
   useUserPermissions,
-  useAllDocuments
+  useAllDocuments,
 } from "@powerhousedao/reactor-browser";
 import { actions, type DocumentModelModule } from "document-model";
 import { useCallback, useRef, useState, useMemo } from "react";
 import { CreateDocument } from "./CreateDocument.jsx";
 import { EditorContainer } from "./EditorContainer.jsx";
 import { FolderTree } from "./FolderTree.jsx";
-
+import { getNewDocumentObject } from "../utils.js";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -81,8 +81,10 @@ export function DriveExplorer(props: any) {
 
   const folderChildren = useFolderChildNodes();
   const fileChildren = useFileChildNodes();
-  const filesWithDocuments = fileChildren.map(file => {
-    const document = allDocuments?.find((doc: any) => doc.header.id === file.id);
+  const filesWithDocuments = fileChildren.map((file) => {
+    const document = allDocuments?.find(
+      (doc: any) => doc.header.id === file.id
+    );
     const state = document?.state.global;
     return {
       ...file,
@@ -101,107 +103,111 @@ export function DriveExplorer(props: any) {
       children: [
         // Add folders
         ...allFolders
-          .filter(folder => !folder.parentFolder) // Only root folders
-          .map(folder => ({
+          .filter((folder) => !folder.parentFolder) // Only root folders
+          .map((folder) => ({
             id: folder.id,
             title: folder.name,
             children: [
               // Add child folders
               ...allFolders
-                .filter(childFolder => childFolder.parentFolder === folder.id)
-                .map(childFolder => ({
+                .filter((childFolder) => childFolder.parentFolder === folder.id)
+                .map((childFolder) => ({
                   id: childFolder.id,
                   title: childFolder.name,
                   children: [
                     // Add files in this folder
                     ...filesWithDocuments
-                      .filter(file => file.parentFolder === childFolder.id)
+                      .filter((file) => file.parentFolder === childFolder.id)
                       .map((file: any) => ({
                         id: `editor-${file.id}`,
-                        title: `📄 ${file.state?.code || ''} - ${file.state?.title || file.name}`,
-                      }))
-                  ]
+                        title: `📄 ${file.state?.code || ""} - ${file.state?.title || file.name}`,
+                      })),
+                  ],
                 })),
               // Add files directly in this folder
               ...filesWithDocuments
-                .filter(file => file.parentFolder === folder.id)
+                .filter((file) => file.parentFolder === folder.id)
                 .map((file: any) => ({
                   id: `editor-${file.id}`,
-                  title: `📄 ${file.state?.code || ''} - ${file.state?.title || file.name}`,
-                }))
-            ]
+                  title: `📄 ${file.state?.code || ""} - ${file.state?.title || file.name}`,
+                })),
+            ],
           })),
         // Add root-level files
         ...filesWithDocuments
-          .filter(file => !file.parentFolder)
+          .filter((file) => !file.parentFolder)
           .map((file: any) => ({
             id: `editor-${file.id}`,
-            title: `📄 ${file.state?.code || ''} - ${file.state?.title || file.name}`,
-          }))
-      ]
+            title: `📄 ${file.state?.code || ""} - ${file.state?.title || file.name}`,
+          })),
+      ],
     };
     return [rootNode];
   }, [allFolders, fileChildren]);
 
   // Handle sidebar node selection
-  const handleActiveNodeChange = useCallback((newNode: SidebarNode) => {
-    console.log("newNode", newNode);
-    if (newNode.id === "workstreams") {
-      setActiveDocumentId(undefined);
-    } else if (newNode.id.startsWith("editor-")) {
-      // Extract file ID from editor-{file.id} format
-      const fileId = newNode.id.replace("editor-", "");
-      const file = fileChildren.find(f => f.id === fileId);
-      setActiveDocumentId(fileId);
-
-    } else {
-      // Find if it's a folder
-      const folder = allFolders.find(f => f.id === newNode.id);
-
-      if (folder) {
+  const handleActiveNodeChange = useCallback(
+    (newNode: SidebarNode) => {
+      console.log("newNode", newNode);
+      if (newNode.id === "workstreams") {
         setActiveDocumentId(undefined);
+      } else if (newNode.id.startsWith("editor-")) {
+        // Extract file ID from editor-{file.id} format
+        const fileId = newNode.id.replace("editor-", "");
+        const file = fileChildren.find((f) => f.id === fileId);
+        setActiveDocumentId(fileId);
+      } else {
+        // Find if it's a folder
+        const folder = allFolders.find((f) => f.id === newNode.id);
+
+        if (folder) {
+          setActiveDocumentId(undefined);
+        }
       }
-    }
-  }, [allFolders, fileChildren, setSelectedNode, setActiveDocumentId]);
+    },
+    [allFolders, fileChildren, setSelectedNode, setActiveDocumentId]
+  );
 
   // === EVENT HANDLERS ===
 
   // Display function that switches views based on active node ID
   const displayActiveNode = (activeNodeId: string) => {
-
     // Determine the type of node and extract the actual ID
-    let nodeType = 'unknown';
+    let nodeType = "unknown";
     let actualId = activeNodeId;
 
     if (activeNodeId === "workstreams") {
-      nodeType = 'workstreams';
+      nodeType = "workstreams";
     } else if (activeNodeId.startsWith("editor-")) {
-      nodeType = 'file';
+      nodeType = "file";
       actualId = activeNodeId.replace("editor-", "");
     } else {
       // Check if it's a folder
-      const folder = allFolders.find(f => f.id === activeNodeId);
+      const folder = allFolders.find((f) => f.id === activeNodeId);
       if (folder) {
-        nodeType = 'folder';
-
+        nodeType = "folder";
       } else {
         // Check if it's a file (direct ID)
-        const file = fileChildren.find(f => f.id === activeNodeId);
+        const file = fileChildren.find((f) => f.id === activeNodeId);
         if (file) {
-          nodeType = 'file';
+          nodeType = "file";
           actualId = activeNodeId; // Use the ID as-is for files
         }
       }
     }
 
     switch (nodeType) {
-      case 'workstreams':
+      case "workstreams":
         return (
           <div className="mt-20 p-4 flex flex-col items-center justify-center">
             <div className="space-y-6 flex flex-col items-center justify-center">
-              <h1 className="text-2xl font-bold">Welcome to the Network Admin</h1>
-              <p>Create a new workstream to get started,
-                or select an existing workstream on the left</p>
+              <h1 className="text-2xl font-bold">
+                Welcome to the Network Admin
+              </h1>
+              <p>
+                Create a new workstream to get started, or select an existing
+                workstream on the left
+              </p>
               <Button
                 color="dark" // Customize button appearance
                 size="medium"
@@ -254,8 +260,13 @@ export function DriveExplorer(props: any) {
                     <div className="space-y-2">
                       {folderChildren.map((folderNode) =>
                         folderNode && folderNode.id ? (
-                          <div key={folderNode.id} className="p-2 border rounded">
-                            <div className="font-medium">📁 {folderNode.name}</div>
+                          <div
+                            key={folderNode.id}
+                            className="p-2 border rounded"
+                          >
+                            <div className="font-medium">
+                              📁 {folderNode.name}
+                            </div>
                             <div className="text-sm text-gray-500">Folder</div>
                             <div className="mt-2 flex gap-2">
                               <button
@@ -266,13 +277,22 @@ export function DriveExplorer(props: any) {
                               </button>
                               <button
                                 onClick={() => {
-                                  const newName = prompt("Enter new name:", folderNode.name || "");
-                                  if (newName && newName.trim() && newName !== folderNode.name) {
+                                  const newName = prompt(
+                                    "Enter new name:",
+                                    folderNode.name || ""
+                                  );
+                                  if (
+                                    newName &&
+                                    newName.trim() &&
+                                    newName !== folderNode.name
+                                  ) {
                                     try {
                                       onRenameNode(newName.trim(), folderNode);
                                     } catch (error) {
                                       console.error("Failed to rename:", error);
-                                      alert("Failed to rename folder. Please try again.");
+                                      alert(
+                                        "Failed to rename folder. Please try again."
+                                      );
                                     }
                                   }
                                 }}
@@ -302,7 +322,9 @@ export function DriveExplorer(props: any) {
                       {fileChildren.map((fileNode) => (
                         <div key={fileNode.id} className="p-2 border rounded">
                           <div className="font-medium">{fileNode.name}</div>
-                          <div className="text-sm text-gray-500">{fileNode.documentType}</div>
+                          <div className="text-sm text-gray-500">
+                            {fileNode.documentType}
+                          </div>
                           <div className="mt-2 flex gap-2">
                             <button
                               onClick={() => {
@@ -316,12 +338,21 @@ export function DriveExplorer(props: any) {
                             <button
                               onClick={() => {
                                 if (!fileNode || !fileNode.id) return;
-                                const newName = prompt("Enter new name:", fileNode.name || "");
-                                if (newName && newName.trim() && newName !== fileNode.name) {
+                                const newName = prompt(
+                                  "Enter new name:",
+                                  fileNode.name || ""
+                                );
+                                if (
+                                  newName &&
+                                  newName.trim() &&
+                                  newName !== fileNode.name
+                                ) {
                                   try {
                                     onRenameNode(newName.trim(), fileNode);
                                   } catch (error) {
-                                    alert("Failed to rename document. Please try again.");
+                                    alert(
+                                      "Failed to rename document. Please try again."
+                                    );
                                   }
                                 }
                               }}
@@ -343,12 +374,11 @@ export function DriveExplorer(props: any) {
                 </div>
               </div>
             )}
-
           </div>
         );
 
-      case 'folder':
-        const folder = allFolders.find(f => f.id === actualId);
+      case "folder":
+        const folder = allFolders.find((f) => f.id === actualId);
         if (!folder) return null;
 
         return (
@@ -381,7 +411,9 @@ export function DriveExplorer(props: any) {
                     {folderChildren.map((folderNode) =>
                       folderNode && folderNode.id ? (
                         <div key={folderNode.id} className="p-2 border rounded">
-                          <div className="font-medium">📁 {folderNode.name}</div>
+                          <div className="font-medium">
+                            📁 {folderNode.name}
+                          </div>
                           <div className="text-sm text-gray-500">Folder</div>
                           <div className="mt-2 flex gap-2">
                             <button
@@ -392,13 +424,22 @@ export function DriveExplorer(props: any) {
                             </button>
                             <button
                               onClick={() => {
-                                const newName = prompt("Enter new name:", folderNode.name || "");
-                                if (newName && newName.trim() && newName !== folderNode.name) {
+                                const newName = prompt(
+                                  "Enter new name:",
+                                  folderNode.name || ""
+                                );
+                                if (
+                                  newName &&
+                                  newName.trim() &&
+                                  newName !== folderNode.name
+                                ) {
                                   try {
                                     onRenameNode(newName.trim(), folderNode);
                                   } catch (error) {
                                     console.error("Failed to rename:", error);
-                                    alert("Failed to rename folder. Please try again.");
+                                    alert(
+                                      "Failed to rename folder. Please try again."
+                                    );
                                   }
                                 }
                               }}
@@ -430,7 +471,9 @@ export function DriveExplorer(props: any) {
                     {fileChildren.map((fileNode) => (
                       <div key={fileNode.id} className="p-2 border rounded">
                         <div className="font-medium">{fileNode.name}</div>
-                        <div className="text-sm text-gray-500">{fileNode.documentType}</div>
+                        <div className="text-sm text-gray-500">
+                          {fileNode.documentType}
+                        </div>
                         <div className="mt-2 flex gap-2">
                           <button
                             onClick={() => {
@@ -444,12 +487,21 @@ export function DriveExplorer(props: any) {
                           <button
                             onClick={() => {
                               if (!fileNode || !fileNode.id) return;
-                              const newName = prompt("Enter new name:", fileNode.name || "");
-                              if (newName && newName.trim() && newName !== fileNode.name) {
+                              const newName = prompt(
+                                "Enter new name:",
+                                fileNode.name || ""
+                              );
+                              if (
+                                newName &&
+                                newName.trim() &&
+                                newName !== fileNode.name
+                              ) {
                                 try {
                                   onRenameNode(newName.trim(), fileNode);
                                 } catch (error) {
-                                  alert("Failed to rename document. Please try again.");
+                                  alert(
+                                    "Failed to rename document. Please try again."
+                                  );
                                 }
                               }
                             }}
@@ -482,11 +534,9 @@ export function DriveExplorer(props: any) {
 
               {/* === DOCUMENT CREATION SECTION === */}
               {/* <CreateDocument /> */}
-
             </div>
           </div>
         );
-
 
       default:
         return <div>Unknown node type: {nodeType}</div>;
@@ -512,7 +562,7 @@ export function DriveExplorer(props: any) {
         }
       }
     },
-    [onAddFolder, selectedFolder],
+    [onAddFolder, selectedFolder]
   );
 
   // Handle document creation from modal
@@ -532,63 +582,7 @@ export function DriveExplorer(props: any) {
           fileName,
           "powerhouse/workstream",
           folder?.id,
-          {
-            header: {
-              name: fileName,
-              documentType: "powerhouse/workstream",
-              createdAtUtcIso: new Date().toISOString(),
-              slug: fileName,
-              branch: "main",
-              id: "",
-              sig: {
-                nonce: "",
-                publicKey: {},
-              },
-              revision: {},
-              lastModifiedAtUtcIso: new Date().toISOString(),
-            },
-            history: {
-              operations: [],
-              clipboard: [],
-            },
-            state: {
-              auth: {},
-              document: {
-                version: "1.0.0",
-              },
-              global: {
-                title: fileName,
-                description: "A new workstream document",
-                createdBy: "network-admin",
-                createdAt: new Date().toISOString(),
-                updatedBy: "network-admin",
-                updatedAt: new Date().toISOString(),
-                status: "draft",
-              },
-              local: {},
-            },
-            initialState: {
-              auth: {},
-              document: {
-                version: "1.0.0",
-              },
-              global: {
-                title: fileName,
-                description: "A new workstream document",
-                createdBy: "network-admin",
-                createdAt: new Date().toISOString(),
-                updatedBy: "network-admin",
-                updatedAt: new Date().toISOString(),
-                status: "draft",
-              },
-              local: {},
-            },
-            operations: {
-              "powerhouse/workstream": [],
-            },
-            clipboard: [],
-            attachments: {},
-          },
+          getNewDocumentObject(fileName, "powerhouse/workstream"),
           undefined,
           "workstream-editor"
         );
@@ -605,7 +599,7 @@ export function DriveExplorer(props: any) {
         console.error("Failed to create document:", error);
       }
     },
-    [addDocument, editorModules, selectedDrive?.header.id, selectedFolder?.id],
+    [addDocument, editorModules, selectedDrive?.header.id, selectedFolder?.id]
   );
 
   // === DOCUMENT EDITOR DATA ===
@@ -619,14 +613,14 @@ export function DriveExplorer(props: any) {
 
   const documentModelModule = activeDocument
     ? documentModelModules?.find(
-      (m) => m.documentModel.id === activeDocument.documentType,
-    )
+        (m) => m.documentModel.id === activeDocument.documentType
+      )
     : null;
 
   const editorModule = activeDocument
     ? editorModules?.find((e) =>
-      e.documentTypes.includes(activeDocument.documentType),
-    )
+        e.documentTypes.includes(activeDocument.documentType)
+      )
     : null;
 
   // === RENDER ===
@@ -651,7 +645,12 @@ export function DriveExplorer(props: any) {
         {/* === MAIN CONTENT AREA === */}
         <div className="flex-1 overflow-y-auto ml-2">
           {activeDocumentId ? (
-            <EditorContainer handleClose={() => setActiveDocumentId(undefined)} hideToolbar={false} activeDocumentId={activeDocumentId} />
+            <EditorContainer
+              handleClose={() => setActiveDocumentId(undefined)}
+              hideToolbar={false}
+              activeDocumentId={activeDocumentId}
+              setActiveDocumentId={setActiveDocumentId}
+            />
           ) : (
             displayActiveNode("workstreams")
           )}

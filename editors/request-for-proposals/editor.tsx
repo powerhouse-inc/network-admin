@@ -7,7 +7,11 @@ import {
 } from "../../document-models/request-for-proposals/index.js";
 import { Button } from "@powerhousedao/design-system";
 import { useSelectedDocument } from "@powerhousedao/reactor-browser";
-import { DatePicker, Select, TextInput } from "@powerhousedao/document-engineering";
+import {
+  DatePicker,
+  Select,
+  TextInput,
+} from "@powerhousedao/document-engineering";
 import { MarkdownEditor } from "./markdown-editor.js";
 
 export type IProps = EditorProps;
@@ -19,28 +23,29 @@ const statusOptions = [
   { label: "OPEN_FOR_PROPOSALS", value: "OPEN_FOR_PROPOSALS" },
   { label: "AWARDED", value: "AWARDED" },
   { label: "NOT_AWARDED", value: "NOT_AWARDED" },
-  { label: "CLOSED", value: "CLOSED" }];
+  { label: "CLOSED", value: "CLOSED" },
+];
 
 export default function Editor(props: any) {
   // const [document, dispatch] = useSelectedDocument();
   const { document, dispatch } = props;
-  const state: RequestForProposalsState = document?.state.global as RequestForProposalsState;
+  const state: RequestForProposalsState = document?.state
+    .global as RequestForProposalsState;
 
   if (!document) {
     return <div>No document selected</div>;
   }
 
-
-
-
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Request for Proposals</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">
+          Request for Proposals
+        </h1>
         {/* Main Form Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="flex flex-row gap-2 mb-8">
           {/* Code Field */}
-          <div>
+          <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Code
             </label>
@@ -57,7 +62,7 @@ export default function Editor(props: any) {
           </div>
 
           {/* Title Field */}
-          <div>
+          <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Title
             </label>
@@ -74,12 +79,14 @@ export default function Editor(props: any) {
           </div>
 
           {/* Status Field */}
-          <div>
+          <div className="w-[150px] flex-1">
             <Select
               label="Status"
               options={statusOptions}
               value={state.status}
-              onChange={(value) => dispatch(actions.editRfp({ status: value as RfpStatusInput }))}
+              onChange={(value) =>
+                dispatch(actions.editRfp({ status: value as RfpStatusInput }))
+              }
             />
           </div>
         </div>
@@ -90,19 +97,19 @@ export default function Editor(props: any) {
             height={200}
             label="Description"
             value={state.description || ""}
-            onChange={() => { }}
-            onBlur={(value) => dispatch(actions.editRfp({ description: value }))}
+            onChange={() => {}}
+            onBlur={(value) =>
+              dispatch(actions.editRfp({ description: value }))
+            }
           />
-
         </div>
 
         {/* Submission Deadline */}
-        <div className="mb-8">
+        <div className="mb-8 w-[250px]">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Submission Deadline
           </label>
           <DatePicker
-            className="w-[250px]"
             value={state.deadline ? new Date(state.deadline) : undefined}
             onChange={(e) => {
               const date = e.target.value ? new Date(e.target.value) : null;
@@ -119,8 +126,10 @@ export default function Editor(props: any) {
             height={200}
             label="Eligibility Criteria"
             value={state.eligibilityCriteria || ""}
-            onChange={() => { }}
-            onBlur={(value) => dispatch(actions.editRfp({ eligibilityCriteria: value }))}
+            onChange={() => {}}
+            onBlur={(value) =>
+              dispatch(actions.editRfp({ eligibilityCriteria: value }))
+            }
           />
         </div>
 
@@ -130,11 +139,12 @@ export default function Editor(props: any) {
             height={200}
             label="Evaluation Criteria"
             value={state.evaluationCriteria || ""}
-            onChange={() => { }}
-            onBlur={(value) => dispatch(actions.editRfp({ evaluationCriteria: value }))}
+            onChange={() => {}}
+            onBlur={(value) =>
+              dispatch(actions.editRfp({ evaluationCriteria: value }))
+            }
           />
         </div>
-
       </div>
     </div>
   );

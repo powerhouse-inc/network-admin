@@ -13,37 +13,58 @@ import {
   useDocumentById,
   useEditorModulesForDocumentType,
   addDocument,
-  useNodes
+  useNodes,
 } from "@powerhousedao/reactor-browser";
+import { Action, PHDocument } from "document-model";
 import { Suspense, useCallback, useState } from "react";
+import { getNewDocumentObject } from "../utils.js";
 
 /**
  * Document editor container that wraps individual document editors.
  * Handles document loading, toolbar, revision history, and dynamic editor loading.
  * Customize toolbar actions and editor context here.
  */
-export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: boolean; activeDocumentId: string }) => {
-  const { handleClose, hideToolbar = false, activeDocumentId } = props;
+export const EditorContainer = (props: {
+  handleClose: () => void;
+  hideToolbar?: boolean;
+  activeDocumentId: string;
+  setActiveDocumentId: (id: string) => void;
+}) => {
+  const {
+    handleClose,
+    hideToolbar = false,
+    activeDocumentId,
+    setActiveDocumentId,
+  } = props;
   // UI state for revision history and timeline
   const [selectedTimelineItem, setSelectedTimelineItem] =
     useState<TimelineItem | null>(null);
+
   const [showRevisionHistory, setShowRevisionHistory] = useState(false);
-  const [selectedDocument, dispatch] = useDocumentById(props.activeDocumentId);
+  
+  const [selectedDocument, dispatch] = useDocumentById(
+    props.activeDocumentId
+  ) as [
+    PHDocument<unknown, unknown> | undefined,
+    (actionOrActions: Action | Action[] | undefined) => void,
+  ];
   const [selectedDrive] = useSelectedDrive();
 
   const nodes = useNodes();
-  const folderId = nodes?.find(node => node.id === selectedDocument?.header.id)?.parentFolder || undefined;
-  console.log("folderId", folderId);
+  const folderId =
+    nodes?.find((node) => node.id === selectedDocument?.header.id)
+      ?.parentFolder || undefined;
 
   const createRfpDocument = useCallback(async () => {
-
+    const rfpDocName = `RFP-${(selectedDocument?.state.global as any)?.title}`;
+    const rfpDocCode = `RFP-${(selectedDocument?.state.global as any)?.code}`;
     try {
       await addDocument(
         selectedDrive?.header.id || "",
-        selectedDocument?.header.name || "RFP",
+        rfpDocName,
         "powerhouse/rfp",
         folderId,
-        undefined,
+        getNewDocumentObject(rfpDocName, "powerhouse/rfp", rfpDocCode),
         undefined,
         "request-for-proposals-editor"
       );
@@ -52,17 +73,15 @@ export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: 
     }
   }, [selectedDrive]);
 
-
   // Timeline data for revision history
   const timelineItems = useTimelineItems(
     selectedDocument?.header.id,
     selectedDocument?.header.createdAtUtcIso,
-    selectedDrive?.header.id,
+    selectedDrive?.header.id
   );
   const editorModule = useEditorModuleById(
     selectedDocument?.header.meta?.preferredEditor
   );
-
 
   // Document export functionality - customize export behavior here
   const onExport = useCallback(async () => {
@@ -78,56 +97,56 @@ export const EditorContainer = (props: { handleClose: () => void; hideToolbar?: 
     </div>
   );
 
-
   if (!selectedDocument) return loadingContent;
 
   // Dynamically load the appropriate editor component for this document type
   const EditorComponent = editorModule?.Component;
   if (!EditorComponent) return loadingContent;
 
-
-
-  return <div className="">
-    {showRevisionHistory ? (
-      // Revision history view
-      <RevisionHistory
-        documentId={selectedDocument.header.id}
-        documentTitle={selectedDocument.header.name}
-        globalOperations={selectedDocument.operations.global}
-        key={selectedDocument.header.id}
-        localOperations={selectedDocument.operations.local}
-        onClose={() => setShowRevisionHistory(false)}
-      />
-    ) : (
-      // Main editor view
-      <Suspense fallback={loadingContent}>
-        {!hideToolbar && (
-          <DocumentToolbar
-            onClose={handleClose}
-            onExport={onExport}
-            onShowRevisionHistory={() => setShowRevisionHistory(true)}
-            onSwitchboardLinkClick={() => { }} // Customize switchboard integration
-            title={selectedDocument.header.name}
-            timelineButtonVisible={editorModule.config.timelineEnabled}
-            timelineItems={timelineItems.data}
-            onTimelineItemClick={setSelectedTimelineItem}
-          />
-        )}
-        <EditorComponent
-          context={{
-            readMode: !!selectedTimelineItem,
-            selectedTimelineRevision: getRevisionFromDate(
-              selectedTimelineItem?.startDate,
-              selectedTimelineItem?.endDate,
-              selectedDocument.operations.global,
-            ),
-          }}
-          dispatch={dispatch}
-          document={selectedDocument}
-          error={console.error}
-          createRfp={createRfpDocument}
+  return (
+    <div className="">
+      {showRevisionHistory ? (
+        // Revision history view
+        <RevisionHistory
+          documentId={selectedDocument.header.id}
+          documentTitle={selectedDocument.header.name}
+          globalOperations={selectedDocument.operations.global}
+          key={selectedDocument.header.id}
+          localOperations={selectedDocument.operations.local}
+          onClose={() => setShowRevisionHistory(false)}
         />
-      </Suspense>
-    )}
-  </div>
+      ) : (
+        // Main editor view
+        <Suspense fallback={loadingContent}>
+          {!hideToolbar && (
+            <DocumentToolbar
+              onClose={handleClose}
+              onExport={onExport}
+              onShowRevisionHistory={() => setShowRevisionHistory(true)}
+              onSwitchboardLinkClick={() => {}} // Customize switchboard integration
+              title={selectedDocument.header.name}
+              timelineButtonVisible={editorModule.config.timelineEnabled}
+              timelineItems={timelineItems.data}
+              onTimelineItemClick={setSelectedTimelineItem}
+            />
+          )}
+          <EditorComponent
+            context={{
+              readMode: !!selectedTimelineItem,
+              selectedTimelineRevision: getRevisionFromDate(
+                selectedTimelineItem?.startDate,
+                selectedTimelineItem?.endDate,
+                selectedDocument.operations.global
+              ),
+            }}
+            dispatch={dispatch}
+            document={selectedDocument}
+            error={console.error}
+            createRfp={createRfpDocument}
+            setActiveDocumentId={setActiveDocumentId}
+          />
+        </Suspense>
+      )}
+    </div>
+  );
 };

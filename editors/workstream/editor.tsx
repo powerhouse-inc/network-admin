@@ -4,6 +4,7 @@ import {
   TextInput,
   Select,
   PHIDInput,
+  Icon,
 } from "@powerhousedao/document-engineering";
 import {
   type WorkstreamDocument,
@@ -38,6 +39,7 @@ export default function Editor(props: any) {
   // Try to get dispatch from context or props
   const state = document.state.global as any;
   const createRfpDocument = props.createRfp;
+  const setActiveDocumentId = props.setActiveDocumentId;
 
   // Checking if there is an RFP document for this workstream
   const nodes: Node[] = useNodes() || [];
@@ -324,68 +326,85 @@ export default function Editor(props: any) {
       </div>
 
       {rfpDocument ? (
-        <div className="w-[350px]">
+        <>
           <h1 className="mt-10 text-2xl text-gray-900 mb-4">
             Request for Proposal
           </h1>
-          <PHIDInput
-            name="Request for Proposal"
-            label="RFP Document"
-            placeholder="Search for RFP Document"
-            variant="withValueTitleAndDescription"
-            value={state.rfp.id}
-            onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-              if (e.target.value !== state.rfp.id) {
-                dispatch(actions.setRequestForProposal({ rfpId: e.target.value, title: rfpDocument.document.title }));
-              }
-            }}
-            // search options as the user types
-            fetchOptionsCallback={async (userInput) => {
-              const results = searchRfpDocuments(userInput);
-              if (results.length === 0) {
-                return Promise.reject(new Error("No RFP documents found"));
-              }
-              return results.map((doc) => ({
-                value: doc.value, // unique document ID
-                title: doc.title, // document title or name
-                path: {
-                  text: doc.path,
-                  url: doc.value,
-                }, // document path or location
-                description: "", // document description or summary
-                icon: "File", // document icon
-              }));
-            }}
-            // get details of a specific option by its ID/value
-            fetchSelectedOptionCallback={async (documentId) => {
-              console.log("fetching selected option", documentId);
-              const [doc] = searchRfpDocuments(documentId);
-              if (!doc) {
-                return Promise.reject(new Error("RFP document not found"));
-              }
-              return {
-                value: doc.value,
-                title: doc.title,
-                path: {
-                  text: doc.path,
-                  url: doc.title,
-                },
-                description: "",
-                icon: "File",
-              };
-            }}
-            initialOptions={[{
-              value: rfpDocument.id,
-              title: rfpDocument.document.title,
-              path: {
-                text: rfpDocument.document.title,
-                url: rfpDocument.id,
-              },
-              description: "",
-              icon: "File",
-            }]}
-          />
-        </div>
+          <div className="w-full flex flex-row items-center gap-8">
+            <div className="w-[350px]">
+              <PHIDInput
+                name="Request for Proposal"
+                label="RFP Document"
+                placeholder="Search for RFP Document"
+                variant="withValueTitleAndDescription"
+                value={state.rfp?.id || ""}
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                  if (e.target.value !== state.rfp?.id) {
+                    dispatch(actions.setRequestForProposal({ rfpId: e.target.value, title: rfpDocument.document.title }));
+                  }
+                }}
+                // search options as the user types
+                fetchOptionsCallback={async (userInput) => {
+                  const results = searchRfpDocuments(userInput);
+                  if (results.length === 0) {
+                    return Promise.reject(new Error("No RFP documents found"));
+                  }
+                  return results.map((doc) => ({
+                    value: doc.value, // unique document ID
+                    title: doc.title, // document title or name
+                    path: {
+                      text: doc.path,
+                      url: doc.value,
+                    }, // document path or location
+                    description: "", // document description or summary
+                    icon: "File", // document icon
+                  }));
+                }}
+                // get details of a specific option by its ID/value
+                fetchSelectedOptionCallback={async (documentId) => {
+                  console.log("fetching selected option", documentId);
+                  const [doc] = searchRfpDocuments(documentId);
+                  if (!doc) {
+                    return Promise.reject(new Error("RFP document not found"));
+                  }
+                  return {
+                    value: doc.value,
+                    title: doc.title,
+                    path: {
+                      text: doc.path,
+                      url: doc.title,
+                    },
+                    description: "",
+                    icon: "File",
+                  };
+                }}
+                initialOptions={[{
+                  value: rfpDocument.id,
+                  title: rfpDocument.document.title,
+                  path: {
+                    text: rfpDocument.document.title,
+                    url: rfpDocument.id,
+                  },
+                  description: "",
+                  icon: "File",
+                }]}
+              />
+            </div>
+            <div className="flex items-center">
+              <span className="inline-flex items-center gap-2">
+                <Icon
+                  className="hover:cursor-pointer hover:bg-gray-500"
+                  name="Moved"
+                  size={18}
+                  onClick={() => {
+                    setActiveDocumentId(rfpDocumentNode?.id || "");
+                  }}
+                />
+                <span>RFP Editor</span>
+              </span>
+            </div>
+          </div>
+        </>
       ) : (
         <>
           <h1 className="mt-10 text-2xl text-gray-900 mb-4">
