@@ -76,6 +76,7 @@ export default function Editor(props: any) {
   // Local state to track manual input values
   const [manualSowInput, setManualSowInput] = useState<string>("");
   const [manualPaymentTermsInput, setManualPaymentTermsInput] = useState<string>("");
+  const [manualAuthorInput, setManualAuthorInput] = useState<string>("");
 
   // Effect to clear local state when global state is updated
   useEffect(() => {
@@ -671,9 +672,9 @@ export default function Editor(props: any) {
                   <div className="flex-1">
                     <TextInput
                       label="Author"
-                      value={state.initialProposal?.author?.name || ""}
+                      value={manualAuthorInput || state.initialProposal?.author?.name || ""}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        // Handle real-time updates if needed
+                        setManualAuthorInput(e.target.value);
                       }}
                       onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                         if (
