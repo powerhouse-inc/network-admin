@@ -34,7 +34,8 @@ export function MarkdownEditor({
 }: MarkdownEditorProps) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [MDEditor, setMDEditor] = useState<any>(null);
-  const [contentValue, setContentValue] = useState<string>(value || "");
+  const [contentValue, setContentValue] = useState<string>(" ");
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const [viewMarkdownMode, setViewMarkdownMode] =
     useLocalStorage<MarkdownEditorMode>("markdown-editor-view-mode", "live");
@@ -43,13 +44,20 @@ export function MarkdownEditor({
   useEffect(() => {
     import("@uiw/react-md-editor").then((module) => {
       setMDEditor(() => module.default);
+      setIsLoaded(true);
+    }).catch((error) => {
+      console.error("Failed to load MDEditor:", error);
     });
   }, []);
 
   // Update contentValue when value prop changes
   useEffect(() => {
-    setContentValue(value || "");
-  }, [value]);
+    if (isLoaded) {
+      const stringValue = typeof value === 'string' ? value : '';
+      const safeValue = stringValue.trim() || " ";
+      setContentValue(safeValue);
+    }
+  }, [value, isLoaded]);
 
   useEffect(() => {
     if (!MDEditor) return;
@@ -85,8 +93,11 @@ export function MarkdownEditor({
   // Handle content changes
   const handleContentChange = (newValue: string | undefined) => {
     if (newValue !== undefined) {
-      setContentValue(newValue);
-      onChange(newValue);
+      const stringValue = typeof newValue === 'string' ? newValue : '';
+      // Only replace completely empty strings with a space, preserve all other content
+      const safeValue = stringValue === '' ? " " : stringValue;
+      setContentValue(safeValue);
+      onChange(newValue); // Keep the original value for the parent component
     }
   };
 
@@ -142,7 +153,17 @@ export function MarkdownEditor({
       </style>
 
       {label && <p className={labelClassName}>{label}</p>}
-      {MDEditor && (
+      {!isLoaded && (
+        <div 
+          className="w-full border border-gray-300 rounded-md p-3 bg-white"
+          style={{ height: `${height}px` }}
+        >
+          <div className="w-full h-full flex items-center justify-center text-gray-500">
+            Loading editor...
+          </div>
+        </div>
+      )}
+      {isLoaded && MDEditor && (
         <div data-color-mode="light" className="w-full">
           <MDEditor
             height={height}

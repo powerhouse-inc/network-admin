@@ -109,7 +109,7 @@ export default function Editor(props: any) {
           <MarkdownEditor
             height={200}
             label="Summary"
-            value={state.summary || ""}
+            value={state.summary ?? ""}
             onChange={() => {}}
             onBlur={(value) => dispatch(actions.editRfp({ summary: value }))}
           />
@@ -138,7 +138,7 @@ export default function Editor(props: any) {
           <MarkdownEditor
             height={200}
             label="Eligibility Criteria"
-            value={state.eligibilityCriteria || ""}
+            value={state.eligibilityCriteria ?? ""}
             onChange={() => {}}
             onBlur={(value) =>
               dispatch(actions.editRfp({ eligibilityCriteria: value }))
@@ -151,7 +151,7 @@ export default function Editor(props: any) {
           <MarkdownEditor
             height={200}
             label="Evaluation Criteria"
-            value={state.evaluationCriteria || ""}
+            value={state.evaluationCriteria ?? ""}
             onChange={() => {}}
             onBlur={(value) =>
               dispatch(actions.editRfp({ evaluationCriteria: value }))
