@@ -90,6 +90,20 @@ export const EditorContainer = (props: {
     }
   }, [selectedDrive]);
 
+  const createPaymentTermsDocument = useCallback(async () => {
+    const paymentTermsDocName = `Payment Terms-${(selectedDocument?.state.global as any)?.title}`;
+
+    await addDocument(
+      selectedDrive?.header.id || "",
+      paymentTermsDocName,
+      "payment-terms",
+      folderId,
+      getNewDocumentObject(paymentTermsDocName, "payment-terms"),
+      undefined,
+      "payment-terms-editor"
+    );
+  }, [selectedDrive]);
+
   // Timeline data for revision history
   const timelineItems = useTimelineItems(
     selectedDocument?.header.id,
@@ -162,6 +176,7 @@ export const EditorContainer = (props: {
             createRfp={createRfpDocument}
             setActiveDocumentId={setActiveDocumentId}
             createSow={createSowDocument}
+            createPaymentTerms={createPaymentTermsDocument}
           />
         </Suspense>
       )}
