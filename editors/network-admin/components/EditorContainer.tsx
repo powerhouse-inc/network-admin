@@ -56,10 +56,10 @@ export const EditorContainer = (props: {
       ?.parentFolder || undefined;
 
   const createRfpDocument = useCallback(async () => {
-    const rfpDocName = `RFP-${(selectedDocument?.state.global as any)?.title}`;
-    const rfpDocCode = `RFP-${(selectedDocument?.state.global as any)?.code}`;
+    const rfpDocName = `RFP-${(selectedDocument?.state.global as any)?.title || "Untitled"}`;
+    const rfpDocCode = `RFP-${(selectedDocument?.state.global as any)?.code || ""}`;
     try {
-      await addDocument(
+      const createdNode = await addDocument(
         selectedDrive?.header.id || "",
         rfpDocName,
         "powerhouse/rfp",
@@ -68,15 +68,17 @@ export const EditorContainer = (props: {
         undefined,
         "request-for-proposals-editor"
       );
+      return createdNode;
     } catch (error) {
       console.error("Error creating RFP document", error);
+      return null;
     }
-  }, [selectedDrive]);
+  }, [selectedDrive, selectedDocument?.state.global, folderId]);
 
   const createSowDocument = useCallback(async () => {
-    const sowDocName = `SOW-${(selectedDocument?.state.global as any)?.title}`;
+    const sowDocName = `SOW-${(selectedDocument?.state.global as any)?.title || "Untitled"}`;
     try {
-      await addDocument(
+      const createdNode = await addDocument(
         selectedDrive?.header.id || "",
         sowDocName,
         "powerhouse/scopeofwork",
@@ -85,24 +87,31 @@ export const EditorContainer = (props: {
         undefined,
         "scope-of-work-editor"
       );
+      return createdNode;
     } catch (error) {
-      console.error("Error creating RFP document", error);
+      console.error("Error creating SOW document", error);
+      return null;
     }
-  }, [selectedDrive]);
+  }, [selectedDrive, selectedDocument?.state.global, folderId]);
 
   const createPaymentTermsDocument = useCallback(async () => {
-    const paymentTermsDocName = `Payment Terms-${(selectedDocument?.state.global as any)?.title}`;
-
-    await addDocument(
-      selectedDrive?.header.id || "",
-      paymentTermsDocName,
-      "payment-terms",
-      folderId,
-      getNewDocumentObject(paymentTermsDocName, "payment-terms"),
-      undefined,
-      "payment-terms-editor"
-    );
-  }, [selectedDrive]);
+    const paymentTermsDocName = `Payment Terms-${(selectedDocument?.state.global as any)?.title || "Untitled"}`;
+    try {
+      const createdNode = await addDocument(
+        selectedDrive?.header.id || "",
+        paymentTermsDocName,
+        "payment-terms",
+        folderId,
+        getNewDocumentObject(paymentTermsDocName, "payment-terms"),
+        undefined,
+        "payment-terms-editor"
+      );
+      return createdNode;
+    } catch (error) {
+      console.error("Error creating Payment Terms document", error);
+      return null;
+    }
+  }, [selectedDrive, selectedDocument?.state.global, folderId]);
 
   // Timeline data for revision history
   const timelineItems = useTimelineItems(

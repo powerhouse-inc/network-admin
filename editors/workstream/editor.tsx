@@ -63,6 +63,36 @@ export default function Editor(props: any) {
   const setActiveDocumentId = props.setActiveDocumentId;
   const createSowDocument = props.createSow;
   const createPaymentTermsDocument = props.createPaymentTerms;
+  
+  // Local state to track newly created SOW document ID
+  const [newlyCreatedSowId, setNewlyCreatedSowId] = useState<string | null>(null);
+  
+  // Local state to track newly created Payment Terms document ID
+  const [newlyCreatedPaymentTermsId, setNewlyCreatedPaymentTermsId] = useState<string | null>(null);
+  
+  // Local state to track newly created RFP document ID
+  const [newlyCreatedRfpId, setNewlyCreatedRfpId] = useState<string | null>(null);
+
+  // Effect to clear local state when global state is updated
+  useEffect(() => {
+    if (state.initialProposal?.sow && newlyCreatedSowId) {
+      setNewlyCreatedSowId(null);
+    }
+  }, [state.initialProposal?.sow, newlyCreatedSowId]);
+
+  // Effect to clear local state when global state is updated
+  useEffect(() => {
+    if (state.initialProposal?.paymentTerms && newlyCreatedPaymentTermsId) {
+      setNewlyCreatedPaymentTermsId(null);
+    }
+  }, [state.initialProposal?.paymentTerms, newlyCreatedPaymentTermsId]);
+
+  // Effect to clear local state when global state is updated
+  useEffect(() => {
+    if (state.rfp?.id && newlyCreatedRfpId) {
+      setNewlyCreatedRfpId(null);
+    }
+  }, [state.rfp?.id, newlyCreatedRfpId]);
 
   // Checking if there is an RFP document for this workstream
   const nodes: Node[] = useNodes() || [];
@@ -81,6 +111,27 @@ export default function Editor(props: any) {
       );
     }
   );
+
+  const sowDocumentNode: FileNode | undefined = fileNodes.find(
+    (node: FileNode) => {
+      if (!workstreamDocument && !node.parentFolder) return false;
+      return (
+        node.parentFolder === workstreamDocument?.parentFolder &&
+        node.documentType === "powerhouse/scopeofwork"
+      );
+    }
+  );
+
+  const paymentTermsDocumentNode: FileNode | undefined = fileNodes.find(
+    (node: FileNode) => {
+      if (!workstreamDocument && !node.parentFolder) return false;
+      return (
+        node.parentFolder === workstreamDocument?.parentFolder &&
+        node.documentType === "payment-terms"
+      );
+    }
+  );
+
 
   // Get RFP document data using useDocumentById hook - always call with stable ID
   const rfpDocumentId = rfpDocumentNode?.id || "";
@@ -114,7 +165,7 @@ export default function Editor(props: any) {
     ) {
       setRfpDocument(undefined);
     }
-  }, [rfpDocumentNode, rfpDocumentDataState]);
+  }, [rfpDocumentNode, rfpDocumentDataState, fileNodes]);
 
   const searchRfpDocuments = (userInput: string) => {
     const results = fileNodes.filter(
@@ -491,7 +542,7 @@ export default function Editor(props: any) {
                   label="RFP Document"
                   placeholder="Search for RFP Document"
                   variant="withValueTitleAndDescription"
-                  value={state.rfp?.id || ""}
+                  value={newlyCreatedRfpId || state.rfp?.id || ""}
                   onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                     if (e.target.value !== state.rfp?.id) {
                       dispatch(
@@ -582,7 +633,20 @@ export default function Editor(props: any) {
                 className="cursor-pointer hover:bg-gray-600 hover:text-white"
                 title={"Save Workstream"}
                 aria-description={"Save Workstream"}
-                onClick={createRfpDocument}
+                onClick={async () => {
+                  const createdNode = await createRfpDocument();
+                  if (createdNode) {
+                    // Set local state to immediately show the new RFP ID
+                    setNewlyCreatedRfpId(createdNode.id);
+                    
+                    dispatch(
+                      actions.setRequestForProposal({
+                        rfpId: createdNode.id,
+                        title: createdNode.name,
+                      })
+                    );
+                  }
+                }}
               >
                 Create RFP Document
               </Button>
@@ -622,12 +686,12 @@ export default function Editor(props: any) {
                   <div className="flex-1">
                     <TextInput
                       label="Sow"
-                      defaultValue={state.initialProposal.sow || ""}
+                      defaultValue={newlyCreatedSowId || state.initialProposal?.sow || ""}
                       onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                        if (e.target.value !== state.initialProposal.sowId) {
+                        if (e.target.value !== state.initialProposal?.sow) {
                           dispatch(
                             actions.editInitialProposal({
-                              id: state.initialProposal.id,
+                              id: state.initialProposal?.id || "",
                               sowId: e.target.value,
                             })
                           );
@@ -636,9 +700,20 @@ export default function Editor(props: any) {
                     />
                     <button
                       className="text-sm bg-gray-100 rounded-md p-1 hover:bg-gray-200"
-                      onClick={() => {
+                      onClick={async () => {
                         console.log("Creating sow");
-                        createSowDocument();
+                        const createdNode = await createSowDocument();
+                        if (createdNode) {
+                          // Set local state to immediately show the new SOW ID
+                          setNewlyCreatedSowId(createdNode.id);
+                          
+                          dispatch(
+                            actions.editInitialProposal({
+                              id: state.initialProposal?.id || "",
+                              sowId: createdNode.id,
+                            })
+                          );
+                        }
                       }}
                     >
                       Create sow
@@ -647,15 +722,15 @@ export default function Editor(props: any) {
                   <div className="flex-1">
                     <TextInput
                       label="Payment Terms"
-                      defaultValue={state.initialProposal.paymentTerms || ""}
+                      defaultValue={newlyCreatedPaymentTermsId || state.initialProposal?.paymentTerms || ""}
                       onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                         if (
                           e.target.value !==
-                          state.initialProposal.paymentTermsId
+                          state.initialProposal?.paymentTerms
                         ) {
                           dispatch(
                             actions.editInitialProposal({
-                              id: state.initialProposal.id,
+                              id: state.initialProposal?.id || "",
                               paymentTermsId: e.target.value,
                             })
                           );
@@ -664,9 +739,20 @@ export default function Editor(props: any) {
                     />
                     <button
                       className="text-sm bg-gray-100 rounded-md p-1 hover:bg-gray-200"
-                      onClick={() => {
+                      onClick={async () => {
                         console.log("Creating payment terms");
-                        createPaymentTermsDocument();
+                        const createdNode = await createPaymentTermsDocument();
+                        if (createdNode) {
+                          // Set local state to immediately show the new Payment Terms ID
+                          setNewlyCreatedPaymentTermsId(createdNode.id);
+                          
+                          dispatch(
+                            actions.editInitialProposal({
+                              id: state.initialProposal?.id || "",
+                              paymentTermsId: createdNode.id,
+                            })
+                          );
+                        }
                       }}
                     >
                       Create Payment Terms
