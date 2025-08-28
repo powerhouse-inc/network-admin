@@ -5,7 +5,7 @@ import {
   actions,
   type RfpStatusInput,
 } from "../../document-models/request-for-proposals/index.js";
-import { Button } from "@powerhousedao/design-system";
+import { Button, toast } from "@powerhousedao/design-system";
 import { useSelectedDocument } from "@powerhousedao/reactor-browser";
 import {
   DatePicker,
@@ -27,13 +27,20 @@ const statusOptions = [
 ];
 
 export default function Editor(props: any) {
-  // const [document, dispatch] = useSelectedDocument();
-  const { document, dispatch } = props;
+  let dispatch: any;
+  const { document } = props;
   const state: RequestForProposalsState = document?.state
     .global as RequestForProposalsState;
 
   if (!document) {
     return <div>No document selected</div>;
+  }
+
+  if (props.dispatch) {
+    dispatch = props.dispatch;
+  } else {
+    const selectedDocument = useSelectedDocument();
+    dispatch = selectedDocument[1];
   }
 
   return (
@@ -95,12 +102,10 @@ export default function Editor(props: any) {
         <div className="mb-8">
           <MarkdownEditor
             height={200}
-            label="Description"
-            value={state.description || ""}
+            label="Summary"
+            value={state.summary || ""}
             onChange={() => {}}
-            onBlur={(value) =>
-              dispatch(actions.editRfp({ description: value }))
-            }
+            onBlur={(value) => dispatch(actions.editRfp({ summary: value }))}
           />
         </div>
 

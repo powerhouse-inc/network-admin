@@ -12,7 +12,8 @@ export const reducer: RequestForProposalsRfpStateOperations = {
    
     state.title = action.input.title || state.title;
     state.code = action.input.code || state.code;
-    state.description = action.input.description || state.description;
+    state.summary = action.input.summary || state.summary;
+    state.briefing = action.input.briefing || state.briefing;
     state.eligibilityCriteria = action.input.eligibilityCriteria || state.eligibilityCriteria;	
     state.evaluationCriteria = action.input.evaluationCriteria || state.evaluationCriteria;
     state.status = action.input.status || state.status;

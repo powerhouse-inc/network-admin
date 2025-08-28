@@ -164,13 +164,14 @@ export function ContextDocumentSchema(): z.ZodObject<
 
 export function EditRfpInputSchema(): z.ZodObject<Properties<EditRfpInput>> {
   return z.object({
+    briefing: z.string().nullish(),
     budgetRange: z.lazy(() => BudgetRangeInputSchema().nullish()),
     code: z.string().nullish(),
     deadline: z.string().datetime().nullish(),
-    description: z.string().nullish(),
     eligibilityCriteria: z.string().nullish(),
     evaluationCriteria: z.string().nullish(),
     status: z.lazy(() => RfpStatusInputSchema.nullish()),
+    summary: z.string().nullish(),
     tags: z.array(z.string()).nullish(),
     title: z.string().nullish(),
   });
@@ -199,17 +200,18 @@ export function RequestForProposalsStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("RequestForProposalsState").optional(),
+    briefing: z.string(),
     budgetRange: BudgetRangeSchema(),
     code: z.string().nullable(),
     contextDocuments: z.array(ContextDocumentSchema()),
     deadline: z.string().datetime().nullable(),
-    description: z.string(),
     eligibilityCriteria: z.string(),
     evaluationCriteria: z.string(),
     issuer: z.string(),
     proposals: z.array(RfpProposalSchema()),
     rfpCommenter: z.array(RfpCommenterSchema()),
     status: RfpStatusSchema,
+    summary: z.string(),
     tags: z.array(z.string()).nullable(),
     title: z.string(),
   });

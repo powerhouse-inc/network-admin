@@ -22,9 +22,8 @@ export function defaultGlobalState(): RequestForProposalsState {
     title: "",
     description: "",
     rfpCommenter: [],
-    eligibilityCriteria: "",
-    evaluationCriteria: "",
-    code: "",
+    eligibilityCriteria: [],
+    evaluationCriteria: [],
     budgetRange: {
       min: null,
       max: null,

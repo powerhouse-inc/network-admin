@@ -26,6 +26,7 @@ import {
   useNodes,
   useDocumentById,
   setSelectedNode,
+  useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import { type Node, type FileNode } from "document-drive";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -47,8 +48,15 @@ const statusOptions: Array<{ value: WorkstreamStatusInput; label: string }> = [
 ];
 
 export default function Editor(props: any) {
-  // Debug: Log props to understand what's available
-  const { document, context, dispatch } = props;
+  // Getting dispatch from props or selected document
+  let dispatch: any;
+  const { document } = props;
+  if (props.dispatch) {
+    dispatch = props.dispatch;
+  } else {
+    const selectedDocument = useSelectedDocument();
+    dispatch = selectedDocument[1];
+  }
   // Try to get dispatch from context or props
   const state = document.state.global as any;
   const createRfpDocument = props.createRfp;

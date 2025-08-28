@@ -96,13 +96,14 @@ export type ContextDocument = {
 };
 
 export type EditRfpInput = {
+  briefing?: InputMaybe<Scalars["String"]["input"]>;
   budgetRange?: InputMaybe<BudgetRangeInput>;
   code?: InputMaybe<Scalars["String"]["input"]>;
   deadline?: InputMaybe<Scalars["DateTime"]["input"]>;
-  description?: InputMaybe<Scalars["String"]["input"]>;
   eligibilityCriteria?: InputMaybe<Scalars["String"]["input"]>;
   evaluationCriteria?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<RfpStatusInput | `${RfpStatusInput}`>;
+  summary?: InputMaybe<Scalars["String"]["input"]>;
   tags?: InputMaybe<Array<Scalars["String"]["input"]>>;
   title?: InputMaybe<Scalars["String"]["input"]>;
 };
@@ -138,17 +139,18 @@ export type RemoveProposalInput = {
 };
 
 export type RequestForProposalsState = {
+  briefing: Scalars["String"]["output"];
   budgetRange: BudgetRange;
   code: Maybe<Scalars["String"]["output"]>;
   contextDocuments: Array<ContextDocument>;
   deadline: Maybe<Scalars["DateTime"]["output"]>;
-  description: Scalars["String"]["output"];
   eligibilityCriteria: Scalars["String"]["output"];
   evaluationCriteria: Scalars["String"]["output"];
   issuer: Scalars["ID"]["output"];
   proposals: Array<RfpProposal>;
   rfpCommenter: Array<RfpCommenter>;
   status: RfpStatus | `${RfpStatus}`;
+  summary: Scalars["String"]["output"];
   tags: Maybe<Array<Scalars["String"]["output"]>>;
   title: Scalars["String"]["output"];
 };

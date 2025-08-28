@@ -9,7 +9,8 @@ export const schema: DocumentNode = gql`
     issuer: ID!
     code: String
     title: String!
-    description: String!
+    summary: String! # udpated
+    briefing: String! # updated
     rfpCommenter: [RfpCommenter!]!
     eligibilityCriteria: String!
     evaluationCriteria: String!
@@ -148,7 +149,8 @@ export const schema: DocumentNode = gql`
   input RequestForProposals_EditRfpInput {
     title: String
     code: String
-    description: String
+    summary: String
+    briefing: String
     eligibilityCriteria: String
     evaluationCriteria: String
     budgetRange: BudgetRangeInput

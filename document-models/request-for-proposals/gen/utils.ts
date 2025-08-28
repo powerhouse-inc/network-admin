@@ -16,13 +16,14 @@ import {
 import { reducer } from "./reducer.js";
 
 export const initialGlobalState: RequestForProposalsState = {
-  issuer: "placeholder-id",
+  code: "",
   title: "",
-  description: "",
+  issuer: "placeholder-id",
+  summary: "",
+  briefing: "",
   rfpCommenter: [],
   eligibilityCriteria: "",
   evaluationCriteria: "",
-  code: "",
   budgetRange: {
     min: null,
     max: null,
