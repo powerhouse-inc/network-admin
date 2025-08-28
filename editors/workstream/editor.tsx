@@ -72,11 +72,16 @@ export default function Editor(props: any) {
   
   // Local state to track newly created RFP document ID
   const [newlyCreatedRfpId, setNewlyCreatedRfpId] = useState<string | null>(null);
+  
+  // Local state to track manual input values
+  const [manualSowInput, setManualSowInput] = useState<string>("");
+  const [manualPaymentTermsInput, setManualPaymentTermsInput] = useState<string>("");
 
   // Effect to clear local state when global state is updated
   useEffect(() => {
     if (state.initialProposal?.sow && newlyCreatedSowId) {
       setNewlyCreatedSowId(null);
+      setManualSowInput("");
     }
   }, [state.initialProposal?.sow, newlyCreatedSowId]);
 
@@ -84,6 +89,7 @@ export default function Editor(props: any) {
   useEffect(() => {
     if (state.initialProposal?.paymentTerms && newlyCreatedPaymentTermsId) {
       setNewlyCreatedPaymentTermsId(null);
+      setManualPaymentTermsInput("");
     }
   }, [state.initialProposal?.paymentTerms, newlyCreatedPaymentTermsId]);
 
@@ -665,14 +671,17 @@ export default function Editor(props: any) {
                   <div className="flex-1">
                     <TextInput
                       label="Author"
-                      defaultValue={state.initialProposal.author.name || ""}
+                      value={state.initialProposal?.author?.name || ""}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        // Handle real-time updates if needed
+                      }}
                       onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                         if (
-                          e.target.value !== state.initialProposal.author.name
+                          e.target.value !== state.initialProposal?.author?.name
                         ) {
                           dispatch(
                             actions.editInitialProposal({
-                              id: state.initialProposal.id,
+                              id: state.initialProposal?.id || "",
                               proposalAuthor: {
                                 id: generateId(),
                                 name: e.target.value,
@@ -686,7 +695,11 @@ export default function Editor(props: any) {
                   <div className="flex-1">
                     <TextInput
                       label="Sow"
-                      defaultValue={newlyCreatedSowId || state.initialProposal?.sow || ""}
+                      value={newlyCreatedSowId || manualSowInput || state.initialProposal?.sow || ""}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setManualSowInput(e.target.value);
+                        setNewlyCreatedSowId(null); // Clear newly created ID when user starts typing
+                      }}
                       onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                         if (e.target.value !== state.initialProposal?.sow) {
                           dispatch(
@@ -722,7 +735,11 @@ export default function Editor(props: any) {
                   <div className="flex-1">
                     <TextInput
                       label="Payment Terms"
-                      defaultValue={newlyCreatedPaymentTermsId || state.initialProposal?.paymentTerms || ""}
+                      value={newlyCreatedPaymentTermsId || manualPaymentTermsInput || state.initialProposal?.paymentTerms || ""}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setManualPaymentTermsInput(e.target.value);
+                        setNewlyCreatedPaymentTermsId(null); // Clear newly created ID when user starts typing
+                      }}
                       onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                         if (
                           e.target.value !==
