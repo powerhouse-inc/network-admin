@@ -14,6 +14,10 @@
         {
             "id": "powerhouse/rfp",
             "name": "Request for Proposals"
+        },
+        {
+            "id": "payment-terms",
+            "name": "Payment Terms"
         }
     ],
     "editors": [
@@ -26,6 +30,11 @@
             "id": "request-for-proposals-editor",
             "name": "Request for Proposals Editor",
             "documentTypes": ["powerhouse/rfp"]
+        },
+        {
+            "id": "payment-terms-editor",
+            "name": "Payment Terms Editor",
+            "documentTypes": ["payment-terms"]
         }
     ],
     "apps": [

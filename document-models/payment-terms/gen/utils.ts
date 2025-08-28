@@ -9,34 +9,30 @@ import {
   generateId,
 } from "document-model";
 import {
-  type RequestForProposalsDocument,
-  type RequestForProposalsState,
-  type RequestForProposalsLocalState,
+  type PaymentTermsDocument,
+  type PaymentTermsState,
+  type PaymentTermsLocalState,
 } from "./types.js";
 import { reducer } from "./reducer.js";
 
-export const initialGlobalState: RequestForProposalsState = {
-  issuer: "placeholder-id",
-  title: "",
-  description: "",
-  rfpCommenter: [],
-  eligibilityCriteria: [],
-  evaluationCriteria: [],
-  budgetRange: {
-    min: null,
-    max: null,
-    currency: null,
-  },
-  contextDocuments: [],
+export const initialGlobalState: PaymentTermsState = {
   status: "DRAFT",
-  proposals: [],
-  deadline: null,
-  tags: null,
+  proposer: "",
+  payer: "",
+  currency: "USD",
+  paymentModel: "MILESTONE",
+  totalAmount: null,
+  milestoneSchedule: [],
+  timeAndMaterials: null,
+  escrowDetails: null,
+  evaluation: null,
+  bonusClauses: [],
+  penaltyClauses: [],
 };
-export const initialLocalState: RequestForProposalsLocalState = {};
+export const initialLocalState: PaymentTermsLocalState = {};
 
-const utils: DocumentModelUtils<RequestForProposalsDocument> = {
-  fileExtension: "",
+const utils: DocumentModelUtils<PaymentTermsDocument> = {
+  fileExtension: "pterms",
   createState(state) {
     return {
       ...defaultBaseState(),
@@ -47,7 +43,7 @@ const utils: DocumentModelUtils<RequestForProposalsDocument> = {
   createDocument(state) {
     const document = baseCreateDocument(utils.createState, state);
 
-    document.header.documentType = "powerhouse/rfp";
+    document.header.documentType = "payment-terms";
 
     // for backwards compatibility, but this is NOT a valid signed document id
     document.header.id = generateId();
@@ -55,7 +51,7 @@ const utils: DocumentModelUtils<RequestForProposalsDocument> = {
     return document;
   },
   saveToFile(document, path, name) {
-    return baseSaveToFile(document, path, "", name);
+    return baseSaveToFile(document, path, "pterms", name);
   },
   saveToFileHandle(document, input) {
     return baseSaveToFileHandle(document, input);
