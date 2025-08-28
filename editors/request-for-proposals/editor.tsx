@@ -44,62 +44,68 @@ export default function Editor(props: any) {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto bg-white">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
-          Request for Proposals
-        </h1>
+    <div className="w-full bg-gray-50">
+      <div className="p-6 max-w-4xl mx-auto min-h-screen">
+        {/* Header Section */}
+        <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Request for Proposals
+          </h1>
+        </div>
+
         {/* Main Form Section */}
-        <div className="flex flex-row gap-2 mb-8">
-          {/* Code Field */}
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Code
-            </label>
-            <TextInput
-              className="w-full"
-              defaultValue={state.code || ""}
-              onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                if (e.target.value !== state.code) {
-                  dispatch(actions.editRfp({ code: e.target.value }));
-                }
-              }}
-              placeholder="Enter rfp code"
-            />
-          </div>
+        <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
+          <div className="flex flex-row gap-6">
+            {/* Code Field */}
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Code
+              </label>
+              <TextInput
+                className="w-full"
+                defaultValue={state.code || ""}
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                  if (e.target.value !== state.code) {
+                    dispatch(actions.editRfp({ code: e.target.value }));
+                  }
+                }}
+                placeholder="Enter rfp code"
+              />
+            </div>
 
-          {/* Title Field */}
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Title
-            </label>
-            <TextInput
-              className="w-full"
-              defaultValue={state.title || ""}
-              onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                if (e.target.value !== state.title) {
-                  dispatch(actions.editRfp({ title: e.target.value }));
-                }
-              }}
-              placeholder="Enter rfp title"
-            />
-          </div>
+            {/* Title Field */}
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Title
+              </label>
+              <TextInput
+                className="w-full"
+                defaultValue={state.title || ""}
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                  if (e.target.value !== state.title) {
+                    dispatch(actions.editRfp({ title: e.target.value }));
+                  }
+                }}
+                placeholder="Enter rfp title"
+              />
+            </div>
 
-          {/* Status Field */}
-          <div className="w-[150px] flex-1">
-            <Select
-              label="Status"
-              options={statusOptions}
-              value={state.status}
-              onChange={(value) =>
-                dispatch(actions.editRfp({ status: value as RfpStatusInput }))
-              }
-            />
+            {/* Status Field */}
+            <div className="w-[150px]">
+              <Select
+                label="Status"
+                options={statusOptions}
+                value={state.status}
+                onChange={(value) =>
+                  dispatch(actions.editRfp({ status: value as RfpStatusInput }))
+                }
+              />
+            </div>
           </div>
         </div>
 
-        {/* Description */}
-        <div className="mb-8">
+        {/* Summary Section */}
+        <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
           <MarkdownEditor
             height={200}
             label="Summary"
@@ -109,24 +115,26 @@ export default function Editor(props: any) {
           />
         </div>
 
-        {/* Submission Deadline */}
-        <div className="mb-8 w-[250px]">
+        {/* Submission Deadline Section */}
+        <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Submission Deadline
           </label>
-          <DatePicker
-            value={state.deadline ? new Date(state.deadline) : undefined}
-            onChange={(e) => {
-              const date = e.target.value ? new Date(e.target.value) : null;
-              dispatch(actions.editRfp({ deadline: date?.toISOString() }));
-            }}
-            name="submission-deadline"
-            placeholder="Select submission deadline"
-          />
+          <div className="w-[250px]">
+            <DatePicker
+              value={state.deadline ? new Date(state.deadline) : undefined}
+              onChange={(e) => {
+                const date = e.target.value ? new Date(e.target.value) : null;
+                dispatch(actions.editRfp({ deadline: date?.toISOString() }));
+              }}
+              name="submission-deadline"
+              placeholder="Select submission deadline"
+            />
+          </div>
         </div>
 
-        {/* Eligibility Criteria */}
-        <div className="mb-8">
+        {/* Eligibility Criteria Section */}
+        <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
           <MarkdownEditor
             height={200}
             label="Eligibility Criteria"
@@ -138,8 +146,8 @@ export default function Editor(props: any) {
           />
         </div>
 
-        {/* Eligibility Criteria */}
-        <div className="mb-8">
+        {/* Evaluation Criteria Section */}
+        <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
           <MarkdownEditor
             height={200}
             label="Evaluation Criteria"
