@@ -11,15 +11,6 @@ export const reducer: PaymentTermsTermsOperations = {
     updateStatusOperation(state, action, dispatch) {
         state.status = action.input.status;
     },
-    setTimeAndMaterialsOperation(state, action, dispatch) {
-        state.timeAndMaterials = {
-          retainerAmount: action.input.retainerAmount || null,
-          hourlyRate: action.input.hourlyRate || null,
-          variableCap: action.input.variableCap || null,
-          billingFrequency: action.input.billingFrequency,
-          timesheetRequired: action.input.timesheetRequired
-        };
-    },
     setEscrowDetailsOperation(state, action, dispatch) {
         state.escrowDetails = {
           amountHeld: action.input.amountHeld,
@@ -36,6 +27,24 @@ export const reducer: PaymentTermsTermsOperations = {
           impactsPayout: action.input.impactsPayout,
           impactsReputation: action.input.impactsReputation,
           commentsVisibleToClient: action.input.commentsVisibleToClient
+        };
+    },
+    setCostAndMaterialsOperation(state, action, dispatch) {
+        state.costAndMaterials = {
+          hourlyRate: action.input.hourlyRate || null,
+          variableCap: action.input.variableCap || null,
+          billingFrequency: action.input.billingFrequency,
+          timesheetRequired: action.input.timesheetRequired
+        };
+    },
+    setRetainerDetailsOperation(state, action, dispatch) {
+        state.retainerDetails = {
+          retainerAmount: action.input.retainerAmount,
+          billingFrequency: action.input.billingFrequency,
+          startDate: action.input.startDate,
+          endDate: action.input.endDate || null,
+          autoRenew: action.input.autoRenew,
+          servicesIncluded: action.input.servicesIncluded
         };
     }
 };

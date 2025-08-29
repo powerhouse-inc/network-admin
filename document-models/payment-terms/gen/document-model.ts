@@ -45,15 +45,15 @@ export const documentModel: DocumentModelState = {
               template: "Update the payment terms status",
             },
             {
-              description: "Configure time and materials payment terms",
+              description: "Configure cost and materials payment terms",
               errors: [],
               examples: [],
               id: "set-time-materials-op",
-              name: "SET_TIME_AND_MATERIALS",
+              name: "SET_COST_AND_MATERIALS",
               reducer:
-                "state.timeAndMaterials = {\n  retainerAmount: action.input.retainerAmount || null,\n  hourlyRate: action.input.hourlyRate || null,\n  variableCap: action.input.variableCap || null,\n  billingFrequency: action.input.billingFrequency,\n  timesheetRequired: action.input.timesheetRequired\n};",
+                "state.costAndMaterials = {\n  hourlyRate: action.input.hourlyRate || null,\n  variableCap: action.input.variableCap || null,\n  billingFrequency: action.input.billingFrequency,\n  timesheetRequired: action.input.timesheetRequired\n};",
               schema:
-                "input SetTimeAndMaterialsInput {\n  retainerAmount: Amount\n  hourlyRate: Amount\n  variableCap: Amount\n  billingFrequency: BillingFrequency!\n  timesheetRequired: Boolean!\n}",
+                "input SetCostAndMaterialsInput {\n  hourlyRate: Amount\n  variableCap: Amount\n  billingFrequency: BillingFrequency!\n  timesheetRequired: Boolean!\n}",
               scope: "global",
               template: "Configure time and materials payment terms",
             },
@@ -82,6 +82,19 @@ export const documentModel: DocumentModelState = {
                 "input SetEvaluationTermsInput {\n  evaluationFrequency: EvaluationFrequency!\n  evaluatorTeam: String!\n  criteria: [String!]!\n  impactsPayout: Boolean!\n  impactsReputation: Boolean!\n  commentsVisibleToClient: Boolean!\n}",
               scope: "global",
               template: "Set evaluation terms for the payment",
+            },
+            {
+              description: "Configure retainer payment terms",
+              errors: [],
+              examples: [],
+              id: "set-retainer-op",
+              name: "SET_RETAINER_DETAILS",
+              reducer:
+                "state.retainerDetails = {\n  retainerAmount: action.input.retainerAmount,\n  billingFrequency: action.input.billingFrequency,\n  startDate: action.input.startDate,\n  endDate: action.input.endDate || null,\n  autoRenew: action.input.autoRenew,\n  servicesIncluded: action.input.servicesIncluded\n};",
+              schema:
+                "input SetRetainerDetailsInput {\n  retainerAmount: Amount!\n  billingFrequency: BillingFrequency!\n  startDate: Date!\n  endDate: Date\n  autoRenew: Boolean!\n  servicesIncluded: String!\n}",
+              scope: "global",
+              template: "Configure retainer payment terms",
             },
           ],
         },
@@ -327,9 +340,9 @@ export const documentModel: DocumentModelState = {
         global: {
           examples: [],
           initialValue:
-            '"{\\n  \\"status\\": \\"DRAFT\\",\\n  \\"proposer\\": \\"\\",\\n  \\"payer\\": \\"\\",\\n  \\"currency\\": \\"USD\\",\\n  \\"paymentModel\\": \\"MILESTONE\\",\\n  \\"totalAmount\\": null,\\n  \\"milestoneSchedule\\": [],\\n  \\"timeAndMaterials\\": null,\\n  \\"escrowDetails\\": null,\\n  \\"evaluation\\": null,\\n  \\"bonusClauses\\": [],\\n  \\"penaltyClauses\\": []\\n}"',
+            '"{\\n  \\"status\\": \\"DRAFT\\",\\n  \\"proposer\\": \\"\\",\\n  \\"payer\\": \\"\\",\\n  \\"currency\\": \\"USD\\",\\n  \\"paymentModel\\": \\"MILESTONE\\",\\n  \\"totalAmount\\": null,\\n  \\"milestoneSchedule\\": [],\\n  \\"costAndMaterials\\": null,\\n  \\"retainerDetails\\": null,\\n  \\"escrowDetails\\": null,\\n  \\"evaluation\\": null,\\n  \\"bonusClauses\\": [],\\n  \\"penaltyClauses\\": []\\n}"',
           schema:
-            "enum PaymentTermsStatus {\n  DRAFT\n  SUBMITTED\n  ACCEPTED\n  CANCELLED\n}\n\nenum PaymentCurrency {\n  USD\n  EUR\n  GBP\n}\n\nenum PaymentModel {\n  MILESTONE\n  TIME_AND_MATERIALS\n}\n\nenum MilestonePayoutStatus {\n  PENDING\n  READY_FOR_REVIEW\n  APPROVED\n  PAID\n  REJECTED\n}\n\nenum BillingFrequency {\n  WEEKLY\n  BIWEEKLY\n  MONTHLY\n}\n\nenum EvaluationFrequency {\n  WEEKLY\n  MONTHLY\n  PER_MILESTONE\n}\n\ntype Milestone {\n  id: OID!\n  name: String!\n  amount: Amount!\n  expectedCompletionDate: Date\n  requiresApproval: Boolean!\n  payoutStatus: MilestonePayoutStatus!\n}\n\ntype TimeAndMaterials {\n  retainerAmount: Amount\n  hourlyRate: Amount\n  variableCap: Amount\n  billingFrequency: BillingFrequency!\n  timesheetRequired: Boolean!\n}\n\ntype Escrow {\n  amountHeld: Amount!\n  proofOfFundsDocumentId: String\n  releaseConditions: String!\n  escrowProvider: String\n}\n\ntype EvaluationTerms {\n  evaluationFrequency: EvaluationFrequency!\n  evaluatorTeam: String!\n  criteria: [String!]!\n  impactsPayout: Boolean!\n  impactsReputation: Boolean!\n  commentsVisibleToClient: Boolean!\n}\n\ntype BonusClause {\n  id: OID!\n  condition: String!\n  bonusAmount: Amount!\n  comment: String\n}\n\ntype PenaltyClause {\n  id: OID!\n  condition: String!\n  deductionAmount: Amount!\n  comment: String\n}\n\ntype PaymentTermsState {\n  status: PaymentTermsStatus!\n  proposer: String!\n  payer: String!\n  currency: PaymentCurrency!\n  paymentModel: PaymentModel!\n  totalAmount: Amount\n  milestoneSchedule: [Milestone!]!\n  timeAndMaterials: TimeAndMaterials\n  escrowDetails: Escrow\n  evaluation: EvaluationTerms\n  bonusClauses: [BonusClause!]!\n  penaltyClauses: [PenaltyClause!]!\n}",
+            "enum PaymentTermsStatus {\n  DRAFT\n  SUBMITTED\n  ACCEPTED\n  CANCELLED\n}\n\nenum PaymentCurrency {\n  USD\n  EUR\n  GBP\n}\n\nenum PaymentModel {\n  MILESTONE\n  COST_AND_MATERIALS\n  RETAINER\n}\n\nenum MilestonePayoutStatus {\n  PENDING\n  READY_FOR_REVIEW\n  APPROVED\n  PAID\n  REJECTED\n}\n\nenum BillingFrequency {\n  WEEKLY\n  BIWEEKLY\n  MONTHLY\n}\n\nenum EvaluationFrequency {\n  WEEKLY\n  MONTHLY\n  PER_MILESTONE\n}\n\ntype Milestone {\n  id: OID!\n  name: String!\n  amount: Amount!\n  expectedCompletionDate: Date\n  requiresApproval: Boolean!\n  payoutStatus: MilestonePayoutStatus!\n}\n\ntype CostAndMaterials {\n  hourlyRate: Amount\n  variableCap: Amount\n  billingFrequency: BillingFrequency!\n  timesheetRequired: Boolean!\n}\n\ntype Retainer {\n  retainerAmount: Amount!\n  billingFrequency: BillingFrequency!\n  startDate: Date!\n  endDate: Date\n  autoRenew: Boolean!\n  servicesIncluded: String!\n}\n\ntype Escrow {\n  amountHeld: Amount!\n  proofOfFundsDocumentId: String\n  releaseConditions: String!\n  escrowProvider: String\n}\n\ntype EvaluationTerms {\n  evaluationFrequency: EvaluationFrequency!\n  evaluatorTeam: String!\n  criteria: [String!]!\n  impactsPayout: Boolean!\n  impactsReputation: Boolean!\n  commentsVisibleToClient: Boolean!\n}\n\ntype BonusClause {\n  id: OID!\n  condition: String!\n  bonusAmount: Amount!\n  comment: String\n}\n\ntype PenaltyClause {\n  id: OID!\n  condition: String!\n  deductionAmount: Amount!\n  comment: String\n}\n\ntype PaymentTermsState {\n  status: PaymentTermsStatus!\n  proposer: String!\n  payer: String!\n  currency: PaymentCurrency!\n  paymentModel: PaymentModel!\n  totalAmount: Amount\n  milestoneSchedule: [Milestone!]!\n  costAndMaterials: CostAndMaterials\n  retainerDetails: Retainer\n  escrowDetails: Escrow\n  evaluation: EvaluationTerms\n  bonusClauses: [BonusClause!]!\n  penaltyClauses: [PenaltyClause!]!\n}",
         },
         local: {
           examples: [],

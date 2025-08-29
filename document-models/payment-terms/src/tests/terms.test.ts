@@ -10,7 +10,8 @@ import {
   z,
   type SetBasicTermsInput,
   type UpdateStatusInput,
-  type SetTimeAndMaterialsInput,
+  type SetCostAndMaterialsInput,
+  type SetRetainerDetailsInput,
   type SetEscrowDetailsInput,
   type SetEvaluationTermsInput,
 } from "../../gen/schema/index.js";
@@ -55,19 +56,38 @@ describe("Terms Operations", () => {
     );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
-  it("should handle setTimeAndMaterials operation", () => {
-    const input: SetTimeAndMaterialsInput = generateMock(
-      z.SetTimeAndMaterialsInputSchema(),
+  it("should handle setCostAndMaterials operation", () => {
+    const input: SetCostAndMaterialsInput = generateMock(
+      z.SetCostAndMaterialsInputSchema(),
     );
 
     const updatedDocument = reducer(
       document,
-      creators.setTimeAndMaterials(input),
+      creators.setCostAndMaterials(input),
     );
 
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
-      "SET_TIME_AND_MATERIALS",
+      "SET_COST_AND_MATERIALS",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
+  });
+  it("should handle setRetainerDetails operation", () => {
+    const input: SetRetainerDetailsInput = generateMock(
+      z.SetRetainerDetailsInputSchema(),
+    );
+
+    const updatedDocument = reducer(
+      document,
+      creators.setRetainerDetails(input),
+    );
+
+    expect(updatedDocument.operations.global).toHaveLength(1);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "SET_RETAINER_DETAILS",
     );
     expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
       input,

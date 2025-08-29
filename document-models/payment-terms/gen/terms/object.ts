@@ -2,18 +2,20 @@ import { BaseDocumentClass } from "document-model";
 import {
   type SetBasicTermsInput,
   type UpdateStatusInput,
-  type SetTimeAndMaterialsInput,
+  type SetCostAndMaterialsInput,
   type SetEscrowDetailsInput,
   type SetEvaluationTermsInput,
+  type SetRetainerDetailsInput,
   type PaymentTermsState,
   type PaymentTermsLocalState,
 } from "../types.js";
 import {
   setBasicTerms,
   updateStatus,
-  setTimeAndMaterials,
+  setCostAndMaterials,
   setEscrowDetails,
   setEvaluationTerms,
+  setRetainerDetails,
 } from "./creators.js";
 import { type PaymentTermsAction } from "../actions.js";
 
@@ -30,8 +32,8 @@ export default class PaymentTerms_Terms extends BaseDocumentClass<
     return this.dispatch(updateStatus(input));
   }
 
-  public setTimeAndMaterials(input: SetTimeAndMaterialsInput) {
-    return this.dispatch(setTimeAndMaterials(input));
+  public setCostAndMaterials(input: SetCostAndMaterialsInput) {
+    return this.dispatch(setCostAndMaterials(input));
   }
 
   public setEscrowDetails(input: SetEscrowDetailsInput) {
@@ -40,5 +42,9 @@ export default class PaymentTerms_Terms extends BaseDocumentClass<
 
   public setEvaluationTerms(input: SetEvaluationTermsInput) {
     return this.dispatch(setEvaluationTerms(input));
+  }
+
+  public setRetainerDetails(input: SetRetainerDetailsInput) {
+    return this.dispatch(setRetainerDetails(input));
   }
 }

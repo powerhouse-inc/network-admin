@@ -1,7 +1,11 @@
-import { useState, useCallback } from "react";
-import type { ChangeEvent } from "react";
-
-import type { PaymentTermsState, PaymentCurrency } from "../../document-models/payment-terms/gen/types.js";
+import { useState, useCallback, useMemo } from "react";
+import { toast } from "react-toastify";
+import type { 
+  PaymentTermsState, 
+  PaymentCurrency, 
+  PaymentModel,
+  PaymentTermsStatus
+} from "../../document-models/payment-terms/gen/types.js";
 
 export interface BasicTermsTabProps {
   state: PaymentTermsState;
@@ -41,7 +45,6 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
 
     // Handle escrow toggle
     if (formData.useEscrow && !state.escrowDetails) {
-      // Initialize escrow with default values
       dispatch(actions.setEscrowDetails({
         amountHeld: { value: 0, unit: formData.currency },
         releaseConditions: "Upon project completion",
@@ -49,7 +52,6 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
         proofOfFundsDocumentId: ""
       }));
     } else if (!formData.useEscrow && state.escrowDetails) {
-      // Clear escrow details by setting empty values
       dispatch(actions.setEscrowDetails({
         amountHeld: { value: 0, unit: formData.currency },
         releaseConditions: "",
@@ -58,6 +60,7 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
       }));
     }
     
+    toast.success("Basic terms updated successfully");
     setIsEditing(false);
   }, [formData, dispatch, actions, state.status, state.escrowDetails]);
 
@@ -102,12 +105,14 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Payment Model</label>
-            <p className="text-lg">{state.paymentModel}</p>
+            <p className="text-lg">{state.paymentModel.replace(/_/g, ' ')}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
             <p className="text-lg">
-              {state.totalAmount ? `${state.totalAmount.value} ${state.totalAmount.unit}` : "Not set"}
+              {state.totalAmount 
+                ? `${state.totalAmount.value} ${state.totalAmount.unit}` 
+                : "Not set"}
             </p>
           </div>
           <div>
@@ -116,7 +121,9 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Escrow</label>
-            <p className="text-lg">{(state.escrowDetails && state.escrowDetails.releaseConditions) ? "Enabled" : "Disabled"}</p>
+            <p className="text-lg">
+              {state.escrowDetails && state.escrowDetails.releaseConditions ? "Enabled" : "Disabled"}
+            </p>
           </div>
         </div>
       </div>
@@ -126,7 +133,7 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Edit Basic Information</h2>
+        <h2 className="text-xl font-semibold">Edit Basic Terms</h2>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
@@ -137,11 +144,12 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           <input
             type="text"
             value={formData.proposer}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({...formData, proposer: e.target.value})}
+            onChange={(e) => setFormData({...formData, proposer: e.target.value})}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Payer *
@@ -149,38 +157,44 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           <input
             type="text"
             value={formData.payer}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({...formData, payer: e.target.value})}
+            onChange={(e) => setFormData({...formData, payer: e.target.value})}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Currency *
           </label>
           <select
             value={formData.currency}
-            onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({...formData, currency: e.target.value as PaymentCurrency})}
+            onChange={(e) => setFormData({...formData, currency: e.target.value as PaymentCurrency})}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           >
             <option value="USD">USD</option>
             <option value="EUR">EUR</option>
             <option value="GBP">GBP</option>
           </select>
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Payment Model *
           </label>
           <select
             value={formData.paymentModel}
-            onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({...formData, paymentModel: e.target.value as any})}
+            onChange={(e) => setFormData({...formData, paymentModel: e.target.value as PaymentModel})}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           >
             <option value="MILESTONE">Milestone</option>
-            <option value="TIME_AND_MATERIALS">Time & Materials</option>
+            <option value="COST_AND_MATERIALS">Cost & Materials</option>
+            <option value="RETAINER">Retainer</option>
           </select>
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Total Amount
@@ -188,20 +202,22 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           <input
             type="number"
             value={formData.totalAmount}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({...formData, totalAmount: e.target.value})}
+            onChange={(e) => setFormData({...formData, totalAmount: e.target.value})}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="0.00"
             step="0.01"
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Status *
           </label>
           <select
             value={formData.status}
-            onChange={(e: ChangeEvent<HTMLSelectElement>) => setFormData({...formData, status: e.target.value as any})}
+            onChange={(e) => setFormData({...formData, status: e.target.value as PaymentTermsStatus})}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           >
             <option value="DRAFT">Draft</option>
             <option value="SUBMITTED">Submitted</option>
@@ -209,26 +225,21 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
             <option value="CANCELLED">Cancelled</option>
           </select>
         </div>
-      </div>
 
-      {/* Escrow Options */}
-      <div className="border-t border-gray-200 pt-6">
-        <h3 className="text-lg font-semibold mb-4">Additional Options</h3>
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="useEscrow"
-            checked={formData.useEscrow}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({...formData, useEscrow: e.target.checked})}
-            className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          />
-          <label htmlFor="useEscrow" className="text-sm font-medium text-gray-700">
-            Enable Escrow Protection
-          </label>
+        <div className="col-span-2">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="useEscrow"
+              checked={formData.useEscrow}
+              onChange={(e) => setFormData({...formData, useEscrow: e.target.checked})}
+              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="useEscrow" className="text-sm font-medium text-gray-700">
+              Use Escrow
+            </label>
+          </div>
         </div>
-        <p className="text-sm text-gray-500 ml-7 mt-1">
-          When enabled, payments can be held in escrow until specific conditions are met
-        </p>
       </div>
 
       <div className="flex gap-3">
@@ -236,7 +247,7 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           type="submit"
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
-          Save Changes
+          Save Terms
         </button>
         <button
           type="button"

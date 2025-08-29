@@ -3,16 +3,18 @@ import {
   z,
   type SetBasicTermsInput,
   type UpdateStatusInput,
-  type SetTimeAndMaterialsInput,
+  type SetCostAndMaterialsInput,
   type SetEscrowDetailsInput,
   type SetEvaluationTermsInput,
+  type SetRetainerDetailsInput,
 } from "../types.js";
 import {
   type SetBasicTermsAction,
   type UpdateStatusAction,
-  type SetTimeAndMaterialsAction,
+  type SetCostAndMaterialsAction,
   type SetEscrowDetailsAction,
   type SetEvaluationTermsAction,
+  type SetRetainerDetailsAction,
 } from "./actions.js";
 
 export const setBasicTerms = (input: SetBasicTermsInput) =>
@@ -33,12 +35,12 @@ export const updateStatus = (input: UpdateStatusInput) =>
     "global",
   );
 
-export const setTimeAndMaterials = (input: SetTimeAndMaterialsInput) =>
-  createAction<SetTimeAndMaterialsAction>(
-    "SET_TIME_AND_MATERIALS",
+export const setCostAndMaterials = (input: SetCostAndMaterialsInput) =>
+  createAction<SetCostAndMaterialsAction>(
+    "SET_COST_AND_MATERIALS",
     { ...input },
     undefined,
-    z.SetTimeAndMaterialsInputSchema,
+    z.SetCostAndMaterialsInputSchema,
     "global",
   );
 
@@ -57,5 +59,14 @@ export const setEvaluationTerms = (input: SetEvaluationTermsInput) =>
     { ...input },
     undefined,
     z.SetEvaluationTermsInputSchema,
+    "global",
+  );
+
+export const setRetainerDetails = (input: SetRetainerDetailsInput) =>
+  createAction<SetRetainerDetailsAction>(
+    "SET_RETAINER_DETAILS",
+    { ...input },
+    undefined,
+    z.SetRetainerDetailsInputSchema,
     "global",
   );

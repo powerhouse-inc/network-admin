@@ -30,7 +30,8 @@ enum PaymentCurrency {
 
 enum PaymentModel {
   MILESTONE
-  TIME_AND_MATERIALS
+  COST_AND_MATERIALS
+  RETAINER
 }
 
 enum MilestonePayoutStatus {
@@ -62,12 +63,20 @@ type Milestone {
   payoutStatus: MilestonePayoutStatus!
 }
 
-type TimeAndMaterials {
-  retainerAmount: Amount
+type CostAndMaterials {
   hourlyRate: Amount
   variableCap: Amount
   billingFrequency: BillingFrequency!
   timesheetRequired: Boolean!
+}
+
+type Retainer {
+  retainerAmount: Amount!
+  billingFrequency: BillingFrequency!
+  startDate: Date!
+  endDate: Date
+  autoRenew: Boolean!
+  servicesIncluded: String!
 }
 
 type Escrow {
@@ -108,7 +117,8 @@ type PaymentTermsState {
   paymentModel: PaymentModel!
   totalAmount: Amount
   milestoneSchedule: [Milestone!]!
-  timeAndMaterials: TimeAndMaterials
+  costAndMaterials: CostAndMaterials
+  retainerDetails: Retainer
   escrowDetails: Escrow
   evaluation: EvaluationTerms
   bonusClauses: [BonusClause!]!
@@ -131,8 +141,7 @@ input UpdateStatusInput {
   status: PaymentTermsStatus!
 }
 
-input SetTimeAndMaterialsInput {
-  retainerAmount: Amount
+input SetCostAndMaterialsInput {
   hourlyRate: Amount
   variableCap: Amount
   billingFrequency: BillingFrequency!
@@ -153,6 +162,15 @@ input SetEvaluationTermsInput {
   impactsPayout: Boolean!
   impactsReputation: Boolean!
   commentsVisibleToClient: Boolean!
+}
+
+input SetRetainerDetailsInput {
+  retainerAmount: Amount!
+  billingFrequency: BillingFrequency!
+  startDate: Date!
+  endDate: Date
+  autoRenew: Boolean!
+  servicesIncluded: String!
 }
 
 # milestones

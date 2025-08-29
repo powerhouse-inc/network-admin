@@ -87,6 +87,13 @@ export type BonusClause = {
   id: Scalars["OID"]["output"];
 };
 
+export type CostAndMaterials = {
+  billingFrequency: BillingFrequency | `${BillingFrequency}`;
+  hourlyRate: Maybe<Scalars["Amount"]["output"]>;
+  timesheetRequired: Scalars["Boolean"]["output"];
+  variableCap: Maybe<Scalars["Amount"]["output"]>;
+};
+
 export type DeleteBonusClauseInput = {
   id: Scalars["OID"]["input"];
 };
@@ -135,10 +142,11 @@ export type MilestonePayoutStatus =
 
 export type PaymentCurrency = "EUR" | "GBP" | "USD";
 
-export type PaymentModel = "MILESTONE" | "TIME_AND_MATERIALS";
+export type PaymentModel = "COST_AND_MATERIALS" | "MILESTONE" | "RETAINER";
 
 export type PaymentTermsState = {
   bonusClauses: Array<BonusClause>;
+  costAndMaterials: Maybe<CostAndMaterials>;
   currency: PaymentCurrency | `${PaymentCurrency}`;
   escrowDetails: Maybe<Escrow>;
   evaluation: Maybe<EvaluationTerms>;
@@ -147,8 +155,8 @@ export type PaymentTermsState = {
   paymentModel: PaymentModel | `${PaymentModel}`;
   penaltyClauses: Array<PenaltyClause>;
   proposer: Scalars["String"]["output"];
+  retainerDetails: Maybe<Retainer>;
   status: PaymentTermsStatus | `${PaymentTermsStatus}`;
-  timeAndMaterials: Maybe<TimeAndMaterials>;
   totalAmount: Maybe<Scalars["Amount"]["output"]>;
 };
 
@@ -169,12 +177,28 @@ export type ReorderMilestonesInput = {
   order: Array<Scalars["OID"]["input"]>;
 };
 
+export type Retainer = {
+  autoRenew: Scalars["Boolean"]["output"];
+  billingFrequency: BillingFrequency | `${BillingFrequency}`;
+  endDate: Maybe<Scalars["Date"]["output"]>;
+  retainerAmount: Scalars["Amount"]["output"];
+  servicesIncluded: Scalars["String"]["output"];
+  startDate: Scalars["Date"]["output"];
+};
+
 export type SetBasicTermsInput = {
   currency: PaymentCurrency | `${PaymentCurrency}`;
   payer: Scalars["String"]["input"];
   paymentModel: PaymentModel | `${PaymentModel}`;
   proposer: Scalars["String"]["input"];
   totalAmount?: InputMaybe<Scalars["Amount"]["input"]>;
+};
+
+export type SetCostAndMaterialsInput = {
+  billingFrequency: BillingFrequency | `${BillingFrequency}`;
+  hourlyRate?: InputMaybe<Scalars["Amount"]["input"]>;
+  timesheetRequired: Scalars["Boolean"]["input"];
+  variableCap?: InputMaybe<Scalars["Amount"]["input"]>;
 };
 
 export type SetEscrowDetailsInput = {
@@ -193,20 +217,13 @@ export type SetEvaluationTermsInput = {
   impactsReputation: Scalars["Boolean"]["input"];
 };
 
-export type SetTimeAndMaterialsInput = {
+export type SetRetainerDetailsInput = {
+  autoRenew: Scalars["Boolean"]["input"];
   billingFrequency: BillingFrequency | `${BillingFrequency}`;
-  hourlyRate?: InputMaybe<Scalars["Amount"]["input"]>;
-  retainerAmount?: InputMaybe<Scalars["Amount"]["input"]>;
-  timesheetRequired: Scalars["Boolean"]["input"];
-  variableCap?: InputMaybe<Scalars["Amount"]["input"]>;
-};
-
-export type TimeAndMaterials = {
-  billingFrequency: BillingFrequency | `${BillingFrequency}`;
-  hourlyRate: Maybe<Scalars["Amount"]["output"]>;
-  retainerAmount: Maybe<Scalars["Amount"]["output"]>;
-  timesheetRequired: Scalars["Boolean"]["output"];
-  variableCap: Maybe<Scalars["Amount"]["output"]>;
+  endDate?: InputMaybe<Scalars["Date"]["input"]>;
+  retainerAmount: Scalars["Amount"]["input"];
+  servicesIncluded: Scalars["String"]["input"];
+  startDate: Scalars["Date"]["input"];
 };
 
 export type UpdateBonusClauseInput = {

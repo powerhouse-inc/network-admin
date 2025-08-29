@@ -5,6 +5,7 @@ import type {
   AddPenaltyClauseInput,
   BillingFrequency,
   BonusClause,
+  CostAndMaterials,
   DeleteBonusClauseInput,
   DeleteMilestoneInput,
   DeletePenaltyClauseInput,
@@ -19,11 +20,12 @@ import type {
   PaymentTermsStatus,
   PenaltyClause,
   ReorderMilestonesInput,
+  Retainer,
   SetBasicTermsInput,
+  SetCostAndMaterialsInput,
   SetEscrowDetailsInput,
   SetEvaluationTermsInput,
-  SetTimeAndMaterialsInput,
-  TimeAndMaterials,
+  SetRetainerDetailsInput,
   UpdateBonusClauseInput,
   UpdateMilestoneInput,
   UpdateMilestoneStatusInput,
@@ -62,7 +64,11 @@ export const MilestonePayoutStatusSchema = z.enum([
 
 export const PaymentCurrencySchema = z.enum(["EUR", "GBP", "USD"]);
 
-export const PaymentModelSchema = z.enum(["MILESTONE", "TIME_AND_MATERIALS"]);
+export const PaymentModelSchema = z.enum([
+  "COST_AND_MATERIALS",
+  "MILESTONE",
+  "RETAINER",
+]);
 
 export const PaymentTermsStatusSchema = z.enum([
   "ACCEPTED",
@@ -124,6 +130,22 @@ export function BonusClauseSchema(): z.ZodObject<Properties<BonusClause>> {
     comment: z.string().nullable(),
     condition: z.string(),
     id: z.string(),
+  });
+}
+
+export function CostAndMaterialsSchema(): z.ZodObject<
+  Properties<CostAndMaterials>
+> {
+  return z.object({
+    __typename: z.literal("CostAndMaterials").optional(),
+    billingFrequency: BillingFrequencySchema,
+    hourlyRate: z
+      .object({ unit: z.string().optional(), value: z.number().finite() })
+      .nullable(),
+    timesheetRequired: z.boolean(),
+    variableCap: z
+      .object({ unit: z.string().optional(), value: z.number().finite() })
+      .nullable(),
   });
 }
 
@@ -199,6 +221,7 @@ export function PaymentTermsStateSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("PaymentTermsState").optional(),
     bonusClauses: z.array(BonusClauseSchema()),
+    costAndMaterials: CostAndMaterialsSchema().nullable(),
     currency: PaymentCurrencySchema,
     escrowDetails: EscrowSchema().nullable(),
     evaluation: EvaluationTermsSchema().nullable(),
@@ -207,8 +230,8 @@ export function PaymentTermsStateSchema(): z.ZodObject<
     paymentModel: PaymentModelSchema,
     penaltyClauses: z.array(PenaltyClauseSchema()),
     proposer: z.string(),
+    retainerDetails: RetainerSchema().nullable(),
     status: PaymentTermsStatusSchema,
-    timeAndMaterials: TimeAndMaterialsSchema().nullable(),
     totalAmount: z
       .object({ unit: z.string().optional(), value: z.number().finite() })
       .nullable(),
@@ -236,6 +259,21 @@ export function ReorderMilestonesInputSchema(): z.ZodObject<
   });
 }
 
+export function RetainerSchema(): z.ZodObject<Properties<Retainer>> {
+  return z.object({
+    __typename: z.literal("Retainer").optional(),
+    autoRenew: z.boolean(),
+    billingFrequency: BillingFrequencySchema,
+    endDate: z.string().datetime().nullable(),
+    retainerAmount: z.object({
+      unit: z.string().optional(),
+      value: z.number().finite(),
+    }),
+    servicesIncluded: z.string(),
+    startDate: z.string().datetime(),
+  });
+}
+
 export function SetBasicTermsInputSchema(): z.ZodObject<
   Properties<SetBasicTermsInput>
 > {
@@ -245,6 +283,21 @@ export function SetBasicTermsInputSchema(): z.ZodObject<
     paymentModel: PaymentModelSchema,
     proposer: z.string(),
     totalAmount: z
+      .object({ unit: z.string().optional(), value: z.number().finite() })
+      .nullish(),
+  });
+}
+
+export function SetCostAndMaterialsInputSchema(): z.ZodObject<
+  Properties<SetCostAndMaterialsInput>
+> {
+  return z.object({
+    billingFrequency: BillingFrequencySchema,
+    hourlyRate: z
+      .object({ unit: z.string().optional(), value: z.number().finite() })
+      .nullish(),
+    timesheetRequired: z.boolean(),
+    variableCap: z
       .object({ unit: z.string().optional(), value: z.number().finite() })
       .nullish(),
   });
@@ -277,40 +330,19 @@ export function SetEvaluationTermsInputSchema(): z.ZodObject<
   });
 }
 
-export function SetTimeAndMaterialsInputSchema(): z.ZodObject<
-  Properties<SetTimeAndMaterialsInput>
+export function SetRetainerDetailsInputSchema(): z.ZodObject<
+  Properties<SetRetainerDetailsInput>
 > {
   return z.object({
+    autoRenew: z.boolean(),
     billingFrequency: BillingFrequencySchema,
-    hourlyRate: z
-      .object({ unit: z.string().optional(), value: z.number().finite() })
-      .nullish(),
-    retainerAmount: z
-      .object({ unit: z.string().optional(), value: z.number().finite() })
-      .nullish(),
-    timesheetRequired: z.boolean(),
-    variableCap: z
-      .object({ unit: z.string().optional(), value: z.number().finite() })
-      .nullish(),
-  });
-}
-
-export function TimeAndMaterialsSchema(): z.ZodObject<
-  Properties<TimeAndMaterials>
-> {
-  return z.object({
-    __typename: z.literal("TimeAndMaterials").optional(),
-    billingFrequency: BillingFrequencySchema,
-    hourlyRate: z
-      .object({ unit: z.string().optional(), value: z.number().finite() })
-      .nullable(),
-    retainerAmount: z
-      .object({ unit: z.string().optional(), value: z.number().finite() })
-      .nullable(),
-    timesheetRequired: z.boolean(),
-    variableCap: z
-      .object({ unit: z.string().optional(), value: z.number().finite() })
-      .nullable(),
+    endDate: z.string().datetime().nullish(),
+    retainerAmount: z.object({
+      unit: z.string().optional(),
+      value: z.number().finite(),
+    }),
+    servicesIncluded: z.string(),
+    startDate: z.string().datetime(),
   });
 }
 

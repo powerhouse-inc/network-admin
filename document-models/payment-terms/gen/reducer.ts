@@ -40,9 +40,9 @@ const stateReducer: StateReducer<PaymentTermsDocument> = (
       );
       break;
 
-    case "SET_TIME_AND_MATERIALS":
-      z.SetTimeAndMaterialsInputSchema().parse(action.input);
-      TermsReducer.setTimeAndMaterialsOperation(
+    case "SET_COST_AND_MATERIALS":
+      z.SetCostAndMaterialsInputSchema().parse(action.input);
+      TermsReducer.setCostAndMaterialsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -61,6 +61,15 @@ const stateReducer: StateReducer<PaymentTermsDocument> = (
     case "SET_EVALUATION_TERMS":
       z.SetEvaluationTermsInputSchema().parse(action.input);
       TermsReducer.setEvaluationTermsOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "SET_RETAINER_DETAILS":
+      z.SetRetainerDetailsInputSchema().parse(action.input);
+      TermsReducer.setRetainerDetailsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

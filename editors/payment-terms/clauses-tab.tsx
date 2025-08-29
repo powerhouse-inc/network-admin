@@ -1,40 +1,160 @@
-import { useState, useCallback } from "react";
-import type { ChangeEvent } from "react";
-
-interface Clause {
-  id: string;
-  condition: string;
-  bonusAmount?: { value?: number; unit?: string };
-  deductionAmount?: { value?: number; unit?: string };
-  comment?: string | null;
-}
+import { useState, useCallback, useMemo } from "react";
+import { ObjectSetTable, TextInput, Textarea } from "@powerhousedao/document-engineering";
+import type { ColumnDef, ColumnAlignment } from "@powerhousedao/document-engineering";
+import { Button, Icon } from "@powerhousedao/design-system";
+import { toast } from "react-toastify";
+import { generateId } from "document-model";
+import type { 
+  BonusClause,
+  PenaltyClause
+} from "../../document-models/payment-terms/gen/types.js";
 
 export interface ClausesTabProps {
-  bonusClauses: Clause[];
-  penaltyClauses: Clause[];
+  bonusClauses: BonusClause[];
+  penaltyClauses: PenaltyClause[];
   dispatch: (action: any) => void;
   actions: any;
-  currency?: string;
+  currency: string;
 }
 
 export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, currency = "USD" }: ClausesTabProps) {
   const [activeSubTab, setActiveSubTab] = useState<"bonus" | "penalty">("bonus");
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [newClause, setNewClause] = useState({
-    id: "",
     condition: "",
     amount: "",
     comment: ""
   });
-  const [editForm, setEditForm] = useState<{condition?: string; amount?: string; comment?: string}>({});
+
+  const bonusColumns = useMemo<Array<ColumnDef<BonusClause>>>(
+    () => [
+      {
+        field: "condition",
+        title: "Condition",
+        editable: true,
+        align: "left" as ColumnAlignment,
+        onSave: (newValue, context) => {
+          dispatch(actions.updateBonusClause({ 
+            id: context.row.id, 
+            condition: newValue as string 
+          }));
+          toast.success("Bonus clause condition updated");
+          return true;
+        },
+      },
+      {
+        field: "bonusAmount",
+        title: `Bonus Amount (${currency})`,
+        editable: true,
+        align: "right" as ColumnAlignment,
+        renderCell: (value: any) => {
+          return value ? `${value.value} ${value.unit}` : "";
+        },
+        onSave: (newValue, context) => {
+          const amount = parseFloat(newValue as string);
+          if (isNaN(amount)) {
+            toast.error("Please enter a valid amount");
+            return false;
+          }
+          dispatch(actions.updateBonusClause({ 
+            id: context.row.id, 
+            bonusAmount: { value: amount, unit: currency }
+          }));
+          toast.success("Bonus amount updated");
+          return true;
+        },
+      },
+      {
+        field: "comment",
+        title: "Comment",
+        editable: true,
+        align: "left" as ColumnAlignment,
+        renderCell: (value: string | null) => value || "-",
+        onSave: (newValue, context) => {
+          dispatch(actions.updateBonusClause({ 
+            id: context.row.id, 
+            comment: newValue as string || undefined
+          }));
+          toast.success("Bonus clause comment updated");
+          return true;
+        },
+      }
+    ],
+    [actions, currency, dispatch]
+  );
+
+  const penaltyColumns = useMemo<Array<ColumnDef<PenaltyClause>>>(
+    () => [
+      {
+        field: "condition",
+        title: "Condition",
+        editable: true,
+        align: "left" as ColumnAlignment,
+        onSave: (newValue, context) => {
+          dispatch(actions.updatePenaltyClause({ 
+            id: context.row.id, 
+            condition: newValue as string 
+          }));
+          toast.success("Penalty clause condition updated");
+          return true;
+        },
+      },
+      {
+        field: "deductionAmount",
+        title: `Deduction Amount (${currency})`,
+        editable: true,
+        align: "right" as ColumnAlignment,
+        renderCell: (value: any) => {
+          return value ? `${value.value} ${value.unit}` : "";
+        },
+        onSave: (newValue, context) => {
+          const amount = parseFloat(newValue as string);
+          if (isNaN(amount)) {
+            toast.error("Please enter a valid amount");
+            return false;
+          }
+          dispatch(actions.updatePenaltyClause({ 
+            id: context.row.id, 
+            deductionAmount: { value: amount, unit: currency }
+          }));
+          toast.success("Deduction amount updated");
+          return true;
+        },
+      },
+      {
+        field: "comment",
+        title: "Comment",
+        editable: true,
+        align: "left" as ColumnAlignment,
+        renderCell: (value: string | null) => value || "-",
+        onSave: (newValue, context) => {
+          dispatch(actions.updatePenaltyClause({ 
+            id: context.row.id, 
+            comment: newValue as string || undefined
+          }));
+          toast.success("Penalty clause comment updated");
+          return true;
+        },
+      }
+    ],
+    [actions, currency, dispatch]
+  );
 
   const handleAddClause = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!newClause.condition.trim()) {
+      toast.error('Condition is required');
+      return;
+    }
+    if (!newClause.amount || isNaN(parseFloat(newClause.amount))) {
+      toast.error('Valid amount is required');
+      return;
+    }
+
     if (activeSubTab === "bonus") {
       dispatch(actions.addBonusClause({
-        id: newClause.id,
+        id: generateId(),
         condition: newClause.condition,
         bonusAmount: {
           value: parseFloat(newClause.amount),
@@ -42,9 +162,10 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
         },
         comment: newClause.comment || undefined
       }));
+      toast.success("Bonus clause added successfully");
     } else {
       dispatch(actions.addPenaltyClause({
-        id: newClause.id,
+        id: generateId(),
         condition: newClause.condition,
         deductionAmount: {
           value: parseFloat(newClause.amount),
@@ -52,295 +173,149 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
         },
         comment: newClause.comment || undefined
       }));
+      toast.success("Penalty clause added successfully");
     }
 
-    setNewClause({ id: "", condition: "", amount: "", comment: "" });
-    setIsAddingNew(false);
-  }, [newClause, activeSubTab, dispatch, actions]);
-
-  const handleUpdateClause = useCallback((id: string, type: "bonus" | "penalty") => {
-    if (type === "bonus") {
-      dispatch(actions.updateBonusClause({
-        id,
-        condition: editForm.condition || undefined,
-        bonusAmount: editForm.amount ? {
-          value: parseFloat(editForm.amount),
-          unit: currency
-        } : undefined,
-        comment: editForm.comment || undefined
-      }));
-    } else {
-      dispatch(actions.updatePenaltyClause({
-        id,
-        condition: editForm.condition || undefined,
-        deductionAmount: editForm.amount ? {
-          value: parseFloat(editForm.amount),
-          unit: currency
-        } : undefined,
-        comment: editForm.comment || undefined
-      }));
-    }
-    setEditingId(null);
-    setEditForm({});
-  }, [editForm, dispatch, actions]);
-
-  const handleDeleteClause = useCallback((id: string, type: "bonus" | "penalty") => {
-    if (confirm(`Are you sure you want to delete this ${type} clause?`)) {
-      if (type === "bonus") {
-        dispatch(actions.deleteBonusClause({ id }));
-      } else {
-        dispatch(actions.deletePenaltyClause({ id }));
-      }
-    }
-  }, [dispatch, actions]);
-
-  const startEditing = useCallback((clause: Clause) => {
-    setEditingId(clause.id);
-    setEditForm({
-      condition: clause.condition,
-      amount: (clause.bonusAmount?.value || clause.deductionAmount?.value || "").toString(),
-      comment: clause.comment || ""
+    setNewClause({
+      condition: "",
+      amount: "",
+      comment: ""
     });
-  }, []);
+    setIsAddingNew(false);
+  }, [newClause, activeSubTab, dispatch, actions, currency]);
 
-  const renderClauseList = (clauses: Clause[], type: "bonus" | "penalty") => {
-    if (clauses.length === 0) {
-      return (
-        <div className="text-center py-8 text-gray-500">
-          No {type} clauses defined yet. Add your first clause to get started.
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4">
-        {clauses.map((clause) => (
-          <div key={clause.id} className={`bg-white border rounded-lg p-4 ${
-            type === "bonus" ? "border-green-200" : "border-red-200"
-          }`}>
-            {editingId === clause.id ? (
-              // Edit Mode
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
-                  <textarea
-                    value={editForm.condition}
-                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => 
-                      setEditForm({...editForm, condition: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={2}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {type === "bonus" ? "Bonus Amount" : "Deduction Amount"}
-                    </label>
-                    <input
-                      type="number"
-                      value={editForm.amount}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                        setEditForm({...editForm, amount: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      step="0.01"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Comment</label>
-                    <input
-                      type="text"
-                      value={editForm.comment}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                        setEditForm({...editForm, comment: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => handleUpdateClause(clause.id, type)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditingId(null);
-                      setEditForm({});
-                    }}
-                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors text-sm"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              // View Mode
-              <div>
-                <div className="flex justify-between items-start">
-                  <div className="flex-grow">
-                    <p className="font-medium text-gray-900 mb-2">{clause.condition}</p>
-                    <div className="flex gap-4 text-sm">
-                      <span className={`font-semibold ${
-                        type === "bonus" ? "text-green-600" : "text-red-600"
-                      }`}>
-                        {type === "bonus" ? "Bonus: " : "Penalty: "}
-                        {(clause.bonusAmount?.value || clause.deductionAmount?.value || 0)} USD
-                      </span>
-                      {clause.comment && (
-                        <span className="text-gray-600">Note: {clause.comment}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => startEditing(clause)}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClause(clause.id, type)}
-                      className="px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors text-sm"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  };
+  const currentClauses = activeSubTab === "bonus" ? bonusClauses : penaltyClauses;
 
   return (
-    <div>
-      {/* Sub-tabs for Bonus/Penalty */}
-      <div className="flex gap-4 mb-6 border-b border-gray-200">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-semibold dark:text-white">Bonus & Penalty Clauses</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+            {bonusClauses.length} bonus clause(s), {penaltyClauses.length} penalty clause(s)
+          </p>
+        </div>
+        <Button
+          onClick={() => setIsAddingNew(!isAddingNew)}
+        >
+          <Icon name="Plus" size={16} className="mr-2" />
+          Add {activeSubTab === "bonus" ? "Bonus" : "Penalty"} Clause
+        </Button>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 border-b border-gray-200 dark:border-gray-600">
         <button
           onClick={() => setActiveSubTab("bonus")}
-          className={`pb-2 px-1 font-medium transition-colors border-b-2 ${
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
             activeSubTab === "bonus"
-              ? "text-green-600 border-green-600"
-              : "text-gray-600 border-transparent hover:text-gray-900"
+              ? "bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 border-b-2 border-blue-700 dark:border-blue-300"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           }`}
         >
           Bonus Clauses ({bonusClauses.length})
         </button>
         <button
           onClick={() => setActiveSubTab("penalty")}
-          className={`pb-2 px-1 font-medium transition-colors border-b-2 ${
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg ${
             activeSubTab === "penalty"
-              ? "text-red-600 border-red-600"
-              : "text-gray-600 border-transparent hover:text-gray-900"
+              ? "bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300 border-b-2 border-red-700 dark:border-red-300"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           }`}
         >
           Penalty Clauses ({penaltyClauses.length})
         </button>
       </div>
 
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">
-          {activeSubTab === "bonus" ? "Bonus Clauses" : "Penalty Clauses"}
-        </h2>
-        <button
-          onClick={() => setIsAddingNew(true)}
-          className={`px-4 py-2 rounded-md transition-colors text-white ${
-            activeSubTab === "bonus"
-              ? "bg-green-600 hover:bg-green-700"
-              : "bg-red-600 hover:bg-red-700"
-          }`}
-        >
-          Add {activeSubTab === "bonus" ? "Bonus" : "Penalty"} Clause
-        </button>
-      </div>
-
-      {/* Add New Clause Form */}
       {isAddingNew && (
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <h3 className="font-semibold mb-4">
-            New {activeSubTab === "bonus" ? "Bonus" : "Penalty"} Clause
+        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border dark:border-gray-600">
+          <h3 className="text-lg font-medium mb-4 dark:text-white">
+            Add New {activeSubTab === "bonus" ? "Bonus" : "Penalty"} Clause
           </h3>
           <form onSubmit={handleAddClause} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ID *</label>
-              <input
-                type="text"
-                value={newClause.id}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                  setNewClause({...newClause, id: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="clause-1, bonus-1, etc."
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Condition *</label>
-              <textarea
-                value={newClause.condition}
-                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => 
-                  setNewClause({...newClause, condition: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-                rows={2}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {activeSubTab === "bonus" ? "Bonus Amount" : "Deduction Amount"} *
-                </label>
-                <input
-                  type="number"
-                  value={newClause.amount}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                    setNewClause({...newClause, amount: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                  step="0.01"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Comment</label>
-                <input
-                  type="text"
-                  value={newClause.comment}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                    setNewClause({...newClause, comment: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
+            <TextInput
+              label="Condition *"
+              value={newClause.condition}
+              onChange={(e) => setNewClause({...newClause, condition: e.target.value})}
+              className="w-full"
+              required
+            />
+
+            <TextInput
+              label={`${activeSubTab === "bonus" ? "Bonus" : "Deduction"} Amount (${currency}) *`}
+              type="number"
+              value={newClause.amount}
+              onChange={(e) => setNewClause({...newClause, amount: e.target.value})}
+              className="w-full"
+              placeholder="0.00"
+              step="0.01"
+              required
+            />
+
+            <Textarea
+              label="Comment"
+              value={newClause.comment}
+              onChange={(e) => setNewClause({...newClause, comment: e.target.value})}
+              className="w-full"
+              rows={3}
+              placeholder="Optional comment or additional details..."
+            />
+
             <div className="flex gap-3">
-              <button
-                type="submit"
-                className={`px-4 py-2 rounded-md transition-colors text-white ${
-                  activeSubTab === "bonus"
-                    ? "bg-green-600 hover:bg-green-700"
-                    : "bg-red-600 hover:bg-red-700"
-                }`}
-              >
-                Add Clause
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAddingNew(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              <Button type="submit">
+                Add {activeSubTab === "bonus" ? "Bonus" : "Penalty"} Clause
+              </Button>
+              <Button 
+                type="button" 
+                onClick={() => {
+                  setIsAddingNew(false);
+                  setNewClause({
+                    condition: "",
+                    amount: "",
+                    comment: ""
+                  });
+                }}
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Clauses List */}
-      {activeSubTab === "bonus" 
-        ? renderClauseList(bonusClauses, "bonus")
-        : renderClauseList(penaltyClauses, "penalty")
-      }
+      {currentClauses.length > 0 ? (
+        activeSubTab === "bonus" ? (
+          <ObjectSetTable
+            data={bonusClauses}
+            columns={bonusColumns}
+            onAdd={() => setIsAddingNew(true)}
+            onDelete={(row) => {
+              dispatch(actions.deleteBonusClause({ id: (row as any).id }));
+              toast.success("Bonus clause deleted");
+            }}
+          />
+        ) : (
+          <ObjectSetTable
+            data={penaltyClauses}
+            columns={penaltyColumns}
+            onAdd={() => setIsAddingNew(true)}
+            onDelete={(row) => {
+              dispatch(actions.deletePenaltyClause({ id: (row as any).id }));
+              toast.success("Penalty clause deleted");
+            }}
+          />
+        )
+      ) : (
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+          <Icon name="Checkmark" size={48} className="mx-auto mb-4 text-gray-400" />
+          <p className="text-lg font-medium">
+            No {activeSubTab} clauses defined yet
+          </p>
+          <p className="text-sm">
+            Add your first {activeSubTab} clause to get started
+          </p>
+        </div>
+      )}
     </div>
   );
 }
