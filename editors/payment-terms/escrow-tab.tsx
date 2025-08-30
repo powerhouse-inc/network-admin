@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { TextInput, Textarea } from "@powerhousedao/document-engineering";
-import { Button } from "@powerhousedao/design-system";
-import { toast } from "react-toastify";
+import { Button, toast } from "@powerhousedao/design-system";
 import type { PaymentTermsState } from "../../document-models/payment-terms/gen/schema/types.js";
 
 export interface EscrowTabProps {
@@ -23,12 +22,16 @@ export function EscrowTab({ state, dispatch, actions }: EscrowTabProps) {
     e.preventDefault();
     
     if (!formData.amountHeld || isNaN(parseFloat(formData.amountHeld))) {
-      toast.error("Please enter a valid amount to be held in escrow");
+      toast("Please enter a valid amount to be held in escrow", {
+        type: "error",
+      });
       return;
     }
     
     if (!formData.releaseConditions.trim()) {
-      toast.error("Release conditions are required");
+      toast("Release conditions are required", {
+        type: "error",
+      });
       return;
     }
     
@@ -42,7 +45,9 @@ export function EscrowTab({ state, dispatch, actions }: EscrowTabProps) {
       escrowProvider: formData.escrowProvider || undefined
     }));
     
-    toast.success("Escrow details saved");
+    toast("Escrow details saved", {
+      type: "success",
+    });
     setIsEditing(false);
   }, [formData, dispatch, actions, state.currency]);
 
@@ -63,6 +68,9 @@ export function EscrowTab({ state, dispatch, actions }: EscrowTabProps) {
           <h2 className="text-xl font-semibold dark:text-white">Escrow Configuration</h2>
           <Button
             onClick={() => setIsEditing(true)}
+            color="light"
+            size="small"
+            className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
             {state.escrowDetails ? "Edit Escrow" : "Configure Escrow"}
           </Button>

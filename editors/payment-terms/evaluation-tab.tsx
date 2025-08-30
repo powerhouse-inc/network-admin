@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { TextInput, Select, Textarea } from "@powerhousedao/document-engineering";
-import { Button } from "@powerhousedao/design-system";
-import { toast } from "react-toastify";
+import { Button, toast } from "@powerhousedao/design-system";
 import type { 
   PaymentTermsState, 
   EvaluationFrequency 
@@ -34,12 +33,16 @@ export function EvaluationTab({ state, dispatch, actions }: EvaluationTabProps) 
     e.preventDefault();
     
     if (!formData.evaluatorTeam.trim()) {
-      toast.error("Evaluator team is required");
+      toast("Evaluator team is required", {
+        type: "error",
+      });
       return;
     }
     
     if (!formData.criteria.trim()) {
-      toast.error("Evaluation criteria are required");
+      toast("Evaluation criteria are required", {
+        type: "error",
+      });
       return;
     }
     
@@ -52,7 +55,9 @@ export function EvaluationTab({ state, dispatch, actions }: EvaluationTabProps) 
       commentsVisibleToClient: formData.commentsVisibleToClient
     }));
     
-    toast.success("Evaluation terms saved");
+    toast("Evaluation terms saved", {
+      type: "success",
+    });
     setIsEditing(false);
   }, [formData, dispatch, actions]);
 
@@ -75,6 +80,9 @@ export function EvaluationTab({ state, dispatch, actions }: EvaluationTabProps) 
           <h2 className="text-xl font-semibold dark:text-white">Evaluation Terms</h2>
           <Button
             onClick={() => setIsEditing(true)}
+            color="light"
+            size="small"
+            className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
             {state.evaluation ? "Edit Terms" : "Configure Evaluation"}
           </Button>
@@ -205,12 +213,18 @@ export function EvaluationTab({ state, dispatch, actions }: EvaluationTabProps) 
       <div className="flex gap-3">
         <Button
           type="submit"
+          color="light"
+          size="small"
+          className="cursor-pointer hover:bg-blue-600 hover:text-white"
         >
           Save Evaluation Terms
         </Button>
         <Button
           type="button"
           onClick={handleCancel}
+          color="light"
+          size="small"
+          className="cursor-pointer hover:bg-gray-600 hover:text-white"
         >
           Cancel
         </Button>

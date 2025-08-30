@@ -1,8 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
-import { ObjectSetTable, TextInput } from "@powerhousedao/document-engineering";
+import { ObjectSetTable, TextInput, DatePicker } from "@powerhousedao/document-engineering";
 import type { ColumnDef, ColumnAlignment } from "@powerhousedao/document-engineering";
-import { Button, Icon } from "@powerhousedao/design-system";
-import { toast } from "react-toastify";
+import { Button, Icon, toast } from "@powerhousedao/design-system";
 import { generateId } from "document-model";
 import type { 
   Milestone,
@@ -33,12 +32,17 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
         editable: true,
         align: "left" as ColumnAlignment,
         onSave: (newValue, context) => {
-          dispatch(actions.updateMilestone({ 
-            id: context.row.id, 
-            name: newValue as string 
-          }));
-          toast.success("Milestone name updated");
-          return true;
+          if (newValue !== context.row.name) {
+            dispatch(actions.updateMilestone({ 
+              id: context.row.id, 
+              name: newValue as string 
+            }));
+            toast("Milestone name updated", {
+              type: "success",
+            });
+            return true;
+          }
+          return false;
         },
       },
       {
@@ -52,14 +56,18 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
         onSave: (newValue, context) => {
           const amount = parseFloat(newValue as string);
           if (isNaN(amount)) {
-            toast.error("Please enter a valid amount");
+            toast("Please enter a valid amount", {
+              type: "error",
+            });
             return false;
           }
           dispatch(actions.updateMilestone({ 
             id: context.row.id, 
             amount: { value: amount, unit: currency }
           }));
-          toast.success("Milestone amount updated");
+          toast("Milestone amount updated", {
+            type: "success",
+          });
           return true;
         },
       },
@@ -77,7 +85,9 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
             id: context.row.id, 
             expectedCompletionDate: dateValue || undefined
           }));
-          toast.success("Expected completion date updated");
+          toast("Expected completion date updated", {
+            type: "success",
+          });
           return true;
         },
       },
@@ -93,7 +103,9 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
             id: context.row.id, 
             requiresApproval: approved 
           }));
-          toast.success("Approval requirement updated");
+          toast("Approval requirement updated", {
+            type: "success",
+          });
           return true;
         },
       },
@@ -102,26 +114,24 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
         title: "Status",
         editable: true,
         align: "center" as ColumnAlignment,
-        renderCell: (value: string) => {
-          const statusColors = {
-            PENDING: "bg-yellow-100 text-yellow-800",
-            READY_FOR_REVIEW: "bg-blue-100 text-blue-800",
-            APPROVED: "bg-green-100 text-green-800",
-            PAID: "bg-green-200 text-green-900",
-            REJECTED: "bg-red-100 text-red-800"
+        renderCell: (value: MilestonePayoutStatus) => {
+          const statusMap: Record<MilestonePayoutStatus, string> = {
+            PENDING: "Pending",
+            READY_FOR_REVIEW: "Ready for Review",
+            APPROVED: "Approved",
+            PAID: "Paid",
+            REJECTED: "Rejected"
           };
-          return (
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[value as keyof typeof statusColors] || "bg-gray-100 text-gray-800"}`}>
-              {value.replace(/_/g, ' ')}
-            </span>
-          );
+          return statusMap[value] || value;
         },
         onSave: (newValue, context) => {
-          dispatch(actions.updateMilestoneStatus({ 
+          dispatch(actions.updateMilestone({ 
             id: context.row.id, 
             payoutStatus: newValue as MilestonePayoutStatus 
           }));
-          toast.success("Milestone status updated");
+          toast("Milestone status updated", {
+            type: "success",
+          });
           return true;
         },
       },
@@ -134,7 +144,9 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
           <Button
             onClick={() => {
               dispatch(actions.deleteMilestone({ id: context.row.id }));
-              toast.success("Milestone deleted");
+              toast("Milestone deleted", {
+                type: "success",
+              });
             }}
             size="small"
             className="text-red-600 hover:text-red-800"
@@ -151,11 +163,15 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
     e.preventDefault();
     
     if (!newMilestone.name.trim()) {
-      toast.error('Name is required');
+      toast('Name is required', {
+        type: "error",
+      });
       return;
     }
     if (!newMilestone.amount || isNaN(parseFloat(newMilestone.amount))) {
-      toast.error('Valid amount is required');
+      toast('Valid amount is required', {
+        type: "error",
+      });
       return;
     }
     
@@ -170,12 +186,15 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
     };
 
     if (newMilestone.expectedCompletionDate) {
-      milestoneData.expectedCompletionDate = newMilestone.expectedCompletionDate;
+      milestoneData.expectedCompletionDate = new Date(newMilestone.expectedCompletionDate).toISOString();
     }
 
     dispatch(actions.addMilestone(milestoneData));
-    toast.success("Milestone added successfully");
+    toast("Milestone added successfully", {
+      type: "success",
+    });
 
+    // Reset form and close edit section
     setNewMilestone({
       name: "",
       amount: "",
@@ -196,6 +215,9 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
         </div>
         <Button
           onClick={() => setIsAddingNew(!isAddingNew)}
+          color="light"
+          size="small"
+          className="cursor-pointer hover:bg-blue-600 hover:text-white"
         >
           <Icon name="Plus" size={16} className="mr-2" />
           Add Milestone
@@ -226,13 +248,15 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
                 required
               />
 
-              <TextInput
-                label="Expected Completion Date"
-                type="date"
-                value={newMilestone.expectedCompletionDate}
-                onChange={(e) => setNewMilestone({...newMilestone, expectedCompletionDate: e.target.value})}
-                className="w-full"
-              />
+                              <DatePicker
+                  value={newMilestone.expectedCompletionDate ? new Date(newMilestone.expectedCompletionDate) : undefined}
+                  onChange={(e) => {
+                    const date = e.target.value ? new Date(e.target.value) : null;
+                    setNewMilestone({...newMilestone, expectedCompletionDate: date?.toISOString() || ""});
+                  }}
+                  name="expected-completion-date"
+                  placeholder="Select expected completion date"
+                />
 
               <div className="flex items-center pt-6">
                 <input
@@ -249,7 +273,12 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
             </div>
 
             <div className="flex gap-3">
-              <Button type="submit">
+              <Button 
+                type="submit"
+                color="light"
+                size="small"
+                className="cursor-pointer hover:bg-blue-600 hover:text-white"
+              >
                 Add Milestone
               </Button>
               <Button 
@@ -263,6 +292,9 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
                     requiresApproval: true
                   });
                 }}
+                color="light"
+                size="small"
+                className="cursor-pointer hover:bg-gray-600 hover:text-white"
               >
                 Cancel
               </Button>
@@ -278,7 +310,9 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
           onAdd={() => setIsAddingNew(true)}
           onDelete={(row) => {
             dispatch(actions.deleteMilestone({ id: (row as any).id }));
-            toast.success("Milestone deleted");
+            toast("Milestone deleted", {
+              type: "success",
+            });
           }}
         />
       ) : (

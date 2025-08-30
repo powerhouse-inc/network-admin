@@ -1,8 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { ObjectSetTable, TextInput, Textarea } from "@powerhousedao/document-engineering";
 import type { ColumnDef, ColumnAlignment } from "@powerhousedao/document-engineering";
-import { Button, Icon } from "@powerhousedao/design-system";
-import { toast } from "react-toastify";
+import { Button, Icon, toast } from "@powerhousedao/design-system";
 import { generateId } from "document-model";
 import type { 
   BonusClause,
@@ -38,7 +37,9 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
             id: context.row.id, 
             condition: newValue as string 
           }));
-          toast.success("Bonus clause condition updated");
+          toast("Bonus clause condition updated", {
+            type: "success",
+          });
           return true;
         },
       },
@@ -53,14 +54,18 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
         onSave: (newValue, context) => {
           const amount = parseFloat(newValue as string);
           if (isNaN(amount)) {
-            toast.error("Please enter a valid amount");
+            toast("Please enter a valid amount", {
+              type: "error",
+            });
             return false;
           }
           dispatch(actions.updateBonusClause({ 
             id: context.row.id, 
             bonusAmount: { value: amount, unit: currency }
           }));
-          toast.success("Bonus amount updated");
+          toast("Bonus amount updated", {
+            type: "success",
+          });
           return true;
         },
       },
@@ -75,7 +80,9 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
             id: context.row.id, 
             comment: newValue as string || undefined
           }));
-          toast.success("Bonus clause comment updated");
+          toast("Bonus clause comment updated", {
+            type: "success",
+          });
           return true;
         },
       }
@@ -95,7 +102,9 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
             id: context.row.id, 
             condition: newValue as string 
           }));
-          toast.success("Penalty clause condition updated");
+          toast("Penalty clause condition updated", {
+            type: "success",
+          });
           return true;
         },
       },
@@ -110,14 +119,18 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
         onSave: (newValue, context) => {
           const amount = parseFloat(newValue as string);
           if (isNaN(amount)) {
-            toast.error("Please enter a valid amount");
+            toast("Please enter a valid amount", {
+              type: "error",
+            });
             return false;
           }
           dispatch(actions.updatePenaltyClause({ 
             id: context.row.id, 
             deductionAmount: { value: amount, unit: currency }
           }));
-          toast.success("Deduction amount updated");
+          toast("Deduction amount updated", {
+            type: "success",
+          });
           return true;
         },
       },
@@ -132,7 +145,9 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
             id: context.row.id, 
             comment: newValue as string || undefined
           }));
-          toast.success("Penalty clause comment updated");
+          toast("Penalty clause comment updated", {
+            type: "success",
+          });
           return true;
         },
       }
@@ -144,11 +159,15 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
     e.preventDefault();
     
     if (!newClause.condition.trim()) {
-      toast.error('Condition is required');
+      toast('Condition is required', {
+        type: "error",
+      });
       return;
     }
     if (!newClause.amount || isNaN(parseFloat(newClause.amount))) {
-      toast.error('Valid amount is required');
+      toast('Valid amount is required', {
+        type: "error",
+      });
       return;
     }
 
@@ -162,7 +181,9 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
         },
         comment: newClause.comment || undefined
       }));
-      toast.success("Bonus clause added successfully");
+      toast("Bonus clause added successfully", {
+      type: "success",
+    });
     } else {
       dispatch(actions.addPenaltyClause({
         id: generateId(),
@@ -173,7 +194,9 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
         },
         comment: newClause.comment || undefined
       }));
-      toast.success("Penalty clause added successfully");
+      toast("Penalty clause added successfully", {
+        type: "success",
+      });
     }
 
     setNewClause({
@@ -197,6 +220,9 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
         </div>
         <Button
           onClick={() => setIsAddingNew(!isAddingNew)}
+          color="light"
+          size="small"
+          className="cursor-pointer hover:bg-blue-600 hover:text-white"
         >
           <Icon name="Plus" size={16} className="mr-2" />
           Add {activeSubTab === "bonus" ? "Bonus" : "Penalty"} Clause
@@ -262,7 +288,12 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
             />
 
             <div className="flex gap-3">
-              <Button type="submit">
+              <Button 
+                type="submit"
+                color="light"
+                size="small"
+                className="cursor-pointer hover:bg-blue-600 hover:text-white"
+              >
                 Add {activeSubTab === "bonus" ? "Bonus" : "Penalty"} Clause
               </Button>
               <Button 
@@ -275,6 +306,9 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
                     comment: ""
                   });
                 }}
+                color="light"
+                size="small"
+                className="cursor-pointer hover:bg-gray-600 hover:text-white"
               >
                 Cancel
               </Button>
@@ -291,7 +325,9 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
             onAdd={() => setIsAddingNew(true)}
             onDelete={(row) => {
               dispatch(actions.deleteBonusClause({ id: (row as any).id }));
-              toast.success("Bonus clause deleted");
+              toast("Bonus clause deleted", {
+              type: "success",
+            });
             }}
           />
         ) : (
@@ -301,7 +337,9 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
             onAdd={() => setIsAddingNew(true)}
             onDelete={(row) => {
               dispatch(actions.deletePenaltyClause({ id: (row as any).id }));
-              toast.success("Penalty clause deleted");
+              toast("Penalty clause deleted", {
+              type: "success",
+            });
             }}
           />
         )

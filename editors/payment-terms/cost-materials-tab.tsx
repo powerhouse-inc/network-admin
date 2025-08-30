@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import { toast } from "react-toastify";
+import { TextInput, Select } from "@powerhousedao/document-engineering";
+import { Button, toast } from "@powerhousedao/design-system";
 import type { 
   PaymentTermsState, 
   BillingFrequency 
@@ -36,7 +37,9 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
       timesheetRequired: formData.timesheetRequired
     }));
     
-    toast.success("Cost & Materials configuration saved");
+    toast("Cost & Materials configuration saved", {
+      type: "success",
+    });
     setIsEditing(false);
   }, [formData, dispatch, actions, state.currency]);
 
@@ -55,12 +58,14 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
       <div className="space-y-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold dark:text-white">Cost & Materials Configuration</h2>
-          <button
+          <Button
             onClick={() => setIsEditing(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            color="light"
+            size="small"
+            className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
             {state.costAndMaterials ? "Edit Configuration" : "Configure Cost & Materials"}
-          </button>
+          </Button>
         </div>
 
         {state.costAndMaterials ? (
@@ -111,12 +116,11 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Hourly Rate
           </label>
-          <input
-            type="number"
+          <TextInput
             value={formData.hourlyRate}
-            onChange={(e) => setFormData({...formData, hourlyRate: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, hourlyRate: e.target.value})}
             placeholder="0.00"
+            type="number"
             step="0.01"
           />
         </div>
@@ -125,12 +129,11 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Variable Cap
           </label>
-          <input
-            type="number"
+          <TextInput
             value={formData.variableCap}
-            onChange={(e) => setFormData({...formData, variableCap: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, variableCap: e.target.value})}
             placeholder="0.00"
+            type="number"
             step="0.01"
           />
         </div>
@@ -139,16 +142,17 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Billing Frequency *
           </label>
-          <select
+          <Select
             value={formData.billingFrequency}
-            onChange={(e) => setFormData({...formData, billingFrequency: e.target.value as BillingFrequency})}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            onChange={(value) => setFormData({...formData, billingFrequency: value as BillingFrequency})}
+            options={[
+              { value: "WEEKLY", label: "Weekly" },
+              { value: "BIWEEKLY", label: "Biweekly" },
+              { value: "MONTHLY", label: "Monthly" }
+            ]}
+            placeholder="Select billing frequency"
             required
-          >
-            <option value="WEEKLY">Weekly</option>
-            <option value="BIWEEKLY">Biweekly</option>
-            <option value="MONTHLY">Monthly</option>
-          </select>
+          />
         </div>
 
         <div className="flex items-center pt-6">
@@ -166,19 +170,23 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
       </div>
 
       <div className="flex gap-3">
-        <button
+        <Button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          color="light"
+          size="small"
+          className="cursor-pointer hover:bg-blue-600 hover:text-white"
         >
           Save Configuration
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={handleCancel}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+          color="light"
+          size="small"
+          className="cursor-pointer hover:bg-gray-600 hover:text-white"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );

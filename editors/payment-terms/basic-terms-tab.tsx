@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
-import { toast } from "react-toastify";
+import { toast, Button } from "@powerhousedao/design-system";
+import { Select, TextInput } from "@powerhousedao/document-engineering";
 import type { 
   PaymentTermsState, 
   PaymentCurrency, 
@@ -60,7 +61,9 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
       }));
     }
     
-    toast.success("Basic terms updated successfully");
+    toast("Basic terms updated successfully", {
+      type: "success",
+    });
     setIsEditing(false);
   }, [formData, dispatch, actions, state.status, state.escrowDetails]);
 
@@ -82,12 +85,14 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
       <div className="space-y-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Basic Information</h2>
-          <button
+          <Button
             onClick={() => setIsEditing(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            color="light"
+            size="small"
+            className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
             Edit Terms
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-2 gap-6">
@@ -141,11 +146,10 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Proposer *
           </label>
-          <input
-            type="text"
+          <TextInput
             value={formData.proposer}
-            onChange={(e) => setFormData({...formData, proposer: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, proposer: e.target.value})}
+            placeholder="Enter proposer name"
             required
           />
         </div>
@@ -154,11 +158,10 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Payer *
           </label>
-          <input
-            type="text"
+          <TextInput
             value={formData.payer}
-            onChange={(e) => setFormData({...formData, payer: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, payer: e.target.value})}
+            placeholder="Enter payer name"
             required
           />
         </div>
@@ -167,44 +170,45 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Currency *
           </label>
-          <select
+          <Select
             value={formData.currency}
-            onChange={(e) => setFormData({...formData, currency: e.target.value as PaymentCurrency})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(value) => setFormData({...formData, currency: value as PaymentCurrency})}
+            options={[
+              { value: "USD", label: "USD" },
+              { value: "EUR", label: "EUR" },
+              { value: "GBP", label: "GBP" }
+            ]}
+            placeholder="Select currency"
             required
-          >
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-          </select>
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Payment Model *
           </label>
-          <select
+          <Select
             value={formData.paymentModel}
-            onChange={(e) => setFormData({...formData, paymentModel: e.target.value as PaymentModel})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(value) => setFormData({...formData, paymentModel: value as PaymentModel})}
+            options={[
+              { value: "MILESTONE", label: "Milestone" },
+              { value: "COST_AND_MATERIALS", label: "Cost & Materials" },
+              { value: "RETAINER", label: "Retainer" }
+            ]}
+            placeholder="Select payment model"
             required
-          >
-            <option value="MILESTONE">Milestone</option>
-            <option value="COST_AND_MATERIALS">Cost & Materials</option>
-            <option value="RETAINER">Retainer</option>
-          </select>
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Total Amount
           </label>
-          <input
-            type="number"
+          <TextInput
             value={formData.totalAmount}
-            onChange={(e) => setFormData({...formData, totalAmount: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, totalAmount: e.target.value})}
             placeholder="0.00"
+            type="number"
             step="0.01"
           />
         </div>
@@ -213,17 +217,18 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Status *
           </label>
-          <select
+          <Select
             value={formData.status}
-            onChange={(e) => setFormData({...formData, status: e.target.value as PaymentTermsStatus})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(value) => setFormData({...formData, status: value as PaymentTermsStatus})}
+            options={[
+              { value: "DRAFT", label: "Draft" },
+              { value: "SUBMITTED", label: "Submitted" },
+              { value: "ACCEPTED", label: "Accepted" },
+              { value: "CANCELLED", label: "Cancelled" }
+            ]}
+            placeholder="Select status"
             required
-          >
-            <option value="DRAFT">Draft</option>
-            <option value="SUBMITTED">Submitted</option>
-            <option value="ACCEPTED">Accepted</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
+          />
         </div>
 
         <div className="col-span-2">
@@ -243,19 +248,23 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
       </div>
 
       <div className="flex gap-3">
-        <button
+        <Button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          color="light"
+          size="small"
+          className="cursor-pointer hover:bg-blue-600 hover:text-white"
         >
           Save Terms
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={handleCancel}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+          color="light"
+          size="small"
+          className="cursor-pointer hover:bg-gray-600 hover:text-white"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );

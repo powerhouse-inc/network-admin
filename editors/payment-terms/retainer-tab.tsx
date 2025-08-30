@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
-import { TextInput, Select, Textarea } from "@powerhousedao/document-engineering";
-import { Button } from "@powerhousedao/design-system";
-import { toast } from "react-toastify";
+import { TextInput, Select, Textarea, DatePicker } from "@powerhousedao/document-engineering";
+import { Button, toast } from "@powerhousedao/design-system";
 import type { 
   PaymentTermsState, 
   BillingFrequency 
@@ -34,19 +33,29 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
     e.preventDefault();
     
     if (!formData.retainerAmount || isNaN(parseFloat(formData.retainerAmount))) {
-      toast.error("Please enter a valid retainer amount");
+      toast("Please enter a valid retainer amount", {
+        type: "error",
+      });
       return;
     }
     
     if (!formData.startDate) {
-      toast.error("Start date is required");
+      toast("Start date is required", {
+        type: "error",
+      });
       return;
     }
 
     if (!formData.servicesIncluded.trim()) {
-      toast.error("Services included description is required");
+      toast("Services included description is required", {
+        type: "error",
+      });
       return;
     }
+    
+    // Convert date strings to ISO format for the schema
+    const startDate = new Date(formData.startDate).toISOString();
+    const endDate = formData.endDate ? new Date(formData.endDate).toISOString() : undefined;
     
     dispatch(actions.setRetainerDetails({
       retainerAmount: {
@@ -54,13 +63,15 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
         unit: state.currency
       },
       billingFrequency: formData.billingFrequency,
-      startDate: formData.startDate,
-      endDate: formData.endDate || undefined,
+      startDate: startDate,
+      endDate: endDate,
       autoRenew: formData.autoRenew,
       servicesIncluded: formData.servicesIncluded
     }));
     
-    toast.success("Retainer configuration saved");
+    toast("Retainer configuration saved", {
+      type: "success",
+    });
     setIsEditing(false);
   }, [formData, dispatch, actions, state.currency]);
 
@@ -83,6 +94,9 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
           <h2 className="text-xl font-semibold dark:text-white">Retainer Configuration</h2>
           <Button
             onClick={() => setIsEditing(true)}
+            color="light"
+            size="small"
+            className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
             {state.retainerDetails ? "Edit Configuration" : "Configure Retainer"}
           </Button>
@@ -156,21 +170,25 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
           onChange={(value) => setFormData({...formData, billingFrequency: value as BillingFrequency})}
         />
 
-        <TextInput
-          label="Start Date *"
-          type="date"
-          value={formData.startDate}
-          onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-          className="w-full"
+        <DatePicker
+          value={formData.startDate ? new Date(formData.startDate) : undefined}
+          onChange={(e) => {
+            const date = e.target.value ? new Date(e.target.value) : null;
+            setFormData({...formData, startDate: date?.toISOString() || ""});
+          }}
+          name="start-date"
+          placeholder="Select start date"
           required
         />
 
-        <TextInput
-          label="End Date (Optional)"
-          type="date"
-          value={formData.endDate}
-          onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-          className="w-full"
+        <DatePicker
+          value={formData.endDate ? new Date(formData.endDate) : undefined}
+          onChange={(e) => {
+            const date = e.target.value ? new Date(e.target.value) : null;
+            setFormData({...formData, endDate: date?.toISOString() || ""});
+          }}
+          name="end-date"
+          placeholder="Select end date (optional)"
         />
 
         <div className="col-span-2">
@@ -204,12 +222,18 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
       <div className="flex gap-3">
         <Button
           type="submit"
+          color="light"
+          size="small"
+          className="cursor-pointer hover:bg-blue-600 hover:text-white"
         >
           Save Configuration
         </Button>
         <Button
           type="button"
           onClick={handleCancel}
+          color="light"
+          size="small"
+          className="cursor-pointer hover:bg-gray-600 hover:text-white"
         >
           Cancel
         </Button>
