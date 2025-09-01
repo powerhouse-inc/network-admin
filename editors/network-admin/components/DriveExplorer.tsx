@@ -5,9 +5,6 @@ import {
   useBreadcrumbs,
 } from "@powerhousedao/design-system";
 import {
-  SidebarProvider,
-  Sidebar,
-  useSidebar,
   Icon,
   type SidebarNode,
 } from "@powerhousedao/document-engineering";
@@ -31,17 +28,20 @@ import {
   useAllDocuments,
 } from "@powerhousedao/reactor-browser";
 import { actions, type DocumentModelModule } from "document-model";
-import { useCallback, useRef, useState, useMemo } from "react";
+import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { CreateDocument } from "./CreateDocument.jsx";
 import { EditorContainer } from "./EditorContainer.jsx";
 import { FolderTree } from "./FolderTree.jsx";
 import { getNewDocumentObject } from "../utils.js";
+import { IsolatedSidebarProvider } from "./IsolatedSidebarProvider.jsx";
+import { IsolatedSidebar } from "./IsolatedSidebar.jsx";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
  * Layout: Left sidebar (folder tree) + Right content area (files/folders + document editor)
  */
 export function DriveExplorer(props: any) {
+
   // === DOCUMENT EDITOR STATE ===
   // Customize document opening/closing behavior here
   const [activeDocumentId, setActiveDocumentId] = useState<
@@ -96,7 +96,7 @@ export function DriveExplorer(props: any) {
   const allFolders = useAllFolderNodes();
 
   // Convert folders and files to SidebarNode format
-  const sidebarNodes = useMemo(() => {
+  const sidebarNodes = useMemo((): SidebarNode[] => {
     const rootNode: SidebarNode = {
       id: "workstreams",
       title: "Workstreams",
@@ -143,12 +143,30 @@ export function DriveExplorer(props: any) {
       ],
     };
     return [rootNode];
-  }, [allFolders, fileChildren]);
+  }, [allFolders, filesWithDocuments]);
 
   // Handle sidebar node selection
   const handleActiveNodeChange = useCallback(
-    (newNode: SidebarNode) => {
-      console.log("newNode", newNode);
+    (nodeId: string) => {
+      console.log("nodeId", nodeId);
+      
+      // Find the node by ID
+      const findNodeById = (nodes: SidebarNode[], id: string): SidebarNode | null => {
+        for (const node of nodes) {
+          if (node.id === id) {
+            return node;
+          }
+          if (node.children) {
+            const found = findNodeById(node.children, id);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const newNode = findNodeById(sidebarNodes, nodeId);
+      if (!newNode) return;
+
       if (newNode.id === "workstreams") {
         setActiveDocumentId(undefined);
       } else if (newNode.id.startsWith("editor-")) {
@@ -165,7 +183,7 @@ export function DriveExplorer(props: any) {
         }
       }
     },
-    [allFolders, fileChildren, setSelectedNode, setActiveDocumentId]
+    [allFolders, fileChildren, setSelectedNode, setActiveDocumentId, sidebarNodes]
   );
 
   // === EVENT HANDLERS ===
@@ -625,10 +643,10 @@ export function DriveExplorer(props: any) {
 
   // === RENDER ===
   return (
-    <SidebarProvider>
+    <IsolatedSidebarProvider nodes={sidebarNodes}>
       <div className="flex h-full">
         {/* === LEFT SIDEBAR: Folder Navigation === */}
-        <Sidebar
+        <IsolatedSidebar
           nodes={sidebarNodes}
           activeNodeId={selectedFolder?.id || activeDocumentId}
           onActiveNodeChange={handleActiveNodeChange}
@@ -643,7 +661,7 @@ export function DriveExplorer(props: any) {
         />
 
         {/* === MAIN CONTENT AREA === */}
-        <div className="flex-1 overflow-y-auto ml-2">
+        <div className="flex-1 overflow-y-auto">
           {activeDocumentId ? (
             <EditorContainer
               handleClose={() => setActiveDocumentId(undefined)}
@@ -664,6 +682,6 @@ export function DriveExplorer(props: any) {
           open={openModal}
         />
       </div>
-    </SidebarProvider>
+    </IsolatedSidebarProvider>
   );
 }
