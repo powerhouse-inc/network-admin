@@ -205,6 +205,76 @@ export const IsolatedSidebarProvider: React.FC<{
     return getMaxDepth(state.nodes);
   }, [state.nodes]);
 
+  // Utility function to check if a level is open
+  const isOpenLevel = useCallback((items: any[], expandedNodes: Set<string>, level: number): boolean => {
+    if (!items.length || level < 1) {
+      return false;
+    }
+    
+    // Check if all levels up to the target level are open
+    const queue = [...items];
+    for (let i = 0; i < level; i++) {
+      const nextLevelQueue = [];
+      while (queue.length > 0) {
+        const current = queue.shift();
+        if (!current) continue;
+        
+        // Check if current level is expanded
+        if (!expandedNodes.has(current.id)) {
+          return false;
+        }
+        
+        // Add children to next level queue
+        if (current.children?.length) {
+          nextLevelQueue.push(...current.children);
+        }
+      }
+      
+      // Move to next level
+      queue.push(...nextLevelQueue);
+      if (queue.length === 0) break;
+    }
+    
+    return true;
+  }, []);
+
+  // Utility function to get nodes that should be expanded for a specific level
+  const getOpenLevels = useCallback((items: any[], level: number): Set<string> => {
+    if (level < 1) {
+      return new Set();
+    }
+    
+    const result = new Set<string>();
+    
+    const traverse = (nodes: any[], currentLevel: number) => {
+      for (const node of nodes) {
+        if (currentLevel < level) {
+          result.add(node.id);
+        }
+        if (node.children?.length) {
+          traverse(node.children, currentLevel + 1);
+        }
+      }
+    };
+    
+    traverse(items, 1); // Start from level 1
+    return result;
+  }, []);
+
+  const openLevel = useCallback((targetLevel: number) => {
+    // Check if the target level is already open
+    const isTargetLevelOpen = isOpenLevel(state.nodes, state.expandedNodes, targetLevel - 1);
+    
+    if (isTargetLevelOpen) {
+      // If the level is already open, close all levels
+      dispatch({ type: SidebarActionType.SET_EXPANDED_NODES, payload: new Set() });
+    } else {
+      // Open nodes up to the target level
+      const openLevels = getOpenLevels(state.nodes, targetLevel);
+      dispatch({ type: SidebarActionType.SET_EXPANDED_NODES, payload: openLevels });
+    }
+  }, [state.nodes, state.expandedNodes, isOpenLevel, getOpenLevels]);
+
   const contextValue = {
     nodes: state.nodes,
     flattenedNodes,
@@ -222,7 +292,7 @@ export const IsolatedSidebarProvider: React.FC<{
     openNode,
     closeNode,
     togglePin: () => {}, // Simplified for now
-    openLevel: () => {}, // Simplified for now
+    openLevel,
     changeSearchTerm: setSearchTerm,
     nextSearchResult,
     previousSearchResult,
