@@ -18,6 +18,10 @@
         {
             "id": "payment-terms",
             "name": "Payment Terms"
+        },
+        {
+            "id": "powerhouse/network-profile",
+            "name": "Network Profile"
         }
     ],
     "editors": [
@@ -35,6 +39,11 @@
             "id": "payment-terms-editor",
             "name": "Payment Terms Editor",
             "documentTypes": ["payment-terms"]
+        },
+        {
+            "id": "network-profile-editor",
+            "name": "Network Profile Editor",
+            "documentTypes": ["powerhouse/network-profile"]
         }
     ],
     "apps": [
