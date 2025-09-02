@@ -122,7 +122,6 @@ export const EditorContainer = (props: {
   const editorModule = useEditorModuleById(
     selectedDocument?.header.meta?.preferredEditor
   );
-
   // Document export functionality - customize export behavior here
   const onExport = useCallback(async () => {
     if (selectedDocument) {
