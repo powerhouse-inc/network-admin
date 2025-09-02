@@ -14,7 +14,7 @@ export const reducer: PaymentTermsMilestonesOperations = {
           amount: action.input.amount,
           expectedCompletionDate: action.input.expectedCompletionDate || null,
           requiresApproval: action.input.requiresApproval,
-          payoutStatus: "PENDING" as const
+          payoutStatus: "PENDING" as "PENDING"
         };
 
         state.milestoneSchedule.push(newMilestone);
