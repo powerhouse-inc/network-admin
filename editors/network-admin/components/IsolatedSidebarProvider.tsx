@@ -192,17 +192,22 @@ export const IsolatedSidebarProvider: React.FC<{
 
   // Calculate max depth
   const maxDepth = useMemo(() => {
-    const getMaxDepth = (nodes: any[]): number => {
-      if (!nodes || nodes.length === 0) return 0;
-      let max = 0;
+    const getMaxDepth = (nodes: any[], currentLevel: number = 0): number => {
+      if (!nodes || nodes.length === 0) return currentLevel;
+      let max = currentLevel;
+      
       for (const node of nodes) {
         if (node.children && node.children.length > 0) {
-          max = Math.max(max, 1 + getMaxDepth(node.children));
+          const childDepth = getMaxDepth(node.children, currentLevel + 1);
+          max = Math.max(max, childDepth);
         }
       }
       return max;
     };
-    return getMaxDepth(state.nodes);
+    const depth = getMaxDepth(state.nodes, 0);
+    // Return depth count (number of levels) instead of level number (0-based index)
+    const depthCount = depth + 1;
+    return depthCount;
   }, [state.nodes]);
 
   // Utility function to check if a level is open
@@ -248,32 +253,107 @@ export const IsolatedSidebarProvider: React.FC<{
     
     const traverse = (nodes: any[], currentLevel: number) => {
       for (const node of nodes) {
+        // Add current node if we're not at the target level yet
         if (currentLevel < level) {
           result.add(node.id);
         }
-        if (node.children?.length) {
+        
+        // Continue traversing children if we haven't reached the target level
+        if (node.children?.length && currentLevel < level - 1) {
           traverse(node.children, currentLevel + 1);
         }
       }
     };
     
-    traverse(items, 1); // Start from level 1
+    traverse(items, 0); // Start from level 0 (root)
     return result;
   }, []);
 
   const openLevel = useCallback((targetLevel: number) => {
-    // Check if the target level is already open
-    const isTargetLevelOpen = isOpenLevel(state.nodes, state.expandedNodes, targetLevel - 1);
+    // Check if the target level is currently visible by checking if nodes at that level are expanded
+    const isTargetLevelVisible = (() => {
+      if (targetLevel === 1) {
+        // For level 1, check if root nodes are expanded
+        return state.nodes.every((node: any) => state.expandedNodes.has(node.id));
+      } else if (targetLevel === 2) {
+        // For level 2, check if folder nodes are expanded
+        const folderNodes = state.nodes.flatMap((node: any) => node.children || []);
+        return folderNodes.length > 0 && folderNodes.every((folder: any) => state.expandedNodes.has(folder.id));
+      } else if (targetLevel === 3) {
+        // For level 3, check if document nodes are expanded
+        const documentNodes = state.nodes.flatMap((node: any) => 
+          (node.children || []).flatMap((folder: any) => folder.children || [])
+        );
+        return documentNodes.length > 0 && documentNodes.every((doc: any) => state.expandedNodes.has(doc.id));
+      }
+      return false;
+    })();
     
-    if (isTargetLevelOpen) {
-      // If the level is already open, close all levels
-      dispatch({ type: SidebarActionType.SET_EXPANDED_NODES, payload: new Set() });
+    if (isTargetLevelVisible) {
+      // If the target level is visible, hide it by closing nodes at that level
+      if (targetLevel === 1) {
+        // Close root nodes
+        const newExpandedNodes = new Set(state.expandedNodes);
+        state.nodes.forEach((node: any) => newExpandedNodes.delete(node.id));
+        dispatch({ type: SidebarActionType.SET_EXPANDED_NODES, payload: newExpandedNodes });
+      } else if (targetLevel === 2) {
+        // Close folder nodes
+        const newExpandedNodes = new Set(state.expandedNodes);
+        state.nodes.forEach((node: any) => {
+          if (node.children) {
+            node.children.forEach((folder: any) => newExpandedNodes.delete(folder.id));
+          }
+        });
+        dispatch({ type: SidebarActionType.SET_EXPANDED_NODES, payload: newExpandedNodes });
+      } else if (targetLevel === 3) {
+        // Close document nodes
+        const newExpandedNodes = new Set(state.expandedNodes);
+        state.nodes.forEach((node: any) => {
+          if (node.children) {
+            node.children.forEach((folder: any) => {
+              if (folder.children) {
+                folder.children.forEach((doc: any) => newExpandedNodes.delete(doc.id));
+              }
+            });
+          }
+        });
+        dispatch({ type: SidebarActionType.SET_EXPANDED_NODES, payload: newExpandedNodes });
+      }
     } else {
-      // Open nodes up to the target level
-      const openLevels = getOpenLevels(state.nodes, targetLevel);
-      dispatch({ type: SidebarActionType.SET_EXPANDED_NODES, payload: openLevels });
+      // If the target level is not visible, show it by opening nodes at that level
+      if (targetLevel === 1) {
+        // Open root nodes
+        const newExpandedNodes = new Set(state.expandedNodes);
+        state.nodes.forEach((node: any) => newExpandedNodes.add(node.id));
+        dispatch({ type: SidebarActionType.SET_EXPANDED_NODES, payload: newExpandedNodes });
+      } else if (targetLevel === 2) {
+        // Open folder nodes (and root nodes if not already open)
+        const newExpandedNodes = new Set(state.expandedNodes);
+        state.nodes.forEach((node: any) => {
+          newExpandedNodes.add(node.id); // Ensure root is open
+          if (node.children) {
+            node.children.forEach((folder: any) => newExpandedNodes.add(folder.id));
+          }
+        });
+        dispatch({ type: SidebarActionType.SET_EXPANDED_NODES, payload: newExpandedNodes });
+      } else if (targetLevel === 3) {
+        // Open document nodes (and root + folder nodes if not already open)
+        const newExpandedNodes = new Set(state.expandedNodes);
+        state.nodes.forEach((node: any) => {
+          newExpandedNodes.add(node.id); // Ensure root is open
+          if (node.children) {
+            node.children.forEach((folder: any) => {
+              newExpandedNodes.add(folder.id); // Ensure folder is open
+              if (folder.children) {
+                folder.children.forEach((doc: any) => newExpandedNodes.add(doc.id));
+              }
+            });
+          }
+        });
+        dispatch({ type: SidebarActionType.SET_EXPANDED_NODES, payload: newExpandedNodes });
+      }
     }
-  }, [state.nodes, state.expandedNodes, isOpenLevel, getOpenLevels]);
+  }, [state.nodes, state.expandedNodes]);
 
   const contextValue = {
     nodes: state.nodes,

@@ -39,6 +39,7 @@ export const IsolatedSidebar: React.FC<{
   children,
 }) => {
   const sidebarContext = useIsolatedSidebar();
+  
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -87,13 +88,13 @@ export const IsolatedSidebar: React.FC<{
           return results;
         };
 
-        const searchResults = searchInNodes(nodes, term);
+        const searchResults = searchInNodes(sidebarContext.nodes, term);
         sidebarContext.setSearchResults(searchResults);
         sidebarContext.setIsSearching(false);
         sidebarContext.setActiveSearchIndex(0);
       }
     },
-    [sidebarContext, nodes]
+    [sidebarContext]
   );
 
   const renderNode = (node: any, depth: number = 0) => {
@@ -169,14 +170,14 @@ export const IsolatedSidebar: React.FC<{
   const filteredNodes = searchTerm
     ? sidebarContext.searchResults.length > 0
       ? sidebarContext.searchResults
-      : nodes.filter((node: any) => {
+      : sidebarContext.nodes.filter((node: any) => {
           const nodeName = node.name || node.title || "";
           return (
             nodeName &&
             nodeName.toLowerCase().includes(searchTerm.toLowerCase())
           );
         })
-    : nodes;
+    : sidebarContext.nodes;
 
   // Don't render anything when collapsed, just the toggle button
   if (isCollapsed) {
@@ -247,45 +248,8 @@ export const IsolatedSidebar: React.FC<{
                     }`}
                     onClick={() => {
                       if (!isDisabled) {
-                        // Open level functionality
-                        const openLevel = (targetLevel: number) => {
-                          const isTargetLevelOpen = targetLevel === 1;
-                          if (isTargetLevelOpen) {
-                            sidebarContext.setExpandedNodes(new Set());
-                          } else {
-                            // Get nodes at the target level
-                            const getNodesAtLevel = (
-                              nodes: any[],
-                              level: number,
-                              currentLevel: number = 0
-                            ): string[] => {
-                              if (currentLevel === level) {
-                                return nodes.map((node) => node.id);
-                              }
-                              const result: string[] = [];
-                              for (const node of nodes) {
-                                if (node.children && node.children.length > 0) {
-                                  result.push(
-                                    ...getNodesAtLevel(
-                                      node.children,
-                                      level,
-                                      currentLevel + 1
-                                    )
-                                  );
-                                }
-                              }
-                              return result;
-                            };
-                            const targetNodes = getNodesAtLevel(
-                              sidebarContext.nodes,
-                              index + 1
-                            );
-                            sidebarContext.setExpandedNodes(
-                              new Set(targetNodes)
-                            );
-                          }
-                        };
-                        openLevel(index + 1);
+                        // Use the context's openLevel function for proper toggle behavior
+                        sidebarContext.openLevel(index + 1);
                       }
                     }}
                   >
