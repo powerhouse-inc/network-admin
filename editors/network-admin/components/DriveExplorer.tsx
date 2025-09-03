@@ -23,7 +23,6 @@ import {
   useSelectedNodePath,
   useUserPermissions,
   useAllDocuments,
-  useNodePath
 } from "@powerhousedao/reactor-browser";
 import { actions, type DocumentModelModule } from "document-model";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
@@ -238,7 +237,7 @@ export function DriveExplorer(props: any) {
                       )
                       .map((file: any) => ({
                         id: `editor-${file.id}`,
-                        title: file.name,
+                        title: `📄 ${file.name}`,
                       })),
                   ],
                 })),
@@ -251,7 +250,7 @@ export function DriveExplorer(props: any) {
                 )
                 .map((file: any) => ({
                   id: `editor-${file.id}`,
-                  title: file.name,
+                  title: `📄 ${file.name}`,
                 })),
             ],
           })),
@@ -264,7 +263,7 @@ export function DriveExplorer(props: any) {
           )
           .map((file: any) => ({
             id: `editor-${file.id}`,
-            title: file.name,
+            title: `📄 ${file.name}`,
           })),
       ],
     };
@@ -970,11 +969,10 @@ export function DriveExplorer(props: any) {
       console.log(`Creating ${documentType} document: ${fileName}`);
 
       try {
-        let fileToName = fileName;
-        if (documentType === "powerhouse/network-profile") {
-          fileToName = "Network Profile";
+        let folder = undefined;
+        if (documentType === "powerhouse/workstream") {
+          folder = await onAddFolder(fileName, undefined);
         }
-        const folder = await onAddFolder(fileToName, undefined);
 
         const node = await addDocument(
           selectedDrive?.header.id || "",
