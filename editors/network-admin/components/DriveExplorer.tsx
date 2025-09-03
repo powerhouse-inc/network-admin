@@ -4,10 +4,7 @@ import {
   CreateDocumentModal,
   useBreadcrumbs,
 } from "@powerhousedao/design-system";
-import {
-  Icon,
-  type SidebarNode,
-} from "@powerhousedao/document-engineering";
+import { Icon, type SidebarNode } from "@powerhousedao/document-engineering";
 import {
   addDocument,
   type DriveEditorProps,
@@ -41,15 +38,17 @@ import { IsolatedSidebar } from "./IsolatedSidebar.jsx";
  * Layout: Left sidebar (folder tree) + Right content area (files/folders + document editor)
  */
 export function DriveExplorer(props: any) {
-
   // === DOCUMENT EDITOR STATE ===
   // Customize document opening/closing behavior here
   const [activeDocumentId, setActiveDocumentId] = useState<
     string | undefined
   >();
   const [openModal, setOpenModal] = useState(false);
-  const [selectedRootNode, setSelectedRootNode] = useState<string>("workstreams");
-  const [modalDocumentType, setModalDocumentType] = useState<string>("powerhouse/workstream");
+  const [selectedRootNode, setSelectedRootNode] =
+    useState<string>("workstreams");
+  const [modalDocumentType, setModalDocumentType] = useState<string>(
+    "powerhouse/workstream"
+  );
   const selectedDocumentModel = useRef<DocumentModelModule | null>(null);
   const editorModules = useEditorModules();
   // === DRIVE CONTEXT HOOKS ===
@@ -108,16 +107,17 @@ export function DriveExplorer(props: any) {
           .filter((folder) => {
             // Only root folders that contain non-network-profile documents
             if (folder.parentFolder) return false;
-            
+
             // Check if this folder or any of its subfolders contain non-network-profile documents
             const hasNonNetworkProfileFiles = filesWithDocuments.some(
-              (file) => 
-                file.documentType !== "powerhouse/network-profile" && 
-                (file.parentFolder === folder.id || 
-                 allFolders.some(subFolder => 
-                   subFolder.parentFolder === folder.id && 
-                   file.parentFolder === subFolder.id
-                 ))
+              (file) =>
+                file.documentType !== "powerhouse/network-profile" &&
+                (file.parentFolder === folder.id ||
+                  allFolders.some(
+                    (subFolder) =>
+                      subFolder.parentFolder === folder.id &&
+                      file.parentFolder === subFolder.id
+                  ))
             );
             return hasNonNetworkProfileFiles;
           })
@@ -127,13 +127,14 @@ export function DriveExplorer(props: any) {
             children: [
               // Add child folders
               ...allFolders
-                .filter((childFolder) => 
-                  childFolder.parentFolder === folder.id &&
-                  filesWithDocuments.some(
-                    (file) => 
-                      file.documentType !== "powerhouse/network-profile" && 
-                      file.parentFolder === childFolder.id
-                  )
+                .filter(
+                  (childFolder) =>
+                    childFolder.parentFolder === folder.id &&
+                    filesWithDocuments.some(
+                      (file) =>
+                        file.documentType !== "powerhouse/network-profile" &&
+                        file.parentFolder === childFolder.id
+                    )
                 )
                 .map((childFolder) => ({
                   id: childFolder.id,
@@ -141,9 +142,10 @@ export function DriveExplorer(props: any) {
                   children: [
                     // Add files in this folder (exclude network-profile documents)
                     ...filesWithDocuments
-                      .filter((file) => 
-                        file.parentFolder === childFolder.id && 
-                        file.documentType !== "powerhouse/network-profile"
+                      .filter(
+                        (file) =>
+                          file.parentFolder === childFolder.id &&
+                          file.documentType !== "powerhouse/network-profile"
                       )
                       .map((file: any) => ({
                         id: `editor-${file.id}`,
@@ -153,9 +155,10 @@ export function DriveExplorer(props: any) {
                 })),
               // Add files directly in this folder (exclude network-profile documents)
               ...filesWithDocuments
-                .filter((file) => 
-                  file.parentFolder === folder.id && 
-                  file.documentType !== "powerhouse/network-profile"
+                .filter(
+                  (file) =>
+                    file.parentFolder === folder.id &&
+                    file.documentType !== "powerhouse/network-profile"
                 )
                 .map((file: any) => ({
                   id: `editor-${file.id}`,
@@ -165,9 +168,10 @@ export function DriveExplorer(props: any) {
           })),
         // Add root-level files (exclude network-profile documents)
         ...filesWithDocuments
-          .filter((file) => 
-            !file.parentFolder && 
-            file.documentType !== "powerhouse/network-profile"
+          .filter(
+            (file) =>
+              !file.parentFolder &&
+              file.documentType !== "powerhouse/network-profile"
           )
           .map((file: any) => ({
             id: `editor-${file.id}`,
@@ -185,13 +189,14 @@ export function DriveExplorer(props: any) {
           .filter((folder) => {
             // Check if this folder or any of its subfolders contain network-profile documents
             const hasNetworkProfileFiles = filesWithDocuments.some(
-              (file) => 
-                file.documentType === "powerhouse/network-profile" && 
-                (file.parentFolder === folder.id || 
-                 allFolders.some(subFolder => 
-                   subFolder.parentFolder === folder.id && 
-                   file.parentFolder === subFolder.id
-                 ))
+              (file) =>
+                file.documentType === "powerhouse/network-profile" &&
+                (file.parentFolder === folder.id ||
+                  allFolders.some(
+                    (subFolder) =>
+                      subFolder.parentFolder === folder.id &&
+                      file.parentFolder === subFolder.id
+                  ))
             );
             return hasNetworkProfileFiles;
           })
@@ -201,13 +206,14 @@ export function DriveExplorer(props: any) {
             children: [
               // Add child folders that contain network-profile documents
               ...allFolders
-                .filter((childFolder) => 
-                  childFolder.parentFolder === folder.id &&
-                  filesWithDocuments.some(
-                    (file) => 
-                      file.documentType === "powerhouse/network-profile" && 
-                      file.parentFolder === childFolder.id
-                  )
+                .filter(
+                  (childFolder) =>
+                    childFolder.parentFolder === folder.id &&
+                    filesWithDocuments.some(
+                      (file) =>
+                        file.documentType === "powerhouse/network-profile" &&
+                        file.parentFolder === childFolder.id
+                    )
                 )
                 .map((childFolder) => ({
                   id: childFolder.id,
@@ -215,9 +221,10 @@ export function DriveExplorer(props: any) {
                   children: [
                     // Add network-profile files in this folder
                     ...filesWithDocuments
-                      .filter((file) => 
-                        file.documentType === "powerhouse/network-profile" && 
-                        file.parentFolder === childFolder.id
+                      .filter(
+                        (file) =>
+                          file.documentType === "powerhouse/network-profile" &&
+                          file.parentFolder === childFolder.id
                       )
                       .map((file: any) => ({
                         id: `editor-${file.id}`,
@@ -227,9 +234,10 @@ export function DriveExplorer(props: any) {
                 })),
               // Add network-profile files directly in this folder
               ...filesWithDocuments
-                .filter((file) => 
-                  file.documentType === "powerhouse/network-profile" && 
-                  file.parentFolder === folder.id
+                .filter(
+                  (file) =>
+                    file.documentType === "powerhouse/network-profile" &&
+                    file.parentFolder === folder.id
                 )
                 .map((file: any) => ({
                   id: `editor-${file.id}`,
@@ -239,9 +247,10 @@ export function DriveExplorer(props: any) {
           })),
         // Add root-level network-profile files
         ...filesWithDocuments
-          .filter((file) => 
-            !file.parentFolder && 
-            file.documentType === "powerhouse/network-profile"
+          .filter(
+            (file) =>
+              !file.parentFolder &&
+              file.documentType === "powerhouse/network-profile"
           )
           .map((file: any) => ({
             id: `editor-${file.id}`,
@@ -257,9 +266,12 @@ export function DriveExplorer(props: any) {
   const handleActiveNodeChange = useCallback(
     (nodeId: string) => {
       console.log("nodeId", nodeId);
-      
+
       // Find the node by ID
-      const findNodeById = (nodes: SidebarNode[], id: string): SidebarNode | null => {
+      const findNodeById = (
+        nodes: SidebarNode[],
+        id: string
+      ): SidebarNode | null => {
         for (const node of nodes) {
           if (node.id === id) {
             return node;
@@ -296,7 +308,13 @@ export function DriveExplorer(props: any) {
         }
       }
     },
-    [allFolders, fileChildren, setSelectedNode, setActiveDocumentId, sidebarNodes]
+    [
+      allFolders,
+      fileChildren,
+      setSelectedNode,
+      setActiveDocumentId,
+      sidebarNodes,
+    ]
   );
 
   // === EVENT HANDLERS ===
@@ -358,7 +376,7 @@ export function DriveExplorer(props: any) {
                     Create Workstream Document
                   </span>
                 </Button>
-                
+
                 <Button
                   color="dark" // Customize button appearance
                   size="medium"
@@ -370,9 +388,7 @@ export function DriveExplorer(props: any) {
                     setOpenModal(true);
                   }}
                 >
-                  <span>
-                    Create Network Profile Document
-                  </span>
+                  <span>Create Network Profile Document</span>
                 </Button>
               </div>
               {/* === HEADER SECTION === */}
@@ -696,12 +712,10 @@ export function DriveExplorer(props: any) {
         return (
           <div className="mt-20 p-4 flex flex-col items-center justify-center">
             <div className="space-y-6 flex flex-col items-center justify-center">
-              <h1 className="text-2xl font-bold">
-                Network Information
-              </h1>
+              <h1 className="text-2xl font-bold">Network Information</h1>
               <p>
-                Create a new network profile to get started, or select an existing
-                network profile from the left sidebar
+                Create a new network profile to get started, or select an
+                existing network profile from the left sidebar
               </p>
               <div className="flex gap-3">
                 <Button
@@ -715,9 +729,7 @@ export function DriveExplorer(props: any) {
                     setOpenModal(true);
                   }}
                 >
-                  <span>
-                    Create Network Profile Document
-                  </span>
+                  <span>Create Network Profile Document</span>
                 </Button>
               </div>
             </div>
@@ -736,13 +748,15 @@ export function DriveExplorer(props: any) {
                         .filter((folder) => {
                           // Only show folders that contain network-profile documents
                           return filesWithDocuments.some(
-                            (file) => 
-                              file.documentType === "powerhouse/network-profile" && 
-                              (file.parentFolder === folder.id || 
-                               allFolders.some(subFolder => 
-                                 subFolder.parentFolder === folder.id && 
-                                 file.parentFolder === subFolder.id
-                               ))
+                            (file) =>
+                              file.documentType ===
+                                "powerhouse/network-profile" &&
+                              (file.parentFolder === folder.id ||
+                                allFolders.some(
+                                  (subFolder) =>
+                                    subFolder.parentFolder === folder.id &&
+                                    file.parentFolder === subFolder.id
+                                ))
                           );
                         })
                         .map((folderNode) =>
@@ -754,7 +768,9 @@ export function DriveExplorer(props: any) {
                               <div className="font-medium">
                                 📁 {folderNode.name}
                               </div>
-                              <div className="text-sm text-gray-500">Network Profile Folder</div>
+                              <div className="text-sm text-gray-500">
+                                Network Profile Folder
+                              </div>
                               <div className="mt-2 flex gap-2">
                                 <button
                                   onClick={() => setSelectedNode(folderNode)}
@@ -774,9 +790,15 @@ export function DriveExplorer(props: any) {
                                       newName !== folderNode.name
                                     ) {
                                       try {
-                                        onRenameNode(newName.trim(), folderNode);
+                                        onRenameNode(
+                                          newName.trim(),
+                                          folderNode
+                                        );
                                       } catch (error) {
-                                        console.error("Failed to rename:", error);
+                                        console.error(
+                                          "Failed to rename:",
+                                          error
+                                        );
                                         alert(
                                           "Failed to rename folder. Please try again."
                                         );
@@ -788,7 +810,9 @@ export function DriveExplorer(props: any) {
                                   Edit
                                 </button>
                                 <button
-                                  onClick={() => showDeleteNodeModal(folderNode)}
+                                  onClick={() =>
+                                    showDeleteNodeModal(folderNode)
+                                  }
                                   className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                                 >
                                   Delete
@@ -807,15 +831,18 @@ export function DriveExplorer(props: any) {
                     </h3>
                     <div className="space-y-2">
                       {filesWithDocuments
-                        .filter((file) => 
-                          file.documentType === "powerhouse/network-profile"
+                        .filter(
+                          (file) =>
+                            file.documentType === "powerhouse/network-profile"
                         )
                         .map((fileNode) => (
                           <div key={fileNode.id} className="p-2 border rounded">
                             <div className="font-medium">
                               🌐 {fileNode.name}
                             </div>
-                            <div className="text-sm text-gray-500">Network Profile</div>
+                            <div className="text-sm text-gray-500">
+                              Network Profile
+                            </div>
                             <div className="mt-2 flex gap-2">
                               <button
                                 onClick={() => {
@@ -905,8 +932,6 @@ export function DriveExplorer(props: any) {
     [onAddFolder, selectedFolder]
   );
 
-
-
   // Handle document creation from modal
   const onCreateDocument = useCallback(
     async (fileName: string) => {
@@ -914,16 +939,21 @@ export function DriveExplorer(props: any) {
 
       // Use the document type that was set when the modal was opened
       const documentType = modalDocumentType;
-      
+
       // Determine editor type based on document type
-      const editorType = documentType === "powerhouse/network-profile" 
-        ? "network-profile-editor" 
-        : "workstream-editor";
+      const editorType =
+        documentType === "powerhouse/network-profile"
+          ? "network-profile-editor"
+          : "workstream-editor";
 
       console.log(`Creating ${documentType} document: ${fileName}`);
 
       try {
-        const folder = await onAddFolder(fileName, undefined);
+        let fileToName = fileName;
+        if (documentType === "powerhouse/network-profile") {
+          fileToName = "Network Profile";
+        }
+        const folder = await onAddFolder(fileToName, undefined);
 
         const node = await addDocument(
           selectedDrive?.header.id || "",
@@ -942,7 +972,7 @@ export function DriveExplorer(props: any) {
         if (node) {
           // Customize: Auto-open created document by uncommenting below
           // setActiveDocumentId(node.id);
-          
+
           // Refresh the sidebar by triggering a re-render
           // Set the root node based on the document type that was created
           if (documentType === "powerhouse/network-profile") {
@@ -955,7 +985,12 @@ export function DriveExplorer(props: any) {
         console.error("Failed to create document:", error);
       }
     },
-    [addDocument, selectedDrive?.header.id, selectedFolder?.id, modalDocumentType]
+    [
+      addDocument,
+      selectedDrive?.header.id,
+      selectedFolder?.id,
+      modalDocumentType,
+    ]
   );
 
   // === DOCUMENT EDITOR DATA ===
