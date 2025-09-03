@@ -23,6 +23,7 @@ import {
   useSelectedNodePath,
   useUserPermissions,
   useAllDocuments,
+  useNodePath
 } from "@powerhousedao/reactor-browser";
 import { actions, type DocumentModelModule } from "document-model";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
@@ -92,6 +93,15 @@ export function DriveExplorer(props: any) {
       state,
     };
   });
+
+  // check if workstream doc is created, set isWorkstreamCreated to true
+  const isWorkstreamCreated = fileChildren.some(
+    (file) => file.documentType === "powerhouse/workstream"
+  );
+  //check if network profile doc is created, set isNetworkProfileCreated to true
+  const isNetworkProfileCreated = fileChildren.some(
+    (file) => file.documentType === "powerhouse/network-profile"
+  );
 
   // All folders for the sidebar tree view
   const allFolders = useAllFolderNodes();
@@ -370,6 +380,7 @@ export function DriveExplorer(props: any) {
                     setModalDocumentType("powerhouse/workstream");
                     setOpenModal(true);
                   }}
+                  disabled={isWorkstreamCreated}
                 >
                   <span>
                     {/* {/* {/* <span className="text-sm"> */}
@@ -387,6 +398,7 @@ export function DriveExplorer(props: any) {
                     setModalDocumentType("powerhouse/network-profile");
                     setOpenModal(true);
                   }}
+                  disabled={isNetworkProfileCreated}
                 >
                   <span>Create Network Profile Document</span>
                 </Button>
@@ -560,6 +572,14 @@ export function DriveExplorer(props: any) {
                   <h2 className="text-lg font-semibold">
                     Contents of "{folder.name}"
                   </h2>
+                  <button
+                    onClick={() => {
+                      setSelectedNode(selectedDrive?.header.id);
+                    }}
+                    className="rounded bg-gray-500 px-3 py-1 text-sm text-white hover:bg-gray-600"
+                  >
+                    Back
+                  </button>
                   {isAllowedToCreateDocuments && (
                     <button
                       onClick={() => handleCreateFolder()}
@@ -728,6 +748,7 @@ export function DriveExplorer(props: any) {
                     setModalDocumentType("powerhouse/network-profile");
                     setOpenModal(true);
                   }}
+                  disabled={isNetworkProfileCreated}
                 >
                   <span>Create Network Profile Document</span>
                 </Button>
@@ -1029,7 +1050,7 @@ export function DriveExplorer(props: any) {
           resizable={true}
           initialWidth={300}
           maxWidth={500}
-          enableMacros={3}
+          enableMacros={2}
           handleOnTitleClick={() => {
             setActiveDocumentId(undefined);
             setSelectedRootNode("workstreams");
