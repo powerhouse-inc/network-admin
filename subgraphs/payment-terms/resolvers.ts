@@ -4,7 +4,7 @@ import {
   actions,
   type SetBasicTermsInput,
   type UpdateStatusInput,
-  type SetTimeAndMaterialsInput,
+  type SetCostAndMaterialsInput,
   type SetEscrowDetailsInput,
   type SetEvaluationTermsInput,
   type AddMilestoneInput,
@@ -150,7 +150,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
 
       PaymentTerms_setTimeAndMaterials: async (
         _: unknown,
-        args: { docId: string; input: SetTimeAndMaterialsInput },
+        args: { docId: string; input: SetCostAndMaterialsInput },
       ) => {
         const { docId, input } = args;
         const doc = await reactor.getDocument(docId);
@@ -160,7 +160,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
 
         const result = await reactor.addAction(
           docId,
-          actions.setTimeAndMaterials(input),
+          actions.setCostAndMaterials(input),
         );
 
         if (result.status !== "SUCCESS") {

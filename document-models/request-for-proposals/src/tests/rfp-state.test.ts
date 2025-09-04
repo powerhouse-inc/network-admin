@@ -23,7 +23,7 @@ describe("RFP State Reducers - State Changes", () => {
     it("should update all RFP fields when provided", () => {
       const input: EditRfpInput = {
         title: "New RFP Title",
-        description: "Updated description for the RFP",
+        summary: "Updated description for the RFP",
         eligibilityCriteria: "Criteria 1",
         evaluationCriteria: "Evaluation 1",
         status: "OPEN_FOR_PROPOSALS",
@@ -42,7 +42,7 @@ describe("RFP State Reducers - State Changes", () => {
       );
 
       expect(updatedDocument.state.global.title).toBe("New RFP Title");
-      expect(updatedDocument.state.global.description).toBe("Updated description for the RFP");
+      expect(updatedDocument.state.global.summary).toBe("Updated description for the RFP");
       expect(updatedDocument.state.global.eligibilityCriteria).toEqual(["Criteria 1", "Criteria 2"]);
       expect(updatedDocument.state.global.evaluationCriteria).toEqual(["Evaluation 1", "Evaluation 2"]);
       expect(updatedDocument.state.global.status).toBe("OPEN_FOR_PROPOSALS");
@@ -59,7 +59,7 @@ describe("RFP State Reducers - State Changes", () => {
         document,
         creators.editRfp({
           title: "Initial Title",
-          description: "Initial description",
+          summary: "Initial description",
           status: "DRAFT",
           eligibilityCriteria: "Initial criteria",
         })
@@ -77,14 +77,14 @@ describe("RFP State Reducers - State Changes", () => {
       expect(finalDocument.state.global.title).toBe("Updated Title"); // Changed
       expect(finalDocument.state.global.status).toBe("OPEN_FOR_PROPOSALS"); // Changed
       expect(finalDocument.state.global.tags).toEqual(["new-tag"]); // Changed
-      expect(finalDocument.state.global.description).toBe("Initial description"); // Unchanged
+      expect(finalDocument.state.global.summary).toBe("Initial description"); // Unchanged
       expect(finalDocument.state.global.eligibilityCriteria).toEqual(["Initial criteria"]); // Unchanged
     });
 
     it("should handle null/undefined values correctly", () => {
       const input: EditRfpInput = {
         title: "Required Title", // Title is required by reducer
-        description: undefined,
+        summary: undefined,
         status: "DRAFT",
         eligibilityCriteria: null,
         evaluationCriteria: undefined,
@@ -102,7 +102,7 @@ describe("RFP State Reducers - State Changes", () => {
       );
 
       expect(updatedDocument.state.global.title).toBe("Required Title");
-      expect(updatedDocument.state.global.description).toBe(""); // Default value
+      expect(updatedDocument.state.global.summary).toBe(""); // Default value
       expect(updatedDocument.state.global.status).toBe("DRAFT");
       expect(updatedDocument.state.global.eligibilityCriteria).toEqual([]); // Default value
       expect(updatedDocument.state.global.evaluationCriteria).toEqual([]); // Default value
@@ -115,7 +115,7 @@ describe("RFP State Reducers - State Changes", () => {
     it("should handle empty string values", () => {
       const input: EditRfpInput = {
         title: "",
-        description: "",
+        summary: "",
         status: "DRAFT",
         eligibilityCriteria: "",
         evaluationCriteria: "",
@@ -128,7 +128,7 @@ describe("RFP State Reducers - State Changes", () => {
       );
 
       expect(updatedDocument.state.global.title).toBe("");
-      expect(updatedDocument.state.global.description).toBe("");
+      expect(updatedDocument.state.global.summary).toBe("");
       expect(updatedDocument.state.global.eligibilityCriteria).toEqual([]);
       expect(updatedDocument.state.global.evaluationCriteria).toEqual([]);
       expect(updatedDocument.state.global.tags).toEqual([]);
@@ -217,7 +217,7 @@ describe("RFP State Reducers - State Changes", () => {
     it("should handle special characters in text fields", () => {
       const input: EditRfpInput = {
         title: "RFP with special chars: & < > \" '",
-        description: "Description with emojis: 🚀 💡 📊 and symbols: © ® ™",
+        summary: "Description with emojis: 🚀 💡 📊 and symbols: © ® ™",
         status: "DRAFT",
         eligibilityCriteria: "Criteria with spaces & symbols!",
         evaluationCriteria: "Evaluation with numbers: 1, 2, 3",
@@ -230,7 +230,7 @@ describe("RFP State Reducers - State Changes", () => {
       );
 
       expect(updatedDocument.state.global.title).toBe("RFP with special chars: & < > \" '");
-      expect(updatedDocument.state.global.description).toBe("Description with emojis: 🚀 💡 📊 and symbols: © ® ™");
+      expect(updatedDocument.state.global.summary).toBe("Description with emojis: 🚀 💡 📊 and symbols: © ® ™");
       expect(updatedDocument.state.global.eligibilityCriteria).toEqual(["Criteria with spaces & symbols!"]);
       expect(updatedDocument.state.global.evaluationCriteria).toEqual(["Evaluation with numbers: 1, 2, 3"]);
       expect(updatedDocument.state.global.tags).toEqual(["tag-with-dashes", "tag_with_underscores", "tag with spaces"]);
