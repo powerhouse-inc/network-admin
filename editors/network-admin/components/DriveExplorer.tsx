@@ -26,12 +26,10 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { actions, type DocumentModelModule } from "document-model";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
-import { CreateDocument } from "./CreateDocument.jsx";
-import { EditorContainer } from "./EditorContainer.jsx";
-import { FolderTree } from "./FolderTree.jsx";
+import { EditorContainer } from "./EditorContainer.js";
 import { getNewDocumentObject } from "../utils.js";
-import { IsolatedSidebarProvider } from "./IsolatedSidebarProvider.jsx";
-import { IsolatedSidebar } from "./IsolatedSidebar.jsx";
+import { IsolatedSidebarProvider } from "./IsolatedSidebarProvider.js";
+import { IsolatedSidebar } from "./IsolatedSidebar.js";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
