@@ -1,5 +1,5 @@
 {
-  "name": "network-admin",
+  "name": "@powerhousedao/network-admin",
   "description": "Network Admin package for Powerhouse",
   "version": "0.0.1",
   "license": "AGPL-3.0-only",
