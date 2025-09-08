@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import { useLocalStorage } from "usehooks-ts";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
 
 // Custom preview renderer to make links open in new tabs and ensure proper list rendering
 const previewOptions = {
@@ -36,18 +38,30 @@ export function MarkdownEditor({
   const [MDEditor, setMDEditor] = useState<any>(null);
   const [contentValue, setContentValue] = useState<string>(" ");
   const [isLoaded, setIsLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [viewMarkdownMode, setViewMarkdownMode] =
     useLocalStorage<MarkdownEditorMode>("markdown-editor-view-mode", "live");
 
   // Load the MDEditor component dynamically
   useEffect(() => {
-    import("@uiw/react-md-editor").then((module) => {
-      setMDEditor(() => module.default);
-      setIsLoaded(true);
-    }).catch((error) => {
-      console.error("Failed to load MDEditor:", error);
-    });
+    // Use a more robust dynamic import approach
+    const loadEditor = async () => {
+      try {
+        const module = await import("@uiw/react-md-editor");
+        setMDEditor(() => module.default);
+        setIsLoaded(true);
+        setLoadError(null);
+      } catch (error) {
+        console.error("Failed to load MDEditor:", error);
+        setLoadError(error instanceof Error ? error.message : "Failed to load editor");
+        setIsLoaded(true);
+      }
+    };
+
+    // Add a small delay to ensure DOM is ready
+    const timer = setTimeout(loadEditor, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   // Update contentValue when value prop changes
@@ -160,6 +174,24 @@ export function MarkdownEditor({
         >
           <div className="w-full h-full flex items-center justify-center text-gray-500">
             Loading editor...
+          </div>
+        </div>
+      )}
+      {isLoaded && loadError && (
+        <div 
+          className="w-full border border-red-300 rounded-md p-3 bg-red-50"
+          style={{ height: `${height}px` }}
+        >
+          <div className="w-full h-full flex flex-col items-center justify-center text-red-600">
+            <p className="text-sm font-medium mb-2">Failed to load markdown editor</p>
+            <p className="text-xs text-red-500">{loadError}</p>
+            <textarea
+              className="w-full h-full mt-2 p-2 border border-gray-300 rounded text-sm"
+              placeholder="Fallback text editor - write your content here..."
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onBlur={(e) => onBlur?.(e.target.value)}
+            />
           </div>
         </div>
       )}
