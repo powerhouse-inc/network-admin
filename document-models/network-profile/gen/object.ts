@@ -1,18 +1,12 @@
 import {
   BaseDocumentClass,
-  type BaseStateFromDocument,
-  type PartialState,
   applyMixins,
   type SignalDispatch,
 } from "document-model";
-import {
-  type NetworkProfileState,
-  type NetworkProfileLocalState,
-  type NetworkProfileDocument,
-} from "./types.js";
+import { NetworkProfilePHState } from "./ph-factories.js";
 import { type NetworkProfileAction } from "./actions.js";
 import { reducer } from "./reducer.js";
-import utils from "./utils.js";
+import { createDocument } from "./utils.js";
 import NetworkProfile_NetworkProfileManagement from "./network-profile-management/object.js";
 
 export * from "./network-profile-management/object.js";
@@ -21,18 +15,14 @@ export * from "./network-profile-management/object.js";
 interface NetworkProfile extends NetworkProfile_NetworkProfileManagement {}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-class NetworkProfile extends BaseDocumentClass<
-  NetworkProfileState,
-  NetworkProfileLocalState,
-  NetworkProfileAction
-> {
+class NetworkProfile extends BaseDocumentClass<NetworkProfilePHState> {
   static fileExtension = ".phdm";
 
   constructor(
-    initialState?: Partial<BaseStateFromDocument<NetworkProfileDocument>>,
+    initialState?: Partial<NetworkProfilePHState>,
     dispatch?: SignalDispatch,
   ) {
-    super(reducer, utils.createDocument(initialState), dispatch);
+    super(reducer, createDocument(initialState), dispatch);
   }
 
   public saveToFile(path: string, name?: string) {

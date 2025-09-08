@@ -1,4 +1,5 @@
 import { BaseDocumentClass } from "document-model";
+import { PaymentTermsPHState } from "../ph-factories.js";
 import {
   type AddBonusClauseInput,
   type UpdateBonusClauseInput,
@@ -6,8 +7,6 @@ import {
   type AddPenaltyClauseInput,
   type UpdatePenaltyClauseInput,
   type DeletePenaltyClauseInput,
-  type PaymentTermsState,
-  type PaymentTermsLocalState,
 } from "../types.js";
 import {
   addBonusClause,
@@ -19,11 +18,7 @@ import {
 } from "./creators.js";
 import { type PaymentTermsAction } from "../actions.js";
 
-export default class PaymentTerms_Clauses extends BaseDocumentClass<
-  PaymentTermsState,
-  PaymentTermsLocalState,
-  PaymentTermsAction
-> {
+export default class PaymentTerms_Clauses extends BaseDocumentClass<PaymentTermsPHState> {
   public addBonusClause(input: AddBonusClauseInput) {
     return this.dispatch(addBonusClause(input));
   }

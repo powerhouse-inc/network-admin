@@ -1,4 +1,5 @@
 import { BaseDocumentClass } from "document-model";
+import { PaymentTermsPHState } from "../ph-factories.js";
 import {
   type SetBasicTermsInput,
   type UpdateStatusInput,
@@ -6,8 +7,6 @@ import {
   type SetEscrowDetailsInput,
   type SetEvaluationTermsInput,
   type SetRetainerDetailsInput,
-  type PaymentTermsState,
-  type PaymentTermsLocalState,
 } from "../types.js";
 import {
   setBasicTerms,
@@ -19,11 +18,7 @@ import {
 } from "./creators.js";
 import { type PaymentTermsAction } from "../actions.js";
 
-export default class PaymentTerms_Terms extends BaseDocumentClass<
-  PaymentTermsState,
-  PaymentTermsLocalState,
-  PaymentTermsAction
-> {
+export default class PaymentTerms_Terms extends BaseDocumentClass<PaymentTermsPHState> {
   public setBasicTerms(input: SetBasicTermsInput) {
     return this.dispatch(setBasicTerms(input));
   }

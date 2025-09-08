@@ -1,18 +1,12 @@
 import {
   BaseDocumentClass,
-  type BaseStateFromDocument,
-  type PartialState,
   applyMixins,
   type SignalDispatch,
 } from "document-model";
-import {
-  type PaymentTermsState,
-  type PaymentTermsLocalState,
-  type PaymentTermsDocument,
-} from "./types.js";
+import { PaymentTermsPHState } from "./ph-factories.js";
 import { type PaymentTermsAction } from "./actions.js";
 import { reducer } from "./reducer.js";
-import utils from "./utils.js";
+import { createDocument } from "./utils.js";
 import PaymentTerms_Terms from "./terms/object.js";
 import PaymentTerms_Milestones from "./milestones/object.js";
 import PaymentTerms_Clauses from "./clauses/object.js";
@@ -28,18 +22,14 @@ interface PaymentTerms
     PaymentTerms_Clauses {}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-class PaymentTerms extends BaseDocumentClass<
-  PaymentTermsState,
-  PaymentTermsLocalState,
-  PaymentTermsAction
-> {
+class PaymentTerms extends BaseDocumentClass<PaymentTermsPHState> {
   static fileExtension = "pterms";
 
   constructor(
-    initialState?: Partial<BaseStateFromDocument<PaymentTermsDocument>>,
+    initialState?: Partial<PaymentTermsPHState>,
     dispatch?: SignalDispatch,
   ) {
-    super(reducer, utils.createDocument(initialState), dispatch);
+    super(reducer, createDocument(initialState), dispatch);
   }
 
   public saveToFile(path: string, name?: string) {

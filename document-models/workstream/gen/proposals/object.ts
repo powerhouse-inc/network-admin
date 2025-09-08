@@ -1,11 +1,10 @@
 import { BaseDocumentClass } from "document-model";
+import { WorkstreamPHState } from "../ph-factories.js";
 import {
   type EditInitialProposalInput,
   type AddAlternativeProposalInput,
   type EditAlternativeProposalInput,
   type RemoveAlternativeProposalInput,
-  type WorkstreamState,
-  type WorkstreamLocalState,
 } from "../types.js";
 import {
   editInitialProposal,
@@ -15,11 +14,7 @@ import {
 } from "./creators.js";
 import { type WorkstreamAction } from "../actions.js";
 
-export default class Workstream_Proposals extends BaseDocumentClass<
-  WorkstreamState,
-  WorkstreamLocalState,
-  WorkstreamAction
-> {
+export default class Workstream_Proposals extends BaseDocumentClass<WorkstreamPHState> {
   public editInitialProposal(input: EditInitialProposalInput) {
     return this.dispatch(editInitialProposal(input));
   }

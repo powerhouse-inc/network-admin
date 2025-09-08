@@ -1,12 +1,11 @@
 import { BaseDocumentClass } from "document-model";
+import { WorkstreamPHState } from "../ph-factories.js";
 import {
   type EditWorkstreamInput,
   type EditClientInfoInput,
   type SetRequestForProposalInput,
   type AddPaymentRequestInput,
   type RemovePaymentRequestInput,
-  type WorkstreamState,
-  type WorkstreamLocalState,
 } from "../types.js";
 import {
   editWorkstream,
@@ -17,11 +16,7 @@ import {
 } from "./creators.js";
 import { type WorkstreamAction } from "../actions.js";
 
-export default class Workstream_Workstream extends BaseDocumentClass<
-  WorkstreamState,
-  WorkstreamLocalState,
-  WorkstreamAction
-> {
+export default class Workstream_Workstream extends BaseDocumentClass<WorkstreamPHState> {
   public editWorkstream(input: EditWorkstreamInput) {
     return this.dispatch(editWorkstream(input));
   }

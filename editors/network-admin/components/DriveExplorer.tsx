@@ -24,7 +24,7 @@ import {
   useUserPermissions,
   useAllDocuments,
 } from "@powerhousedao/reactor-browser";
-import { actions, type DocumentModelModule } from "document-model";
+import { actions, PHDocument, PHDocumentState, type DocumentModelModule } from "document-model";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { EditorContainer } from "./EditorContainer.js";
 import { getNewDocumentObject } from "../utils.js";
@@ -82,9 +82,9 @@ export function DriveExplorer(props: any) {
   const fileChildren = useFileChildNodes();
   const filesWithDocuments = fileChildren.map((file) => {
     const document = allDocuments?.find(
-      (doc: any) => doc.header.id === file.id
+      (doc: PHDocument) => doc.header.id === file.id
     );
-    const state = document?.state.global;
+    const state = (document?.state as any)?.global;
     return {
       ...file,
       state,

@@ -1,18 +1,12 @@
 import {
   BaseDocumentClass,
-  type BaseStateFromDocument,
-  type PartialState,
   applyMixins,
   type SignalDispatch,
 } from "document-model";
-import {
-  type RequestForProposalsState,
-  type RequestForProposalsLocalState,
-  type RequestForProposalsDocument,
-} from "./types.js";
+import { RequestForProposalsPHState } from "./ph-factories.js";
 import { type RequestForProposalsAction } from "./actions.js";
 import { reducer } from "./reducer.js";
-import utils from "./utils.js";
+import { createDocument } from "./utils.js";
 import RequestForProposals_RfpState from "./rfp-state/object.js";
 import RequestForProposals_ContexDocument from "./contex-document/object.js";
 import RequestForProposals_Proposals from "./proposals/object.js";
@@ -28,18 +22,14 @@ interface RequestForProposals
     RequestForProposals_Proposals {}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-class RequestForProposals extends BaseDocumentClass<
-  RequestForProposalsState,
-  RequestForProposalsLocalState,
-  RequestForProposalsAction
-> {
+class RequestForProposals extends BaseDocumentClass<RequestForProposalsPHState> {
   static fileExtension = "";
 
   constructor(
-    initialState?: Partial<BaseStateFromDocument<RequestForProposalsDocument>>,
+    initialState?: Partial<RequestForProposalsPHState>,
     dispatch?: SignalDispatch,
   ) {
-    super(reducer, utils.createDocument(initialState), dispatch);
+    super(reducer, createDocument(initialState), dispatch);
   }
 
   public saveToFile(path: string, name?: string) {

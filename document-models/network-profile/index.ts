@@ -12,12 +12,12 @@ import { reducer } from "./gen/reducer.js";
 import { documentModel } from "./gen/document-model.js";
 import genUtils from "./gen/utils.js";
 import * as customUtils from "./src/utils.js";
-import { type NetworkProfileDocument } from "./gen/types.js";
+import type { NetworkProfilePHState } from "./gen/ph-factories.js";
 
 const utils = { ...genUtils, ...customUtils };
 const actions = { ...BaseActions, ...NetworkProfileActions };
 
-export const module: DocumentModelModule<NetworkProfileDocument> = {
+export const module: DocumentModelModule<NetworkProfilePHState> = {
   reducer,
   actions,
   utils,

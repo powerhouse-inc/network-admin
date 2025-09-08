@@ -159,11 +159,11 @@ export default function Editor(props: any) {
       rfpDocumentNode &&
       rfpDocumentNode.id &&
       rfpDocumentNode.id !== "" &&
-      rfpDocumentDataState?.state?.global
+      (rfpDocumentDataState?.state as any)?.global
     ) {
       setRfpDocument({
         ...rfpDocumentNode,
-        document: rfpDocumentDataState.state.global as RequestForProposalsState,
+        document: (rfpDocumentDataState?.state as any).global as RequestForProposalsState,
       });
     } else if (
       !rfpDocumentNode ||

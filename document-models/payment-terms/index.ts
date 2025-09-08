@@ -12,12 +12,12 @@ import { reducer } from "./gen/reducer.js";
 import { documentModel } from "./gen/document-model.js";
 import genUtils from "./gen/utils.js";
 import * as customUtils from "./src/utils.js";
-import { type PaymentTermsDocument } from "./gen/types.js";
+import type { PaymentTermsPHState } from "./gen/ph-factories.js";
 
 const utils = { ...genUtils, ...customUtils };
 const actions = { ...BaseActions, ...PaymentTermsActions };
 
-export const module: DocumentModelModule<PaymentTermsDocument> = {
+export const module: DocumentModelModule<PaymentTermsPHState> = {
   reducer,
   actions,
   utils,

@@ -6,11 +6,12 @@ import {
   isDocumentAction,
   createReducer,
 } from "document-model";
-import { type NetworkProfileDocument, z } from "./types.js";
+import { NetworkProfilePHState } from "./ph-factories.js";
+import { z } from "./types.js";
 
 import { reducer as NetworkProfileManagementReducer } from "../src/reducers/network-profile-management.js";
 
-const stateReducer: StateReducer<NetworkProfileDocument> = (
+export const stateReducer: StateReducer<NetworkProfilePHState> = (
   state,
   action,
   dispatch,
@@ -124,4 +125,4 @@ const stateReducer: StateReducer<NetworkProfileDocument> = (
   }
 };
 
-export const reducer = createReducer<NetworkProfileDocument>(stateReducer);
+export const reducer = createReducer<NetworkProfilePHState>(stateReducer);

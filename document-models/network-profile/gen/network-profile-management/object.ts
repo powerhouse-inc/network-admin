@@ -1,4 +1,5 @@
 import { BaseDocumentClass } from "document-model";
+import { NetworkProfilePHState } from "../ph-factories.js";
 import {
   type SetIconInput,
   type SetLogoInput,
@@ -11,8 +12,6 @@ import {
   type SetDiscordInput,
   type SetYoutubeInput,
   type SetProfileNameInput,
-  type NetworkProfileState,
-  type NetworkProfileLocalState,
 } from "../types.js";
 import {
   setIcon,
@@ -29,11 +28,7 @@ import {
 } from "./creators.js";
 import { type NetworkProfileAction } from "../actions.js";
 
-export default class NetworkProfile_NetworkProfileManagement extends BaseDocumentClass<
-  NetworkProfileState,
-  NetworkProfileLocalState,
-  NetworkProfileAction
-> {
+export default class NetworkProfile_NetworkProfileManagement extends BaseDocumentClass<NetworkProfilePHState> {
   public setIcon(input: SetIconInput) {
     return this.dispatch(setIcon(input));
   }

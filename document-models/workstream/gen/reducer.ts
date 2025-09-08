@@ -6,12 +6,13 @@ import {
   isDocumentAction,
   createReducer,
 } from "document-model";
-import { type WorkstreamDocument, z } from "./types.js";
+import { WorkstreamPHState } from "./ph-factories.js";
+import { z } from "./types.js";
 
 import { reducer as WorkstreamReducer } from "../src/reducers/workstream.js";
 import { reducer as ProposalsReducer } from "../src/reducers/proposals.js";
 
-const stateReducer: StateReducer<WorkstreamDocument> = (
+export const stateReducer: StateReducer<WorkstreamPHState> = (
   state,
   action,
   dispatch,
@@ -107,4 +108,4 @@ const stateReducer: StateReducer<WorkstreamDocument> = (
   }
 };
 
-export const reducer = createReducer<WorkstreamDocument>(stateReducer);
+export const reducer = createReducer<WorkstreamPHState>(stateReducer);

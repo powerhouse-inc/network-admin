@@ -23,8 +23,8 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
               driveId: driveId,
               ...doc,
               ...doc.header,
-              state: doc.state.global,
-              stateJSON: doc.state.global,
+              state: (doc.state as any).global,
+              stateJSON: (doc.state as any).global,
               revision: doc.header.revision["global"] ?? 0,
             };
           },
@@ -38,8 +38,8 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
                   driveId: driveId,
                   ...doc,
                   ...doc.header,
-                  state: doc.state.global,
-                  stateJSON: doc.state.global,
+                  state: (doc.state as any).global,
+                  stateJSON: (doc.state as any).global,
                   revision: doc.header.revision["global"] ?? 0,
                 };
               }),

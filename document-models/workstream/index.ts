@@ -12,12 +12,12 @@ import { reducer } from "./gen/reducer.js";
 import { documentModel } from "./gen/document-model.js";
 import genUtils from "./gen/utils.js";
 import * as customUtils from "./src/utils.js";
-import { type WorkstreamDocument } from "./gen/types.js";
+import type { WorkstreamPHState } from "./gen/ph-factories.js";
 
 const utils = { ...genUtils, ...customUtils };
 const actions = { ...BaseActions, ...WorkstreamActions };
 
-export const module: DocumentModelModule<WorkstreamDocument> = {
+export const module: DocumentModelModule<WorkstreamPHState> = {
   reducer,
   actions,
   utils,

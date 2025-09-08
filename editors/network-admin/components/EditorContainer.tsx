@@ -45,7 +45,7 @@ export const EditorContainer = (props: {
   const [selectedDocument, dispatch] = useDocumentById(
     props.activeDocumentId
   ) as [
-    PHDocument<unknown, unknown> | undefined,
+    PHDocument | undefined,
     (actionOrActions: Action | Action[] | undefined) => void,
   ];
   const [selectedDrive] = useSelectedDrive();
@@ -56,8 +56,8 @@ export const EditorContainer = (props: {
       ?.parentFolder || undefined;
 
   const createRfpDocument = useCallback(async () => {
-    const rfpDocName = `RFP-${(selectedDocument?.state.global as any)?.title || "Untitled"}`;
-    const rfpDocCode = `RFP-${(selectedDocument?.state.global as any)?.code || ""}`;
+    const rfpDocName = `RFP-${(selectedDocument?.state as any).global?.title || "Untitled"}`;
+    const rfpDocCode = `RFP-${(selectedDocument?.state as any).global?.code || ""}`;
     try {
       const createdNode = await addDocument(
         selectedDrive?.header.id || "",
@@ -73,10 +73,10 @@ export const EditorContainer = (props: {
       console.error("Error creating RFP document", error);
       return null;
     }
-  }, [selectedDrive, selectedDocument?.state.global, folderId]);
+  }, [selectedDrive, (selectedDocument?.state as any).global, folderId]);
 
   const createSowDocument = useCallback(async () => {
-    const sowDocName = `SOW-${(selectedDocument?.state.global as any)?.title || "Untitled"}`;
+    const sowDocName = `SOW-${(selectedDocument?.state as any).global?.title || "Untitled"}`;
     try {
       const createdNode = await addDocument(
         selectedDrive?.header.id || "",
@@ -92,10 +92,10 @@ export const EditorContainer = (props: {
       console.error("Error creating SOW document", error);
       return null;
     }
-  }, [selectedDrive, selectedDocument?.state.global, folderId]);
+  }, [selectedDrive, (selectedDocument?.state as any).global, folderId]);
 
   const createPaymentTermsDocument = useCallback(async () => {
-    const paymentTermsDocName = `Payment Terms-${(selectedDocument?.state.global as any)?.title || "Untitled"}`;
+    const paymentTermsDocName = `Payment Terms-${(selectedDocument?.state as any).global?.title || "Untitled"}`;
     try {
       const createdNode = await addDocument(
         selectedDrive?.header.id || "",
@@ -111,7 +111,7 @@ export const EditorContainer = (props: {
       console.error("Error creating Payment Terms document", error);
       return null;
     }
-  }, [selectedDrive, selectedDocument?.state.global, folderId]);
+  }, [selectedDrive, (selectedDocument?.state as any).global, folderId]);
 
   // Timeline data for revision history
   const timelineItems = useTimelineItems(

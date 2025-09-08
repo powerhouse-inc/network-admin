@@ -6,13 +6,14 @@ import {
   isDocumentAction,
   createReducer,
 } from "document-model";
-import { type RequestForProposalsDocument, z } from "./types.js";
+import { RequestForProposalsPHState } from "./ph-factories.js";
+import { z } from "./types.js";
 
 import { reducer as RfpStateReducer } from "../src/reducers/rfp-state.js";
 import { reducer as ContexDocumentReducer } from "../src/reducers/contex-document.js";
 import { reducer as ProposalsReducer } from "../src/reducers/proposals.js";
 
-const stateReducer: StateReducer<RequestForProposalsDocument> = (
+export const stateReducer: StateReducer<RequestForProposalsPHState> = (
   state,
   action,
   dispatch,
@@ -81,4 +82,4 @@ const stateReducer: StateReducer<RequestForProposalsDocument> = (
   }
 };
 
-export const reducer = createReducer<RequestForProposalsDocument>(stateReducer);
+export const reducer = createReducer<RequestForProposalsPHState>(stateReducer);

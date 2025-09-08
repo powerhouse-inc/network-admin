@@ -6,13 +6,14 @@ import {
   isDocumentAction,
   createReducer,
 } from "document-model";
-import { type PaymentTermsDocument, z } from "./types.js";
+import { PaymentTermsPHState } from "./ph-factories.js";
+import { z } from "./types.js";
 
 import { reducer as TermsReducer } from "../src/reducers/terms.js";
 import { reducer as MilestonesReducer } from "../src/reducers/milestones.js";
 import { reducer as ClausesReducer } from "../src/reducers/clauses.js";
 
-const stateReducer: StateReducer<PaymentTermsDocument> = (
+export const stateReducer: StateReducer<PaymentTermsPHState> = (
   state,
   action,
   dispatch,
@@ -180,4 +181,4 @@ const stateReducer: StateReducer<PaymentTermsDocument> = (
   }
 };
 
-export const reducer = createReducer<PaymentTermsDocument>(stateReducer);
+export const reducer = createReducer<PaymentTermsPHState>(stateReducer);

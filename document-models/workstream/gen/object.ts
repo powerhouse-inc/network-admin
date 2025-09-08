@@ -1,18 +1,12 @@
 import {
   BaseDocumentClass,
-  type BaseStateFromDocument,
-  type PartialState,
   applyMixins,
   type SignalDispatch,
 } from "document-model";
-import {
-  type WorkstreamState,
-  type WorkstreamLocalState,
-  type WorkstreamDocument,
-} from "./types.js";
+import { WorkstreamPHState } from "./ph-factories.js";
 import { type WorkstreamAction } from "./actions.js";
 import { reducer } from "./reducer.js";
-import utils from "./utils.js";
+import { createDocument } from "./utils.js";
 import Workstream_Workstream from "./workstream/object.js";
 import Workstream_Proposals from "./proposals/object.js";
 
@@ -23,18 +17,14 @@ export * from "./proposals/object.js";
 interface Workstream extends Workstream_Workstream, Workstream_Proposals {}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-class Workstream extends BaseDocumentClass<
-  WorkstreamState,
-  WorkstreamLocalState,
-  WorkstreamAction
-> {
+class Workstream extends BaseDocumentClass<WorkstreamPHState> {
   static fileExtension = "";
 
   constructor(
-    initialState?: Partial<BaseStateFromDocument<WorkstreamDocument>>,
+    initialState?: Partial<WorkstreamPHState>,
     dispatch?: SignalDispatch,
   ) {
-    super(reducer, utils.createDocument(initialState), dispatch);
+    super(reducer, createDocument(initialState), dispatch);
   }
 
   public saveToFile(path: string, name?: string) {

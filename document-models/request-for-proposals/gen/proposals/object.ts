@@ -1,10 +1,9 @@
 import { BaseDocumentClass } from "document-model";
+import { RequestForProposalsPHState } from "../ph-factories.js";
 import {
   type AddProposalInput,
   type ChangeProposalStatusInput,
   type RemoveProposalInput,
-  type RequestForProposalsState,
-  type RequestForProposalsLocalState,
 } from "../types.js";
 import {
   addProposal,
@@ -13,11 +12,7 @@ import {
 } from "./creators.js";
 import { type RequestForProposalsAction } from "../actions.js";
 
-export default class RequestForProposals_Proposals extends BaseDocumentClass<
-  RequestForProposalsState,
-  RequestForProposalsLocalState,
-  RequestForProposalsAction
-> {
+export default class RequestForProposals_Proposals extends BaseDocumentClass<RequestForProposalsPHState> {
   public addProposal(input: AddProposalInput) {
     return this.dispatch(addProposal(input));
   }
