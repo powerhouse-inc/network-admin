@@ -14,6 +14,7 @@ import {
   useEditorModulesForDocumentType,
   addDocument,
   useNodes,
+  useFallbackEditorModule,
 } from "@powerhousedao/reactor-browser";
 import { Action, PHDocument } from "document-model";
 import { Suspense, useCallback, useState } from "react";
@@ -120,27 +121,14 @@ export const EditorContainer = (props: {
     selectedDrive?.header.id
   );
 
-  let preferredEditor = selectedDocument?.header.meta?.preferredEditor;
-  if (!preferredEditor) {
-    if (selectedDocument?.header.documentType === "powerhouse/workstream") {
-      preferredEditor = "workstream-editor";
-    } else if (selectedDocument?.header.documentType === "powerhouse/rfp") {
-      preferredEditor = "request-for-proposals-editor";
-    } else if (selectedDocument?.header.documentType === "payment-terms") {
-      preferredEditor = "payment-terms-editor";
-    } else if (
-      selectedDocument?.header.documentType === "powerhouse/network-profile"
-    ) {
-      preferredEditor = "network-profile-editor";
-    } else if (
-      selectedDocument?.header.documentType === "powerhouse/scopeofwork"
-    ) {
-      preferredEditor = "scope-of-work-editor";
-    }
-  }
+  let preferredEditor = useFallbackEditorModule(
+    selectedDocument?.header.documentType
+  );
 
   const editorModule = useEditorModuleById(
-    selectedDocument?.header.meta?.preferredEditor || preferredEditor
+    selectedDocument?.header.meta?.preferredEditor ||
+      preferredEditor?.id ||
+      undefined
   );
   // Document export functionality - customize export behavior here
   const onExport = useCallback(async () => {
