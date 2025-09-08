@@ -1,8 +1,7 @@
 import {
-  Breadcrumbs,
   Button,
   CreateDocumentModal,
-  useBreadcrumbs,
+  useDrop,
 } from "@powerhousedao/design-system";
 import { Icon, type SidebarNode } from "@powerhousedao/document-engineering";
 import {
@@ -24,8 +23,15 @@ import {
   useUserPermissions,
   useAllDocuments,
 } from "@powerhousedao/reactor-browser";
-import { actions, PHDocument, PHDocumentState, type DocumentModelModule } from "document-model";
-import { useCallback, useRef, useState, useMemo, useEffect } from "react";
+import {
+  actions,
+  PHDocument,
+  PHDocumentState,
+  type DocumentModelModule,
+} from "document-model";
+import { type Node } from "document-drive";
+import { twMerge } from "tailwind-merge";
+import { useCallback, useRef, useState, useMemo } from "react";
 import { EditorContainer } from "./EditorContainer.js";
 import { getNewDocumentObject } from "../utils.js";
 import { IsolatedSidebarProvider } from "./IsolatedSidebarProvider.js";
@@ -70,14 +76,6 @@ export function DriveExplorer(props: any) {
   const sharingType = useDriveSharingType(selectedDrive?.header.id);
   const allDocuments = useAllDocuments();
 
-  // === NAVIGATION SETUP ===
-  // Breadcrumbs for folder navigation
-  // const { breadcrumbs, onBreadcrumbSelected } = useBreadcrumbs({
-  //   selectedNodePath: selectedNodePath as any,
-  //   setSelectedNode: (node) => setSelectedNode(node as any),
-  //   getNodeById: (id: string) => (allFolders.find(node => node.id === id) || fileChildren.find(node => node.id === id)) as any || null,
-  // });
-
   const folderChildren = useFolderChildNodes();
   const fileChildren = useFileChildNodes();
   const filesWithDocuments = fileChildren.map((file) => {
@@ -89,6 +87,17 @@ export function DriveExplorer(props: any) {
       ...file,
       state,
     };
+  });
+
+  // === DROP HOOKS ===
+  const { isDropTarget, dropProps } = useDrop({
+    node:
+      folderChildren?.length > 0
+        ? (folderChildren[folderChildren.length - 1] as Node)
+        : undefined,
+    onAddFile,
+    onCopyNode,
+    onMoveNode,
   });
 
   // check if workstream doc is created, set isWorkstreamCreated to true
@@ -1055,16 +1064,24 @@ export function DriveExplorer(props: any) {
 
         {/* === MAIN CONTENT AREA === */}
         <div className="flex-1 overflow-y-auto">
-          {activeDocumentId ? (
-            <EditorContainer
-              handleClose={() => setActiveDocumentId(undefined)}
-              hideToolbar={false}
-              activeDocumentId={activeDocumentId}
-              setActiveDocumentId={setActiveDocumentId}
-            />
-          ) : (
-            displayActiveNode(selectedFolder?.id || selectedRootNode)
-          )}
+          <div
+            {...dropProps}
+            className={twMerge(
+              "rounded-md border-2 border-transparent ",
+              isDropTarget && "border-dashed border-blue-100"
+            )}
+          >
+            {activeDocumentId ? (
+              <EditorContainer
+                handleClose={() => setActiveDocumentId(undefined)}
+                hideToolbar={false}
+                activeDocumentId={activeDocumentId}
+                setActiveDocumentId={setActiveDocumentId}
+              />
+            ) : (
+              displayActiveNode(selectedFolder?.id || selectedRootNode)
+            )}
+          </div>
         </div>
 
         {/* === DOCUMENT CREATION MODAL === */}
