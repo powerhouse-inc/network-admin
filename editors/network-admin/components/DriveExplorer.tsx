@@ -22,6 +22,7 @@ import {
   useSelectedNodePath,
   useUserPermissions,
   useAllDocuments,
+  useNodes,
 } from "@powerhousedao/reactor-browser";
 import {
   actions,
@@ -55,6 +56,11 @@ export function DriveExplorer(props: any) {
   );
   const selectedDocumentModel = useRef<DocumentModelModule | null>(null);
   const editorModules = useEditorModules();
+
+  // Track the last created folder for drag and drop targeting
+  const [lastCreatedFolder, setLastCreatedFolder] = useState<Node | undefined>(
+    undefined
+  );
   // === DRIVE CONTEXT HOOKS ===
   // Core drive operations and document models
   const {
@@ -76,6 +82,9 @@ export function DriveExplorer(props: any) {
   const sharingType = useDriveSharingType(selectedDrive?.header.id);
   const allDocuments = useAllDocuments();
 
+  // All folders for the sidebar tree view
+  const allFolders = useAllFolderNodes();
+
   const folderChildren = useFolderChildNodes();
   const fileChildren = useFileChildNodes();
   const filesWithDocuments = fileChildren.map((file) => {
@@ -89,13 +98,51 @@ export function DriveExplorer(props: any) {
     };
   });
 
+  // Find the folder containing the most recent workstream document
+  const getMostRecentWorkstreamFolder = useCallback(() => {
+    const workstreamFiles = fileChildren.filter(
+      (file) => file.documentType === "powerhouse/workstream"
+    );
+    if (workstreamFiles.length === 0) return undefined;
+
+    // Sort by creation time (assuming newer files have higher IDs or we can use a different method)
+    const mostRecentWorkstream = workstreamFiles[workstreamFiles.length - 1];
+
+    // Find the folder that contains this workstream
+    if (mostRecentWorkstream.parentFolder) {
+      return allFolders.find(
+        (folder) => folder.id === mostRecentWorkstream.parentFolder
+      );
+    }
+
+    return undefined;
+  }, [fileChildren, allFolders]);
+
   // === DROP HOOKS ===
+  const mostRecentWorkstreamFolder = getMostRecentWorkstreamFolder();
+  const dropTargetNode =
+    lastCreatedFolder ||
+    mostRecentWorkstreamFolder ||
+    selectedFolder ||
+    undefined;
+
+  // Create a custom onAddFile wrapper that ensures the correct folder is used
+  const onAddFileWithTarget = useCallback(
+    (file: File, targetFolder?: Node) => {
+      console.log("onAddFileWithTarget called with:", {
+        file,
+        targetFolder,
+        dropTargetNode,
+      });
+      // Use the dropTargetNode as the folder, not the targetFolder parameter
+      return onAddFile(file, dropTargetNode);
+    },
+    [onAddFile, dropTargetNode]
+  );
+
   const { isDropTarget, dropProps } = useDrop({
-    node:
-      folderChildren?.length > 0
-        ? (folderChildren[folderChildren.length - 1] as Node)
-        : undefined,
-    onAddFile,
+    node: dropTargetNode,
+    onAddFile: onAddFileWithTarget,
     onCopyNode,
     onMoveNode,
   });
@@ -108,9 +155,6 @@ export function DriveExplorer(props: any) {
   const isNetworkProfileCreated = fileChildren.some(
     (file) => file.documentType === "powerhouse/network-profile"
   );
-
-  // All folders for the sidebar tree view
-  const allFolders = useAllFolderNodes();
 
   // Convert folders and files to SidebarNode format
   const sidebarNodes = useMemo((): SidebarNode[] => {
@@ -282,6 +326,9 @@ export function DriveExplorer(props: any) {
   const handleActiveNodeChange = useCallback(
     (nodeId: string) => {
       console.log("nodeId", nodeId);
+
+      // Clear the last created folder when navigating to a different node
+      setLastCreatedFolder(undefined);
 
       // Find the node by ID
       const findNodeById = (
@@ -950,7 +997,10 @@ export function DriveExplorer(props: any) {
 
       if (name?.trim()) {
         try {
-          await onAddFolder(name.trim(), selectedFolder);
+          const createdFolder = await onAddFolder(name.trim(), selectedFolder);
+          // Track the created folder for drag and drop targeting
+          console.log("Created manual folder:", createdFolder);
+          setLastCreatedFolder(createdFolder);
         } catch (error) {
           console.error("Failed to create folder:", error);
         }
@@ -979,6 +1029,9 @@ export function DriveExplorer(props: any) {
         let folder = undefined;
         if (documentType === "powerhouse/workstream") {
           folder = await onAddFolder(fileName, undefined);
+          // Track the created folder for drag and drop targeting
+          console.log("Created workstream folder:", folder);
+          setLastCreatedFolder(folder);
         }
 
         const node = await addDocument(
