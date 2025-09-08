@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import { useLocalStorage } from "usehooks-ts";
-import "@uiw/react-md-editor/markdown-editor.css";
-import "@uiw/react-markdown-preview/markdown.css";
 
 // Custom preview renderer to make links open in new tabs and ensure proper list rendering
 const previewOptions = {
@@ -42,6 +40,9 @@ export function MarkdownEditor({
 
   const [viewMarkdownMode, setViewMarkdownMode] =
     useLocalStorage<MarkdownEditorMode>("markdown-editor-view-mode", "live");
+  
+  // Ensure we have a valid mode for the editor
+  const editorMode = viewMarkdownMode || "live";
 
   // Load the MDEditor component dynamically
   useEffect(() => {
@@ -204,7 +205,7 @@ export function MarkdownEditor({
             onBlur={handleContentBlur}
             previewOptions={previewOptions}
             enableScroll={true}
-            preview={viewMarkdownMode}
+            preview={editorMode}
             textareaProps={{
               placeholder: "Write your content here...",
             }}
