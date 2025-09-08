@@ -21,9 +21,9 @@ import { reducer } from "./reducer.js";
 export const initialGlobalState: RequestForProposalsState = {
   issuer: "placeholder-id",
   title: "",
+  code: "",
   summary: "",
   briefing: "",
-  code: "",
   rfpCommenter: [],
   eligibilityCriteria: "",
   evaluationCriteria: "",

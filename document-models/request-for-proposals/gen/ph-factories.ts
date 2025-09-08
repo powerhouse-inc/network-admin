@@ -24,12 +24,12 @@ export type RequestForProposalsPHState = PHBaseState & {
 export function defaultGlobalState(): RequestForProposalsState {
   return {
     issuer: "placeholder-id",
-    code: "",
     title: "",
+    code: "",
     summary: "",
     briefing: "",
     rfpCommenter: [],
-    eligibilityCriteria: "",
+    eligibilityCriteria: ""	,
     evaluationCriteria: "",
     budgetRange: {
       min: null,
