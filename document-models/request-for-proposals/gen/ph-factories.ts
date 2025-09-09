@@ -29,7 +29,7 @@ export function defaultGlobalState(): RequestForProposalsState {
     summary: "",
     briefing: "",
     rfpCommenter: [],
-    eligibilityCriteria: ""	,
+    eligibilityCriteria: "",
     evaluationCriteria: "",
     budgetRange: {
       min: null,

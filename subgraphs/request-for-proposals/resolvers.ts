@@ -1,46 +1,69 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { type Subgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
-import { actions } from "../../document-models/request-for-proposals/index.js";
-import { generateId } from "document-model";
+import {
+  actions,
+  type EditRfpInput,
+  type AddContextDocumentInput,
+  type RemoveContextDocumentInput,
+  type AddProposalInput,
+  type ChangeProposalStatusInput,
+  type RemoveProposalInput,
+  type RequestForProposalsDocument,
+} from "../../document-models/request-for-proposals/index.js";
+import { setName } from "document-model";
 
-const DEFAULT_DRIVE_ID = "powerhouse";
-
-export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
+export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
     Query: {
-      RequestForProposals: async (_: any, args: any, ctx: any) => {
+      RequestForProposals: async () => {
         return {
-          getDocument: async (args: any) => {
-            const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-            const docId: string = args.docId || "";
-            const doc = await reactor.getDocument(driveId, docId);
+          getDocument: async (args: { docId: string; driveId: string }) => {
+            const { docId, driveId } = args;
+
+            if (!docId) {
+              throw new Error("Document id is required");
+            }
+
+            if (driveId) {
+              const docIds = await reactor.getDocuments(driveId);
+              if (!docIds.includes(docId)) {
+                throw new Error(
+                  `Document with id ${docId} is not part of ${driveId}`,
+                );
+              }
+            }
+
+            const doc =
+              await reactor.getDocument<RequestForProposalsDocument>(docId);
             return {
               driveId: driveId,
               ...doc,
               ...doc.header,
-              state: (doc.state as any).global,
-              stateJSON: (doc.state as any).global,
-              revision: doc.header.revision["global"] ?? 0,
+              created: doc.header.createdAtUtcIso,
+              lastModified: doc.header.lastModifiedAtUtcIso,
+              state: doc.state.global,
+              stateJSON: doc.state.global,
+              revision: doc.header?.revision?.global ?? 0,
             };
           },
-          getDocuments: async (args: any) => {
-            const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
+          getDocuments: async (args: { driveId: string }) => {
+            const { driveId } = args;
             const docsIds = await reactor.getDocuments(driveId);
             const docs = await Promise.all(
               docsIds.map(async (docId) => {
-                const doc = await reactor.getDocument(driveId, docId);
+                const doc =
+                  await reactor.getDocument<RequestForProposalsDocument>(docId);
                 return {
                   driveId: driveId,
                   ...doc,
                   ...doc.header,
-                  state: (doc.state as any).global,
-                  stateJSON: (doc.state as any).global,
-                  revision: doc.header.revision["global"] ?? 0,
+                  created: doc.header.createdAtUtcIso,
+                  lastModified: doc.header.lastModifiedAtUtcIso,
+                  state: doc.state.global,
+                  stateJSON: doc.state.global,
+                  revision: doc.header?.revision?.global ?? 0,
                 };
               }),
             );
@@ -53,116 +76,170 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
       },
     },
     Mutation: {
-      RequestForProposals_createDocument: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId = generateId();
+      RequestForProposals_createDocument: async (
+        _: unknown,
+        args: { name: string; driveId?: string },
+      ) => {
+        const { driveId, name } = args;
+        const document = await reactor.addDocument("powerhouse/rfp");
 
-        await reactor.addDriveAction(
-          driveId,
-          addFile({
-            id: docId,
-            name: args.name,
-            documentType: "powerhouse/rfp",
-            synchronizationUnits: [
-              {
-                branch: "main",
-                scope: "global",
-                syncId: generateId(),
-              },
-              {
-                branch: "main",
-                scope: "local",
-                syncId: generateId(),
-              },
-            ],
-          }),
-        );
+        if (driveId) {
+          await reactor.addAction(
+            driveId,
+            addFile({
+              name,
+              id: document.header.id,
+              documentType: "powerhouse/rfp",
+            }),
+          );
+        }
 
-        return docId;
+        if (name) {
+          await reactor.addAction(document.header.id, setName(name));
+        }
+
+        return document.header.id;
       },
 
-      RequestForProposals_editRfp: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      RequestForProposals_editRfp: async (
+        _: unknown,
+        args: { docId: string; input: EditRfpInput },
+      ) => {
+        const { docId, input } = args;
+        const doc =
+          await reactor.getDocument<RequestForProposalsDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
-          docId,
-          actions.editRfp({ ...args.input }),
-        );
+        const result = await reactor.addAction(docId, actions.editRfp(input));
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to editRfp");
+        }
+
+        return true;
       },
 
-      RequestForProposals_addContextDocument: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      RequestForProposals_addContextDocument: async (
+        _: unknown,
+        args: { docId: string; input: AddContextDocumentInput },
+      ) => {
+        const { docId, input } = args;
+        const doc =
+          await reactor.getDocument<RequestForProposalsDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.addContextDocument({ ...args.input }),
+          actions.addContextDocument(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to addContextDocument",
+          );
+        }
+
+        return true;
       },
 
-      RequestForProposals_removeContextDocument: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      RequestForProposals_removeContextDocument: async (
+        _: unknown,
+        args: { docId: string; input: RemoveContextDocumentInput },
+      ) => {
+        const { docId, input } = args;
+        const doc =
+          await reactor.getDocument<RequestForProposalsDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.removeContextDocument({ ...args.input }),
+          actions.removeContextDocument(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to removeContextDocument",
+          );
+        }
+
+        return true;
       },
 
-      RequestForProposals_addProposal: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      RequestForProposals_addProposal: async (
+        _: unknown,
+        args: { docId: string; input: AddProposalInput },
+      ) => {
+        const { docId, input } = args;
+        const doc =
+          await reactor.getDocument<RequestForProposalsDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.addProposal({ ...args.input }),
+          actions.addProposal(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to addProposal");
+        }
+
+        return true;
       },
 
-      RequestForProposals_changeProposalStatus: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      RequestForProposals_changeProposalStatus: async (
+        _: unknown,
+        args: { docId: string; input: ChangeProposalStatusInput },
+      ) => {
+        const { docId, input } = args;
+        const doc =
+          await reactor.getDocument<RequestForProposalsDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.changeProposalStatus({ ...args.input }),
+          actions.changeProposalStatus(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to changeProposalStatus",
+          );
+        }
+
+        return true;
       },
 
-      RequestForProposals_removeProposal: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      RequestForProposals_removeProposal: async (
+        _: unknown,
+        args: { docId: string; input: RemoveProposalInput },
+      ) => {
+        const { docId, input } = args;
+        const doc =
+          await reactor.getDocument<RequestForProposalsDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.removeProposal({ ...args.input }),
+          actions.removeProposal(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to removeProposal");
+        }
+
+        return true;
       },
     },
   };

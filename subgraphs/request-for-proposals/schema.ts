@@ -97,8 +97,8 @@ export const schema: DocumentNode = gql`
   Queries: RequestForProposals
   """
   type RequestForProposalsQueries {
-    getDocument(driveId: String, docId: PHID): RequestForProposals
-    getDocuments: [RequestForProposals!]
+    getDocument(docId: PHID!, driveId: PHID): RequestForProposals
+    getDocuments(driveId: String!): [RequestForProposals!]
   }
 
   type Query {
@@ -109,7 +109,7 @@ export const schema: DocumentNode = gql`
   Mutations: RequestForProposals
   """
   type Mutation {
-    RequestForProposals_createDocument(driveId: String, name: String): String
+    RequestForProposals_createDocument(name: String!, driveId: String): String
 
     RequestForProposals_editRfp(
       driveId: String

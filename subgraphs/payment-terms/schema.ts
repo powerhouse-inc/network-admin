@@ -20,7 +20,8 @@ export const schema: DocumentNode = gql`
 
   enum PaymentModel {
     MILESTONE
-    TIME_AND_MATERIALS
+    COST_AND_MATERIALS
+    RETAINER
   }
 
   enum MilestonePayoutStatus {
@@ -52,12 +53,20 @@ export const schema: DocumentNode = gql`
     payoutStatus: MilestonePayoutStatus!
   }
 
-  type TimeAndMaterials {
-    retainerAmount: Amount
+  type CostAndMaterials {
     hourlyRate: Amount
     variableCap: Amount
     billingFrequency: BillingFrequency!
     timesheetRequired: Boolean!
+  }
+
+  type Retainer {
+    retainerAmount: Amount!
+    billingFrequency: BillingFrequency!
+    startDate: Date!
+    endDate: Date
+    autoRenew: Boolean!
+    servicesIncluded: String!
   }
 
   type Escrow {
@@ -98,7 +107,8 @@ export const schema: DocumentNode = gql`
     paymentModel: PaymentModel!
     totalAmount: Amount
     milestoneSchedule: [Milestone!]!
-    timeAndMaterials: TimeAndMaterials
+    costAndMaterials: CostAndMaterials
+    retainerDetails: Retainer
     escrowDetails: Escrow
     evaluation: EvaluationTerms
     bonusClauses: [BonusClause!]!
@@ -133,10 +143,10 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: PaymentTerms_UpdateStatusInput
     ): Int
-    PaymentTerms_setTimeAndMaterials(
+    PaymentTerms_setCostAndMaterials(
       driveId: String
       docId: PHID
-      input: PaymentTerms_SetTimeAndMaterialsInput
+      input: PaymentTerms_SetCostAndMaterialsInput
     ): Int
     PaymentTerms_setEscrowDetails(
       driveId: String
@@ -147,6 +157,11 @@ export const schema: DocumentNode = gql`
       driveId: String
       docId: PHID
       input: PaymentTerms_SetEvaluationTermsInput
+    ): Int
+    PaymentTerms_setRetainerDetails(
+      driveId: String
+      docId: PHID
+      input: PaymentTerms_SetRetainerDetailsInput
     ): Int
     PaymentTerms_addMilestone(
       driveId: String
@@ -218,8 +233,7 @@ export const schema: DocumentNode = gql`
   input PaymentTerms_UpdateStatusInput {
     status: PaymentTermsStatus!
   }
-  input PaymentTerms_SetTimeAndMaterialsInput {
-    retainerAmount: Amount
+  input PaymentTerms_SetCostAndMaterialsInput {
     hourlyRate: Amount
     variableCap: Amount
     billingFrequency: BillingFrequency!
@@ -238,6 +252,14 @@ export const schema: DocumentNode = gql`
     impactsPayout: Boolean!
     impactsReputation: Boolean!
     commentsVisibleToClient: Boolean!
+  }
+  input PaymentTerms_SetRetainerDetailsInput {
+    retainerAmount: Amount!
+    billingFrequency: BillingFrequency!
+    startDate: Date!
+    endDate: Date
+    autoRenew: Boolean!
+    servicesIncluded: String!
   }
 
   """

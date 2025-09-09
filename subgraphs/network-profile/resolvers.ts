@@ -1,46 +1,74 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { type Subgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
-import { actions } from "../../document-models/network-profile/index.js";
-import { generateId } from "document-model";
+import {
+  actions,
+  type SetIconInput,
+  type SetLogoInput,
+  type SetLogoBigInput,
+  type SetWebsiteInput,
+  type SetDescriptionInput,
+  type SetCategoryInput,
+  type SetXInput,
+  type SetGithubInput,
+  type SetDiscordInput,
+  type SetYoutubeInput,
+  type SetProfileNameInput,
+  type NetworkProfileDocument,
+} from "../../document-models/network-profile/index.js";
+import { setName } from "document-model";
 
-const DEFAULT_DRIVE_ID = "powerhouse";
-
-export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
+export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
     Query: {
-      NetworkProfile: async (_: any, args: any, ctx: any) => {
+      NetworkProfile: async () => {
         return {
-          getDocument: async (args: any) => {
-            const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-            const docId: string = args.docId || "";
-            const doc = await reactor.getDocument(docId);
+          getDocument: async (args: { docId: string; driveId: string }) => {
+            const { docId, driveId } = args;
+
+            if (!docId) {
+              throw new Error("Document id is required");
+            }
+
+            if (driveId) {
+              const docIds = await reactor.getDocuments(driveId);
+              if (!docIds.includes(docId)) {
+                throw new Error(
+                  `Document with id ${docId} is not part of ${driveId}`,
+                );
+              }
+            }
+
+            const doc =
+              await reactor.getDocument<NetworkProfileDocument>(docId);
             return {
               driveId: driveId,
               ...doc,
               ...doc.header,
-              state: (doc.state as any).global,
-              stateJSON: (doc.state as any).global,
-              revision: doc.header.revision["global"] ?? 0,
+              created: doc.header.createdAtUtcIso,
+              lastModified: doc.header.lastModifiedAtUtcIso,
+              state: doc.state.global,
+              stateJSON: doc.state.global,
+              revision: doc.header?.revision?.global ?? 0,
             };
           },
-          getDocuments: async (args: any) => {
-            const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
+          getDocuments: async (args: { driveId: string }) => {
+            const { driveId } = args;
             const docsIds = await reactor.getDocuments(driveId);
             const docs = await Promise.all(
               docsIds.map(async (docId) => {
-                const doc = await reactor.getDocument(driveId, docId);
+                const doc =
+                  await reactor.getDocument<NetworkProfileDocument>(docId);
                 return {
                   driveId: driveId,
                   ...doc,
                   ...doc.header,
-                  state: (doc.state as any).global,
-                  stateJSON: (doc.state as any).global,
-                  revision: doc.header.revision["global"] ?? 0,
+                  created: doc.header.createdAtUtcIso,
+                  lastModified: doc.header.lastModifiedAtUtcIso,
+                  state: doc.state.global,
+                  stateJSON: doc.state.global,
+                  revision: doc.header?.revision?.global ?? 0,
                 };
               }),
             );
@@ -53,186 +81,261 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
       },
     },
     Mutation: {
-      NetworkProfile_createDocument: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId = generateId();
-
-        await reactor.addDriveAction(
-          driveId,
-          addFile({
-            id: docId,
-            name: args.name,
-            documentType: "powerhouse/network-profile",
-            synchronizationUnits: [
-              {
-                branch: "main",
-                scope: "global",
-                syncId: generateId(),
-              },
-              {
-                branch: "main",
-                scope: "local",
-                syncId: generateId(),
-              },
-            ],
-          }),
+      NetworkProfile_createDocument: async (
+        _: unknown,
+        args: { name: string; driveId?: string },
+      ) => {
+        const { driveId, name } = args;
+        const document = await reactor.addDocument(
+          "powerhouse/network-profile",
         );
 
-        return docId;
+        if (driveId) {
+          await reactor.addAction(
+            driveId,
+            addFile({
+              name,
+              id: document.header.id,
+              documentType: "powerhouse/network-profile",
+            }),
+          );
+        }
+
+        if (name) {
+          await reactor.addAction(document.header.id, setName(name));
+        }
+
+        return document.header.id;
       },
 
-      NetworkProfile_setIcon: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      NetworkProfile_setIcon: async (
+        _: unknown,
+        args: { docId: string; input: SetIconInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<NetworkProfileDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
-          docId,
-          actions.setIcon({ ...args.input }),
-        );
+        const result = await reactor.addAction(docId, actions.setIcon(input));
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setIcon");
+        }
+
+        return true;
       },
 
-      NetworkProfile_setLogo: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      NetworkProfile_setLogo: async (
+        _: unknown,
+        args: { docId: string; input: SetLogoInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<NetworkProfileDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
-          docId,
-          actions.setLogo({ ...args.input }),
-        );
+        const result = await reactor.addAction(docId, actions.setLogo(input));
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setLogo");
+        }
+
+        return true;
       },
 
-      NetworkProfile_setLogoBig: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      NetworkProfile_setLogoBig: async (
+        _: unknown,
+        args: { docId: string; input: SetLogoBigInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<NetworkProfileDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.setLogoBig({ ...args.input }),
+          actions.setLogoBig(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setLogoBig");
+        }
+
+        return true;
       },
 
-      NetworkProfile_setWebsite: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      NetworkProfile_setWebsite: async (
+        _: unknown,
+        args: { docId: string; input: SetWebsiteInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<NetworkProfileDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.setWebsite({ ...args.input }),
+          actions.setWebsite(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setWebsite");
+        }
+
+        return true;
       },
 
-      NetworkProfile_setDescription: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      NetworkProfile_setDescription: async (
+        _: unknown,
+        args: { docId: string; input: SetDescriptionInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<NetworkProfileDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.setDescription({ ...args.input }),
+          actions.setDescription(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setDescription");
+        }
+
+        return true;
       },
 
-      NetworkProfile_setCategory: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      NetworkProfile_setCategory: async (
+        _: unknown,
+        args: { docId: string; input: SetCategoryInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<NetworkProfileDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.setCategory({ ...args.input }),
+          actions.setCategory(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setCategory");
+        }
+
+        return true;
       },
 
-      NetworkProfile_setX: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      NetworkProfile_setX: async (
+        _: unknown,
+        args: { docId: string; input: SetXInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<NetworkProfileDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
-          docId,
-          actions.setX({ ...args.input }),
-        );
+        const result = await reactor.addAction(docId, actions.setX(input));
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setX");
+        }
+
+        return true;
       },
 
-      NetworkProfile_setGithub: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      NetworkProfile_setGithub: async (
+        _: unknown,
+        args: { docId: string; input: SetGithubInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<NetworkProfileDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
-          docId,
-          actions.setGithub({ ...args.input }),
-        );
+        const result = await reactor.addAction(docId, actions.setGithub(input));
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setGithub");
+        }
+
+        return true;
       },
 
-      NetworkProfile_setDiscord: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      NetworkProfile_setDiscord: async (
+        _: unknown,
+        args: { docId: string; input: SetDiscordInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<NetworkProfileDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.setDiscord({ ...args.input }),
+          actions.setDiscord(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setDiscord");
+        }
+
+        return true;
       },
 
-      NetworkProfile_setYoutube: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      NetworkProfile_setYoutube: async (
+        _: unknown,
+        args: { docId: string; input: SetYoutubeInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<NetworkProfileDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.setYoutube({ ...args.input }),
+          actions.setYoutube(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setYoutube");
+        }
+
+        return true;
       },
 
-      NetworkProfile_setProfileName: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      NetworkProfile_setProfileName: async (
+        _: unknown,
+        args: { docId: string; input: SetProfileNameInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<NetworkProfileDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.setProfileName({ ...args.input }),
+          actions.setProfileName(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setProfileName");
+        }
+
+        return true;
       },
     },
   };

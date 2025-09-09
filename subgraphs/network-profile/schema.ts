@@ -31,8 +31,8 @@ export const schema: DocumentNode = gql`
   Queries: NetworkProfile
   """
   type NetworkProfileQueries {
-    getDocument(driveId: String, docId: PHID): NetworkProfile
-    getDocuments: [NetworkProfile!]
+    getDocument(docId: PHID!, driveId: PHID): NetworkProfile
+    getDocuments(driveId: String!): [NetworkProfile!]
   }
 
   type Query {
@@ -43,7 +43,7 @@ export const schema: DocumentNode = gql`
   Mutations: NetworkProfile
   """
   type Mutation {
-    NetworkProfile_createDocument(driveId: String, name: String): String
+    NetworkProfile_createDocument(name: String!, driveId: String): String
 
     NetworkProfile_setIcon(
       driveId: String

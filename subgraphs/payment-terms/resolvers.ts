@@ -7,6 +7,7 @@ import {
   type SetCostAndMaterialsInput,
   type SetEscrowDetailsInput,
   type SetEvaluationTermsInput,
+  type SetRetainerDetailsInput,
   type AddMilestoneInput,
   type UpdateMilestoneInput,
   type UpdateMilestoneStatusInput,
@@ -18,10 +19,11 @@ import {
   type AddPenaltyClauseInput,
   type UpdatePenaltyClauseInput,
   type DeletePenaltyClauseInput,
+  type PaymentTermsDocument,
 } from "../../document-models/payment-terms/index.js";
 import { setName } from "document-model";
 
-export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
+export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
@@ -44,13 +46,15 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
               }
             }
 
-            const doc = await reactor.getDocument(docId);
+            const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
             return {
               driveId: driveId,
               ...doc,
               ...doc.header,
-              state: (doc.state as any).global,
-              stateJSON: (doc.state as any).global,
+              created: doc.header.createdAtUtcIso,
+              lastModified: doc.header.lastModifiedAtUtcIso,
+              state: doc.state.global,
+              stateJSON: doc.state.global,
               revision: doc.header?.revision?.global ?? 0,
             };
           },
@@ -59,13 +63,16 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
             const docsIds = await reactor.getDocuments(driveId);
             const docs = await Promise.all(
               docsIds.map(async (docId) => {
-                const doc = await reactor.getDocument(docId);
+                const doc =
+                  await reactor.getDocument<PaymentTermsDocument>(docId);
                 return {
                   driveId: driveId,
                   ...doc,
                   ...doc.header,
-                  state: (doc.state as any).global,
-                  stateJSON: (doc.state as any).global,
+                  created: doc.header.createdAtUtcIso,
+                  lastModified: doc.header.lastModifiedAtUtcIso,
+                  state: doc.state.global,
+                  stateJSON: doc.state.global,
                   revision: doc.header?.revision?.global ?? 0,
                 };
               }),
@@ -109,7 +116,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: SetBasicTermsInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -131,7 +138,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: UpdateStatusInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -148,12 +155,12 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         return true;
       },
 
-      PaymentTerms_setTimeAndMaterials: async (
+      PaymentTerms_setCostAndMaterials: async (
         _: unknown,
         args: { docId: string; input: SetCostAndMaterialsInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -165,7 +172,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
 
         if (result.status !== "SUCCESS") {
           throw new Error(
-            result.error?.message ?? "Failed to setTimeAndMaterials",
+            result.error?.message ?? "Failed to setCostAndMaterials",
           );
         }
 
@@ -177,7 +184,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: SetEscrowDetailsInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -201,7 +208,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: SetEvaluationTermsInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -220,12 +227,36 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         return true;
       },
 
+      PaymentTerms_setRetainerDetails: async (
+        _: unknown,
+        args: { docId: string; input: SetRetainerDetailsInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.setRetainerDetails(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to setRetainerDetails",
+          );
+        }
+
+        return true;
+      },
+
       PaymentTerms_addMilestone: async (
         _: unknown,
         args: { docId: string; input: AddMilestoneInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -247,7 +278,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: UpdateMilestoneInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -269,7 +300,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: UpdateMilestoneStatusInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -293,7 +324,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: DeleteMilestoneInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -315,7 +346,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: ReorderMilestonesInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -339,7 +370,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: AddBonusClauseInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -361,7 +392,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: UpdateBonusClauseInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -385,7 +416,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: DeleteBonusClauseInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -409,7 +440,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: AddPenaltyClauseInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -433,7 +464,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: UpdatePenaltyClauseInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }
@@ -457,7 +488,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
         args: { docId: string; input: DeletePenaltyClauseInput },
       ) => {
         const { docId, input } = args;
-        const doc = await reactor.getDocument(docId);
+        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
         if (!doc) {
           throw new Error("Document not found");
         }

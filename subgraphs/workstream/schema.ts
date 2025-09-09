@@ -66,8 +66,8 @@ export const schema: DocumentNode = gql`
   Queries: Workstream
   """
   type WorkstreamQueries {
-    getDocument(driveId: String, docId: PHID): Workstream
-    getDocuments: [Workstream!]
+    getDocument(docId: PHID!, driveId: PHID): Workstream
+    getDocuments(driveId: String!): [Workstream!]
   }
 
   type Query {
@@ -78,7 +78,7 @@ export const schema: DocumentNode = gql`
   Mutations: Workstream
   """
   type Mutation {
-    Workstream_createDocument(driveId: String, name: String): String
+    Workstream_createDocument(name: String!, driveId: String): String
 
     Workstream_editWorkstream(
       driveId: String

@@ -1,46 +1,71 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { type Subgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
-import { actions } from "../../document-models/workstream/index.js";
-import { generateId } from "document-model";
+import {
+  actions,
+  type EditWorkstreamInput,
+  type EditClientInfoInput,
+  type SetRequestForProposalInput,
+  type AddPaymentRequestInput,
+  type RemovePaymentRequestInput,
+  type EditInitialProposalInput,
+  type AddAlternativeProposalInput,
+  type EditAlternativeProposalInput,
+  type RemoveAlternativeProposalInput,
+  type WorkstreamDocument,
+} from "../../document-models/workstream/index.js";
+import { setName } from "document-model";
 
-const DEFAULT_DRIVE_ID = "powerhouse";
-
-export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
+export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
     Query: {
-      Workstream: async (_: any, args: any, ctx: any) => {
+      Workstream: async () => {
         return {
-          getDocument: async (args: any) => {
-            const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-            const docId: string = args.docId || "";
-            const doc = await reactor.getDocument(driveId, docId);
+          getDocument: async (args: { docId: string; driveId: string }) => {
+            const { docId, driveId } = args;
+
+            if (!docId) {
+              throw new Error("Document id is required");
+            }
+
+            if (driveId) {
+              const docIds = await reactor.getDocuments(driveId);
+              if (!docIds.includes(docId)) {
+                throw new Error(
+                  `Document with id ${docId} is not part of ${driveId}`,
+                );
+              }
+            }
+
+            const doc = await reactor.getDocument<WorkstreamDocument>(docId);
             return {
               driveId: driveId,
               ...doc,
               ...doc.header,
-              state: (doc.state as any).global,
-              stateJSON: (doc.state as any).global,
-              revision: doc.header.revision["global"] ?? 0,
+              created: doc.header.createdAtUtcIso,
+              lastModified: doc.header.lastModifiedAtUtcIso,
+              state: doc.state.global,
+              stateJSON: doc.state.global,
+              revision: doc.header?.revision?.global ?? 0,
             };
           },
-          getDocuments: async (args: any) => {
-            const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
+          getDocuments: async (args: { driveId: string }) => {
+            const { driveId } = args;
             const docsIds = await reactor.getDocuments(driveId);
             const docs = await Promise.all(
               docsIds.map(async (docId) => {
-                const doc = await reactor.getDocument(driveId, docId);
+                const doc =
+                  await reactor.getDocument<WorkstreamDocument>(docId);
                 return {
                   driveId: driveId,
                   ...doc,
                   ...doc.header,
-                  state: (doc.state as any).global,
-                  stateJSON: (doc.state as any).global,
-                  revision: doc.header.revision["global"] ?? 0,
+                  created: doc.header.createdAtUtcIso,
+                  lastModified: doc.header.lastModifiedAtUtcIso,
+                  state: doc.state.global,
+                  stateJSON: doc.state.global,
+                  revision: doc.header?.revision?.global ?? 0,
                 };
               }),
             );
@@ -53,158 +78,241 @@ export const getResolvers = (subgraph: Subgraph): Record<string, any> => {
       },
     },
     Mutation: {
-      Workstream_createDocument: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId = generateId();
+      Workstream_createDocument: async (
+        _: unknown,
+        args: { name: string; driveId?: string },
+      ) => {
+        const { driveId, name } = args;
+        const document = await reactor.addDocument("powerhouse/workstream");
 
-        await reactor.addDriveAction(
-          driveId,
-          addFile({
-            id: docId,
-            name: args.name,
-            documentType: "powerhouse/workstream",
-            synchronizationUnits: [
-              {
-                branch: "main",
-                scope: "global",
-                syncId: generateId(),
-              },
-              {
-                branch: "main",
-                scope: "local",
-                syncId: generateId(),
-              },
-            ],
-          }),
-        );
+        if (driveId) {
+          await reactor.addAction(
+            driveId,
+            addFile({
+              name,
+              id: document.header.id,
+              documentType: "powerhouse/workstream",
+            }),
+          );
+        }
 
-        return docId;
+        if (name) {
+          await reactor.addAction(document.header.id, setName(name));
+        }
+
+        return document.header.id;
       },
 
-      Workstream_editWorkstream: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Workstream_editWorkstream: async (
+        _: unknown,
+        args: { docId: string; input: EditWorkstreamInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<WorkstreamDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.editWorkstream({ ...args.input }),
+          actions.editWorkstream(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to editWorkstream");
+        }
+
+        return true;
       },
 
-      Workstream_editClientInfo: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Workstream_editClientInfo: async (
+        _: unknown,
+        args: { docId: string; input: EditClientInfoInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<WorkstreamDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.editClientInfo({ ...args.input }),
+          actions.editClientInfo(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to editClientInfo");
+        }
+
+        return true;
       },
 
-      Workstream_setRequestForProposal: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Workstream_setRequestForProposal: async (
+        _: unknown,
+        args: { docId: string; input: SetRequestForProposalInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<WorkstreamDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.setRequestForProposal({ ...args.input }),
+          actions.setRequestForProposal(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to setRequestForProposal",
+          );
+        }
+
+        return true;
       },
 
-      Workstream_addPaymentRequest: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Workstream_addPaymentRequest: async (
+        _: unknown,
+        args: { docId: string; input: AddPaymentRequestInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<WorkstreamDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.addPaymentRequest({ ...args.input }),
+          actions.addPaymentRequest(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to addPaymentRequest",
+          );
+        }
+
+        return true;
       },
 
-      Workstream_removePaymentRequest: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Workstream_removePaymentRequest: async (
+        _: unknown,
+        args: { docId: string; input: RemovePaymentRequestInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<WorkstreamDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.removePaymentRequest({ ...args.input }),
+          actions.removePaymentRequest(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to removePaymentRequest",
+          );
+        }
+
+        return true;
       },
 
-      Workstream_editInitialProposal: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Workstream_editInitialProposal: async (
+        _: unknown,
+        args: { docId: string; input: EditInitialProposalInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<WorkstreamDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.editInitialProposal({ ...args.input }),
+          actions.editInitialProposal(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to editInitialProposal",
+          );
+        }
+
+        return true;
       },
 
-      Workstream_addAlternativeProposal: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Workstream_addAlternativeProposal: async (
+        _: unknown,
+        args: { docId: string; input: AddAlternativeProposalInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<WorkstreamDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.addAlternativeProposal({ ...args.input }),
+          actions.addAlternativeProposal(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to addAlternativeProposal",
+          );
+        }
+
+        return true;
       },
 
-      Workstream_editAlternativeProposal: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Workstream_editAlternativeProposal: async (
+        _: unknown,
+        args: { docId: string; input: EditAlternativeProposalInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<WorkstreamDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.editAlternativeProposal({ ...args.input }),
+          actions.editAlternativeProposal(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to editAlternativeProposal",
+          );
+        }
+
+        return true;
       },
 
-      Workstream_removeAlternativeProposal: async (_: any, args: any) => {
-        const driveId: string = args.driveId || DEFAULT_DRIVE_ID;
-        const docId: string = args.docId || "";
-        const doc = await reactor.getDocument(driveId, docId);
+      Workstream_removeAlternativeProposal: async (
+        _: unknown,
+        args: { docId: string; input: RemoveAlternativeProposalInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<WorkstreamDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
 
-        await reactor.addAction(
-          driveId,
+        const result = await reactor.addAction(
           docId,
-          actions.removeAlternativeProposal({ ...args.input }),
+          actions.removeAlternativeProposal(input),
         );
 
-        return (doc.header.revision["global"] ?? 0) + 1;
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to removeAlternativeProposal",
+          );
+        }
+
+        return true;
       },
     },
   };
