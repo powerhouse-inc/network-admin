@@ -1,10 +1,10 @@
 {
-    "name": "Network Admin",
-    "description": "Powerhouse document models and editors for network administration and workstream management",
-    "category": "Administration",
+    "name": "network-admin",
+    "description": "A place to handle all network related info",
+    "category": "Governance",
     "publisher": {
-        "name": "Powerhouse",
-        "url": "https://powerhouse.inc"
+        "name": "powerhouse.io",
+        "url": ""
     },
     "documentModels": [
         {
@@ -28,22 +28,30 @@
         {
             "id": "workstream-editor",
             "name": "Workstream Editor",
-            "documentTypes": ["powerhouse/workstream"]
+            "documentTypes": [
+                "powerhouse/workstream"
+            ]
         },
         {
             "id": "request-for-proposals-editor",
             "name": "Request for Proposals Editor",
-            "documentTypes": ["powerhouse/rfp"]
+            "documentTypes": [
+                "powerhouse/rfp"
+            ]
         },
         {
             "id": "payment-terms-editor",
             "name": "Payment Terms Editor",
-            "documentTypes": ["payment-terms"]
+            "documentTypes": [
+                "payment-terms"
+            ]
         },
         {
             "id": "network-profile-editor",
             "name": "Network Profile Editor",
-            "documentTypes": ["powerhouse/network-profile"]
+            "documentTypes": [
+                "powerhouse/network-profile"
+            ]
         }
     ],
     "apps": [
@@ -51,14 +59,18 @@
             "id": "powerhouse/network-admin",
             "name": "Network Admin Drive Explorer",
             "description": "Custom drive explorer for managing and organizing network administration documents and workstreams",
-            "documentTypes": ["powerhouse/document-drive"]
+            "documentTypes": [
+                "powerhouse/document-drive"
+            ]
         }
     ],
     "subgraphs": [
         {
             "id": "powerhouse/workstream-subgraph",
             "name": "Workstream Subgraph",
-            "documentTypes": ["powerhouse/workstream"]
+            "documentTypes": [
+                "powerhouse/workstream"
+            ]
         }
     ],
     "importScripts": []
