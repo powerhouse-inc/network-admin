@@ -6,7 +6,7 @@ import { getResolvers } from "./resolvers.js";
 export class WorkstreamSubgraph extends Subgraph {
   name = "workstream";
   typeDefs: DocumentNode = schema;
-  resolvers = getResolvers(this);
+  resolvers: Record<string, unknown> = getResolvers(this);
   additionalContextFields = {};
   async onSetup() {}
   async onDisconnect() {}

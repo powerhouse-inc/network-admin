@@ -6,8 +6,8 @@ import { getResolvers } from "./resolvers.js";
 export class PaymentTermsSubgraph extends Subgraph {
   name = "payment-terms";
   typeDefs: DocumentNode = schema;
-  resolvers = getResolvers(this);
+  resolvers: Record<string, unknown> = getResolvers(this);
   additionalContextFields = {};
-  async onSetup() {}
-  async onDisconnect() {}
+  async onSetup() { }
+  async onDisconnect() { }
 }
