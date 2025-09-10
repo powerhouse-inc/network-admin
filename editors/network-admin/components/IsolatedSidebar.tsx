@@ -51,6 +51,7 @@ export const IsolatedSidebar: React.FC<{
   const handleNodeClick = useCallback(
     (nodeId: string) => {
       sidebarContext.toggleNode(nodeId);
+      sidebarContext.syncActiveNodeId(nodeId);
       if (onActiveNodeChange) {
         onActiveNodeChange(nodeId);
       }
@@ -98,7 +99,7 @@ export const IsolatedSidebar: React.FC<{
   );
 
   const renderNode = (node: any, depth: number = 0) => {
-    const isActive = activeNodeId === node.id;
+    const isActive = activeNodeId === node.id || sidebarContext.activeNodeId === node.id;
     const isExpanded = sidebarContext.expandedNodes.has(node.id);
     const hasChildren = node.children && node.children.length > 0;
 
@@ -116,19 +117,19 @@ export const IsolatedSidebar: React.FC<{
     return (
       <div key={node.id} className="select-none">
         <div
-          className={`flex items-center py-2 px-3 cursor-pointer hover:bg-gray-200 rounded-md mx-2 ${
+          className={`flex items-center py-2 px-3 cursor-pointer rounded-md mx-2 ${
             isActive
-              ? "bg-blue-100 text-blue-600"
+              ? "bg-gray-200 text-gray-900 font-semibold"
               : isSearchActive
-                ? "bg-yellow-100 dark:bg-[#604B0033] text-gray-700"
-                : "text-gray-700"
+                ? "bg-yellow-100 dark:bg-[#604B0033] text-gray-700 hover:bg-yellow-200"
+                : "text-gray-700 hover:bg-gray-200"
           }`}
           style={{ paddingLeft: `${depth * 16 + 12}px` }}
           onClick={() => handleNodeClick(node.id)}
         >
           {hasChildren && (
             <button
-              className="mr-2 p-1 hover:bg-gray-300 rounded transition-colors"
+              className="mr-1 p-1 hover:bg-gray-300 rounded transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 sidebarContext.toggleNode(node.id);
@@ -136,13 +137,21 @@ export const IsolatedSidebar: React.FC<{
             >
               <Icon
                 name={isExpanded ? "ChevronDown" : "CaretRight"}
-                size={12}
+                size={16}
                 className="text-gray-500"
               />
             </button>
           )}
-          {!hasChildren && <div className="w-6 mr-2" />}
-          <span className="text-sm truncate font-medium">
+          {!hasChildren && (
+            <div className="mr-1 p-1">
+              <Icon
+                name="CaretRight"
+                size={16}
+                className="text-gray-500"
+              />
+            </div>
+          )}
+          <span className="text-sm truncate font-semimedium">
             {matchesSearch && searchTerm ? (
               <span
                 dangerouslySetInnerHTML={{

@@ -210,7 +210,7 @@ export function DriveExplorer(props: any) {
                       )
                       .map((file: any) => ({
                         id: `editor-${file.id}`,
-                        title: `📄 ${file.state?.code || ""} - ${file.state?.title || file.name}`,
+                        title: `${file.state?.code || ""} - ${file.state?.title || file.name}`,
                       })),
                   ],
                 })),
@@ -223,7 +223,7 @@ export function DriveExplorer(props: any) {
                 )
                 .map((file: any) => ({
                   id: `editor-${file.id}`,
-                  title: `📄 ${file.state?.code || ""} - ${file.state?.title || file.name}`,
+                  title: `${file.state?.code || ""} - ${file.state?.title || file.name}`,
                 })),
             ],
           })),
@@ -236,7 +236,7 @@ export function DriveExplorer(props: any) {
           )
           .map((file: any) => ({
             id: `editor-${file.id}`,
-            title: `📄 ${file.state?.code || ""} - ${file.state?.title || file.name}`,
+            title: `${file.state?.code || ""} - ${file.state?.title || file.name}`,
           })),
       ],
     };
@@ -289,7 +289,7 @@ export function DriveExplorer(props: any) {
                       )
                       .map((file: any) => ({
                         id: `editor-${file.id}`,
-                        title: `📄 ${file.name}`,
+                        title: `${file.name}`,
                       })),
                   ],
                 })),
@@ -302,7 +302,7 @@ export function DriveExplorer(props: any) {
                 )
                 .map((file: any) => ({
                   id: `editor-${file.id}`,
-                  title: `📄 ${file.name}`,
+                  title: `${file.name}`,
                 })),
             ],
           })),
@@ -315,7 +315,7 @@ export function DriveExplorer(props: any) {
           )
           .map((file: any) => ({
             id: `editor-${file.id}`,
-            title: `📄 ${file.name}`,
+            title: `${file.name}`,
           })),
       ],
     };
