@@ -23,6 +23,7 @@ import {
   useUserPermissions,
   useAllDocuments,
   useNodes,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import {
   actions,
@@ -34,9 +35,9 @@ import { type Node } from "document-drive";
 import { twMerge } from "tailwind-merge";
 import { useCallback, useRef, useState, useMemo } from "react";
 import { EditorContainer } from "./EditorContainer.js";
-import { createDocument as createNewWorkstreamDocument } from "../../../document-models/workstream/gen/utils.js";
 import { IsolatedSidebarProvider } from "./IsolatedSidebarProvider.js";
 import { IsolatedSidebar } from "./IsolatedSidebar.js";
+import { editWorkstream } from "../../../document-models/workstream/gen/creators.js";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -1041,7 +1042,7 @@ export function DriveExplorer(props: any) {
           folder?.id,
           undefined,
           undefined,
-          editorType,
+          editorType
         );
 
         if (!node?.id) {
