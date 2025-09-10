@@ -34,7 +34,7 @@ import { type Node } from "document-drive";
 import { twMerge } from "tailwind-merge";
 import { useCallback, useRef, useState, useMemo } from "react";
 import { EditorContainer } from "./EditorContainer.js";
-import { getNewDocumentObject } from "../utils.js";
+import { createDocument as createNewWorkstreamDocument } from "../../../document-models/workstream/gen/utils.js";
 import { IsolatedSidebarProvider } from "./IsolatedSidebarProvider.js";
 import { IsolatedSidebar } from "./IsolatedSidebar.js";
 
@@ -1034,12 +1034,28 @@ export function DriveExplorer(props: any) {
           setLastCreatedFolder(folder);
         }
 
+        const createdDocument = createNewWorkstreamDocument({
+          global: {
+            code: "",
+            title: fileName,
+            status: "RFP_DRAFT",
+            client: null,
+            rfp: null,
+            initialProposal: null,
+            alternativeProposals: [],
+            sow: null,
+            paymentTerms: null,
+            paymentRequests: [],
+          },
+          local: {},
+        });
+
         const node = await addDocument(
           selectedDrive?.header.id || "",
           fileName,
           documentType,
           folder?.id,
-          getNewDocumentObject(fileName, documentType),
+          createdDocument,
           undefined,
           editorType
         );
