@@ -1034,31 +1034,22 @@ export function DriveExplorer(props: any) {
           setLastCreatedFolder(folder);
         }
 
-        const createdDocument = createNewWorkstreamDocument({
-          global: {
-            code: "",
-            title: fileName,
-            status: "RFP_DRAFT",
-            client: null,
-            rfp: null,
-            initialProposal: null,
-            alternativeProposals: [],
-            sow: null,
-            paymentTerms: null,
-            paymentRequests: [],
-          },
-          local: {},
-        });
-
         const node = await addDocument(
           selectedDrive?.header.id || "",
           fileName,
           documentType,
           folder?.id,
-          createdDocument,
           undefined,
-          editorType
+          undefined,
+          editorType,
         );
+
+        if (!node?.id) {
+          console.error("Error creating document", fileName);
+          return;
+        }
+
+        await dispatchActions(editWorkstream({ title: fileName }), node.id);
 
         selectedDocumentModel.current = null;
 
