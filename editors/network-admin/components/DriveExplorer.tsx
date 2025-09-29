@@ -101,6 +101,15 @@ export function DriveExplorer(props: any) {
     };
   });
 
+  const networkAdminDocuments = allDocuments?.filter(
+    (doc) =>
+      doc.header.documentType === "powerhouse/network-profile" ||
+      doc.header.documentType === "powerhouse/workstream" ||
+      doc.header.documentType === "powerhouse/scopeofwork" ||
+      doc.header.documentType === "powerhouse/rfp" ||
+      doc.header.documentType === "payment-terms"
+  );
+
   // Find the folder containing the most recent workstream document
   const getMostRecentWorkstreamFolder = useCallback(() => {
     const workstreamFiles = fileChildren.filter(
@@ -151,95 +160,57 @@ export function DriveExplorer(props: any) {
   });
 
   // check if workstream doc is created, set isWorkstreamCreated to true
-  const isWorkstreamCreated = fileChildren.some(
-    (file) => file.documentType === "powerhouse/workstream"
-  );
+  const isWorkstreamCreated = networkAdminDocuments?.some(
+    (doc) => doc.header.documentType === "powerhouse/workstream"
+  ) || false;
   //check if network profile doc is created, set isNetworkProfileCreated to true
-  const isNetworkProfileCreated = fileChildren.some(
-    (file) => file.documentType === "powerhouse/network-profile"
-  );
+  const isNetworkProfileCreated = networkAdminDocuments?.some(
+    (doc) => doc.header.documentType === "powerhouse/network-profile"
+  ) || false;
 
-  // Convert folders and files to SidebarNode format
+  // Convert network admin documents to SidebarNode format
   const sidebarNodes = useMemo((): SidebarNode[] => {
+    // Group documents by type
+    const workstreamDocs = networkAdminDocuments?.filter(
+      (doc) => doc.header.documentType === "powerhouse/workstream"
+    ) || [];
+    const scopeOfWorkDocs = networkAdminDocuments?.filter(
+      (doc) => doc.header.documentType === "powerhouse/scopeofwork"
+    ) || [];
+    const rfpDocs = networkAdminDocuments?.filter(
+      (doc) => doc.header.documentType === "powerhouse/rfp"
+    ) || [];
+    const paymentTermsDocs = networkAdminDocuments?.filter(
+      (doc) => doc.header.documentType === "payment-terms"
+    ) || [];
+    const networkProfileDocs = networkAdminDocuments?.filter(
+      (doc) => doc.header.documentType === "powerhouse/network-profile"
+    ) || [];
+
     const workstreamsNode: SidebarNode = {
       id: "workstreams",
       title: "Workstreams",
       children: [
-        // Add folders
-        ...allFolders
-          .filter((folder) => {
-            // Only root folders that contain non-network-profile documents
-            if (folder.parentFolder) return false;
-
-            // Check if this folder or any of its subfolders contain non-network-profile documents
-            const hasNonNetworkProfileFiles = filesWithDocuments.some(
-              (file) =>
-                file.documentType !== "powerhouse/network-profile" &&
-                (file.parentFolder === folder.id ||
-                  allFolders.some(
-                    (subFolder) =>
-                      subFolder.parentFolder === folder.id &&
-                      file.parentFolder === subFolder.id
-                  ))
-            );
-            return hasNonNetworkProfileFiles;
-          })
-          .map((folder) => ({
-            id: folder.id,
-            title: folder.name,
-            children: [
-              // Add child folders
-              ...allFolders
-                .filter(
-                  (childFolder) =>
-                    childFolder.parentFolder === folder.id &&
-                    filesWithDocuments.some(
-                      (file) =>
-                        file.documentType !== "powerhouse/network-profile" &&
-                        file.parentFolder === childFolder.id
-                    )
-                )
-                .map((childFolder) => ({
-                  id: childFolder.id,
-                  title: childFolder.name,
-                  children: [
-                    // Add files in this folder (exclude network-profile documents)
-                    ...filesWithDocuments
-                      .filter(
-                        (file) =>
-                          file.parentFolder === childFolder.id &&
-                          file.documentType !== "powerhouse/network-profile"
-                      )
-                      .map((file: any) => ({
-                        id: `editor-${file.id}`,
-                        title: `${file.state?.code || ""} - ${file.state?.title || file.name}`,
-                      })),
-                  ],
-                })),
-              // Add files directly in this folder (exclude network-profile documents)
-              ...filesWithDocuments
-                .filter(
-                  (file) =>
-                    file.parentFolder === folder.id &&
-                    file.documentType !== "powerhouse/network-profile"
-                )
-                .map((file: any) => ({
-                  id: `editor-${file.id}`,
-                  title: `${file.state?.code || ""} - ${file.state?.title || file.name}`,
-                })),
-            ],
-          })),
-        // Add root-level files (exclude network-profile documents)
-        ...filesWithDocuments
-          .filter(
-            (file) =>
-              !file.parentFolder &&
-              file.documentType !== "powerhouse/network-profile"
-          )
-          .map((file: any) => ({
-            id: `editor-${file.id}`,
-            title: `${file.state?.code || ""} - ${file.state?.title || file.name}`,
-          })),
+        // Add workstream documents
+        ...workstreamDocs.map((doc) => ({
+          id: `editor-${doc.header.id}`,
+          title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
+        })),
+        // Add scope of work documents
+        ...scopeOfWorkDocs.map((doc) => ({
+          id: `editor-${doc.header.id}`,
+          title: `${(doc.state as any)?.global?.title || doc.header.name}`,
+        })),
+        // Add RFP documents
+        ...rfpDocs.map((doc) => ({
+          id: `editor-${doc.header.id}`,
+          title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
+        })),
+        // Add payment terms documents
+        ...paymentTermsDocs.map((doc) => ({
+          id: `editor-${doc.header.id}`,
+          title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
+        })),
       ],
     };
 
@@ -247,83 +218,16 @@ export function DriveExplorer(props: any) {
       id: "network-information",
       title: "Network Information",
       children: [
-        // Add folders that contain network-profile documents
-        ...allFolders
-          .filter((folder) => {
-            // Check if this folder or any of its subfolders contain network-profile documents
-            const hasNetworkProfileFiles = filesWithDocuments.some(
-              (file) =>
-                file.documentType === "powerhouse/network-profile" &&
-                (file.parentFolder === folder.id ||
-                  allFolders.some(
-                    (subFolder) =>
-                      subFolder.parentFolder === folder.id &&
-                      file.parentFolder === subFolder.id
-                  ))
-            );
-            return hasNetworkProfileFiles;
-          })
-          .map((folder) => ({
-            id: folder.id,
-            title: folder.name,
-            children: [
-              // Add child folders that contain network-profile documents
-              ...allFolders
-                .filter(
-                  (childFolder) =>
-                    childFolder.parentFolder === folder.id &&
-                    filesWithDocuments.some(
-                      (file) =>
-                        file.documentType === "powerhouse/network-profile" &&
-                        file.parentFolder === childFolder.id
-                    )
-                )
-                .map((childFolder) => ({
-                  id: childFolder.id,
-                  title: childFolder.name,
-                  children: [
-                    // Add network-profile files in this folder
-                    ...filesWithDocuments
-                      .filter(
-                        (file) =>
-                          file.documentType === "powerhouse/network-profile" &&
-                          file.parentFolder === childFolder.id
-                      )
-                      .map((file: any) => ({
-                        id: `editor-${file.id}`,
-                        title: `${file.name}`,
-                      })),
-                  ],
-                })),
-              // Add network-profile files directly in this folder
-              ...filesWithDocuments
-                .filter(
-                  (file) =>
-                    file.documentType === "powerhouse/network-profile" &&
-                    file.parentFolder === folder.id
-                )
-                .map((file: any) => ({
-                  id: `editor-${file.id}`,
-                  title: `${file.name}`,
-                })),
-            ],
-          })),
-        // Add root-level network-profile files
-        ...filesWithDocuments
-          .filter(
-            (file) =>
-              !file.parentFolder &&
-              file.documentType === "powerhouse/network-profile"
-          )
-          .map((file: any) => ({
-            id: `editor-${file.id}`,
-            title: `${file.name}`,
-          })),
+        // Add network profile documents
+        ...networkProfileDocs.map((doc) => ({
+          id: `editor-${doc.header.id}`,
+          title: doc.header.name,
+        })),
       ],
     };
 
     return [workstreamsNode, networkInfoNode];
-  }, [allFolders, filesWithDocuments]);
+  }, [networkAdminDocuments]);
 
   // Handle sidebar node selection
   const handleActiveNodeChange = useCallback(
@@ -466,7 +370,7 @@ export function DriveExplorer(props: any) {
             </div>
 
             {/* === DOCUMENTS TABLE === */}
-            {fileChildren.length > 0 && (
+            {networkAdminDocuments && networkAdminDocuments.length > 0 && (
               <div className="mt-10">
                 <h3 className="mb-4 text-lg font-medium text-gray-700">
                   📄 Documents
@@ -490,77 +394,90 @@ export function DriveExplorer(props: any) {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {fileChildren.map((fileNode) => (
-                        <tr key={fileNode.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
-                              {fileNode.name}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-500">
-                              {fileNode.documentType}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-500">
-                              {(() => {
-                                const document = allDocuments?.find(
-                                  (doc: PHDocument) => doc.header.id === fileNode.id
-                                );
-                                return document?.header?.createdAtUtcIso ? 
-                                  new Date(document.header.createdAtUtcIso).toLocaleDateString() + ' ' + 
-                                  new Date(document.header.createdAtUtcIso).toLocaleTimeString() : 
-                                  'Unknown';
-                              })()}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => {
-                                  setSelectedNode(fileNode);
-                                  setActiveDocumentId(fileNode.id);
-                                }}
-                                className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
-                              >
-                                Open
-                              </button>
-                              <button
-                                onClick={() => {
-                                  if (!fileNode || !fileNode.id) return;
-                                  const newName = prompt(
-                                    "Enter new name:",
-                                    fileNode.name || ""
-                                  );
-                                  if (
-                                    newName &&
-                                    newName.trim() &&
-                                    newName !== fileNode.name
-                                  ) {
-                                    try {
-                                      onRenameNode(newName.trim(), fileNode);
-                                    } catch (error) {
-                                      alert(
-                                        "Failed to rename document. Please try again."
-                                      );
+                      {networkAdminDocuments.map((document) => {
+                        // Find the corresponding file node for actions
+                        const fileNode = fileChildren.find(
+                          (file) => file.id === document.header.id
+                        );
+                        
+                        return (
+                          <tr key={document.header.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                {document.header.name}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {document.header.documentType}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm text-gray-500">
+                                {document.header.createdAtUtcIso
+                                  ? new Date(
+                                      document.header.createdAtUtcIso
+                                    ).toLocaleDateString() +
+                                      " " +
+                                      new Date(
+                                        document.header.createdAtUtcIso
+                                      ).toLocaleTimeString()
+                                  : "Unknown"}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    if (fileNode) {
+                                      setSelectedNode(fileNode);
                                     }
-                                  }
-                                }}
-                                className="px-3 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600 transition-colors"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => showDeleteNodeModal(fileNode)}
-                                className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600 transition-colors"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                                    setActiveDocumentId(document.header.id);
+                                  }}
+                                  className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
+                                >
+                                  Open
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (!fileNode || !fileNode.id) return;
+                                    const newName = prompt(
+                                      "Enter new name:",
+                                      document.header.name || ""
+                                    );
+                                    if (
+                                      newName &&
+                                      newName.trim() &&
+                                      newName !== document.header.name
+                                    ) {
+                                      try {
+                                        onRenameNode(newName.trim(), fileNode);
+                                      } catch (error) {
+                                        alert(
+                                          "Failed to rename document. Please try again."
+                                        );
+                                      }
+                                    }
+                                  }}
+                                  className="px-3 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600 transition-colors"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (fileNode) {
+                                      showDeleteNodeModal(fileNode);
+                                    }
+                                  }}
+                                  className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600 transition-colors"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
