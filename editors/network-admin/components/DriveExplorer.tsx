@@ -3,7 +3,11 @@ import {
   CreateDocumentModal,
   useDrop,
 } from "@powerhousedao/design-system";
-import { Icon, type SidebarNode } from "@powerhousedao/document-engineering";
+import {
+  Sidebar,
+  SidebarProvider,
+  type SidebarNode,
+} from "@powerhousedao/document-engineering";
 import {
   addDocument,
   type DriveEditorProps,
@@ -35,8 +39,6 @@ import { type Node } from "document-drive";
 import { twMerge } from "tailwind-merge";
 import { useCallback, useRef, useState, useMemo } from "react";
 import { EditorContainer } from "./EditorContainer.js";
-import { IsolatedSidebarProvider } from "./IsolatedSidebarProvider.js";
-import { IsolatedSidebar } from "./IsolatedSidebar.js";
 import { editWorkstream } from "../../../document-models/workstream/gen/creators.js";
 
 /**
@@ -362,7 +364,11 @@ export function DriveExplorer(props: any) {
         // Extract file ID from editor-{file.id} format
         const fileId = newNode.id.replace("editor-", "");
         const file = fileChildren.find((f) => f.id === fileId);
-        setActiveDocumentId(fileId);
+        if (file?.documentType === "powerhouse/scopeofwork") {
+          setSelectedNode(file);
+        } else {
+          setActiveDocumentId(fileId);
+        }
       } else {
         // Find if it's a folder
         const folder = allFolders.find((f) => f.id === newNode.id);
@@ -1103,13 +1109,16 @@ export function DriveExplorer(props: any) {
 
   // === RENDER ===
   return (
-    <IsolatedSidebarProvider nodes={sidebarNodes}>
+    <SidebarProvider nodes={sidebarNodes}>
+      {/* === LEFT SIDEBAR: Folder Navigation === */}
       <div className="flex h-full">
-        {/* === LEFT SIDEBAR: Folder Navigation === */}
-        <IsolatedSidebar
+        <Sidebar
+          className={String.raw`
+            [&_.sidebar\\_\\_item--active]:bg-yellow-500
+          `}
           nodes={sidebarNodes}
           activeNodeId={selectedFolder?.id || activeDocumentId}
-          onActiveNodeChange={handleActiveNodeChange}
+          onActiveNodeChange={(node) => handleActiveNodeChange(node.id)}
           sidebarTitle="Network Admin"
           showSearchBar={true}
           allowPinning={true}
@@ -1154,6 +1163,6 @@ export function DriveExplorer(props: any) {
           open={openModal}
         />
       </div>
-    </IsolatedSidebarProvider>
+    </SidebarProvider>
   );
 }
