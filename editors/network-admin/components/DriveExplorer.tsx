@@ -398,7 +398,7 @@ export function DriveExplorer(props: any) {
     if (activeNodeId === "workstreams") {
       nodeType = "workstreams";
     } else if (activeNodeId === "network-information") {
-      nodeType = "network-information";
+      nodeType = "workstreams";
     } else if (activeNodeId.startsWith("editor-")) {
       nodeType = "file";
       actualId = activeNodeId.replace("editor-", "");
@@ -420,7 +420,7 @@ export function DriveExplorer(props: any) {
     switch (nodeType) {
       case "workstreams":
         return (
-          <div className="mt-20 p-4 flex flex-col items-center justify-center">
+          <div className="mt-10 p-4 flex flex-col items-center justify-center">
             <div className="space-y-6 flex flex-col items-center justify-center">
               <h1 className="text-2xl font-bold">
                 Welcome to the Network Admin
@@ -463,474 +463,66 @@ export function DriveExplorer(props: any) {
                   <span>Create Network Profile Document</span>
                 </Button>
               </div>
-              {/* === HEADER SECTION === */}
-              {/* <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">Root Contents</h2>
-                  {isAllowedToCreateDocuments && (
-                    <button
-                      onClick={() => handleCreateFolder()}
-                      className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
-                    >
-                      + New Folder
-                    </button>
-                  )}
-                </div> */}
-
-              {/* Navigation breadcrumbs */}
-              {/* {breadcrumbs.length > 1 && (
-                  <div className="border-b border-gray-200 pb-3">
-                    <Breadcrumbs
-                      breadcrumbs={breadcrumbs}
-                      createEnabled={isAllowedToCreateDocuments}
-                      onCreate={handleCreateFolder}
-                      onBreadcrumbSelected={onBreadcrumbSelected}
-                    />
-                  </div>
-                )} */}
             </div>
 
-            {/* === FOLDERS AND FILES GRID LAYOUT === */}
-            {(folderChildren.length > 0 || fileChildren.length > 0) && (
+            {/* === DOCUMENTS TABLE === */}
+            {fileChildren.length > 0 && (
               <div className="mt-10">
-                <div className="grid grid-cols-2 gap-6">
-                  {/* === FOLDERS COLUMN === */}
-                  <div>
-                    <h3 className="mb-2 text-sm font-medium text-gray-500">
-                      📁 Folders
-                    </h3>
-                    <div className="space-y-2">
-                      {folderChildren.map((folderNode) =>
-                        folderNode && folderNode.id ? (
-                          <div
-                            key={folderNode.id}
-                            className="p-2 border rounded"
-                          >
-                            <div className="font-medium">
-                              📁 {folderNode.name}
-                            </div>
-                            <div className="text-sm text-gray-500">Folder</div>
-                            <div className="mt-2 flex gap-2">
-                              <button
-                                onClick={() => setSelectedNode(folderNode)}
-                                className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                              >
-                                Open
-                              </button>
-                              <button
-                                onClick={() => {
-                                  const newName = prompt(
-                                    "Enter new name:",
-                                    folderNode.name || ""
-                                  );
-                                  if (
-                                    newName &&
-                                    newName.trim() &&
-                                    newName !== folderNode.name
-                                  ) {
-                                    try {
-                                      onRenameNode(newName.trim(), folderNode);
-                                    } catch (error) {
-                                      console.error("Failed to rename:", error);
-                                      alert(
-                                        "Failed to rename folder. Please try again."
-                                      );
-                                    }
-                                  }
-                                }}
-                                className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => showDeleteNodeModal(folderNode)}
-                                className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        ) : null
-                      )}
-                    </div>
-                  </div>
-
-                  {/* === FILES COLUMN === */}
-                  <div>
-                    <h3 className="mb-2 text-sm font-medium text-gray-500">
-                      📄 Documents
-                    </h3>
-                    <div className="space-y-2">
+                <h3 className="mb-4 text-lg font-medium text-gray-700">
+                  📄 Documents
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Created
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
                       {fileChildren.map((fileNode) => (
-                        <div key={fileNode.id} className="p-2 border rounded">
-                          <div className="font-medium">{fileNode.name}</div>
-                          <div className="text-sm text-gray-500">
-                            {fileNode.documentType}
-                          </div>
-                          <div className="mt-2 flex gap-2">
-                            <button
-                              onClick={() => {
-                                setSelectedNode(fileNode);
-                                setActiveDocumentId(fileNode.id);
-                              }}
-                              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                            >
-                              Open
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (!fileNode || !fileNode.id) return;
-                                const newName = prompt(
-                                  "Enter new name:",
-                                  fileNode.name || ""
-                                );
-                                if (
-                                  newName &&
-                                  newName.trim() &&
-                                  newName !== fileNode.name
-                                ) {
-                                  try {
-                                    onRenameNode(newName.trim(), fileNode);
-                                  } catch (error) {
-                                    alert(
-                                      "Failed to rename document. Please try again."
-                                    );
-                                  }
-                                }
-                              }}
-                              className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => showDeleteNodeModal(fileNode)}
-                              className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-
-      case "folder":
-        const folder = allFolders.find((f) => f.id === actualId);
-        if (!folder) return null;
-
-        return (
-          <div className="p-4">
-            <div className="space-y-6">
-              {/* === HEADER SECTION === */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">
-                    Contents of "{folder.name}"
-                  </h2>
-                  <button
-                    onClick={() => {
-                      setSelectedNode(selectedDrive?.header.id);
-                    }}
-                    className="rounded bg-gray-500 px-3 py-1 text-sm text-white hover:bg-gray-600"
-                  >
-                    Back
-                  </button>
-                  {isAllowedToCreateDocuments && (
-                    <button
-                      onClick={() => handleCreateFolder()}
-                      className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
-                    >
-                      + New Folder
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* === FOLDERS SECTION === */}
-              {folderChildren.length > 0 && (
-                <div>
-                  <h3 className="mb-2 text-sm font-medium text-gray-500">
-                    📁 Folders
-                  </h3>
-                  <div className="grid grid-cols-1 gap-2">
-                    {folderChildren.map((folderNode) =>
-                      folderNode && folderNode.id ? (
-                        <div key={folderNode.id} className="p-2 border rounded">
-                          <div className="font-medium">
-                            📁 {folderNode.name}
-                          </div>
-                          <div className="text-sm text-gray-500">Folder</div>
-                          <div className="mt-2 flex gap-2">
-                            <button
-                              onClick={() => setSelectedNode(folderNode)}
-                              className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                            >
-                              Open
-                            </button>
-                            <button
-                              onClick={() => {
-                                const newName = prompt(
-                                  "Enter new name:",
-                                  folderNode.name || ""
-                                );
-                                if (
-                                  newName &&
-                                  newName.trim() &&
-                                  newName !== folderNode.name
-                                ) {
-                                  try {
-                                    onRenameNode(newName.trim(), folderNode);
-                                  } catch (error) {
-                                    console.error("Failed to rename:", error);
-                                    alert(
-                                      "Failed to rename folder. Please try again."
-                                    );
-                                  }
-                                }
-                              }}
-                              className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => showDeleteNodeModal(folderNode)}
-                              className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      ) : null
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* === FILES/DOCUMENTS SECTION === */}
-              {fileChildren.length > 0 ? (
-                <div>
-                  <h3 className="mb-2 text-sm font-medium text-gray-500">
-                    📄 Documents
-                  </h3>
-                  <div className="grid grid-cols-1 gap-2">
-                    {fileChildren.map((fileNode) => (
-                      <div key={fileNode.id} className="p-2 border rounded">
-                        <div className="font-medium">{fileNode.name}</div>
-                        <div className="text-sm text-gray-500">
-                          {fileNode.documentType}
-                        </div>
-                        <div className="mt-2 flex gap-2">
-                          <button
-                            onClick={() => {
-                              setSelectedNode(fileNode);
-                              setActiveDocumentId(fileNode.id);
-                            }}
-                            className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                          >
-                            Open
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (!fileNode || !fileNode.id) return;
-                              const newName = prompt(
-                                "Enter new name:",
-                                fileNode.name || ""
-                              );
-                              if (
-                                newName &&
-                                newName.trim() &&
-                                newName !== fileNode.name
-                              ) {
-                                try {
-                                  onRenameNode(newName.trim(), fileNode);
-                                } catch (error) {
-                                  alert(
-                                    "Failed to rename document. Please try again."
-                                  );
-                                }
-                              }
-                            }}
-                            className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => showDeleteNodeModal(fileNode)}
-                            className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
-              {/* === EMPTY STATE === */}
-              {folderChildren.length === 0 && fileChildren.length === 0 && (
-                <div className="py-12 text-center text-gray-500">
-                  <p className="text-lg">🗂️ This folder is empty</p>
-                  <p className="mt-2 text-sm">
-                    Create your first document or folder below
-                  </p>
-                </div>
-              )}
-
-              {/* === DOCUMENT CREATION SECTION === */}
-              {/* <CreateDocument /> */}
-            </div>
-          </div>
-        );
-
-      case "network-information":
-        return (
-          <div className="mt-20 p-4 flex flex-col items-center justify-center">
-            <div className="space-y-6 flex flex-col items-center justify-center">
-              <h1 className="text-2xl font-bold">Network Information</h1>
-              <p>
-                Create a new network profile to get started, or select an
-                existing network profile from the left sidebar
-              </p>
-              <div className="flex gap-3">
-                <Button
-                  color="dark"
-                  size="medium"
-                  className="cursor-pointer hover:bg-gray-600 hover:text-white"
-                  title={"Create Network Profile Document"}
-                  aria-description={"Create Network Profile Document"}
-                  onClick={() => {
-                    setModalDocumentType("powerhouse/network-profile");
-                    setOpenModal(true);
-                  }}
-                  disabled={isNetworkProfileCreated}
-                >
-                  <span>Create Network Profile Document</span>
-                </Button>
-              </div>
-            </div>
-
-            {/* === NETWORK PROFILE FOLDERS AND FILES GRID LAYOUT === */}
-            {(folderChildren.length > 0 || fileChildren.length > 0) && (
-              <div className="mt-10">
-                <div className="grid grid-cols-2 gap-6">
-                  {/* === FOLDERS COLUMN === */}
-                  <div>
-                    <h3 className="mb-2 text-sm font-medium text-gray-500">
-                      📁 Network Profile Folders
-                    </h3>
-                    <div className="space-y-2">
-                      {folderChildren
-                        .filter((folder) => {
-                          // Only show folders that contain network-profile documents
-                          return filesWithDocuments.some(
-                            (file) =>
-                              file.documentType ===
-                                "powerhouse/network-profile" &&
-                              (file.parentFolder === folder.id ||
-                                allFolders.some(
-                                  (subFolder) =>
-                                    subFolder.parentFolder === folder.id &&
-                                    file.parentFolder === subFolder.id
-                                ))
-                          );
-                        })
-                        .map((folderNode) =>
-                          folderNode && folderNode.id ? (
-                            <div
-                              key={folderNode.id}
-                              className="p-2 border rounded"
-                            >
-                              <div className="font-medium">
-                                📁 {folderNode.name}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                Network Profile Folder
-                              </div>
-                              <div className="mt-2 flex gap-2">
-                                <button
-                                  onClick={() => setSelectedNode(folderNode)}
-                                  className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                                >
-                                  Open
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    const newName = prompt(
-                                      "Enter new name:",
-                                      folderNode.name || ""
-                                    );
-                                    if (
-                                      newName &&
-                                      newName.trim() &&
-                                      newName !== folderNode.name
-                                    ) {
-                                      try {
-                                        onRenameNode(
-                                          newName.trim(),
-                                          folderNode
-                                        );
-                                      } catch (error) {
-                                        console.error(
-                                          "Failed to rename:",
-                                          error
-                                        );
-                                        alert(
-                                          "Failed to rename folder. Please try again."
-                                        );
-                                      }
-                                    }
-                                  }}
-                                  className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-blue-600"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    showDeleteNodeModal(folderNode)
-                                  }
-                                  className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                                >
-                                  Delete
-                                </button>
-                              </div>
+                        <tr key={fileNode.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {fileNode.name}
                             </div>
-                          ) : null
-                        )}
-                    </div>
-                  </div>
-
-                  {/* === NETWORK PROFILE FILES COLUMN === */}
-                  <div>
-                    <h3 className="mb-2 text-sm font-medium text-gray-500">
-                      🌐 Network Profile Documents
-                    </h3>
-                    <div className="space-y-2">
-                      {filesWithDocuments
-                        .filter(
-                          (file) =>
-                            file.documentType === "powerhouse/network-profile"
-                        )
-                        .map((fileNode) => (
-                          <div key={fileNode.id} className="p-2 border rounded">
-                            <div className="font-medium">
-                              🌐 {fileNode.name}
-                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-500">
-                              Network Profile
+                              {fileNode.documentType}
                             </div>
-                            <div className="mt-2 flex gap-2">
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-500">
+                              {(() => {
+                                const document = allDocuments?.find(
+                                  (doc: PHDocument) => doc.header.id === fileNode.id
+                                );
+                                return document?.header?.createdAtUtcIso ? 
+                                  new Date(document.header.createdAtUtcIso).toLocaleDateString() + ' ' + 
+                                  new Date(document.header.createdAtUtcIso).toLocaleTimeString() : 
+                                  'Unknown';
+                              })()}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex gap-2">
                               <button
                                 onClick={() => {
                                   setSelectedNode(fileNode);
                                   setActiveDocumentId(fileNode.id);
                                 }}
-                                className="px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                                className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
                               >
                                 Open
                               </button>
@@ -955,37 +547,27 @@ export function DriveExplorer(props: any) {
                                     }
                                   }
                                 }}
-                                className="px-2 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-blue-600"
+                                className="px-3 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600 transition-colors"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => showDeleteNodeModal(fileNode)}
-                                className="px-2 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                                className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600 transition-colors"
                               >
                                 Delete
                               </button>
                             </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              </div>
-            )}
-
-            {/* === EMPTY STATE === */}
-            {folderChildren.length === 0 && fileChildren.length === 0 && (
-              <div className="py-12 text-center text-gray-500">
-                <p className="text-lg">🌐 No network profiles yet</p>
-                <p className="mt-2 text-sm">
-                  Create your first network profile above
-                </p>
               </div>
             )}
           </div>
         );
-
       default:
         return <div>Unknown node type: {nodeType}</div>;
     }
@@ -1033,19 +615,11 @@ export function DriveExplorer(props: any) {
       console.log(`Creating ${documentType} document: ${fileName}`);
 
       try {
-        let folder = undefined;
-        if (documentType === "powerhouse/workstream") {
-          folder = await onAddFolder(fileName, undefined);
-          // Track the created folder for drag and drop targeting
-          console.log("Created workstream folder:", folder);
-          setLastCreatedFolder(folder);
-        }
-
         const node = await addDocument(
           selectedDrive?.header.id || "",
           fileName,
           documentType,
-          folder?.id,
+          undefined, // creating in root folder
           undefined,
           undefined,
           editorType
@@ -1086,7 +660,6 @@ export function DriveExplorer(props: any) {
     ]
   );
 
-  // === DOCUMENT EDITOR DATA ===
   // Filter available document types here if needed
   const documentModelModules = useDocumentModelModules();
 
