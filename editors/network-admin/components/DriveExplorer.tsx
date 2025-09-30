@@ -327,167 +327,164 @@ export function DriveExplorer(props: any) {
     switch (nodeType) {
       case "workstreams":
         return (
-          <div className="mt-10 p-4 flex flex-col items-center justify-center">
-            <div className="space-y-6 flex flex-col items-center justify-center">
-              <h1 className="text-2xl font-bold">
-                Welcome to the Network Admin
-              </h1>
-              <p>
-                Create a new workstream to get started, or select an existing
-                workstream on the left
-              </p>
-              <div className="flex gap-3">
-                <Button
-                  color="dark" // Customize button appearance
-                  size="medium"
-                  className="cursor-pointer hover:bg-gray-600 hover:text-white"
-                  title={"Create Workstream Document"}
-                  aria-description={"Create Workstream Document"}
-                  onClick={() => {
-                    setModalDocumentType("powerhouse/workstream");
-                    setOpenModal(true);
-                  }}
-                  disabled={isWorkstreamCreated}
-                >
-                  <span>
-                    {/* {/* {/* <span className="text-sm"> */}
-                    Create Workstream Document
-                  </span>
-                </Button>
+          <div className="w-full h-full p-6 overflow-auto">
+            <div className="max-w-7xl mx-auto">
+              <div className="space-y-6 flex flex-col items-center justify-center mb-10">
+                <h1 className="text-2xl font-bold">
+                  Welcome to the Network Admin
+                </h1>
+                <p className="text-center">
+                  Create a new workstream to get started, or select an existing
+                  workstream on the left
+                </p>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <Button
+                    color="dark" // Customize button appearance
+                    size="medium"
+                    className="cursor-pointer hover:bg-gray-600 hover:text-white"
+                    title={"Create Workstream Document"}
+                    aria-description={"Create Workstream Document"}
+                    onClick={() => {
+                      setModalDocumentType("powerhouse/workstream");
+                      setOpenModal(true);
+                    }}
+                    disabled={isWorkstreamCreated}
+                  >
+                    <span>
+                      {/* {/* {/* <span className="text-sm"> */}
+                      Create Workstream Document
+                    </span>
+                  </Button>
 
-                <Button
-                  color="dark" // Customize button appearance
-                  size="medium"
-                  className="cursor-pointer hover:bg-gray-600 hover:text-white"
-                  title={"Create Network Profile Document"}
-                  aria-description={"Create Network Profile Document"}
-                  onClick={() => {
-                    setModalDocumentType("powerhouse/network-profile");
-                    setOpenModal(true);
-                  }}
-                  disabled={isNetworkProfileCreated}
-                >
-                  <span>Create Network Profile Document</span>
-                </Button>
-              </div>
-            </div>
-
-            {/* === DOCUMENTS TABLE === */}
-            {networkAdminDocuments && networkAdminDocuments.length > 0 && (
-              <div className="mt-10">
-                <h3 className="mb-4 text-lg font-medium text-gray-700">
-                  📄 Documents
-                </h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Name
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Type
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Created
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {networkAdminDocuments.map((document) => {
-                        // Find the corresponding file node for actions
-                        const fileNode = fileChildren?.find(
-                          (file) => file.id === document.header.id
-                        );
-
-                        return (
-                          <tr
-                            key={document.header.id}
-                            className="hover:bg-gray-50"
-                          >
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
-                                {document.header.name}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {document.header.documentType}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                {document.header.createdAtUtcIso
-                                  ? new Date(
-                                      document.header.createdAtUtcIso
-                                    ).toLocaleDateString() +
-                                    " " +
-                                    new Date(
-                                      document.header.createdAtUtcIso
-                                    ).toLocaleTimeString()
-                                  : "Unknown"}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => {
-                                    if (fileNode) {
-                                      setSelectedNode(fileNode);
-                                    }
-                                  }}
-                                  className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
-                                >
-                                  Open
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (!fileNode || !fileNode.id) return;
-                                    const newName = prompt(
-                                      "Enter new name:",
-                                      document.header.name || ""
-                                    );
-                                    if (
-                                      newName &&
-                                      newName.trim() &&
-                                      newName !== document.header.name
-                                    ) {
-                                      try {
-                                        onRenameNode(newName.trim(), fileNode);
-                                      } catch (error) {
-                                        alert(
-                                          "Failed to rename document. Please try again."
-                                        );
-                                      }
-                                    }
-                                  }}
-                                  className="px-3 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600 transition-colors"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (fileNode) {
-                                      showDeleteNodeModal(fileNode);
-                                    }
-                                  }}
-                                  className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600 transition-colors"
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  <Button
+                    color="dark" // Customize button appearance
+                    size="medium"
+                    className="cursor-pointer hover:bg-gray-600 hover:text-white"
+                    title={"Create Network Profile Document"}
+                    aria-description={"Create Network Profile Document"}
+                    onClick={() => {
+                      setModalDocumentType("powerhouse/network-profile");
+                      setOpenModal(true);
+                    }}
+                    disabled={isNetworkProfileCreated}
+                  >
+                    <span>Create Network Profile Document</span>
+                  </Button>
                 </div>
               </div>
-            )}
+
+              {/* === DOCUMENTS TABLE === */}
+              {networkAdminDocuments && networkAdminDocuments.length > 0 && (
+                <div className="w-full">
+                  <h3 className="mb-4 text-lg font-medium text-gray-700">
+                    📄 Documents
+                  </h3>
+                  <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+                    <table className="w-full bg-white">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
+                            Name
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
+                            Type
+                          </th>
+
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {networkAdminDocuments.map((document) => {
+                          // Find the corresponding file node for actions
+                          const fileNode = fileChildren?.find(
+                            (file) => file.id === document.header.id
+                          );
+
+                          return (
+                            <tr
+                              key={document.header.id}
+                              className="hover:bg-gray-50 transition-colors"
+                            >
+                              <td className="px-2 py-2">
+                                <div
+                                  className="text-sm font-medium text-gray-900 truncate max-w-xs"
+                                  title={document.header.name}
+                                >
+                                  {document.header.name}
+                                </div>
+                              </td>
+                              <td className="px-2 py-2">
+                                <div
+                                  className="text-sm text-gray-500 truncate max-w-xs"
+                                  title={document.header.documentType}
+                                >
+                                  {document.header.documentType}
+                                </div>
+                              </td>
+
+                              <td className="px-2 py-2">
+                                <div className="flex gap-2 flex-wrap">
+                                  <button
+                                    onClick={() => {
+                                      if (fileNode) {
+                                        setSelectedNode(fileNode);
+                                      }
+                                    }}
+                                    className="px-3 py-1.5 bg-blue-500 text-white rounded text-xs font-medium hover:bg-blue-600 transition-colors whitespace-nowrap"
+                                  >
+                                    Open
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      if (!fileNode || !fileNode.id) return;
+                                      const newName = prompt(
+                                        "Enter new name:",
+                                        document.header.name || ""
+                                      );
+                                      if (
+                                        newName &&
+                                        newName.trim() &&
+                                        newName !== document.header.name
+                                      ) {
+                                        try {
+                                          onRenameNode(
+                                            newName.trim(),
+                                            fileNode
+                                          );
+                                        } catch (error) {
+                                          alert(
+                                            "Failed to rename document. Please try again."
+                                          );
+                                        }
+                                      }
+                                    }}
+                                    className="px-3 py-1.5 bg-yellow-500 text-white rounded text-xs font-medium hover:bg-yellow-600 transition-colors whitespace-nowrap"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      if (fileNode) {
+                                        showDeleteNodeModal(fileNode);
+                                      }
+                                    }}
+                                    className="px-3 py-1.5 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600 transition-colors whitespace-nowrap"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         );
       default:
