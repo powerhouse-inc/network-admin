@@ -222,7 +222,6 @@ function ImageUrlInput({
 
 export default function Editor(props: any) {
   // Getting dispatch from selected document
-  console.log("props", props);
   const [doc, dispatch] = useDocumentById(props.documentId) as [
     NetworkProfileDocument,
     (actionOrActions: Action | Action[] | undefined) => void,

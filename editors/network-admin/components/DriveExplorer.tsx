@@ -28,6 +28,7 @@ import {
   useAllDocuments,
   useNodes,
   dispatchActions,
+  useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import {
   actions,
@@ -37,7 +38,7 @@ import {
 } from "document-model";
 import { type Node } from "document-drive";
 import { twMerge } from "tailwind-merge";
-import { useCallback, useRef, useState, useMemo } from "react";
+import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { EditorContainer } from "./EditorContainer.js";
 import { editWorkstream } from "../../../document-models/workstream/gen/creators.js";
 
@@ -85,21 +86,13 @@ export function DriveExplorer(props: any) {
   const sharingType = useDriveSharingType(selectedDrive?.header.id);
   const allDocuments = useAllDocuments();
 
+  // Listen to global selected document state (for external editors like Scope of Work)
+  const [globalSelectedDocument] = useSelectedDocument();
+
   // All folders for the sidebar tree view
   const allFolders = useAllFolderNodes();
 
-  const folderChildren = useFolderChildNodes();
   const fileChildren = useFileChildNodes();
-  const filesWithDocuments = fileChildren.map((file) => {
-    const document = allDocuments?.find(
-      (doc: PHDocument) => doc.header.id === file.id
-    );
-    const state = (document?.state as any)?.global;
-    return {
-      ...file,
-      state,
-    };
-  });
 
   const networkAdminDocuments = allDocuments?.filter(
     (doc) =>
@@ -109,6 +102,21 @@ export function DriveExplorer(props: any) {
       doc.header.documentType === "powerhouse/rfp" ||
       doc.header.documentType === "payment-terms"
   );
+
+  // Sync global selected document with local activeDocumentId
+  // This makes setSelectedNode() trigger the EditorContainer to open
+  useEffect(() => {
+    if (globalSelectedDocument?.header?.id) {
+      setActiveDocumentId(globalSelectedDocument.header.id);
+    }
+  }, [globalSelectedDocument]);
+
+  // Check if current active document is a Scope of Work (should show in full view)
+  const activeDoc = allDocuments?.find(
+    (doc) => doc.header.id === activeDocumentId
+  );
+  const isScopeOfWorkFullView =
+    activeDoc?.header.documentType === "powerhouse/scopeofwork";
 
   // Find the folder containing the most recent workstream document
   const getMostRecentWorkstreamFolder = useCallback(() => {
@@ -160,32 +168,39 @@ export function DriveExplorer(props: any) {
   });
 
   // check if workstream doc is created, set isWorkstreamCreated to true
-  const isWorkstreamCreated = networkAdminDocuments?.some(
-    (doc) => doc.header.documentType === "powerhouse/workstream"
-  ) || false;
+  const isWorkstreamCreated =
+    networkAdminDocuments?.some(
+      (doc) => doc.header.documentType === "powerhouse/workstream"
+    ) || false;
   //check if network profile doc is created, set isNetworkProfileCreated to true
-  const isNetworkProfileCreated = networkAdminDocuments?.some(
-    (doc) => doc.header.documentType === "powerhouse/network-profile"
-  ) || false;
+  const isNetworkProfileCreated =
+    networkAdminDocuments?.some(
+      (doc) => doc.header.documentType === "powerhouse/network-profile"
+    ) || false;
 
   // Convert network admin documents to SidebarNode format
   const sidebarNodes = useMemo((): SidebarNode[] => {
     // Group documents by type
-    const workstreamDocs = networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/workstream"
-    ) || [];
-    const scopeOfWorkDocs = networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/scopeofwork"
-    ) || [];
-    const rfpDocs = networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/rfp"
-    ) || [];
-    const paymentTermsDocs = networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "payment-terms"
-    ) || [];
-    const networkProfileDocs = networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/network-profile"
-    ) || [];
+    const workstreamDocs =
+      networkAdminDocuments?.filter(
+        (doc) => doc.header.documentType === "powerhouse/workstream"
+      ) || [];
+    const scopeOfWorkDocs =
+      networkAdminDocuments?.filter(
+        (doc) => doc.header.documentType === "powerhouse/scopeofwork"
+      ) || [];
+    const rfpDocs =
+      networkAdminDocuments?.filter(
+        (doc) => doc.header.documentType === "powerhouse/rfp"
+      ) || [];
+    const paymentTermsDocs =
+      networkAdminDocuments?.filter(
+        (doc) => doc.header.documentType === "payment-terms"
+      ) || [];
+    const networkProfileDocs =
+      networkAdminDocuments?.filter(
+        (doc) => doc.header.documentType === "powerhouse/network-profile"
+      ) || [];
 
     const workstreamsNode: SidebarNode = {
       id: "workstreams",
@@ -267,21 +282,7 @@ export function DriveExplorer(props: any) {
       } else if (newNode.id.startsWith("editor-")) {
         // Extract file ID from editor-{file.id} format
         const fileId = newNode.id.replace("editor-", "");
-        const file = fileChildren.find((f) => f.id === fileId);
-        if (file?.documentType === "powerhouse/scopeofwork") {
-          console.log("file", file);
-          setSelectedNode(file);
-        } else {
-          console.log("fileId", fileId);
-          setActiveDocumentId(fileId);
-        }
-      } else {
-        // Find if it's a folder
-        const folder = allFolders.find((f) => f.id === newNode.id);
-
-        if (folder) {
-          setActiveDocumentId(undefined);
-        }
+        setActiveDocumentId(fileId);
       }
     },
     [
@@ -398,12 +399,15 @@ export function DriveExplorer(props: any) {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {networkAdminDocuments.map((document) => {
                         // Find the corresponding file node for actions
-                        const fileNode = fileChildren.find(
+                        const fileNode = fileChildren?.find(
                           (file) => file.id === document.header.id
                         );
-                        
+
                         return (
-                          <tr key={document.header.id} className="hover:bg-gray-50">
+                          <tr
+                            key={document.header.id}
+                            className="hover:bg-gray-50"
+                          >
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm font-medium text-gray-900">
                                 {document.header.name}
@@ -420,10 +424,10 @@ export function DriveExplorer(props: any) {
                                   ? new Date(
                                       document.header.createdAtUtcIso
                                     ).toLocaleDateString() +
-                                      " " +
-                                      new Date(
-                                        document.header.createdAtUtcIso
-                                      ).toLocaleTimeString()
+                                    " " +
+                                    new Date(
+                                      document.header.createdAtUtcIso
+                                    ).toLocaleTimeString()
                                   : "Unknown"}
                               </div>
                             </td>
@@ -434,7 +438,6 @@ export function DriveExplorer(props: any) {
                                     if (fileNode) {
                                       setSelectedNode(fileNode);
                                     }
-                                    setActiveDocumentId(document.header.id);
                                   }}
                                   className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors"
                                 >
@@ -602,59 +605,74 @@ export function DriveExplorer(props: any) {
   // === RENDER ===
   return (
     <SidebarProvider nodes={sidebarNodes}>
-      {/* === LEFT SIDEBAR: Folder Navigation === */}
-      <div className="flex h-full">
-        <Sidebar
-          className={String.raw`
-            [&_.sidebar\\_\\_item--active]:bg-yellow-500
-          `}
-          nodes={sidebarNodes}
-          activeNodeId={selectedFolder?.id || activeDocumentId}
-          onActiveNodeChange={(node) => handleActiveNodeChange(node.id)}
-          sidebarTitle="Network Admin"
-          showSearchBar={true}
-          allowPinning={true}
-          resizable={true}
-          initialWidth={300}
-          maxWidth={500}
-          enableMacros={2}
-          handleOnTitleClick={() => {
-            setActiveDocumentId(undefined);
-            setSelectedRootNode("workstreams");
-          }}
-        />
-
-        {/* === MAIN CONTENT AREA === */}
-        <div className="flex-1 overflow-y-auto">
-          <div
-            {...dropProps}
-            className={twMerge(
-              "rounded-md border-2 border-transparent ",
-              isDropTarget && "border-dashed border-blue-100"
-            )}
-          >
-            {activeDocumentId ? (
-              <EditorContainer
-                handleClose={() => setActiveDocumentId(undefined)}
-                hideToolbar={false}
-                activeDocumentId={activeDocumentId}
-                setActiveDocumentId={setActiveDocumentId}
-              />
-            ) : (
-              displayActiveNode(selectedFolder?.id || selectedRootNode)
-            )}
-          </div>
+      {/* === FULL VIEW MODE (for Scope of Work) === */}
+      {isScopeOfWorkFullView && activeDocumentId ? (
+        <div className="h-full w-full">
+          <EditorContainer
+            handleClose={() => {
+              setActiveDocumentId(undefined);
+              setSelectedNode(undefined); // Clear global selection
+            }}
+            hideToolbar={false}
+            activeDocumentId={activeDocumentId}
+            setActiveDocumentId={setActiveDocumentId}
+          />
         </div>
+      ) : (
+        /* === NORMAL VIEW WITH SIDEBAR === */
+        <div className="flex h-full">
+          <Sidebar
+            className={String.raw`
+              [&_.sidebar\\_\\_item--active]:bg-yellow-500
+            `}
+            nodes={sidebarNodes}
+            activeNodeId={selectedFolder?.id || activeDocumentId}
+            onActiveNodeChange={(node) => handleActiveNodeChange(node.id)}
+            sidebarTitle="Network Admin"
+            showSearchBar={true}
+            allowPinning={true}
+            resizable={true}
+            initialWidth={300}
+            maxWidth={500}
+            enableMacros={2}
+            handleOnTitleClick={() => {
+              setActiveDocumentId(undefined);
+              setSelectedRootNode("workstreams");
+            }}
+          />
 
-        {/* === DOCUMENT CREATION MODAL === */}
-        {/* Modal for entering document name after selecting type */}
-        {/* Note: Modal title is fixed, but document type is determined by selectedRootNode */}
-        <CreateDocumentModal
-          onContinue={onCreateDocument}
-          onOpenChange={(open) => setOpenModal(open)}
-          open={openModal}
-        />
-      </div>
+          {/* === MAIN CONTENT AREA === */}
+          <div className="flex-1 overflow-y-auto">
+            <div
+              {...dropProps}
+              className={twMerge(
+                "rounded-md border-2 border-transparent ",
+                isDropTarget && "border-dashed border-blue-100"
+              )}
+            >
+              {activeDocumentId ? (
+                <EditorContainer
+                  handleClose={() => setActiveDocumentId(undefined)}
+                  hideToolbar={false}
+                  activeDocumentId={activeDocumentId}
+                  setActiveDocumentId={setActiveDocumentId}
+                />
+              ) : (
+                displayActiveNode(selectedFolder?.id || selectedRootNode)
+              )}
+            </div>
+          </div>
+
+          {/* === DOCUMENT CREATION MODAL === */}
+          {/* Modal for entering document name after selecting type */}
+          {/* Note: Modal title is fixed, but document type is determined by selectedRootNode */}
+          <CreateDocumentModal
+            onContinue={onCreateDocument}
+            onOpenChange={(open) => setOpenModal(open)}
+            open={openModal}
+          />
+        </div>
+      )}
     </SidebarProvider>
   );
 }
