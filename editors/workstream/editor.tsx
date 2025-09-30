@@ -1,4 +1,4 @@
-import type { EditorProps } from "document-model";
+import type { Action, EditorProps } from "document-model";
 import { Button, toast, ToastContainer } from "@powerhousedao/design-system";
 import {
   TextInput,
@@ -26,7 +26,6 @@ import {
   useNodes,
   useDocumentById,
   setSelectedNode,
-  useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import { type Node, type FileNode } from "document-drive";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -48,34 +47,37 @@ const statusOptions: Array<{ value: WorkstreamStatusInput; label: string }> = [
 ];
 
 export default function Editor(props: any) {
-  // Getting dispatch from props or selected document
-  let dispatch: any;
-  const { document } = props;
-  if (props.dispatch) {
-    dispatch = props.dispatch;
-  } else {
-    const selectedDocument = useSelectedDocument();
-    dispatch = selectedDocument[1];
-  }
+  const [doc, dispatch] = useDocumentById(props.documentId) as [
+    WorkstreamDocument,
+    (actionOrActions: Action | Action[] | undefined) => void,
+  ];
+
   // Try to get dispatch from context or props
-  const state = document.state.global as any;
+  const state = doc.state.global as any;
   const createRfpDocument = props.createRfp;
   const setActiveDocumentId = props.setActiveDocumentId;
   const createSowDocument = props.createSow;
   const createPaymentTermsDocument = props.createPaymentTerms;
-  
+
   // Local state to track newly created SOW document ID
-  const [newlyCreatedSowId, setNewlyCreatedSowId] = useState<string | null>(null);
-  
+  const [newlyCreatedSowId, setNewlyCreatedSowId] = useState<string | null>(
+    null
+  );
+
   // Local state to track newly created Payment Terms document ID
-  const [newlyCreatedPaymentTermsId, setNewlyCreatedPaymentTermsId] = useState<string | null>(null);
-  
+  const [newlyCreatedPaymentTermsId, setNewlyCreatedPaymentTermsId] = useState<
+    string | null
+  >(null);
+
   // Local state to track newly created RFP document ID
-  const [newlyCreatedRfpId, setNewlyCreatedRfpId] = useState<string | null>(null);
-  
+  const [newlyCreatedRfpId, setNewlyCreatedRfpId] = useState<string | null>(
+    null
+  );
+
   // Local state to track manual input values
   const [manualSowInput, setManualSowInput] = useState<string>("");
-  const [manualPaymentTermsInput, setManualPaymentTermsInput] = useState<string>("");
+  const [manualPaymentTermsInput, setManualPaymentTermsInput] =
+    useState<string>("");
   const [manualAuthorInput, setManualAuthorInput] = useState<string>("");
 
   // Effect to clear local state when global state is updated
@@ -104,7 +106,7 @@ export default function Editor(props: any) {
   // Checking if there is an RFP document for this workstream
   const nodes: Node[] = useNodes() || [];
   const workstreamDocument: Node | undefined = nodes.find(
-    (node) => node.id === document.header.id
+    (node) => node.id === doc.header.id
   );
   const fileNodes = nodes.filter(
     (node): node is FileNode => node.kind === "file"
@@ -139,7 +141,6 @@ export default function Editor(props: any) {
     }
   );
 
-
   // Get RFP document data using useDocumentById hook - always call with stable ID
   const rfpDocumentId = rfpDocumentNode?.id || "";
   const rfpDocumentData = useDocumentById(rfpDocumentId);
@@ -163,7 +164,8 @@ export default function Editor(props: any) {
     ) {
       setRfpDocument({
         ...rfpDocumentNode,
-        document: (rfpDocumentDataState?.state as any).global as RequestForProposalsState,
+        document: (rfpDocumentDataState?.state as any)
+          .global as RequestForProposalsState,
       });
     } else if (
       !rfpDocumentNode ||
@@ -645,7 +647,7 @@ export default function Editor(props: any) {
                   if (createdNode) {
                     // Set local state to immediately show the new RFP ID
                     setNewlyCreatedRfpId(createdNode.id);
-                    
+
                     dispatch(
                       actions.setRequestForProposal({
                         rfpId: createdNode.id,
@@ -672,7 +674,11 @@ export default function Editor(props: any) {
                   <div className="flex-1">
                     <TextInput
                       label="Author"
-                      value={manualAuthorInput || state.initialProposal?.author?.name || ""}
+                      value={
+                        manualAuthorInput ||
+                        state.initialProposal?.author?.name ||
+                        ""
+                      }
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         setManualAuthorInput(e.target.value);
                       }}
@@ -696,7 +702,12 @@ export default function Editor(props: any) {
                   <div className="flex-1">
                     <TextInput
                       label="Sow"
-                      value={newlyCreatedSowId || manualSowInput || state.initialProposal?.sow || ""}
+                      value={
+                        newlyCreatedSowId ||
+                        manualSowInput ||
+                        state.initialProposal?.sow ||
+                        ""
+                      }
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         setManualSowInput(e.target.value);
                         setNewlyCreatedSowId(null); // Clear newly created ID when user starts typing
@@ -720,7 +731,7 @@ export default function Editor(props: any) {
                         if (createdNode) {
                           // Set local state to immediately show the new SOW ID
                           setNewlyCreatedSowId(createdNode.id);
-                          
+
                           dispatch(
                             actions.editInitialProposal({
                               id: state.initialProposal?.id || "",
@@ -736,15 +747,19 @@ export default function Editor(props: any) {
                   <div className="flex-1">
                     <TextInput
                       label="Payment Terms"
-                      value={newlyCreatedPaymentTermsId || manualPaymentTermsInput || state.initialProposal?.paymentTerms || ""}
+                      value={
+                        newlyCreatedPaymentTermsId ||
+                        manualPaymentTermsInput ||
+                        state.initialProposal?.paymentTerms ||
+                        ""
+                      }
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         setManualPaymentTermsInput(e.target.value);
                         setNewlyCreatedPaymentTermsId(null); // Clear newly created ID when user starts typing
                       }}
                       onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                         if (
-                          e.target.value !==
-                          state.initialProposal?.paymentTerms
+                          e.target.value !== state.initialProposal?.paymentTerms
                         ) {
                           dispatch(
                             actions.editInitialProposal({
@@ -763,7 +778,7 @@ export default function Editor(props: any) {
                         if (createdNode) {
                           // Set local state to immediately show the new Payment Terms ID
                           setNewlyCreatedPaymentTermsId(createdNode.id);
-                          
+
                           dispatch(
                             actions.editInitialProposal({
                               id: state.initialProposal?.id || "",

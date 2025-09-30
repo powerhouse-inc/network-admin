@@ -219,6 +219,7 @@ export const EditorContainer = (props: {
             setActiveDocumentId={setActiveDocumentId}
             createSow={createSowDocument}
             createPaymentTerms={createPaymentTermsDocument}
+            documentId={selectedDocument.header.id}
           />
         </Suspense>
       )}

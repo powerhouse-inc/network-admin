@@ -1,4 +1,4 @@
-import type { EditorProps } from "document-model";
+import type { Action, EditorProps } from "document-model";
 import {
   TextInput,
   Textarea,
@@ -11,7 +11,7 @@ import {
   actions,
   type NetworkCategory,
 } from "../../document-models/network-profile/index.js";
-import { useSelectedDocument } from "@powerhousedao/reactor-browser";
+import { useDocumentById } from "@powerhousedao/reactor-browser";
 import { useCallback, useState, useEffect } from "react";
 
 export type IProps = EditorProps;
@@ -38,7 +38,10 @@ function ImageModal({
   imageAlt: string;
 }) {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+  const [imageDimensions, setImageDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
 
   if (!isOpen) return null;
 
@@ -50,23 +53,29 @@ function ImageModal({
 
   // Calculate modal size based on image dimensions with padding
   const getModalSize = () => {
-    if (!imageLoaded) return { width: 'auto', height: 'auto' };
-    
-    const maxWidth = Math.min(imageDimensions.width + 100, window.innerWidth * 0.8);
-    const maxHeight = Math.min(imageDimensions.height + 100, window.innerHeight * 0.8);
-    
+    if (!imageLoaded) return { width: "auto", height: "auto" };
+
+    const maxWidth = Math.min(
+      imageDimensions.width + 100,
+      window.innerWidth * 0.8
+    );
+    const maxHeight = Math.min(
+      imageDimensions.height + 100,
+      window.innerHeight * 0.8
+    );
+
     return {
       width: `${maxWidth}px`,
-      height: `${maxHeight}px`
+      height: `${maxHeight}px`,
     };
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
       onClick={onClose}
     >
-      <div 
+      <div
         className="relative bg-gray-900 rounded-lg shadow-2xl border-2 border-gray-700"
         style={getModalSize()}
       >
@@ -81,7 +90,7 @@ function ImageModal({
             src={imageUrl}
             alt={imageAlt}
             className={`max-w-full max-h-full object-contain rounded-lg ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
+              imageLoaded ? "opacity-100" : "opacity-0"
             } transition-opacity duration-200`}
             onClick={(e) => e.stopPropagation()}
             onLoad={handleImageLoad}
@@ -108,34 +117,45 @@ function ImageUrlInput({
 }) {
   const [imageError, setImageError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   // Reset image error when value changes
   useEffect(() => {
     setImageError(false);
   }, [value]);
 
   const handleImageClick = () => {
-    if (value && !imageError && (value.startsWith('http://') || value.startsWith('https://'))) {
+    if (
+      value &&
+      !imageError &&
+      (value.startsWith("http://") || value.startsWith("https://"))
+    ) {
       setIsModalOpen(true);
     }
   };
-  
+
   return (
     <>
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">{label}</label>
+        <label className="block text-sm font-medium text-gray-700">
+          {label}
+        </label>
         <div className="border border-gray-300 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div 
+              <div
                 className={`flex-shrink-0 w-12 h-12 bg-gray-100 rounded border flex items-center justify-center overflow-hidden ${
-                  value && !imageError && (value.startsWith('http://') || value.startsWith('https://')) 
-                    ? 'cursor-pointer hover:opacity-80 transition-opacity duration-200' 
-                    : ''
+                  value &&
+                  !imageError &&
+                  (value.startsWith("http://") || value.startsWith("https://"))
+                    ? "cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                    : ""
                 }`}
                 onClick={handleImageClick}
               >
-                {value && !imageError && (value.startsWith('http://') || value.startsWith('https://')) ? (
+                {value &&
+                !imageError &&
+                (value.startsWith("http://") ||
+                  value.startsWith("https://")) ? (
                   <img
                     src={value}
                     alt={`${label} preview`}
@@ -149,16 +169,23 @@ function ImageUrlInput({
               </div>
               <div className="flex-1">
                 <div className="text-sm font-medium text-gray-900">
-                  {value || placeholder || `${label.replace(':', '')}.jpg`}
+                  {value || placeholder || `${label.replace(":", "")}.jpg`}
                 </div>
                 <div className="text-xs text-gray-500">
                   File Type: jpg | File Size: {value ? fileSize : "0KB"}
                   {imageError && value && (
-                    <div className="text-red-500 mt-1">⚠ Failed to load image</div>
+                    <div className="text-red-500 mt-1">
+                      ⚠ Failed to load image
+                    </div>
                   )}
-                  {value && !imageError && (value.startsWith('http://') || value.startsWith('https://')) && (
-                    <div className="text-blue-600 mt-1">💡 Click image to view full size</div>
-                  )}
+                  {value &&
+                    !imageError &&
+                    (value.startsWith("http://") ||
+                      value.startsWith("https://")) && (
+                      <div className="text-blue-600 mt-1">
+                        💡 Click image to view full size
+                      </div>
+                    )}
                 </div>
               </div>
             </div>
@@ -194,17 +221,14 @@ function ImageUrlInput({
 }
 
 export default function Editor(props: any) {
-  // Getting dispatch from props or selected document
-  let dispatch: any;
-  const { document } = props;
-  if (props.dispatch) {
-    dispatch = props.dispatch;
-  } else {
-    const selectedDocument = useSelectedDocument();
-    dispatch = selectedDocument[1];
-  }
+  // Getting dispatch from selected document
+  console.log("props", props);
+  const [doc, dispatch] = useDocumentById(props.documentId) as [
+    NetworkProfileDocument,
+    (actionOrActions: Action | Action[] | undefined) => void,
+  ];
 
-  const state = document.state.global;
+  const state = doc?.state.global;
 
   // Handle field changes
   const handleFieldChange = useCallback(
@@ -238,7 +262,9 @@ export default function Editor(props: any) {
           action = actions.setDescription({ description: value as string });
           break;
         case "category":
-          action = actions.setCategory({ category: value as NetworkCategory[] });
+          action = actions.setCategory({
+            category: value as NetworkCategory[],
+          });
           break;
         case "x":
           action = actions.setX({ x: value as string | null });
@@ -267,7 +293,9 @@ export default function Editor(props: any) {
       <div className="p-6 max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Network Profile</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Network Profile
+          </h1>
         </div>
 
         {/* Main Form Section */}
@@ -280,9 +308,9 @@ export default function Editor(props: any) {
               </label>
               <TextInput
                 className="w-full"
-                defaultValue={state.name || ""}
+                defaultValue={state?.name || ""}
                 onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                  if (e.target.value !== state.name) {
+                  if (e.target.value !== state?.name) {
                     handleFieldChange("name", e.target.value);
                   }
                 }}
@@ -293,7 +321,7 @@ export default function Editor(props: any) {
             {/* Icon URL */}
             <ImageUrlInput
               label="Icon:"
-              value={state.icon || ""}
+              value={state?.icon || ""}
               onChange={(value) => handleFieldChange("icon", value)}
               placeholder="PowerhouseIcon.jpg"
               fileSize="200KB"
@@ -302,7 +330,7 @@ export default function Editor(props: any) {
             {/* Logo URL */}
             <ImageUrlInput
               label="Logo:"
-              value={state.logo || ""}
+              value={state?.logo || ""}
               onChange={(value) => handleFieldChange("logo", value)}
               placeholder="PowerhouseLogo.jpg"
               fileSize="2MB"
@@ -311,7 +339,7 @@ export default function Editor(props: any) {
             {/* Large Logo URL */}
             <ImageUrlInput
               label="Large Logo:"
-              value={state.logoBig || ""}
+              value={state?.logoBig || ""}
               onChange={(value) => handleFieldChange("logoBig", value)}
               placeholder="LargeLogo.jpg"
               fileSize="10MB"
@@ -324,10 +352,10 @@ export default function Editor(props: any) {
               </label>
               <TextInput
                 className="w-full"
-                defaultValue={state.website || ""}
+                defaultValue={state?.website || ""}
                 onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                   const value = e.target.value || null;
-                  if (value !== state.website) {
+                  if (value !== state?.website) {
                     handleFieldChange("website", value);
                   }
                 }}
@@ -342,9 +370,9 @@ export default function Editor(props: any) {
               </label>
               <Textarea
                 className="w-full"
-                defaultValue={state.description || ""}
+                defaultValue={state?.description || ""}
                 onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) => {
-                  if (e.target.value !== state.description) {
+                  if (e.target.value !== state?.description) {
                     handleFieldChange("description", e.target.value);
                   }
                 }}
@@ -358,7 +386,7 @@ export default function Editor(props: any) {
               <Select
                 label="Category:"
                 options={categoryOptions}
-                value={state.category?.[0] || "OSS"}
+                value={state?.category?.[0] || "OSS"}
                 onChange={(value) =>
                   handleFieldChange("category", [value as NetworkCategory])
                 }
@@ -367,8 +395,10 @@ export default function Editor(props: any) {
 
             {/* Social Media Links */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-900">Social Media Links</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900">
+                Social Media Links
+              </h3>
+
               {/* X Link */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -376,10 +406,10 @@ export default function Editor(props: any) {
                 </label>
                 <TextInput
                   className="w-full"
-                  defaultValue={state.x || ""}
+                  defaultValue={state?.x || ""}
                   onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                     const value = e.target.value || null;
-                    if (value !== state.x) {
+                    if (value !== state?.x) {
                       handleFieldChange("x", value);
                     }
                   }}
@@ -394,10 +424,10 @@ export default function Editor(props: any) {
                 </label>
                 <TextInput
                   className="w-full"
-                  defaultValue={state.discord || ""}
+                  defaultValue={state?.discord || ""}
                   onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                     const value = e.target.value || null;
-                    if (value !== state.discord) {
+                    if (value !== state?.discord) {
                       handleFieldChange("discord", value);
                     }
                   }}
@@ -412,10 +442,10 @@ export default function Editor(props: any) {
                 </label>
                 <TextInput
                   className="w-full"
-                  defaultValue={state.youtube || ""}
+                  defaultValue={state?.youtube || ""}
                   onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                     const value = e.target.value || null;
-                    if (value !== state.youtube) {
+                    if (value !== state?.youtube) {
                       handleFieldChange("youtube", value);
                     }
                   }}

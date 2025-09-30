@@ -1,4 +1,4 @@
-import type { EditorProps } from "document-model";
+import type { Action, EditorProps } from "document-model";
 import {
   type RequestForProposalsDocument,
   RequestForProposalsState,
@@ -6,7 +6,7 @@ import {
   type RfpStatusInput,
 } from "../../document-models/request-for-proposals/index.js";
 import { Button, toast } from "@powerhousedao/design-system";
-import { useSelectedDocument } from "@powerhousedao/reactor-browser";
+import { useDocumentById } from "@powerhousedao/reactor-browser";
 import {
   DatePicker,
   Select,
@@ -27,21 +27,12 @@ const statusOptions = [
 ];
 
 export default function Editor(props: any) {
-  let dispatch: any;
-  const { document } = props;
-  const state: RequestForProposalsState = document?.state
-    .global as RequestForProposalsState;
+  const [doc, dispatch] = useDocumentById(props.documentId) as [
+    RequestForProposalsDocument,
+    (actionOrActions: Action | Action[] | undefined) => void,
+  ];
 
-  if (!document) {
-    return <div>No document selected</div>;
-  }
-
-  if (props.dispatch) {
-    dispatch = props.dispatch;
-  } else {
-    const selectedDocument = useSelectedDocument();
-    dispatch = selectedDocument[1];
-  }
+  const state = doc?.state.global as RequestForProposalsState;
 
   return (
     <div className="w-full bg-gray-50">

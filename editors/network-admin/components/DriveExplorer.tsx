@@ -269,8 +269,10 @@ export function DriveExplorer(props: any) {
         const fileId = newNode.id.replace("editor-", "");
         const file = fileChildren.find((f) => f.id === fileId);
         if (file?.documentType === "powerhouse/scopeofwork") {
+          console.log("file", file);
           setSelectedNode(file);
         } else {
+          console.log("fileId", fileId);
           setActiveDocumentId(fileId);
         }
       } else {
