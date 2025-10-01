@@ -8,7 +8,7 @@
         "@powerhousedao/common": "^5.0.0-staging.21",
         "@powerhousedao/design-system": "^5.0.0-staging.21",
         "@powerhousedao/document-engineering": "^1.38.0",
-        "@powerhousedao/project-management": "^0.0.30",
+        "@powerhousedao/project-management": "^0.0.39",
         "@uiw/react-md-editor": "^4.0.8",
         "document-model": "^5.0.0-staging.21",
         "error": "^10.4.0",
@@ -996,7 +996,7 @@
 
     "@powerhousedao/ph-cli": ["@powerhousedao/ph-cli@5.0.0-staging.21", "", { "dependencies": { "@powerhousedao/builder-tools": "5.0.0-staging.21", "@powerhousedao/codegen": "5.0.0-staging.21", "@powerhousedao/config": "5.0.0-staging.21", "@powerhousedao/connect": "5.0.0-staging.21", "@powerhousedao/reactor-local": "5.0.0-staging.21", "@powerhousedao/switchboard": "5.0.0-staging.21", "colorette": "^2.0.20", "commander": "^12.1.0", "document-drive": "5.0.0-staging.21", "document-model": "5.0.0-staging.21", "pm2": "^5.4.3" }, "bin": { "ph-cli": "dist/src/cli.js" } }, "sha512-PsJ6htUcsMK435QbjvqjQMMkLHeDlMW4GjQmxR2xQ7Ds+0n9pNoq9/8VZbg/lo8B/mMK6pt9r4mKUhMChnI4UQ=="],
 
-    "@powerhousedao/project-management": ["@powerhousedao/project-management@0.0.30", "", { "dependencies": { "@powerhousedao/builder-tools": "^5.0.0-staging.9", "@powerhousedao/common": "^5.0.0-staging.9", "@powerhousedao/design-system": "^5.0.0-staging.9", "@powerhousedao/document-engineering": "^1.34.0", "document-model": "^5.0.0-staging.9", "error": "^10.4.0", "graphql": "^16.10.0", "graphql-tag": "^2.12.6", "zod": "^3.24.2" }, "peerDependencies": { "react": "^18.3.1", "react-dom": "^18.3.1" } }, "sha512-0GuoYtZWICjXxXbmdKk0DcN3KA29e5Pi/66PXy1MuWLb6B8DSh5PBechMu7q0qXmCO36KQTDsp11Afaso8cg+Q=="],
+    "@powerhousedao/project-management": ["@powerhousedao/project-management@0.0.39", "", { "dependencies": { "@powerhousedao/builder-tools": "^5.0.0-staging.19", "@powerhousedao/common": "^5.0.0-staging.19", "@powerhousedao/design-system": "^5.0.0-staging.19", "@powerhousedao/document-engineering": "^1.38.0", "document-model": "^5.0.0-staging.19", "error": "^10.4.0", "graphql": "^16.10.0", "graphql-tag": "^2.12.6", "zod": "^3.24.2" }, "peerDependencies": { "react": "^18.3.1", "react-dom": "^18.3.1" } }, "sha512-UD3tPCN50YOqiONSfk0TanvsUxdRXrmQmpDzBTLgbEer81tAeOlj9nwlTNaLVP1mz/pdRBoK8AcCZ+txPIqfrQ=="],
 
     "@powerhousedao/reactor": ["@powerhousedao/reactor@5.0.0-staging.21", "", { "dependencies": { "document-drive": "5.0.0-staging.21", "document-model": "5.0.0-staging.21", "uuid": "^11.0.5" } }, "sha512-SIInRexA1qs7+KO8y2sj5oHdEbKJreJ8zz488HidD/UqSS10aTSavFLucjNUJzOefjVmMAOtjBqloA9wZcpadw=="],
 
