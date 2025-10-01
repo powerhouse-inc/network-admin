@@ -12,13 +12,17 @@ import {
   addDocument,
   setSelectedNode,
   useAllFolderNodes,
-  useDriveContext,
   useFileChildNodes,
   useSelectedDrive,
   useSelectedFolder,
   dispatchActions,
   useSelectedDocument,
   useSelectedDriveDocuments,
+  addFile,
+  renameNode,
+  showDeleteNodeModal,
+  useSelectedDriveId,
+  useOnDropFile
 } from "@powerhousedao/reactor-browser";
 import { type DocumentModelModule } from "document-model";
 import { type Node } from "document-drive";
@@ -51,19 +55,20 @@ export function DriveExplorer(props: any) {
   );
   // === DRIVE CONTEXT HOOKS ===
   // Core drive operations and document models
-  const {
-    onAddFile,
-    onCopyNode,
-    onMoveNode,
-    onRenameNode,
-    showDeleteNodeModal,
-  } = useDriveContext();
+  // const {
+  //   onAddFile,
+  //   onCopyNode,
+  //   onMoveNode,
+  //   onRenameNode,
+  //   showDeleteNodeModal,
+  // } = useDriveContext();
 
   // === STATE MANAGEMENT HOOKS ===
   // Core state hooks for drive navigation
   const [selectedDrive] = useSelectedDrive(); // Currently selected drive
   const selectedFolder = useSelectedFolder(); // Currently selected folder
   const allDocuments = useSelectedDriveDocuments();
+  const selectedDriveId = useSelectedDriveId();
 
   // Listen to global selected document state (for external editors like Scope of Work)
   const [globalSelectedDocument] = useSelectedDocument();
@@ -134,17 +139,27 @@ export function DriveExplorer(props: any) {
         dropTargetNode,
       });
       // Use the dropTargetNode as the folder, not the targetFolder parameter
-      return onAddFile(file, dropTargetNode);
+      return addFile(file, dropTargetNode?.id || "");
     },
-    [onAddFile, dropTargetNode]
+    [addFile, dropTargetNode]
   );
 
-  const { isDropTarget, dropProps } = useDrop({
-    node: dropTargetNode,
-    onAddFile: onAddFileWithTarget,
-    onCopyNode,
-    onMoveNode,
-  });
+  // const { isDropTarget, dropProps } = useDrop({
+  //   node: dropTargetNode,
+  //   onAddFile: onAddFileWithTarget,
+  //   onMoveNode: (src, target) => moveNode(useSelectedDriveId() || "", src, target),
+  //   onCopyNode: (src, target) => copyNode(useSelectedDriveId() || "", src, target),
+  // });
+
+  const onDropFile = useOnDropFile();
+
+  // rename node
+  const onRenameNode = async (nodeId: string, newName: string) => {
+    const renamedNode = await renameNode(selectedDriveId || "", nodeId, newName);
+    if (renamedNode) {
+      console.log("Renamed node", renamedNode);
+    }
+  };
 
   // check if workstream doc is created, set isWorkstreamCreated to true
   const isWorkstreamCreated =
@@ -416,7 +431,7 @@ export function DriveExplorer(props: any) {
                                     Open
                                   </button>
                                   <button
-                                    onClick={() => {
+                                    onClick={async () => {
                                       if (!fileNode || !fileNode.id) return;
                                       const newName = prompt(
                                         "Enter new name:",
@@ -428,13 +443,14 @@ export function DriveExplorer(props: any) {
                                         newName !== document.header.name
                                       ) {
                                         try {
-                                          onRenameNode(
-                                            newName.trim(),
-                                            fileNode
+                                          await onRenameNode(
+                                            fileNode.id || "",
+                                            newName.trim()
                                           );
                                         } catch (error) {
-                                          alert(
-                                            "Failed to rename document. Please try again."
+                                          console.error(
+                                            "Failed to rename document",
+                                            error
                                           );
                                         }
                                       }
@@ -446,7 +462,7 @@ export function DriveExplorer(props: any) {
                                   <button
                                     onClick={() => {
                                       if (fileNode) {
-                                        showDeleteNodeModal(fileNode);
+                                        showDeleteNodeModal(fileNode.id || "");
                                       }
                                     }}
                                     className="px-3 py-1.5 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600 transition-colors whitespace-nowrap"
@@ -575,11 +591,11 @@ export function DriveExplorer(props: any) {
           {/* === MAIN CONTENT AREA === */}
           <div className="flex-1 overflow-y-auto">
             <div
-              {...dropProps}
-              className={twMerge(
-                "rounded-xl border-4 border-transparent h-full ",
-                isDropTarget && "border-dashed border-blue-500"
-              )}
+            // {...dropProps}
+            // className={twMerge(
+            //   "rounded-xl border-4 border-transparent h-full ",
+            //   isDropTarget && "border-dashed border-blue-500"
+            // )}
             >
               {activeDocumentId ? (
                 <EditorContainer

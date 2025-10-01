@@ -515,3 +515,161 @@ export { module as <PascalCaseName>DriveExplorer } from "./<drive-app-name>/inde
 - They provide specialized interfaces for managing documents of any type within drives
 - Unlike document editors (which edit specific document types), drive explorers manage collections of documents
 - The generated template includes responsive layout, folder navigation, and document creation workflows
+
+
+## Drag-and-Drop Implementation for Drive Explorers
+
+### Overview
+This guide explains how to add drag-and-drop file functionality to any drive explorer editor in the Powerhouse ecosystem.
+
+### Step 1: Configure the Editor Module
+In your editor's `index.ts`, add drag-and-drop configuration:
+
+```typescript
+import type { DriveEditorModule } from "@powerhousedao/reactor-browser";
+import { Editor } from "./editor.js";
+
+export const module: DriveEditorModule = {
+  Component: Editor,
+  documentTypes: ["your/document-type"],
+  config: {
+    id: "your-editor-id",
+    documentTypes: [
+      // List all document types that can be dropped
+      "powerhouse/document-model",
+      "powerhouse/app",
+      // ... other types
+    ],
+    dragAndDrop: {
+      enabled: true,  // Enable drag-and-drop functionality
+    },
+  },
+};
+```
+
+### Step 2: Create the withDropZone HOC
+Create a `utils/withDropZone.tsx` file:
+
+```typescript
+import { DropZone } from "@powerhousedao/design-system";
+import type {
+  ConflictResolution,
+  DriveEditorProps,
+  FileUploadProgressCallback,
+} from "@powerhousedao/reactor-browser";
+import {
+  setSelectedNode,
+  useOnDropFile,
+  useSelectedDriveId,
+} from "@powerhousedao/reactor-browser";
+import type { ComponentType } from "react";
+
+export function withDropZone<T extends DriveEditorProps>(
+  WrappedComponent: ComponentType<T>,
+): ComponentType<T> {
+  const WithDropZoneComponent = (props: T) => {
+    const driveId = useSelectedDriveId();
+    const onDropFile = useOnDropFile(props.editorConfig?.documentTypes);
+
+    const onAddFile = async (
+      file: File,
+      parent: any,
+      onProgress?: FileUploadProgressCallback,
+      resolveConflict?: ConflictResolution,
+    ) => {
+      return await onDropFile(file, onProgress, resolveConflict);
+    };
+
+    // Only wrap with DropZone if enabled in config
+    if (props.editorConfig?.dragAndDrop?.enabled) {
+      return (
+        <DropZone
+          onAddFile={onAddFile}
+          setSelectedNode={setSelectedNode}
+          driveId={driveId}
+          useLocalStorage={true}
+          style={{ height: "100%" }}
+        >
+          <WrappedComponent {...props} />
+        </DropZone>
+      );
+    }
+
+    return <WrappedComponent {...props} />;
+  };
+
+  WithDropZoneComponent.displayName = `withDropZone(${
+    WrappedComponent.displayName || WrappedComponent.name || "Component"
+  })`;
+
+  return WithDropZoneComponent;
+}
+```
+
+### Step 3: Wrap Your Base Editor Component
+In your `editor.tsx`:
+
+```typescript
+import type { DriveEditorProps } from "@powerhousedao/reactor-browser";
+import { useSelectedDriveDocument } from "@powerhousedao/reactor-browser";
+import { withDropZone } from "./utils/withDropZone.js";
+
+export type IProps = DriveEditorProps;
+
+// Your base editor component
+export function BaseEditor(props: IProps) {
+  const [document] = useSelectedDriveDocument();
+  
+  return (
+    <div style={{ height: "100%" }}>
+      {/* Your drive explorer UI */}
+    </div>
+  );
+}
+
+// Wrap base editor with drop zone functionality
+const BaseEditorWithDropZone = withDropZone(BaseEditor);
+
+// Export wrapped editor
+export function Editor(props: IProps) {
+  return <BaseEditorWithDropZone {...props} />;
+}
+```
+
+### Step 4: Install Required Dependencies
+Ensure you have the following packages installed:
+
+```json
+{
+  "@powerhousedao/design-system": "...",
+  "@powerhousedao/reactor-browser": "..."
+}
+```
+
+### How It Works
+
+1. **Configuration Flow**: The `editorConfig` prop is passed down to the editor component containing `dragAndDrop.enabled` and `documentTypes`
+
+2. **Conditional Rendering**: The HOC checks the config and conditionally wraps the component with `DropZone` only when enabled
+
+3. **File Handling**:
+   - `useOnDropFile` hook processes dropped files based on allowed `documentTypes`
+   - Files are validated against the configured document types
+   - Successful drops trigger document creation in the drive
+
+4. **Visual Feedback**: The `DropZone` component (from design-system) provides visual feedback during drag operations (blue overlay effect)
+
+### Key Hooks & Components
+
+- **`useOnDropFile(documentTypes)`**: Returns a handler that processes dropped files
+- **`useSelectedDriveId()`**: Gets the current drive ID for file operations
+- **`setSelectedNode(node)`**: Selects/opens the dropped document after creation
+- **`DropZone` component**: Provides the drag-and-drop UI wrapper with visual feedback
+
+### Notes
+
+- The pattern is flexible: drag-and-drop can be toggled via configuration without code changes
+- Document type filtering happens at the HOC level through `editorConfig.documentTypes`
+- The visual feedback (blue overlay) is handled by the `DropZone` component's internal styling
+- LocalStorage is used to persist some drop zone state (`useLocalStorage={true}`)
+- This pattern provides a clean separation of concerns and makes drag-and-drop functionality easy to add to any drive editor
