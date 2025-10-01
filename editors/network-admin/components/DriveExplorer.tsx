@@ -10,32 +10,20 @@ import {
 } from "@powerhousedao/document-engineering";
 import {
   addDocument,
-  type DriveEditorProps,
-  getSyncStatusSync,
   setSelectedNode,
   useAllFolderNodes,
-  useDocumentById,
   useDocumentModelModules,
   useDriveContext,
-  useDriveSharingType,
   useEditorModules,
   useFileChildNodes,
-  useFolderChildNodes,
   useSelectedDrive,
   useSelectedFolder,
-  useSelectedNodePath,
   useUserPermissions,
-  useAllDocuments,
-  useNodes,
   dispatchActions,
   useSelectedDocument,
+  useSelectedDriveDocuments,
 } from "@powerhousedao/reactor-browser";
-import {
-  actions,
-  PHDocument,
-  PHDocumentState,
-  type DocumentModelModule,
-} from "document-model";
+import { type DocumentModelModule } from "document-model";
 import { type Node } from "document-drive";
 import { twMerge } from "tailwind-merge";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
@@ -82,9 +70,7 @@ export function DriveExplorer(props: any) {
   // Core state hooks for drive navigation
   const [selectedDrive] = useSelectedDrive(); // Currently selected drive
   const selectedFolder = useSelectedFolder(); // Currently selected folder
-  const selectedNodePath = useSelectedNodePath();
-  const sharingType = useDriveSharingType(selectedDrive?.header.id);
-  const allDocuments = useAllDocuments();
+  const allDocuments = useSelectedDriveDocuments();
 
   // Listen to global selected document state (for external editors like Scope of Work)
   const [globalSelectedDocument] = useSelectedDocument();
@@ -492,31 +478,6 @@ export function DriveExplorer(props: any) {
     }
   };
 
-  // Handle folder creation with optional name parameter
-  const handleCreateFolder = useCallback(
-    async (folderName?: string) => {
-      let name: string | undefined = folderName;
-
-      // If no name provided, prompt for it (for manual folder creation)
-      if (!name) {
-        const promptResult = prompt("Enter folder name:");
-        name = promptResult || undefined;
-      }
-
-      if (name?.trim()) {
-        try {
-          const createdFolder = await onAddFolder(name.trim(), selectedFolder);
-          // Track the created folder for drag and drop targeting
-          console.log("Created manual folder:", createdFolder);
-          setLastCreatedFolder(createdFolder);
-        } catch (error) {
-          console.error("Failed to create folder:", error);
-        }
-      }
-    },
-    [onAddFolder, selectedFolder]
-  );
-
   // Handle document creation from modal
   const onCreateDocument = useCallback(
     async (fileName: string) => {
@@ -643,8 +604,8 @@ export function DriveExplorer(props: any) {
             <div
               {...dropProps}
               className={twMerge(
-                "rounded-md border-2 border-transparent ",
-                isDropTarget && "border-dashed border-blue-100"
+                "rounded-xl border-4 border-transparent h-full ",
+                isDropTarget && "border-dashed border-blue-500"
               )}
             >
               {activeDocumentId ? (
