@@ -1,7 +1,6 @@
 import {
   Button,
   CreateDocumentModal,
-  useDrop,
 } from "@powerhousedao/design-system";
 import {
   Sidebar,
@@ -18,15 +17,11 @@ import {
   dispatchActions,
   useSelectedDocument,
   useSelectedDriveDocuments,
-  addFile,
   renameNode,
   showDeleteNodeModal,
   useSelectedDriveId,
-  useOnDropFile
 } from "@powerhousedao/reactor-browser";
 import { type DocumentModelModule } from "document-model";
-import { type Node } from "document-drive";
-import { twMerge } from "tailwind-merge";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { EditorContainer } from "./EditorContainer.js";
 import { editWorkstream } from "../../../document-models/workstream/gen/creators.js";
@@ -48,20 +43,6 @@ export function DriveExplorer(props: any) {
     "powerhouse/workstream"
   );
   const selectedDocumentModel = useRef<DocumentModelModule | null>(null);
-
-  // Track the last created folder for drag and drop targeting
-  const [lastCreatedFolder, setLastCreatedFolder] = useState<Node | undefined>(
-    undefined
-  );
-  // === DRIVE CONTEXT HOOKS ===
-  // Core drive operations and document models
-  // const {
-  //   onAddFile,
-  //   onCopyNode,
-  //   onMoveNode,
-  //   onRenameNode,
-  //   showDeleteNodeModal,
-  // } = useDriveContext();
 
   // === STATE MANAGEMENT HOOKS ===
   // Core state hooks for drive navigation
@@ -101,57 +82,6 @@ export function DriveExplorer(props: any) {
   );
   const isScopeOfWorkFullView =
     activeDoc?.header.documentType === "powerhouse/scopeofwork";
-
-  // Find the folder containing the most recent workstream document
-  const getMostRecentWorkstreamFolder = useCallback(() => {
-    const workstreamFiles = fileChildren.filter(
-      (file) => file.documentType === "powerhouse/workstream"
-    );
-    if (workstreamFiles.length === 0) return undefined;
-
-    // Sort by creation time (assuming newer files have higher IDs or we can use a different method)
-    const mostRecentWorkstream = workstreamFiles[workstreamFiles.length - 1];
-
-    // Find the folder that contains this workstream
-    if (mostRecentWorkstream.parentFolder) {
-      return allFolders.find(
-        (folder) => folder.id === mostRecentWorkstream.parentFolder
-      );
-    }
-
-    return undefined;
-  }, [fileChildren, allFolders]);
-
-  // === DROP HOOKS ===
-  const mostRecentWorkstreamFolder = getMostRecentWorkstreamFolder();
-  const dropTargetNode =
-    lastCreatedFolder ||
-    mostRecentWorkstreamFolder ||
-    selectedFolder ||
-    undefined;
-
-  // Create a custom onAddFile wrapper that ensures the correct folder is used
-  const onAddFileWithTarget = useCallback(
-    (file: File, targetFolder?: Node) => {
-      console.log("onAddFileWithTarget called with:", {
-        file,
-        targetFolder,
-        dropTargetNode,
-      });
-      // Use the dropTargetNode as the folder, not the targetFolder parameter
-      return addFile(file, dropTargetNode?.id || "");
-    },
-    [addFile, dropTargetNode]
-  );
-
-  // const { isDropTarget, dropProps } = useDrop({
-  //   node: dropTargetNode,
-  //   onAddFile: onAddFileWithTarget,
-  //   onMoveNode: (src, target) => moveNode(useSelectedDriveId() || "", src, target),
-  //   onCopyNode: (src, target) => copyNode(useSelectedDriveId() || "", src, target),
-  // });
-
-  const onDropFile = useOnDropFile();
 
   // rename node
   const onRenameNode = async (nodeId: string, newName: string) => {
@@ -242,9 +172,6 @@ export function DriveExplorer(props: any) {
   const handleActiveNodeChange = useCallback(
     (nodeId: string) => {
       console.log("nodeId", nodeId);
-
-      // Clear the last created folder when navigating to a different node
-      setLastCreatedFolder(undefined);
 
       // Find the node by ID
       const findNodeById = (
@@ -590,13 +517,7 @@ export function DriveExplorer(props: any) {
 
           {/* === MAIN CONTENT AREA === */}
           <div className="flex-1 overflow-y-auto">
-            <div
-            // {...dropProps}
-            // className={twMerge(
-            //   "rounded-xl border-4 border-transparent h-full ",
-            //   isDropTarget && "border-dashed border-blue-500"
-            // )}
-            >
+            <div className="h-full">
               {activeDocumentId ? (
                 <EditorContainer
                   handleClose={() => setActiveDocumentId(undefined)}

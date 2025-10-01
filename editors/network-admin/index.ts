@@ -9,6 +9,17 @@ export const module: DriveEditorModule = {
     disableExternalControls: true,
     documentToolbarEnabled: true,
     showSwitchboardLink: true,
+    documentTypes: [
+      // List all document types that can be dropped
+      "powerhouse/network-profile",
+      "powerhouse/workstream",
+      "powerhouse/scopeofwork",
+      "powerhouse/rfp",
+      "payment-terms",
+    ],
+    dragAndDrop: {
+      enabled: true, // Enable drag-and-drop functionality
+    },
   },
 };
 
