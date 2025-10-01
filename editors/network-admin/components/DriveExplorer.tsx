@@ -17,11 +17,12 @@ import {
   dispatchActions,
   useSelectedDocument,
   useSelectedDriveDocuments,
-  renameNode,
   showDeleteNodeModal,
   useSelectedDriveId,
+  useNodeActions,
 } from "@powerhousedao/reactor-browser";
 import { type DocumentModelModule } from "document-model";
+import { type Node } from "document-drive";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { EditorContainer } from "./EditorContainer.js";
 import { editWorkstream } from "../../../document-models/workstream/gen/creators.js";
@@ -50,6 +51,8 @@ export function DriveExplorer(props: any) {
   const selectedFolder = useSelectedFolder(); // Currently selected folder
   const allDocuments = useSelectedDriveDocuments();
   const selectedDriveId = useSelectedDriveId();
+
+  const {onRenameNode} = useNodeActions();
 
   // Listen to global selected document state (for external editors like Scope of Work)
   const [globalSelectedDocument] = useSelectedDocument();
@@ -82,14 +85,6 @@ export function DriveExplorer(props: any) {
   );
   const isScopeOfWorkFullView =
     activeDoc?.header.documentType === "powerhouse/scopeofwork";
-
-  // rename node
-  const onRenameNode = async (nodeId: string, newName: string) => {
-    const renamedNode = await renameNode(selectedDriveId || "", nodeId, newName);
-    if (renamedNode) {
-      console.log("Renamed node", renamedNode);
-    }
-  };
 
   // check if workstream doc is created, set isWorkstreamCreated to true
   const isWorkstreamCreated =
@@ -331,9 +326,9 @@ export function DriveExplorer(props: any) {
                               <td className="px-2 py-2">
                                 <div
                                   className="text-sm font-medium text-gray-900 truncate max-w-xs"
-                                  title={document.header.name}
+                                  title={fileNode?.name || document.header.name}
                                 >
-                                  {document.header.name}
+                                  {fileNode?.name || document.header.name}
                                 </div>
                               </td>
                               <td className="px-2 py-2">
@@ -360,19 +355,20 @@ export function DriveExplorer(props: any) {
                                   <button
                                     onClick={async () => {
                                       if (!fileNode || !fileNode.id) return;
+                                      const currentName = fileNode.name || document.header.name;
                                       const newName = prompt(
                                         "Enter new name:",
-                                        document.header.name || ""
+                                        currentName
                                       );
                                       if (
                                         newName &&
                                         newName.trim() &&
-                                        newName !== document.header.name
+                                        newName !== currentName
                                       ) {
                                         try {
                                           await onRenameNode(
-                                            fileNode.id || "",
-                                            newName.trim()
+                                            newName.trim(),
+                                            fileNode as Node
                                           );
                                         } catch (error) {
                                           console.error(
@@ -388,8 +384,8 @@ export function DriveExplorer(props: any) {
                                   </button>
                                   <button
                                     onClick={() => {
-                                      if (fileNode) {
-                                        showDeleteNodeModal(fileNode.id || "");
+                                      if (fileNode && fileNode.id) {
+                                        showDeleteNodeModal(fileNode.id);
                                       }
                                     }}
                                     className="px-3 py-1.5 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600 transition-colors whitespace-nowrap"
