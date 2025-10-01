@@ -12,13 +12,10 @@ import {
   addDocument,
   setSelectedNode,
   useAllFolderNodes,
-  useDocumentModelModules,
   useDriveContext,
-  useEditorModules,
   useFileChildNodes,
   useSelectedDrive,
   useSelectedFolder,
-  useUserPermissions,
   dispatchActions,
   useSelectedDocument,
   useSelectedDriveDocuments,
@@ -47,7 +44,6 @@ export function DriveExplorer(props: any) {
     "powerhouse/workstream"
   );
   const selectedDocumentModel = useRef<DocumentModelModule | null>(null);
-  const editorModules = useEditorModules();
 
   // Track the last created folder for drag and drop targeting
   const [lastCreatedFolder, setLastCreatedFolder] = useState<Node | undefined>(
@@ -57,15 +53,12 @@ export function DriveExplorer(props: any) {
   // Core drive operations and document models
   const {
     onAddFile,
-    onAddFolder,
     onCopyNode,
-    onDuplicateNode,
     onMoveNode,
     onRenameNode,
     showDeleteNodeModal,
   } = useDriveContext();
 
-  const { isAllowedToCreateDocuments } = useUserPermissions();
   // === STATE MANAGEMENT HOOKS ===
   // Core state hooks for drive navigation
   const [selectedDrive] = useSelectedDrive(); // Currently selected drive
@@ -539,26 +532,6 @@ export function DriveExplorer(props: any) {
       modalDocumentType,
     ]
   );
-
-  // Filter available document types here if needed
-  const documentModelModules = useDocumentModelModules();
-
-  // Get active document and its editor components
-  const activeDocument = activeDocumentId
-    ? fileChildren.find((file) => file.id === activeDocumentId)
-    : undefined;
-
-  const documentModelModule = activeDocument
-    ? documentModelModules?.find(
-        (m) => m.documentModel.id === activeDocument.documentType
-      )
-    : null;
-
-  const editorModule = activeDocument
-    ? editorModules?.find((e) =>
-        e.documentTypes.includes(activeDocument.documentType)
-      )
-    : null;
 
   // === RENDER ===
   return (

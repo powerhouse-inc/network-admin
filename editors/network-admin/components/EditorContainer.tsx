@@ -1,6 +1,5 @@
 import { getRevisionFromDate, useTimelineItems } from "@powerhousedao/common";
 import {
-  DefaultEditorLoader,
   DocumentToolbar,
   RevisionHistory,
   type TimelineItem,
@@ -8,10 +7,8 @@ import {
 import {
   exportFile,
   useEditorModuleById,
-  useSelectedDocument,
   useSelectedDrive,
   useDocumentById,
-  useEditorModulesForDocumentType,
   addDocument,
   useNodes,
   useFallbackEditorModule,
@@ -21,7 +18,6 @@ import { Action, PHDocument } from "document-model";
 import { Suspense, useCallback, useState } from "react";
 import { actions as rfpActions } from "../../../document-models/request-for-proposals/index.js";
 import { ScopeOfWork } from "@powerhousedao/project-management/document-models";
-import { actions as paymentTermsActions } from "../../../document-models/payment-terms/index.js";
 
 /**
  * Document editor container that wraps individual document editors.
