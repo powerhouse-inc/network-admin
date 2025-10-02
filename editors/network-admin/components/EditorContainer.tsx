@@ -200,6 +200,7 @@ export const EditorContainer = (props: {
             />
           )}
           <EditorComponent
+            key={selectedDocument.header.id}
             context={{
               readMode: !!selectedTimelineItem,
               selectedTimelineRevision: getRevisionFromDate(

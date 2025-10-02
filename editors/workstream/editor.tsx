@@ -162,19 +162,31 @@ export default function Editor(props: any) {
       rfpDocumentNode.id !== "" &&
       (rfpDocumentDataState?.state as any)?.global
     ) {
-      setRfpDocument({
+      const newRfpDocument = {
         ...rfpDocumentNode,
         document: (rfpDocumentDataState?.state as any)
           .global as RequestForProposalsState,
+      };
+      
+      // Only update if the ID changed or if we don't have a document yet
+      setRfpDocument((prev) => {
+        if (!prev || prev.id !== newRfpDocument.id) {
+          return newRfpDocument;
+        }
+        // Update if the document content changed
+        if (JSON.stringify(prev.document) !== JSON.stringify(newRfpDocument.document)) {
+          return newRfpDocument;
+        }
+        return prev;
       });
     } else if (
       !rfpDocumentNode ||
       !rfpDocumentNode.id ||
       rfpDocumentNode.id === ""
     ) {
-      setRfpDocument(undefined);
+      setRfpDocument((prev) => prev === undefined ? prev : undefined);
     }
-  }, [rfpDocumentNode, rfpDocumentDataState, fileNodes]);
+  }, [rfpDocumentNode, rfpDocumentDataState]);
 
   const searchRfpDocuments = (userInput: string) => {
     const results = fileNodes.filter(
