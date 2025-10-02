@@ -47,6 +47,8 @@ export function DriveExplorer(props: any) {
   const [activeDocumentId, setActiveDocumentId] = useState<
     string | undefined
   >();
+  const [activeSidebarNodeId, setActiveSidebarNodeId] =
+    useState<string>("workstreams");
   const [openModal, setOpenModal] = useState(false);
   const [selectedRootNode, setSelectedRootNode] =
     useState<string>("workstreams");
@@ -86,6 +88,8 @@ export function DriveExplorer(props: any) {
   useEffect(() => {
     if (globalSelectedDocument?.header?.id) {
       setActiveDocumentId(globalSelectedDocument.header.id);
+      // Also update the sidebar node ID to match
+      setActiveSidebarNodeId(`editor-${globalSelectedDocument.header.id}`);
     }
   }, [globalSelectedDocument]);
 
@@ -251,6 +255,9 @@ export function DriveExplorer(props: any) {
 
       const newNode = findNodeById(sidebarNodes, nodeId);
       if (!newNode) return;
+
+      // Always update the active sidebar node ID
+      setActiveSidebarNodeId(newNode.id);
 
       if (newNode.id === "workstreams") {
         setActiveDocumentId(undefined);
@@ -557,11 +564,8 @@ export function DriveExplorer(props: any) {
         /* === NORMAL VIEW WITH SIDEBAR === */
         <div className="flex h-full">
           <Sidebar
-            className={String.raw`
-              [&_.sidebar\\_\\_item--active]:bg-yellow-500
-            `}
             nodes={sidebarNodes}
-            activeNodeId={activeDocumentId}
+            activeNodeId={activeSidebarNodeId}
             onActiveNodeChange={(node) => handleActiveNodeChange(node.id)}
             sidebarTitle="Network Admin"
             showSearchBar={true}
@@ -572,6 +576,7 @@ export function DriveExplorer(props: any) {
             enableMacros={4}
             handleOnTitleClick={() => {
               setActiveDocumentId(undefined);
+              setActiveSidebarNodeId("workstreams");
               setSelectedRootNode("workstreams");
             }}
           />
