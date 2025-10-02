@@ -145,10 +145,6 @@ export function DriveExplorer(props: any) {
             .split("_")
             .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(" ");
-          const statusWorkstreamDocs = workstreamDocs.filter(
-            (doc) => (doc.state as any)?.global?.status === status
-          );
-
           return {
             id: `workstream-status-${status}`,
             title:
@@ -162,10 +158,19 @@ export function DriveExplorer(props: any) {
               ...workstreamDocs
                 .filter((doc) => (doc.state as any)?.global?.status === status)
                 .map((doc) => {
-                  const sow = (doc.state as any)?.global?.initialProposal.sow;
-                  const rfp = (doc.state as any)?.global?.rfp?.id;
-                  const paymentTerms = (doc.state as any)?.global
-                    ?.initialProposal.paymentTerms;
+                  let sow = null;
+                  let paymentTerms = null;
+                  let rfp = null;
+                  if ((doc.state as any)?.global?.initialProposal) {
+                    sow = (doc.state as any)?.global?.initialProposal.sow;
+                    paymentTerms = (doc.state as any)?.global?.initialProposal
+                      .paymentTerms;
+                  }
+
+                  if ((doc.state as any)?.global?.rfp) {
+                    rfp = (doc.state as any)?.global?.rfp?.id;
+                  }
+
                   const sowDoc = allDocuments?.find(
                     (doc) => doc.header.id === sow
                   );
@@ -175,18 +180,19 @@ export function DriveExplorer(props: any) {
                   const pmtDoc = allDocuments?.find(
                     (doc) => doc.header.id === paymentTerms
                   );
-                  const wstrChildDocs = [sowDoc, rfpDoc, pmtDoc];
+                  
+                  // Only include documents that actually exist
+                  const wstrChildDocs = [sowDoc, rfpDoc, pmtDoc].filter(
+                    (doc) => doc !== undefined && doc !== null
+                  );
+                  
                   return {
                     id: `editor-${doc.header.id}`,
-                    title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
-                    children: [
-                      ...wstrChildDocs.map((childDoc) => {
-                        return {
-                          id: `editor-${childDoc?.header.id}`,
-                          title: `${(childDoc?.state as any)?.global?.code ? (childDoc?.state as any)?.global?.code + " - " : ""}${(childDoc?.state as any)?.global?.title || childDoc?.header.name}`,
-                        };
-                      }),
-                    ],
+                    title: `${(doc.state as any)?.global?.code ? (doc.state as any)?.global?.code + " - " : ""}${(doc.state as any)?.global?.title || doc.header.name}`,
+                    children: wstrChildDocs.map((childDoc) => ({
+                      id: `editor-${childDoc.header.id}`,
+                      title: `${(childDoc.state as any)?.global?.code ? (childDoc.state as any)?.global?.code + " - " : ""}${(childDoc.state as any)?.global?.title || childDoc.header.name}`,
+                    })),
                   };
                 }),
             ],
@@ -335,7 +341,6 @@ export function DriveExplorer(props: any) {
                       setModalDocumentType("powerhouse/workstream");
                       setOpenModal(true);
                     }}
-                    disabled={isWorkstreamCreated}
                   >
                     <span>
                       {/* {/* {/* <span className="text-sm"> */}
@@ -543,7 +548,6 @@ export function DriveExplorer(props: any) {
       modalDocumentType,
     ]
   );
-  console.log("activeDocumentId", activeDocumentId);
   // === RENDER ===
   return (
     <SidebarProvider nodes={sidebarNodes}>
