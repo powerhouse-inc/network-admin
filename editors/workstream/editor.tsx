@@ -1,4 +1,4 @@
-import type { Action, EditorProps } from "document-model";
+import type { Action, EditorProps, PHDocument } from "document-model";
 import { Button, toast, ToastContainer } from "@powerhousedao/design-system";
 import {
   TextInput,
@@ -19,17 +19,18 @@ import {
 import {
   type RequestForProposalsDocument,
   type RequestForProposalsState,
+  actions as rfpActions,
 } from "../../document-models/request-for-proposals/index.js";
 import { generateId } from "document-model";
 import {
-  useAllDocuments,
-  useNodes,
   useDocumentById,
-  setSelectedNode,
+  useSelectedDrive,
+  addDocument,
+  useSelectedDriveDocuments,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { type Node, type FileNode } from "document-drive";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { fa } from "zod/v4/locales";
 
 export type IProps = EditorProps;
 
@@ -53,11 +54,39 @@ export default function Editor(props: any) {
   ];
 
   // Try to get dispatch from context or props
-  const state = doc.state.global as any;
-  const createRfpDocument = props.createRfp;
+  const [state, setState] = useState(doc.state.global as any);
+
+  useEffect(() => {
+    setState(doc.state.global as any);
+  }, [doc.state.global]);
   const setActiveDocumentId = props.setActiveDocumentId;
+  const setActiveSidebarNodeId = props.setActiveSidebarNodeId;
   const createSowDocument = props.createSow;
   const createPaymentTermsDocument = props.createPaymentTerms;
+
+  const [selectedDrive] = useSelectedDrive();
+
+  const createRfpDocument = async () => {
+    const createdNode = await addDocument(
+      selectedDrive?.header.id || "",
+      `RFP-${state.title || ""}`,
+      "powerhouse/rfp",
+      undefined,
+      undefined,
+      undefined,
+      "request-for-proposals-editor"
+    );
+    console.log("Created RFP document", createdNode);
+    if (createdNode) {
+      await dispatchActions(
+        rfpActions.editRfp({
+          title: `RFP-${state.title || ""}`,
+        }),
+        createdNode.id
+      );
+    }
+    return createdNode;
+  };
 
   // Local state to track newly created SOW document ID
   const [newlyCreatedSowId, setNewlyCreatedSowId] = useState<string | null>(
@@ -103,52 +132,26 @@ export default function Editor(props: any) {
     }
   }, [state.rfp?.id, newlyCreatedRfpId]);
 
-  // Checking if there is an RFP document for this workstream
-  const nodes: Node[] = useNodes() || [];
-  const workstreamDocument: Node | undefined = nodes.find(
-    (node) => node.id === doc.header.id
-  );
-  const fileNodes = nodes.filter(
-    (node): node is FileNode => node.kind === "file"
-  );
-  const rfpDocumentNode: FileNode | undefined = fileNodes.find(
-    (node: FileNode) => {
-      if (!workstreamDocument && !node.parentFolder) return false;
-      return (
-        node.parentFolder === workstreamDocument?.parentFolder &&
-        node.documentType === "powerhouse/rfp"
-      );
-    }
-  );
+  const allDocuments = useSelectedDriveDocuments();
 
-  const sowDocumentNode: FileNode | undefined = fileNodes.find(
-    (node: FileNode) => {
-      if (!workstreamDocument && !node.parentFolder) return false;
+  let rfpDocumentNode: PHDocument | undefined = undefined;
+  if (state.rfp?.id) {
+    rfpDocumentNode = allDocuments?.find((doc: PHDocument) => {
       return (
-        node.parentFolder === workstreamDocument?.parentFolder &&
-        node.documentType === "powerhouse/scopeofwork"
+        doc.header.documentType === "powerhouse/rfp" &&
+        doc.header.id === state.rfp?.id
       );
-    }
-  );
-
-  const paymentTermsDocumentNode: FileNode | undefined = fileNodes.find(
-    (node: FileNode) => {
-      if (!workstreamDocument && !node.parentFolder) return false;
-      return (
-        node.parentFolder === workstreamDocument?.parentFolder &&
-        node.documentType === "payment-terms"
-      );
-    }
-  );
+    });
+  }
 
   // Get RFP document data using useDocumentById hook - always call with stable ID
-  const rfpDocumentId = rfpDocumentNode?.id || "";
+  const rfpDocumentId = rfpDocumentNode?.header.id || "";
   const rfpDocumentData = useDocumentById(rfpDocumentId);
   const [rfpDocumentDataState] = rfpDocumentData || [];
 
   // State to track RFP document
   const [rfpDocument, setRfpDocument] = useState<
-    | (FileNode & {
+    | (PHDocument & {
         document: RequestForProposalsState;
       })
     | undefined
@@ -158,8 +161,8 @@ export default function Editor(props: any) {
   useEffect(() => {
     if (
       rfpDocumentNode &&
-      rfpDocumentNode.id &&
-      rfpDocumentNode.id !== "" &&
+      rfpDocumentNode.header.id &&
+      rfpDocumentNode.header.id !== "" &&
       (rfpDocumentDataState?.state as any)?.global
     ) {
       const newRfpDocument = {
@@ -167,39 +170,41 @@ export default function Editor(props: any) {
         document: (rfpDocumentDataState?.state as any)
           .global as RequestForProposalsState,
       };
-      
+
       // Only update if the ID changed or if we don't have a document yet
       setRfpDocument((prev) => {
-        if (!prev || prev.id !== newRfpDocument.id) {
+        if (!prev || prev.header.id !== newRfpDocument.header.id) {
           return newRfpDocument;
         }
         // Update if the document content changed
-        if (JSON.stringify(prev.document) !== JSON.stringify(newRfpDocument.document)) {
+        if (
+          JSON.stringify(prev.document) !==
+          JSON.stringify(newRfpDocument.document)
+        ) {
           return newRfpDocument;
         }
         return prev;
       });
     } else if (
       !rfpDocumentNode ||
-      !rfpDocumentNode.id ||
-      rfpDocumentNode.id === ""
+      !rfpDocumentNode.header.id ||
+      rfpDocumentNode.header.id === ""
     ) {
-      setRfpDocument((prev) => prev === undefined ? prev : undefined);
+      setRfpDocument((prev) => (prev === undefined ? prev : undefined));
     }
   }, [rfpDocumentNode, rfpDocumentDataState]);
 
   const searchRfpDocuments = (userInput: string) => {
-    const results = fileNodes.filter(
-      (node): node is FileNode =>
-        (node.kind === "file" &&
-          node.documentType === "powerhouse/rfp" &&
-          node.name.toLowerCase().includes(userInput.toLowerCase())) ||
-        node.id.toLowerCase().includes(userInput.toLowerCase())
+    const results = allDocuments?.filter(
+      (node): node is PHDocument =>
+        (node.header.documentType === "powerhouse/rfp" &&
+          node.header.name.toLowerCase().includes(userInput.toLowerCase())) ||
+        node.header.id.toLowerCase().includes(userInput.toLowerCase())
     );
-    return results.map((doc) => ({
-      value: doc.id,
-      title: doc.name,
-      path: nodes.find((node) => node.id === doc.parentFolder)?.name || "",
+    return results?.map((doc) => ({
+      value: doc.header.id,
+      title: doc.header.name,
+      path: "",
     }));
   };
 
@@ -576,13 +581,13 @@ export default function Editor(props: any) {
                   }}
                   // search options as the user types
                   fetchOptionsCallback={async (userInput) => {
-                    const results = searchRfpDocuments(userInput);
-                    if (results.length === 0) {
+                    const results = searchRfpDocuments(userInput) || [];
+                    if (results?.length === 0) {
                       return Promise.reject(
                         new Error("No RFP documents found")
                       );
                     }
-                    return results.map((doc) => ({
+                    return results?.map((doc) => ({
                       value: doc.value, // unique document ID
                       title: doc.title, // document title or name
                       path: {
@@ -596,7 +601,7 @@ export default function Editor(props: any) {
                   // get details of a specific option by its ID/value
                   fetchSelectedOptionCallback={async (documentId) => {
                     console.log("fetching selected option", documentId);
-                    const [doc] = searchRfpDocuments(documentId);
+                    const doc = searchRfpDocuments(documentId)?.[0];
                     if (!doc) {
                       return Promise.reject(
                         new Error("RFP document not found")
@@ -615,11 +620,11 @@ export default function Editor(props: any) {
                   }}
                   initialOptions={[
                     {
-                      value: rfpDocument.id,
+                      value: rfpDocument.header.id,
                       title: rfpDocument.document.title,
                       path: {
                         text: rfpDocument.document.title,
-                        url: rfpDocument.id,
+                        url: rfpDocument.header.id,
                       },
                       description: "",
                       icon: "File",
@@ -634,7 +639,10 @@ export default function Editor(props: any) {
                     name="Moved"
                     size={18}
                     onClick={() => {
-                      setActiveDocumentId(rfpDocumentNode?.id || "");
+                      setActiveDocumentId(rfpDocument?.header.id);
+                      setActiveSidebarNodeId(
+                        `editor-${rfpDocument?.header.id}`
+                      );
                     }}
                   />
                   <span>RFP Editor</span>

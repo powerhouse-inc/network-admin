@@ -29,12 +29,14 @@ export const EditorContainer = (props: {
   hideToolbar?: boolean;
   activeDocumentId: string;
   setActiveDocumentId: (id: string) => void;
+  setActiveSidebarNodeId: (id: string) => void;
 }) => {
   const {
     handleClose,
     hideToolbar = false,
     activeDocumentId,
     setActiveDocumentId,
+    setActiveSidebarNodeId,
   } = props;
   // UI state for revision history and timeline
   const [selectedTimelineItem, setSelectedTimelineItem] =
@@ -212,7 +214,7 @@ export const EditorContainer = (props: {
             dispatch={dispatch}
             document={selectedDocument}
             error={console.error}
-            createRfp={createRfpDocument}
+            setActiveSidebarNodeId={setActiveSidebarNodeId}
             setActiveDocumentId={setActiveDocumentId}
             createSow={createSowDocument}
             createPaymentTerms={createPaymentTermsDocument}

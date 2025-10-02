@@ -13,9 +13,6 @@ export const module: DriveEditorModule = {
       // List all document types that can be dropped
       "powerhouse/network-profile",
       "powerhouse/workstream",
-      "powerhouse/scopeofwork",
-      "powerhouse/rfp",
-      "payment-terms",
     ],
     dragAndDrop: {
       enabled: true, // Enable drag-and-drop functionality

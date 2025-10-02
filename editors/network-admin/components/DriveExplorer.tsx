@@ -562,6 +562,7 @@ export function DriveExplorer(props: any) {
             hideToolbar={false}
             activeDocumentId={activeDocumentId}
             setActiveDocumentId={setActiveDocumentId}
+            setActiveSidebarNodeId={setActiveSidebarNodeId}
           />
         </div>
       ) : (
@@ -594,6 +595,7 @@ export function DriveExplorer(props: any) {
                   hideToolbar={false}
                   activeDocumentId={activeDocumentId}
                   setActiveDocumentId={setActiveDocumentId}
+                  setActiveSidebarNodeId={setActiveSidebarNodeId}
                 />
               ) : (
                 displayActiveNode(selectedFolder?.id || selectedRootNode)
