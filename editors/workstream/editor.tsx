@@ -12,15 +12,14 @@ import {
 import {
   type WorkstreamDocument,
   actions,
-  type WorkstreamStatus,
   type WorkstreamStatusInput,
   ProposalStatusInput,
 } from "../../document-models/workstream/index.js";
 import {
-  type RequestForProposalsDocument,
   type RequestForProposalsState,
   actions as rfpActions,
 } from "../../document-models/request-for-proposals/index.js";
+import { ScopeOfWork } from "@powerhousedao/project-management/document-models";
 import { generateId } from "document-model";
 import {
   useDocumentById,
@@ -29,8 +28,7 @@ import {
   useSelectedDriveDocuments,
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
-import { type Node, type FileNode } from "document-drive";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export type IProps = EditorProps;
 
@@ -61,8 +59,6 @@ export default function Editor(props: any) {
   }, [doc.state.global]);
   const setActiveDocumentId = props.setActiveDocumentId;
   const setActiveSidebarNodeId = props.setActiveSidebarNodeId;
-  const createSowDocument = props.createSow;
-  const createPaymentTermsDocument = props.createPaymentTerms;
 
   const [selectedDrive] = useSelectedDrive();
 
@@ -85,6 +81,43 @@ export default function Editor(props: any) {
         createdNode.id
       );
     }
+    return createdNode;
+  };
+
+  const createSowDocument = async () => {
+    const createdNode = await addDocument(
+      selectedDrive?.header.id || "",
+      `SOW-${state.title || ""}`,
+      "powerhouse/scopeofwork",
+      undefined,
+      undefined,
+      undefined,
+      "scope-of-work-editor"
+    );
+    console.log("Created SOW document", createdNode);
+    if (createdNode) {
+      await dispatchActions(
+        ScopeOfWork.actions.editScopeOfWork({
+          title: `SOW-${state.title || ""}`,
+        }),
+        createdNode.id
+      );
+    }
+    return createdNode;
+  };
+
+  const createPaymentTermsDocument = async () => {
+    const createdNode = await addDocument(
+      selectedDrive?.header.id || "",
+      `Payment Terms-${state.title || ""}`,
+      "payment-terms",
+      undefined,
+      undefined,
+      undefined,
+      "payment-terms-editor"
+    );
+    console.log("Created Payment Terms document", createdNode);
+    // Note: Payment Terms might not have actions to initialize, so we just create it
     return createdNode;
   };
 
