@@ -1,7 +1,4 @@
-import {
-  Button,
-  CreateDocumentModal,
-} from "@powerhousedao/design-system";
+import { Button, CreateDocumentModal } from "@powerhousedao/design-system";
 import {
   Sidebar,
   SidebarProvider,
@@ -26,8 +23,21 @@ import { type Node } from "document-drive";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { EditorContainer } from "./EditorContainer.js";
 import { editWorkstream } from "../../../document-models/workstream/gen/creators.js";
+import { type WorkstreamStatus } from "../../../document-models/workstream/gen/types.js";
 
-/**
+const WorkstreamStatusEnums = [
+  "RFP_DRAFT",
+  "PREWORK_RFC",
+  "RFP_CANCELLED",
+  "OPEN_FOR_PROPOSALS",
+  "PROPOSAL_SUBMITTED",
+  "NOT_AWARDED",
+  "AWARDED",
+  "IN_PROGRESS",
+  "FINISHED",
+];
+
+/**1
  * Main drive explorer component with sidebar navigation and content area.
  * Layout: Left sidebar (folder tree) + Right content area (files/folders + document editor)
  */
@@ -52,7 +62,7 @@ export function DriveExplorer(props: any) {
   const allDocuments = useSelectedDriveDocuments();
   const selectedDriveId = useSelectedDriveId();
 
-  const {onRenameNode} = useNodeActions();
+  const { onRenameNode } = useNodeActions();
 
   // Listen to global selected document state (for external editors like Scope of Work)
   const [globalSelectedDocument] = useSelectedDocument();
@@ -125,26 +135,80 @@ export function DriveExplorer(props: any) {
       id: "workstreams",
       title: "Workstreams",
       children: [
-        // Add workstream documents
-        ...workstreamDocs.map((doc) => ({
-          id: `editor-${doc.header.id}`,
-          title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
-        })),
-        // Add scope of work documents
-        ...scopeOfWorkDocs.map((doc) => ({
-          id: `editor-${doc.header.id}`,
-          title: `${(doc.state as any)?.global?.title || doc.header.name}`,
-        })),
-        // Add RFP documents
-        ...rfpDocs.map((doc) => ({
-          id: `editor-${doc.header.id}`,
-          title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
-        })),
-        // Add payment terms documents
-        ...paymentTermsDocs.map((doc) => ({
-          id: `editor-${doc.header.id}`,
-          title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
-        })),
+        ...WorkstreamStatusEnums.map((status) => {
+          const statusTitle = status
+            .toLowerCase()
+            .split("_")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+          const statusWorkstreamDocs = workstreamDocs.filter(
+            (doc) => (doc.state as any)?.global?.status === status
+          );
+
+          return {
+            id: `workstream-status-${status}`,
+            title:
+              statusTitle +
+              (workstreamDocs.filter(
+                (doc) => (doc.state as any)?.global?.status === status
+              ).length > 0
+                ? ` (${workstreamDocs.filter((doc) => (doc.state as any)?.global?.status === status).length})`
+                : ""),
+            children: [
+              ...workstreamDocs
+                .filter((doc) => (doc.state as any)?.global?.status === status)
+                .map((doc) => {
+                  const sow = (doc.state as any)?.global?.initialProposal.sow;
+                  const rfp = (doc.state as any)?.global?.rfp?.id;
+                  const paymentTerms = (doc.state as any)?.global
+                    ?.initialProposal.paymentTerms;
+                  const sowDoc = allDocuments?.find(
+                    (doc) => doc.header.id === sow
+                  );
+                  const rfpDoc = allDocuments?.find(
+                    (doc) => doc.header.id === rfp
+                  );
+                  const pmtDoc = allDocuments?.find(
+                    (doc) => doc.header.id === paymentTerms
+                  );
+                  const wstrChildDocs = [sowDoc, rfpDoc, pmtDoc];
+                  return {
+                    id: `editor-${doc.header.id}`,
+                    title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
+                    children: [
+                      ...wstrChildDocs.map((childDoc) => {
+                        return {
+                          id: `editor-${childDoc?.header.id}`,
+                          title: `${(childDoc?.state as any)?.global?.code ? (childDoc?.state as any)?.global?.code + " - " : ""}${(childDoc?.state as any)?.global?.title || childDoc?.header.name}`,
+                        };
+                      }),
+                    ],
+                  };
+                }),
+            ],
+          };
+        }),
+
+        // // Add workstream documents
+        // ...workstreamDocs.map((doc) => ({
+        //   id: `editor-${doc.header.id}`,
+        //   title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
+        // })),
+        // // Add scope of work documents
+        // ...scopeOfWorkDocs.map((doc) => ({
+        //   id: `editor-${doc.header.id}`,
+        //   title: `${(doc.state as any)?.global?.title || doc.header.name}`,
+        // })),
+        // // Add RFP documents
+        // ...rfpDocs.map((doc) => ({
+        //   id: `editor-${doc.header.id}`,
+        //   title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
+        // })),
+        // // Add payment terms documents
+        // ...paymentTermsDocs.map((doc) => ({
+        //   id: `editor-${doc.header.id}`,
+        //   title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
+        // })),
       ],
     };
 
@@ -355,7 +419,8 @@ export function DriveExplorer(props: any) {
                                   <button
                                     onClick={async () => {
                                       if (!fileNode || !fileNode.id) return;
-                                      const currentName = fileNode.name || document.header.name;
+                                      const currentName =
+                                        fileNode.name || document.header.name;
                                       const newName = prompt(
                                         "Enter new name:",
                                         currentName
@@ -471,7 +536,7 @@ export function DriveExplorer(props: any) {
       modalDocumentType,
     ]
   );
-
+  console.log("activeDocumentId", activeDocumentId);
   // === RENDER ===
   return (
     <SidebarProvider nodes={sidebarNodes}>
@@ -496,7 +561,7 @@ export function DriveExplorer(props: any) {
               [&_.sidebar\\_\\_item--active]:bg-yellow-500
             `}
             nodes={sidebarNodes}
-            activeNodeId={selectedFolder?.id || activeDocumentId}
+            activeNodeId={activeDocumentId}
             onActiveNodeChange={(node) => handleActiveNodeChange(node.id)}
             sidebarTitle="Network Admin"
             showSearchBar={true}
@@ -504,7 +569,7 @@ export function DriveExplorer(props: any) {
             resizable={true}
             initialWidth={300}
             maxWidth={500}
-            enableMacros={2}
+            enableMacros={4}
             handleOnTitleClick={() => {
               setActiveDocumentId(undefined);
               setSelectedRootNode("workstreams");
