@@ -3,7 +3,7 @@ import { Button, toast, ToastContainer } from "@powerhousedao/design-system";
 import {
   TextInput,
   Select,
-  PHIDInput,
+  OIDInput,
   Icon,
   ObjectSetTable,
   ColumnDef,
@@ -145,16 +145,12 @@ export default function Editor(props: any) {
   );
 
   // Local state to track manual input values
-  const [manualSowInput, setManualSowInput] = useState<string>("");
-  const [manualPaymentTermsInput, setManualPaymentTermsInput] =
-    useState<string>("");
   const [manualAuthorInput, setManualAuthorInput] = useState<string>("");
 
   // Effect to clear local state when global state is updated
   useEffect(() => {
     if (state.initialProposal?.sow && newlyCreatedSowId) {
       setNewlyCreatedSowId(null);
-      setManualSowInput("");
     }
   }, [state.initialProposal?.sow, newlyCreatedSowId]);
 
@@ -162,7 +158,6 @@ export default function Editor(props: any) {
   useEffect(() => {
     if (state.initialProposal?.paymentTerms && newlyCreatedPaymentTermsId) {
       setNewlyCreatedPaymentTermsId(null);
-      setManualPaymentTermsInput("");
     }
   }, [state.initialProposal?.paymentTerms, newlyCreatedPaymentTermsId]);
 
@@ -181,6 +176,28 @@ export default function Editor(props: any) {
       return (
         doc.header.documentType === "powerhouse/rfp" &&
         doc.header.id === state.rfp?.id
+      );
+    });
+  }
+
+  // Find SOW document node
+  let sowDocumentNode: PHDocument | undefined = undefined;
+  if (state.initialProposal?.sow) {
+    sowDocumentNode = allDocuments?.find((doc: PHDocument) => {
+      return (
+        doc.header.documentType === "powerhouse/scopeofwork" &&
+        doc.header.id === state.initialProposal?.sow
+      );
+    });
+  }
+
+  // Find Payment Terms document node
+  let paymentTermsDocumentNode: PHDocument | undefined = undefined;
+  if (state.initialProposal?.paymentTerms) {
+    paymentTermsDocumentNode = allDocuments?.find((doc: PHDocument) => {
+      return (
+        doc.header.documentType === "payment-terms" &&
+        doc.header.id === state.initialProposal?.paymentTerms
       );
     });
   }
@@ -238,13 +255,47 @@ export default function Editor(props: any) {
   const searchRfpDocuments = (userInput: string) => {
     const results = allDocuments?.filter(
       (node): node is PHDocument =>
-        (node.header.documentType === "powerhouse/rfp" &&
-          node.header.name.toLowerCase().includes(userInput.toLowerCase())) ||
-        node.header.id.toLowerCase().includes(userInput.toLowerCase())
+        node.header.documentType === "powerhouse/rfp" &&
+        (!userInput ||
+          node.header.name.toLowerCase().includes(userInput.toLowerCase()) ||
+          node.header.id.toLowerCase().includes(userInput.toLowerCase()))
     );
     return results?.map((doc) => ({
       value: doc.header.id,
       title: doc.header.name,
+      path: "",
+    }));
+  };
+  const searchSowDocuments = (userInput: string) => {
+    const results = allDocuments?.filter(
+      (node): node is PHDocument =>
+        node.header.documentType === "powerhouse/scopeofwork" &&
+        (!userInput ||
+          node.header.name.toLowerCase().includes(userInput.toLowerCase()) ||
+          node.header.id.toLowerCase().includes(userInput.toLowerCase()) ||
+          ((node.state as any)?.global?.title
+            ?.toLowerCase()
+            .includes(userInput.toLowerCase()) ??
+            false))
+    );
+    return results?.map((doc) => ({
+      value: doc.header.id,
+      title: (doc.state as any)?.global?.title || doc.header.name,
+      path: "",
+    }));
+  };
+
+  const searchPaymentTermsDocuments = (userInput: string) => {
+    const results = allDocuments?.filter(
+      (node): node is PHDocument =>
+        node.header.documentType === "payment-terms" &&
+        (!userInput ||
+          node.header.name.toLowerCase().includes(userInput.toLowerCase()) ||
+          node.header.id.toLowerCase().includes(userInput.toLowerCase()))
+    );
+    return results?.map((doc) => ({
+      value: doc.header.id,
+      title: (doc.state as any)?.global?.title || doc.header.name,
       path: "",
     }));
   };
@@ -430,7 +481,11 @@ export default function Editor(props: any) {
         renderCell: (value: any) => {
           if (!value) return null;
           return (
-            <div className={`text-center ${statusStyles[value as keyof typeof statusStyles]}`}>{value}</div>
+            <div
+              className={`text-center ${statusStyles[value as keyof typeof statusStyles]}`}
+            >
+              {value}
+            </div>
           );
         },
       },
@@ -610,7 +665,7 @@ export default function Editor(props: any) {
             </h1>
             <div className="w-full flex flex-row items-center gap-8">
               <div className="w-[350px]">
-                <PHIDInput
+                <OIDInput
                   name="Request for Proposal"
                   label="RFP Document"
                   placeholder="Search for RFP Document"
@@ -628,7 +683,7 @@ export default function Editor(props: any) {
                   }}
                   // search options as the user types
                   fetchOptionsCallback={async (userInput) => {
-                    const results = searchRfpDocuments(userInput) || [];
+                    const results = searchRfpDocuments(userInput || "") || [];
                     if (results?.length === 0) {
                       return Promise.reject(
                         new Error("No RFP documents found")
@@ -766,98 +821,7 @@ export default function Editor(props: any) {
                       }}
                     />
                   </div>
-                  <div className="flex-1">
-                    <TextInput
-                      label="Sow"
-                      value={
-                        newlyCreatedSowId ||
-                        manualSowInput ||
-                        state.initialProposal?.sow ||
-                        ""
-                      }
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setManualSowInput(e.target.value);
-                        setNewlyCreatedSowId(null); // Clear newly created ID when user starts typing
-                      }}
-                      onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                        if (e.target.value !== state.initialProposal?.sow) {
-                          dispatch(
-                            actions.editInitialProposal({
-                              id: state.initialProposal?.id || "",
-                              sowId: e.target.value,
-                            })
-                          );
-                        }
-                      }}
-                    />
-                    <button
-                      className="text-sm bg-gray-100 rounded-md p-1 hover:bg-gray-200"
-                      onClick={async () => {
-                        console.log("Creating sow");
-                        const createdNode = await createSowDocument();
-                        if (createdNode) {
-                          // Set local state to immediately show the new SOW ID
-                          setNewlyCreatedSowId(createdNode.id);
 
-                          dispatch(
-                            actions.editInitialProposal({
-                              id: state.initialProposal?.id || "",
-                              sowId: createdNode.id,
-                            })
-                          );
-                        }
-                      }}
-                    >
-                      Create sow
-                    </button>
-                  </div>
-                  <div className="flex-1">
-                    <TextInput
-                      label="Payment Terms"
-                      value={
-                        newlyCreatedPaymentTermsId ||
-                        manualPaymentTermsInput ||
-                        state.initialProposal?.paymentTerms ||
-                        ""
-                      }
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setManualPaymentTermsInput(e.target.value);
-                        setNewlyCreatedPaymentTermsId(null); // Clear newly created ID when user starts typing
-                      }}
-                      onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                        if (
-                          e.target.value !== state.initialProposal?.paymentTerms
-                        ) {
-                          dispatch(
-                            actions.editInitialProposal({
-                              id: state.initialProposal?.id || "",
-                              paymentTermsId: e.target.value,
-                            })
-                          );
-                        }
-                      }}
-                    />
-                    <button
-                      className="text-sm bg-gray-100 rounded-md p-1 hover:bg-gray-200"
-                      onClick={async () => {
-                        console.log("Creating payment terms");
-                        const createdNode = await createPaymentTermsDocument();
-                        if (createdNode) {
-                          // Set local state to immediately show the new Payment Terms ID
-                          setNewlyCreatedPaymentTermsId(createdNode.id);
-
-                          dispatch(
-                            actions.editInitialProposal({
-                              id: state.initialProposal?.id || "",
-                              paymentTermsId: createdNode.id,
-                            })
-                          );
-                        }
-                      }}
-                    >
-                      Create Payment Terms
-                    </button>
-                  </div>
                   <div className="flex-1">
                     <Select
                       label="Status"
@@ -879,6 +843,210 @@ export default function Editor(props: any) {
                         }
                       }}
                     />
+                  </div>
+                </div>
+                <div className="flex flex-row gap-4 mb-6">
+                  <div className="flex-1">
+                    <OIDInput
+                      name="Scope of Work"
+                      label="Scope Of Work"
+                      placeholder="Search for SOW Document"
+                      variant="withValueTitleAndDescription"
+                      value={
+                        newlyCreatedSowId || state.initialProposal?.sow || ""
+                      }
+                      onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                        if (e.target.value !== state.initialProposal?.sow) {
+                          dispatch(
+                            actions.editInitialProposal({
+                              id: state.initialProposal?.id || "",
+                              sowId: e.target.value,
+                            })
+                          );
+                        }
+                      }}
+                      // search options as the user types
+                      fetchOptionsCallback={async (userInput) => {
+                        const results =
+                          searchSowDocuments(userInput || "") || [];
+                        if (results?.length === 0) {
+                          return Promise.reject(
+                            new Error("No SOW documents found")
+                          );
+                        }
+                        return results?.map((doc) => ({
+                          value: doc.value, // unique document ID
+                          title: doc.title, // document title or name
+                          path: {
+                            text: doc.path,
+                            url: doc.value,
+                          }, // document path or location
+                          description: "", // document description or summary
+                          icon: "File", // document icon
+                        }));
+                      }}
+                      // get details of a specific option by its ID/value
+                      fetchSelectedOptionCallback={async (documentId) => {
+                        const doc = searchSowDocuments(documentId)?.[0];
+                        if (!doc) {
+                          return Promise.reject(
+                            new Error("SOW document not found")
+                          );
+                        }
+                        return {
+                          value: doc.value,
+                          title: doc.title,
+                          path: {
+                            text: doc.path,
+                            url: doc.title,
+                          },
+                          description: "",
+                          icon: "File",
+                        };
+                      }}
+                      initialOptions={
+                        sowDocumentNode
+                          ? [
+                              {
+                                value: sowDocumentNode.header.id,
+                                title:
+                                  (sowDocumentNode.state as any)?.global
+                                    ?.title || sowDocumentNode.header.name,
+                                path: {
+                                  text: sowDocumentNode.header.name,
+                                  url: sowDocumentNode.header.id,
+                                },
+                                description: "",
+                                icon: "File",
+                              },
+                            ]
+                          : undefined
+                      }
+                    />
+                    <button
+                      className="text-sm bg-gray-100 rounded-md mt-1 p-1 hover:bg-gray-200"
+                      onClick={async () => {
+                        console.log("Creating sow");
+                        const createdNode = await createSowDocument();
+                        if (createdNode) {
+                          // Set local state to immediately show the new SOW ID
+                          setNewlyCreatedSowId(createdNode.id);
+
+                          dispatch(
+                            actions.editInitialProposal({
+                              id: state.initialProposal?.id || "",
+                              sowId: createdNode.id,
+                            })
+                          );
+                        }
+                      }}
+                    >
+                      Create sow
+                    </button>
+                  </div>
+                  <div className="flex-1">
+                    <OIDInput
+                      name="Payment Terms"
+                      label="Payment Terms"
+                      placeholder="Search for Payment Terms Document"
+                      variant="withValueTitleAndDescription"
+                      value={
+                        newlyCreatedPaymentTermsId ||
+                        state.initialProposal?.paymentTerms ||
+                        ""
+                      }
+                      onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                        if (
+                          e.target.value !== state.initialProposal?.paymentTerms
+                        ) {
+                          dispatch(
+                            actions.editInitialProposal({
+                              id: state.initialProposal?.id || "",
+                              paymentTermsId: e.target.value,
+                            })
+                          );
+                        }
+                      }}
+                      // search options as the user types
+                      fetchOptionsCallback={async (userInput) => {
+                        const results =
+                          searchPaymentTermsDocuments(userInput || "") || [];
+                        if (results?.length === 0) {
+                          return Promise.reject(
+                            new Error("No Payment Terms documents found")
+                          );
+                        }
+                        return results?.map((doc) => ({
+                          value: doc.value, // unique document ID
+                          title: doc.title, // document title or name
+                          path: {
+                            text: doc.path,
+                            url: doc.value,
+                          }, // document path or location
+                          description: "", // document description or summary
+                          icon: "File", // document icon
+                        }));
+                      }}
+                      // get details of a specific option by its ID/value
+                      fetchSelectedOptionCallback={async (documentId) => {
+                        const doc =
+                          searchPaymentTermsDocuments(documentId)?.[0];
+                        if (!doc) {
+                          return Promise.reject(
+                            new Error("Payment Terms document not found")
+                          );
+                        }
+                        return {
+                          value: doc.value,
+                          title: doc.title,
+                          path: {
+                            text: doc.path,
+                            url: doc.title,
+                          },
+                          description: "",
+                          icon: "File",
+                        };
+                      }}
+                      initialOptions={
+                        paymentTermsDocumentNode
+                          ? [
+                              {
+                                value: paymentTermsDocumentNode.header.id,
+                                title:
+                                  (paymentTermsDocumentNode.state as any)
+                                    ?.global?.title ||
+                                  paymentTermsDocumentNode.header.name,
+                                path: {
+                                  text: paymentTermsDocumentNode.header.name,
+                                  url: paymentTermsDocumentNode.header.id,
+                                },
+                                description: "",
+                                icon: "File",
+                              },
+                            ]
+                          : undefined
+                      }
+                    />
+                    <button
+                      className="text-sm bg-gray-100 rounded-md mt-1 p-1 hover:bg-gray-200"
+                      onClick={async () => {
+                        console.log("Creating payment terms");
+                        const createdNode = await createPaymentTermsDocument();
+                        if (createdNode) {
+                          // Set local state to immediately show the new Payment Terms ID
+                          setNewlyCreatedPaymentTermsId(createdNode.id);
+
+                          dispatch(
+                            actions.editInitialProposal({
+                              id: state.initialProposal?.id || "",
+                              paymentTermsId: createdNode.id,
+                            })
+                          );
+                        }
+                      }}
+                    >
+                      Create Payment Terms
+                    </button>
                   </div>
                 </div>
                 <div>
