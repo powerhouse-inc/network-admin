@@ -8,6 +8,7 @@ import {
   ObjectSetTable,
   ColumnDef,
   ColumnAlignment,
+  buildEnumCellEditor,
 } from "@powerhousedao/document-engineering";
 import {
   type WorkstreamDocument,
@@ -44,6 +45,13 @@ const statusOptions: Array<{ value: WorkstreamStatusInput; label: string }> = [
   { value: "IN_PROGRESS", label: "In Progress" },
   { value: "FINISHED", label: "Finished" },
 ];
+
+const statusStyles = {
+  DRAFT: "bg-[#fcdfbd] text-[#ffa033] rounded px-2 py-1 font-semibold",
+  SUBMITTED: "bg-[#bfdffd] text-[#339cff] rounded px-2 py-1 font-semibold",
+  ACCEPTED: "bg-[#c8ecd1] text-[#4fc86f] rounded px-2 py-1 font-semibold",
+  REJECTED: "bg-[#ffaea8] text-[#de3333] rounded px-2 py-1 font-semibold",
+};
 
 export default function Editor(props: any) {
   const [doc, dispatch] = useDocumentById(props.documentId) as [
@@ -343,9 +351,9 @@ export default function Editor(props: any) {
           return false;
         },
         renderCell: (value: any, context: any) => {
-          if (value === "") {
+          if (value === undefined) {
             return (
-              <div className="font-light italic text-left text-gray-500">
+              <div className="font-light italic text-left text-gray-500 text-xs">
                 + Double-click to add new author
               </div>
             );
@@ -356,6 +364,7 @@ export default function Editor(props: any) {
       {
         field: "sow",
         title: "SOW",
+        type: "oid",
         editable: true,
         align: "center" as ColumnAlignment,
         onSave: (newValue: any, context: any) => {
@@ -374,6 +383,7 @@ export default function Editor(props: any) {
       {
         field: "paymentTerms",
         title: "Payment Terms",
+        type: "oid",
         editable: true,
         align: "center" as ColumnAlignment,
         onSave: (newValue: any, context: any) => {
@@ -392,31 +402,35 @@ export default function Editor(props: any) {
       {
         field: "status",
         title: "Status",
-        editable: false,
+        editable: true,
         align: "center" as ColumnAlignment,
-        width: 100,
-        renderCell: (value: any, context: any) => {
+        type: "enum",
+        valueGetter: (row: any) => row.status,
+        onSave: (newValue: any, context: any) => {
+          if (newValue !== context.row.status) {
+            dispatch(
+              actions.editAlternativeProposal({
+                id: context.row.id as string,
+                status: newValue as ProposalStatusInput,
+              })
+            );
+            return true;
+          }
+          return false;
+        },
+        renderCellEditor: buildEnumCellEditor({
+          className: "w-[130px]",
+          options: [
+            { value: "DRAFT", label: "Draft" },
+            { value: "SUBMITTED", label: "Submitted" },
+            { value: "ACCEPTED", label: "Accepted" },
+            { value: "REJECTED", label: "Rejected" },
+          ],
+        }),
+        renderCell: (value: any) => {
           if (!value) return null;
           return (
-            <Select
-              options={[
-                { value: "DRAFT", label: "Draft" },
-                { value: "SUBMITTED", label: "Submitted" },
-                { value: "ACCEPTED", label: "Accepted" },
-                { value: "REJECTED", label: "Rejected" },
-              ]}
-              value={value || "DRAFT"}
-              onChange={(value) => {
-                if (value !== value) {
-                  dispatch(
-                    actions.editAlternativeProposal({
-                      id: context.row.id as string,
-                      status: value as ProposalStatusInput,
-                    })
-                  );
-                }
-              }}
-            />
+            <div className={`text-center ${statusStyles[value as keyof typeof statusStyles]}`}>{value}</div>
           );
         },
       },
