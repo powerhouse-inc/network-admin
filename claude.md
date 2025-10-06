@@ -68,6 +68,7 @@ When the user requests to create or make changes on a document editor, follow th
 - If it's a new editor, create a new editor document on the "vetra" drive if available, of type `powerhouse/document-editor`
 - Check the document editor schema and comply with it
 - After adding the editor document to the `vetra` drive, a new editor will be generated in the `editors` folder
+- Inspect the hooks in `editors/hooks` as they should be useful
 - Read the schema of the document model that the editor is for to know how to interact with it
 - Style the editor using tailwind classes or a style tag. If using a style tag, make sure to make the selectors specific to only apply to the editor component.
 - Create modular components for the UI elements and place them on separate files to make it easier to maintain and update
@@ -75,6 +76,35 @@ When the user requests to create or make changes on a document editor, follow th
 - Separate business logic from presentation logic
 - Use TypeScript for type safety, avoid using any and type casting
 - Always check for type and lint errors after creating or modifying the editor
+
+### Document Editor Implementation Pattern
+
+**CRITICAL**: When implementing document editors, use the modern React hooks pattern from `@powerhousedao/reactor-browser`.
+
+The following section is valid for editors that edit a single document type.
+
+#### Required Imports and Setup
+
+Using a "Todo" document model as example:
+
+```typescript
+import { generateId } from "document-model";
+import { useSelectedTodoDocument } from "../hooks/useTodoDocument.js";
+import {
+  addTodo,
+} from "../../document-models/todo/gen/creators.js";
+
+export default function Editor() {
+  const [document, dispatch] = useSelectedTodoDocument();
+
+    const handleAddTodo = useCallback((values: { title: string }) {
+      if (values.name) {
+        dispatch(addTodo({ id: generateId(), title: values.title }));
+      }
+    }, [dispatch]);
+```
+
+The `useSelectedTodoDocument` gets generated automatically so you don't need to implement it yourself.
 
 ## ⚠️ CRITICAL: Generated Files & Modification Rules
 
@@ -298,7 +328,6 @@ throw new MissingIdError("message");
 - Reflect user intent with descriptive names
 - Simple, specific fields over complex nested types
 - System auto-generates `OID` for new objects (users don't provide manually)
-
 
 ## UI Component Guidelines
 
