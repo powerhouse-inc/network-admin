@@ -180,13 +180,20 @@ export function DriveExplorer(props: any) {
                   const pmtDoc = allDocuments?.find(
                     (doc) => doc.header.id === paymentTerms
                   );
-                  
+
+                  // get alternative proposals
+                  let alternativeProposals = null;
+                  if ((doc.state as any)?.global?.alternativeProposals) {
+                    alternativeProposals = (doc.state as any)?.global
+                      ?.alternativeProposals;
+                  }
+
                   // Only include documents that actually exist
                   const wstrChildDocs = [sowDoc, rfpDoc, pmtDoc].filter(
                     (doc) => doc !== undefined && doc !== null
                   );
-                  
-                  return {
+
+                  const returnableChildren: any = {
                     id: `editor-${doc.header.id}`,
                     title: `${(doc.state as any)?.global?.code ? (doc.state as any)?.global?.code + " - " : ""}${(doc.state as any)?.global?.title || doc.header.name}`,
                     children: wstrChildDocs.map((childDoc) => ({
@@ -194,31 +201,35 @@ export function DriveExplorer(props: any) {
                       title: `${(childDoc.state as any)?.global?.code ? (childDoc.state as any)?.global?.code + " - " : ""}${(childDoc.state as any)?.global?.title || childDoc.header.name}`,
                     })),
                   };
+
+                  if (alternativeProposals.length > 0) {
+                    const altSowDoc = allDocuments?.find(
+                      (doc) => doc.header.id === alternativeProposals[0].sow
+                    );
+                    const altPaymentTermsDoc = allDocuments?.find(
+                      (doc) =>
+                        doc.header.id === alternativeProposals[0].paymentTerms
+                    );
+
+                    const altChildDocs = [altSowDoc, altPaymentTermsDoc].filter(
+                      (doc) => doc !== undefined && doc !== null
+                    );
+
+                    returnableChildren.children.push({
+                      id: "alternative-proposals",
+                      title: "Alternative Proposals",
+                      children: altChildDocs.map((childDoc) => ({
+                        id: `editor-${childDoc.header.id}`,
+                        title: `${(childDoc.state as any)?.global?.code ? (childDoc.state as any)?.global?.code + " - " : ""}${(childDoc.state as any)?.global?.title || childDoc.header.name}`,
+                      })),
+                    });
+                  }
+
+                  return returnableChildren;
                 }),
             ],
           };
         }),
-
-        // // Add workstream documents
-        // ...workstreamDocs.map((doc) => ({
-        //   id: `editor-${doc.header.id}`,
-        //   title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
-        // })),
-        // // Add scope of work documents
-        // ...scopeOfWorkDocs.map((doc) => ({
-        //   id: `editor-${doc.header.id}`,
-        //   title: `${(doc.state as any)?.global?.title || doc.header.name}`,
-        // })),
-        // // Add RFP documents
-        // ...rfpDocs.map((doc) => ({
-        //   id: `editor-${doc.header.id}`,
-        //   title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
-        // })),
-        // // Add payment terms documents
-        // ...paymentTermsDocs.map((doc) => ({
-        //   id: `editor-${doc.header.id}`,
-        //   title: `${(doc.state as any)?.global?.code || ""} - ${(doc.state as any)?.global?.title || doc.header.name}`,
-        // })),
       ],
     };
 
