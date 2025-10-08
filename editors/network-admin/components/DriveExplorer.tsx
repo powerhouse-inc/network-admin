@@ -189,39 +189,97 @@ export function DriveExplorer(props: any) {
                   }
 
                   // Only include documents that actually exist
-                  const wstrChildDocs = [sowDoc, rfpDoc, pmtDoc].filter(
+                  const wstrChildDocs = [rfpDoc].filter(
                     (doc) => doc !== undefined && doc !== null
                   );
 
                   const returnableChildren: any = {
                     id: `editor-${doc.header.id}`,
                     title: `${(doc.state as any)?.global?.code ? (doc.state as any)?.global?.code + " - " : ""}${(doc.state as any)?.global?.title || doc.header.name}`,
-                    children: wstrChildDocs.map((childDoc) => ({
-                      id: `editor-${childDoc.header.id}`,
-                      title: `${(childDoc.state as any)?.global?.code ? (childDoc.state as any)?.global?.code + " - " : ""}${(childDoc.state as any)?.global?.title || childDoc.header.name}`,
-                    })),
+                    children: wstrChildDocs.map((childDoc) => {
+                      let dynamicTitle =
+                        childDoc?.header.documentType === "powerhouse/rfp"
+                          ? `Request For Proposal`
+                          : `${(childDoc.state as any)?.global?.code ? (childDoc.state as any)?.global?.code + " - " : ""}${(childDoc.state as any)?.global?.title || childDoc.header.name}`;
+
+                      return {
+                        id: `editor-${childDoc.header.id}`,
+                        title: dynamicTitle,
+                      };
+                    }),
                   };
 
+                  wstrChildDocs.push(sowDoc as any);
+                  wstrChildDocs.push(pmtDoc as any);
+
+                  // if sowDoc or pmtDoc is included in the wstrChildDocs, then add a child with the title "Initial Proposal"
+                  if (
+                    wstrChildDocs.includes(sowDoc as any) ||
+                    wstrChildDocs.includes(pmtDoc as any)
+                  ) {
+                    returnableChildren.children.push({
+                      id: "initial-proposal",
+                      title: "Initial Proposal",
+                      children: wstrChildDocs
+                        .filter(
+                          (childDoc) =>
+                            childDoc &&
+                            childDoc.header &&
+                            (childDoc.header.documentType ===
+                              "powerhouse/scopeofwork" ||
+                              childDoc.header.documentType === "payment-terms")
+                        )
+                        .map((childDoc) => {
+                          let dynamicTitle =
+                            childDoc.header.documentType ===
+                            "powerhouse/scopeofwork"
+                              ? "Scope of Work"
+                              : childDoc.header.documentType === "payment-terms"
+                                ? "Payment Terms"
+                                : null;
+                          return {
+                            id: `editor-${childDoc.header.id}`,
+                            title: dynamicTitle,
+                          };
+                        }),
+                    });
+                  }
+
                   if (alternativeProposals.length > 0) {
-                    const altSowDoc = allDocuments?.find(
-                      (doc) => doc.header.id === alternativeProposals[0].sow
-                    );
-                    const altPaymentTermsDoc = allDocuments?.find(
-                      (doc) =>
-                        doc.header.id === alternativeProposals[0].paymentTerms
-                    );
-
-                    const altChildDocs = [altSowDoc, altPaymentTermsDoc].filter(
-                      (doc) => doc !== undefined && doc !== null
-                    );
-
                     returnableChildren.children.push({
                       id: "alternative-proposals",
-                      title: "Alternative Proposals",
-                      children: altChildDocs.map((childDoc) => ({
-                        id: `editor-${childDoc.header.id}`,
-                        title: `${(childDoc.state as any)?.global?.code ? (childDoc.state as any)?.global?.code + " - " : ""}${(childDoc.state as any)?.global?.title || childDoc.header.name}`,
-                      })),
+                      title: `Alternative Proposals (${alternativeProposals.length})`,
+                      children: alternativeProposals.map((proposal: any) => {
+                        // Find documents for this specific proposal
+                        const proposalSowDoc = allDocuments?.find(
+                          (doc) => doc.header.id === proposal.sow
+                        );
+                        const proposalPaymentTermsDoc = allDocuments?.find(
+                          (doc) => doc.header.id === proposal.paymentTerms
+                        );
+
+                        // Filter to only include documents that exist
+                        const proposalChildDocs = [proposalSowDoc, proposalPaymentTermsDoc].filter(
+                          (doc) => doc !== undefined && doc !== null
+                        );
+
+                        return {
+                          id: `alternative-proposal-${proposal.id}`,
+                          title: `${proposal.author.name}`,
+                          children: proposalChildDocs.map((childDoc) => {
+                            let dynamicTitle =
+                              childDoc.header.documentType === "powerhouse/scopeofwork"
+                                ? "Scope of Work"
+                                : childDoc.header.documentType === "payment-terms"
+                                  ? "Payment Terms"
+                                  : null;
+                            return {
+                              id: `editor-${childDoc.header.id}`,
+                              title: dynamicTitle,
+                            };
+                          }),
+                        };
+                      }),
                     });
                   }
 

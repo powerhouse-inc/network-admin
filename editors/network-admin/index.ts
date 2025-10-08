@@ -15,6 +15,7 @@ export const module: DriveEditorModule = {
       "powerhouse/workstream",
       "powerhouse/scopeofwork",
       "payment-terms",
+      "powerhouse/rfp",
     ],
     dragAndDrop: {
       enabled: true, // Enable drag-and-drop functionality
