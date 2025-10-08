@@ -23,7 +23,10 @@ import { type Node } from "document-drive";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { EditorContainer } from "./EditorContainer.js";
 import { editWorkstream } from "../../../document-models/workstream/gen/creators.js";
-import { type WorkstreamStatus } from "../../../document-models/workstream/gen/types.js";
+import { PaymentIcon } from "./icons/PaymentIcon.js";
+import { RfpIcon } from "./icons/RfpIcon.js";
+import { SowIcon } from "./icons/SowIcon.js";
+import { WorkstreamIcon } from "./icons/WorkstreamIcon.js";
 
 const WorkstreamStatusEnums = [
   "RFP_DRAFT",
@@ -196,6 +199,7 @@ export function DriveExplorer(props: any) {
                   const returnableChildren: any = {
                     id: `editor-${doc.header.id}`,
                     title: `${(doc.state as any)?.global?.code ? (doc.state as any)?.global?.code + " - " : ""}${(doc.state as any)?.global?.title || doc.header.name}`,
+                    icon: <WorkstreamIcon className="w-5 h-5" />,
                     children: wstrChildDocs.map((childDoc) => {
                       let dynamicTitle =
                         childDoc?.header.documentType === "powerhouse/rfp"
@@ -205,6 +209,7 @@ export function DriveExplorer(props: any) {
                       return {
                         id: `editor-${childDoc.header.id}`,
                         title: dynamicTitle,
+                        icon: <RfpIcon className="w-5 h-5" />,
                       };
                     }),
                   };
@@ -240,6 +245,13 @@ export function DriveExplorer(props: any) {
                           return {
                             id: `editor-${childDoc.header.id}`,
                             title: dynamicTitle,
+                            icon:
+                              childDoc.header.documentType ===
+                              "powerhouse/scopeofwork" ? (
+                                <SowIcon className="w-5 h-5" />
+                              ) : (
+                                <PaymentIcon className="w-5 h-5" />
+                              ),
                           };
                         }),
                     });
@@ -259,23 +271,33 @@ export function DriveExplorer(props: any) {
                         );
 
                         // Filter to only include documents that exist
-                        const proposalChildDocs = [proposalSowDoc, proposalPaymentTermsDoc].filter(
-                          (doc) => doc !== undefined && doc !== null
-                        );
+                        const proposalChildDocs = [
+                          proposalSowDoc,
+                          proposalPaymentTermsDoc,
+                        ].filter((doc) => doc !== undefined && doc !== null);
 
                         return {
                           id: `alternative-proposal-${proposal.id}`,
                           title: `${proposal.author.name}`,
                           children: proposalChildDocs.map((childDoc) => {
                             let dynamicTitle =
-                              childDoc.header.documentType === "powerhouse/scopeofwork"
+                              childDoc.header.documentType ===
+                              "powerhouse/scopeofwork"
                                 ? "Scope of Work"
-                                : childDoc.header.documentType === "payment-terms"
+                                : childDoc.header.documentType ===
+                                    "payment-terms"
                                   ? "Payment Terms"
                                   : null;
                             return {
                               id: `editor-${childDoc.header.id}`,
                               title: dynamicTitle,
+                              icon:
+                                childDoc.header.documentType ===
+                                "powerhouse/scopeofwork" ? (
+                                  <SowIcon className="w-5 h-5" />
+                                ) : (
+                                  <PaymentIcon className="w-5 h-5" />
+                                ),
                             };
                           }),
                         };
@@ -298,7 +320,7 @@ export function DriveExplorer(props: any) {
         // Add network profile documents
         ...networkProfileDocs.map((doc) => ({
           id: `editor-${doc.header.id}`,
-          title: doc.header.name,
+          title: (doc.state as any)?.global?.name || doc.header.name,
         })),
       ],
     };
@@ -411,8 +433,8 @@ export function DriveExplorer(props: any) {
                       setOpenModal(true);
                     }}
                   >
-                    <span>
-                      {/* {/* {/* <span className="text-sm"> */}
+                    <span className="flex items-center gap-2">
+                      <WorkstreamIcon className="w-7 h-7 text-white" />
                       Create Workstream Document
                     </span>
                   </Button>
@@ -429,7 +451,9 @@ export function DriveExplorer(props: any) {
                     }}
                     disabled={isNetworkProfileCreated}
                   >
-                    <span>Create Network Profile Document</span>
+                    <span className="flex items-center gap-2">
+                      Create Network Profile Document
+                    </span>
                   </Button>
                 </div>
               </div>
