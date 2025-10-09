@@ -1,5 +1,5 @@
 import { type DriveEditorModule } from "@powerhousedao/reactor-browser";
-import Editor from "./editor.js";
+import { Editor } from "./editor.js";
 
 export const module: DriveEditorModule = {
   Component: Editor,
@@ -22,5 +22,3 @@ export const module: DriveEditorModule = {
     },
   },
 };
-
-export default module;

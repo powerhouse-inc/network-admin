@@ -13,6 +13,7 @@ import {
 } from "../../document-models/network-profile/index.js";
 import { useDocumentById } from "@powerhousedao/reactor-browser";
 import { useCallback, useState, useEffect } from "react";
+import { useNetworkProfileDocument, useSelectedNetworkProfileDocument } from "editors/hooks/useNetworkProfileDocument.js";
 
 export type IProps = EditorProps;
 
@@ -220,14 +221,10 @@ function ImageUrlInput({
   );
 }
 
-export default function Editor(props: any) {
+export default function Editor() {
   // Getting dispatch from selected document
-  const [doc, dispatch] = useDocumentById(props.documentId) as [
-    NetworkProfileDocument,
-    (actionOrActions: Action | Action[] | undefined) => void,
-  ];
-
-  const state = doc?.state.global;
+  const [doc, dispatch] = useSelectedNetworkProfileDocument();
+  const state = doc.state.global;
 
   // Handle field changes
   const handleFieldChange = useCallback(
