@@ -15,13 +15,11 @@ import {
   useSelectedDocument,
   useSelectedDriveDocuments,
   showDeleteNodeModal,
-  useSelectedDriveId,
   useNodeActions,
 } from "@powerhousedao/reactor-browser";
 import { type DocumentModelModule } from "document-model";
 import { type Node } from "document-drive";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
-import { EditorContainer } from "./EditorContainer.js";
 import { editWorkstream } from "../../../document-models/workstream/gen/creators.js";
 import { PaymentIcon } from "./icons/PaymentIcon.js";
 import { RfpIcon } from "./icons/RfpIcon.js";
@@ -49,7 +47,7 @@ const WorkstreamStatusEnums = [
  * Main drive explorer component with sidebar navigation and content area.
  * Layout: Left sidebar (folder tree) + Right content area (files/folders + document editor)
  */
-export function DriveExplorer(props: {children?: any}) {
+export function DriveExplorer(props: { children?: any }) {
   // === DOCUMENT EDITOR STATE ===
   const [activeSidebarNodeId, setActiveSidebarNodeId] =
     useState<string>("workstreams");
@@ -66,7 +64,6 @@ export function DriveExplorer(props: {children?: any}) {
   const [selectedDrive] = useSelectedDrive(); // Currently selected drive
   const selectedFolder = useSelectedFolder(); // Currently selected folder
   const allDocuments = useSelectedDriveDocuments();
-  const selectedDriveId = useSelectedDriveId();
 
   const { onRenameNode } = useNodeActions();
 
@@ -94,7 +91,6 @@ export function DriveExplorer(props: {children?: any}) {
     ) || false;
 
   // Sync global selected document with local activeDocumentId
-  // This makes setSelectedNode() trigger the EditorContainer to open
   useEffect(() => {
     if (globalSelectedDocument?.header?.id) {
       // Also update the sidebar node ID to match
@@ -109,14 +105,12 @@ export function DriveExplorer(props: {children?: any}) {
   // Convert network admin documents to SidebarNode format
   const sidebarNodes = useMemo((): SidebarNode[] => {
     // Group documents by type
-    const workstreamDocs =
-      (networkAdminDocuments?.filter(
-        (doc) => doc.header.documentType === "powerhouse/workstream"
-      ) ?? []) as  WorkstreamDocument[];
-    const networkProfileDocs =
-      (networkAdminDocuments?.filter(
-        (doc) => doc.header.documentType === "powerhouse/network-profile"
-      ) ?? []) as NetworkProfileDocument[];
+    const workstreamDocs = (networkAdminDocuments?.filter(
+      (doc) => doc.header.documentType === "powerhouse/workstream"
+    ) ?? []) as WorkstreamDocument[];
+    const networkProfileDocs = (networkAdminDocuments?.filter(
+      (doc) => doc.header.documentType === "powerhouse/network-profile"
+    ) ?? []) as NetworkProfileDocument[];
 
     const workstreamsNode: SidebarNode = {
       id: "workstreams",
@@ -133,75 +127,85 @@ export function DriveExplorer(props: {children?: any}) {
             title:
               statusTitle +
               (workstreamDocs.filter(
-                (doc) => (doc.state).global.status === status
+                (doc) => doc.state.global.status === status
               ).length > 0
                 ? ` (${workstreamDocs.filter((doc) => doc.state.global.status === status).length})`
                 : ""),
             children: workstreamDocs
-                .filter((doc) => doc.state.global.status === status)
-                .map((doc) => {
-                  let sow = null;
-                  let paymentTerms = null;
-                  let rfp = null;
-                  if (doc.state.global.initialProposal) {
-                    sow = doc.state.global.initialProposal.sow;
-                    paymentTerms = doc.state.global.initialProposal
-                      .paymentTerms;
-                  }
+              .filter((doc) => doc.state.global.status === status)
+              .map((doc) => {
+                let sow = null;
+                let paymentTerms = null;
+                let rfp = null;
+                if (doc.state.global.initialProposal) {
+                  sow = doc.state.global.initialProposal.sow;
+                  paymentTerms = doc.state.global.initialProposal.paymentTerms;
+                }
 
-                  if (doc.state.global.rfp) {
-                    rfp = doc.state.global.rfp.id;
-                  }
+                if (doc.state.global.rfp) {
+                  rfp = doc.state.global.rfp.id;
+                }
 
-                  const sowDoc = allDocuments?.find(
-                    (doc) => doc.header.id === sow
-                  ) as ScopeOfWorkDocument | undefined;
-                  const rfpDoc = allDocuments?.find(
-                    (doc) => doc.header.id === rfp
-                  ) as RequestForProposalsDocument | undefined;
-                  const pmtDoc = allDocuments?.find(
-                    (doc) => doc.header.id === paymentTerms
-                  ) as PaymentTermsDocument | undefined;
+                const sowDoc = allDocuments?.find(
+                  (doc) => doc.header.id === sow
+                ) as ScopeOfWorkDocument | undefined;
+                const rfpDoc = allDocuments?.find(
+                  (doc) => doc.header.id === rfp
+                ) as RequestForProposalsDocument | undefined;
+                const pmtDoc = allDocuments?.find(
+                  (doc) => doc.header.id === paymentTerms
+                ) as PaymentTermsDocument | undefined;
 
-                  // get alternative proposals
-                  const alternativeProposals = doc.state.global
-                      .alternativeProposals;
+                // get alternative proposals
+                const alternativeProposals =
+                  doc.state.global.alternativeProposals;
 
-                  const returnableChildren: SidebarNode = {
-                    id: `editor-${doc.header.id}`,
-                    title: `${doc.state.global.code ? doc.state.global.code + " - " : ""}${doc.state.global.title || doc.header.name}`,
-                    icon: <WorkstreamIcon className="w-5 h-5" />,
-                    children: rfpDoc ? [{id: `editor-${rfpDoc.header.id}`,
-                        title: "Request For Proposal",
-                        icon: <RfpIcon className="w-5 h-5" />}]: []
-                  };
+                const returnableChildren: SidebarNode = {
+                  id: `editor-${doc.header.id}`,
+                  title: `${doc.state.global.code ? doc.state.global.code + " - " : ""}${doc.state.global.title || doc.header.name}`,
+                  icon: <WorkstreamIcon className="w-5 h-5" />,
+                  children: rfpDoc
+                    ? [
+                        {
+                          id: `editor-${rfpDoc.header.id}`,
+                          title: "Request For Proposal",
+                          icon: <RfpIcon className="w-5 h-5" />,
+                        },
+                      ]
+                    : [],
+                };
 
-                  // if sowDoc or pmtDoc is included in the wstrChildDocs, then add a child with the title "Initial Proposal"
-                   const children: SidebarNode[] = [];
-                    if (sowDoc) {
-                      children.push({
-                            id: `editor-${sowDoc.header.id}`,
-                            title: "Scope of Work",
-                            icon:<SowIcon className="w-5 h-5" />
-                          })
-                    }
-                    if (pmtDoc) {
-                       children.push({
-                            id: `editor-${pmtDoc.header.id}`,
-                            title: "Payment Terms",
-                            icon:<PaymentIcon className="w-5 h-5" />
-                          })
-                    }
-                  if (children.length) {
-                    returnableChildren.children = [...(returnableChildren.children ?? []), {
+                // if sowDoc or pmtDoc is included in the wstrChildDocs, then add a child with the title "Initial Proposal"
+                const children: SidebarNode[] = [];
+                if (sowDoc) {
+                  children.push({
+                    id: `editor-${sowDoc.header.id}`,
+                    title: "Scope of Work",
+                    icon: <SowIcon className="w-5 h-5" />,
+                  });
+                }
+                if (pmtDoc) {
+                  children.push({
+                    id: `editor-${pmtDoc.header.id}`,
+                    title: "Payment Terms",
+                    icon: <PaymentIcon className="w-5 h-5" />,
+                  });
+                }
+                if (children.length) {
+                  returnableChildren.children = [
+                    ...(returnableChildren.children ?? []),
+                    {
                       id: "initial-proposal",
                       title: "Initial Proposal",
-                      children: children
-                    }];
-                  }
+                      children: children,
+                    },
+                  ];
+                }
 
-                  if (alternativeProposals.length > 0) {
-                    returnableChildren.children = [...(returnableChildren.children ?? []), {
+                if (alternativeProposals.length > 0) {
+                  returnableChildren.children = [
+                    ...(returnableChildren.children ?? []),
+                    {
                       id: "alternative-proposals",
                       title: `Alternative Proposals (${alternativeProposals.length})`,
                       children: alternativeProposals.map((proposal) => {
@@ -245,11 +249,12 @@ export function DriveExplorer(props: {children?: any}) {
                           }),
                         };
                       }),
-                    }];
-                  }
+                    },
+                  ];
+                }
 
-                  return returnableChildren;
-                }),
+                return returnableChildren;
+              }),
           };
         }),
       ],
@@ -311,12 +316,7 @@ export function DriveExplorer(props: {children?: any}) {
         setSelectedNode(fileId);
       }
     },
-    [
-      allFolders,
-      fileChildren,
-      setSelectedNode,
-      sidebarNodes,
-    ]
+    [allFolders, fileChildren, setSelectedNode, sidebarNodes]
   );
 
   // === EVENT HANDLERS ===
@@ -587,9 +587,7 @@ export function DriveExplorer(props: {children?: any}) {
     <SidebarProvider nodes={sidebarNodes}>
       {/* === FULL VIEW MODE (for Scope of Work) === */}
       {isScopeOfWorkFullView && props.children ? (
-        <div className="h-full w-full">
-          {props.children}
-        </div>
+        <div className="h-full w-full">{props.children}</div>
       ) : (
         /* === NORMAL VIEW WITH SIDEBAR === */
         <div className="flex h-full">
@@ -614,7 +612,8 @@ export function DriveExplorer(props: {children?: any}) {
           {/* === MAIN CONTENT AREA === */}
           <div className="flex-1 overflow-y-auto">
             <div className="h-full">
-              {props.children || displayActiveNode(selectedFolder?.id || selectedRootNode)}
+              {props.children ||
+                displayActiveNode(selectedFolder?.id || selectedRootNode)}
             </div>
           </div>
 

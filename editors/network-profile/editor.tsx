@@ -1,4 +1,4 @@
-import type { Action, EditorProps } from "document-model";
+import type { EditorProps } from "document-model";
 import {
   TextInput,
   Textarea,
@@ -7,13 +7,11 @@ import {
 } from "@powerhousedao/document-engineering";
 import { toast, ToastContainer } from "@powerhousedao/design-system";
 import {
-  type NetworkProfileDocument,
   actions,
   type NetworkCategory,
 } from "../../document-models/network-profile/index.js";
-import { useDocumentById } from "@powerhousedao/reactor-browser";
 import { useCallback, useState, useEffect } from "react";
-import { useNetworkProfileDocument, useSelectedNetworkProfileDocument } from "editors/hooks/useNetworkProfileDocument.js";
+import { useSelectedNetworkProfileDocument } from "../hooks/useNetworkProfileDocument.js";
 
 export type IProps = EditorProps;
 

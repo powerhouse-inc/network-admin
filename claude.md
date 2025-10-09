@@ -501,7 +501,6 @@ export const module: DriveEditorModule = {
 - **Main Explorer** (`components/DriveExplorer.tsx`): Update sidebar title and empty state messages
 - **Document Creation** (`components/CreateDocument.tsx`): Customize document type filtering if needed
 - **Folder Tree** (`components/FolderTree.tsx`): Customize navigation behavior
-- **Editor Container** (`components/EditorContainer.tsx`): Customize toolbar actions
 
 ### Step 4: Update Powerhouse Manifest
 Add the drive explorer to the `apps` section in `powerhouse.manifest.json`:

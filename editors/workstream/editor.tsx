@@ -30,6 +30,7 @@ import {
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { useEffect, useMemo, useState } from "react";
+import { useSelectedWorkstreamDocument } from "../hooks/useWorkstreamDocument.js";
 
 export type IProps = EditorProps;
 
@@ -54,7 +55,7 @@ const statusStyles = {
 };
 
 export default function Editor(props: any) {
-  const [doc, dispatch] = useDocumentById(props.documentId) as [
+  const [doc, dispatch] = useSelectedWorkstreamDocument() as [
     WorkstreamDocument,
     (actionOrActions: Action | Action[] | undefined) => void,
   ];
@@ -730,26 +731,6 @@ export default function Editor(props: any) {
                 ]}
               />
             </div>
-            {rfpDocument ? (
-              <div className="flex items-center">
-                <span className="inline-flex items-center gap-2">
-                  <Icon
-                    className="hover:cursor-pointer hover:bg-gray-500"
-                    name="Moved"
-                    size={18}
-                    onClick={() => {
-                      setActiveDocumentId(rfpDocument?.header.id);
-                      setActiveSidebarNodeId(
-                        `editor-${rfpDocument?.header.id}`
-                      );
-                    }}
-                  />
-                  <span>RFP Editor</span>
-                </span>
-              </div>
-            ) : (
-              ""
-            )}
           </div>
           {!rfpDocument ? (
             <div className="mt-4">

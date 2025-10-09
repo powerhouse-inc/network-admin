@@ -18,12 +18,13 @@ import { CostMaterialsTab } from "./cost-materials-tab.js";
 import { RetainerTab } from "./retainer-tab.js";
 import { EscrowTab } from "./escrow-tab.js";
 import { EvaluationTab } from "./evaluation-tab.js";
+import { useSelectedPaymentTermsDocument } from "../hooks/usePaymentTermsDocument.js";
 
 export type IProps = EditorProps;
 
-export default function Editor(props: any) {
+export default function Editor() {
   // Getting dispatch from props or selected document
-  const [doc, dispatch] = useDocumentById(props.documentId) as [
+  const [doc, dispatch] = useSelectedPaymentTermsDocument() as [
     PaymentTermsDocument,
     (actionOrActions: Action | Action[] | undefined) => void,
   ];

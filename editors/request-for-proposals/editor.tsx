@@ -5,14 +5,13 @@ import {
   actions,
   type RfpStatusInput,
 } from "../../document-models/request-for-proposals/index.js";
-import { Button, toast } from "@powerhousedao/design-system";
-import { useDocumentById } from "@powerhousedao/reactor-browser";
 import {
   DatePicker,
   Select,
   TextInput,
 } from "@powerhousedao/document-engineering";
 import { MarkdownEditor } from "./markdown-editor.js";
+import { useSelectedRequestForProposalsDocument } from "../hooks/useRequestForProposalsDocument.js";
 
 export type IProps = EditorProps;
 
@@ -26,8 +25,8 @@ const statusOptions = [
   { label: "CLOSED", value: "CLOSED" },
 ];
 
-export default function Editor(props: any) {
-  const [doc, dispatch] = useDocumentById(props.documentId) as [
+export default function Editor() {
+  const [doc, dispatch] = useSelectedRequestForProposalsDocument() as [
     RequestForProposalsDocument,
     (actionOrActions: Action | Action[] | undefined) => void,
   ];
