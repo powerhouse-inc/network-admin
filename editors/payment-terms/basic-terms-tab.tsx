@@ -1,20 +1,26 @@
 import { useState, useCallback, useMemo } from "react";
 import { toast, Button } from "@powerhousedao/design-system";
 import { Select, TextInput } from "@powerhousedao/document-engineering";
-import type { 
-  PaymentTermsState, 
-  PaymentCurrency, 
+import type {
+  PaymentTermsState,
+  PaymentCurrency,
   PaymentModel,
-  PaymentTermsStatus
+  PaymentTermsStatus,
 } from "../../document-models/payment-terms/gen/types.js";
+import type { PaymentTermsAction } from "../../document-models/payment-terms/gen/actions.js";
+import { actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
 
 export interface BasicTermsTabProps {
   state: PaymentTermsState;
-  dispatch: (action: any) => void;
-  actions: any;
+  dispatch: (action: PaymentTermsAction) => void;
+  actions: typeof paymentTermsActions;
 }
 
-export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) {
+export function BasicTermsTab({
+  state,
+  dispatch,
+  actions,
+}: BasicTermsTabProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     proposer: state.proposer || "",
@@ -23,49 +29,60 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
     paymentModel: state.paymentModel || "MILESTONE",
     totalAmount: state.totalAmount?.value?.toString() || "",
     status: state.status || "DRAFT",
-    useEscrow: !!(state.escrowDetails && state.escrowDetails.releaseConditions)
+    useEscrow: !!(state.escrowDetails && state.escrowDetails.releaseConditions),
   });
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    
-    dispatch(actions.setBasicTerms({
-      proposer: formData.proposer,
-      payer: formData.payer,
-      currency: formData.currency,
-      paymentModel: formData.paymentModel,
-      totalAmount: formData.totalAmount ? {
-        value: parseFloat(formData.totalAmount),
-        unit: formData.currency
-      } : undefined
-    }));
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (formData.status !== state.status) {
-      dispatch(actions.updateStatus({ status: formData.status }));
-    }
+      dispatch(
+        actions.setBasicTerms({
+          proposer: formData.proposer,
+          payer: formData.payer,
+          currency: formData.currency,
+          paymentModel: formData.paymentModel,
+          totalAmount: formData.totalAmount
+            ? {
+                value: parseFloat(formData.totalAmount),
+                unit: formData.currency,
+              }
+            : undefined,
+        })
+      );
 
-    // Handle escrow toggle
-    if (formData.useEscrow && !state.escrowDetails) {
-      dispatch(actions.setEscrowDetails({
-        amountHeld: { value: 0, unit: formData.currency },
-        releaseConditions: "Upon project completion",
-        escrowProvider: "",
-        proofOfFundsDocumentId: ""
-      }));
-    } else if (!formData.useEscrow && state.escrowDetails) {
-      dispatch(actions.setEscrowDetails({
-        amountHeld: { value: 0, unit: formData.currency },
-        releaseConditions: "",
-        escrowProvider: "",
-        proofOfFundsDocumentId: ""
-      }));
-    }
-    
-    toast("Basic terms updated successfully", {
-      type: "success",
-    });
-    setIsEditing(false);
-  }, [formData, dispatch, actions, state.status, state.escrowDetails]);
+      if (formData.status !== state.status) {
+        dispatch(actions.updateStatus({ status: formData.status }));
+      }
+
+      // Handle escrow toggle
+      if (formData.useEscrow && !state.escrowDetails) {
+        dispatch(
+          actions.setEscrowDetails({
+            amountHeld: { value: 0, unit: formData.currency },
+            releaseConditions: "Upon project completion",
+            escrowProvider: "",
+            proofOfFundsDocumentId: "",
+          })
+        );
+      } else if (!formData.useEscrow && state.escrowDetails) {
+        dispatch(
+          actions.setEscrowDetails({
+            amountHeld: { value: 0, unit: formData.currency },
+            releaseConditions: "",
+            escrowProvider: "",
+            proofOfFundsDocumentId: "",
+          })
+        );
+      }
+
+      toast("Basic terms updated successfully", {
+        type: "success",
+      });
+      setIsEditing(false);
+    },
+    [formData, dispatch, actions, state.status, state.escrowDetails]
+  );
 
   const handleCancel = useCallback(() => {
     setFormData({
@@ -75,7 +92,9 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
       paymentModel: state.paymentModel || "MILESTONE",
       totalAmount: state.totalAmount?.value?.toString() || "",
       status: state.status || "DRAFT",
-      useEscrow: !!(state.escrowDetails && state.escrowDetails.releaseConditions)
+      useEscrow: !!(
+        state.escrowDetails && state.escrowDetails.releaseConditions
+      ),
     });
     setIsEditing(false);
   }, [state]);
@@ -97,37 +116,53 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
 
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Proposer</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Proposer
+            </label>
             <p className="text-lg">{state.proposer || "Not set"}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Payer</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Payer
+            </label>
             <p className="text-lg">{state.payer || "Not set"}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Currency
+            </label>
             <p className="text-lg">{state.currency}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Payment Model</label>
-            <p className="text-lg">{state.paymentModel.replace(/_/g, ' ')}</p>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Payment Model
+            </label>
+            <p className="text-lg">{state.paymentModel.replace(/_/g, " ")}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Total Amount
+            </label>
             <p className="text-lg">
-              {state.totalAmount 
-                ? `${state.totalAmount.value} ${state.totalAmount.unit}` 
+              {state.totalAmount
+                ? `${state.totalAmount.value} ${state.totalAmount.unit}`
                 : "Not set"}
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
             <p className="text-lg">{state.status}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Escrow</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Escrow
+            </label>
             <p className="text-lg">
-              {state.escrowDetails && state.escrowDetails.releaseConditions ? "Enabled" : "Disabled"}
+              {state.escrowDetails && state.escrowDetails.releaseConditions
+                ? "Enabled"
+                : "Disabled"}
             </p>
           </div>
         </div>
@@ -148,7 +183,9 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           </label>
           <TextInput
             value={formData.proposer}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, proposer: e.target.value})}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData({ ...formData, proposer: e.target.value })
+            }
             placeholder="Enter proposer name"
             required
           />
@@ -160,7 +197,9 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           </label>
           <TextInput
             value={formData.payer}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, payer: e.target.value})}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData({ ...formData, payer: e.target.value })
+            }
             placeholder="Enter payer name"
             required
           />
@@ -172,11 +211,13 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           </label>
           <Select
             value={formData.currency}
-            onChange={(value) => setFormData({...formData, currency: value as PaymentCurrency})}
+            onChange={(value) =>
+              setFormData({ ...formData, currency: value as PaymentCurrency })
+            }
             options={[
               { value: "USD", label: "USD" },
               { value: "EUR", label: "EUR" },
-              { value: "GBP", label: "GBP" }
+              { value: "GBP", label: "GBP" },
             ]}
             placeholder="Select currency"
             required
@@ -189,11 +230,13 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           </label>
           <Select
             value={formData.paymentModel}
-            onChange={(value) => setFormData({...formData, paymentModel: value as PaymentModel})}
+            onChange={(value) =>
+              setFormData({ ...formData, paymentModel: value as PaymentModel })
+            }
             options={[
               { value: "MILESTONE", label: "Milestone" },
               { value: "COST_AND_MATERIALS", label: "Cost & Materials" },
-              { value: "RETAINER", label: "Retainer" }
+              { value: "RETAINER", label: "Retainer" },
             ]}
             placeholder="Select payment model"
             required
@@ -206,7 +249,9 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           </label>
           <TextInput
             value={formData.totalAmount}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, totalAmount: e.target.value})}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData({ ...formData, totalAmount: e.target.value })
+            }
             placeholder="0.00"
             type="number"
             step="0.01"
@@ -219,12 +264,14 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
           </label>
           <Select
             value={formData.status}
-            onChange={(value) => setFormData({...formData, status: value as PaymentTermsStatus})}
+            onChange={(value) =>
+              setFormData({ ...formData, status: value as PaymentTermsStatus })
+            }
             options={[
               { value: "DRAFT", label: "Draft" },
               { value: "SUBMITTED", label: "Submitted" },
               { value: "ACCEPTED", label: "Accepted" },
-              { value: "CANCELLED", label: "Cancelled" }
+              { value: "CANCELLED", label: "Cancelled" },
             ]}
             placeholder="Select status"
             required
@@ -237,10 +284,15 @@ export function BasicTermsTab({ state, dispatch, actions }: BasicTermsTabProps) 
               type="checkbox"
               id="useEscrow"
               checked={formData.useEscrow}
-              onChange={(e) => setFormData({...formData, useEscrow: e.target.checked})}
+              onChange={(e) =>
+                setFormData({ ...formData, useEscrow: e.target.checked })
+              }
               className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label htmlFor="useEscrow" className="text-sm font-medium text-gray-700">
+            <label
+              htmlFor="useEscrow"
+              className="text-sm font-medium text-gray-700"
+            >
               Use Escrow
             </label>
           </div>

@@ -1,27 +1,41 @@
 import { useState, useCallback, useMemo } from "react";
-import { ObjectSetTable, TextInput, DatePicker } from "@powerhousedao/document-engineering";
-import type { ColumnDef, ColumnAlignment } from "@powerhousedao/document-engineering";
+import {
+  ObjectSetTable,
+  TextInput,
+  DatePicker,
+} from "@powerhousedao/document-engineering";
+import type {
+  ColumnDef,
+  ColumnAlignment,
+} from "@powerhousedao/document-engineering";
 import { Button, Icon, toast } from "@powerhousedao/design-system";
 import { generateId } from "document-model";
-import type { 
+import type {
   Milestone,
-  MilestonePayoutStatus
+  MilestonePayoutStatus,
+  PaymentTermsAction,
 } from "../../document-models/payment-terms/gen/types.js";
+import { actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
 
 export interface MilestonesTabProps {
   milestones: Milestone[];
-  dispatch: (action: any) => void;
-  actions: any;
+  dispatch: (action: PaymentTermsAction) => void;
+  actions: typeof paymentTermsActions;
   currency: string;
 }
 
-export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" }: MilestonesTabProps) {
+export function MilestonesTab({
+  milestones,
+  dispatch,
+  actions,
+  currency = "USD",
+}: MilestonesTabProps) {
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newMilestone, setNewMilestone] = useState({
     name: "",
     amount: "",
     expectedCompletionDate: "",
-    requiresApproval: true
+    requiresApproval: true,
   });
 
   const columns = useMemo<Array<ColumnDef<Milestone>>>(
@@ -33,10 +47,12 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
         align: "left" as ColumnAlignment,
         onSave: (newValue, context) => {
           if (newValue !== context.row.name) {
-            dispatch(actions.updateMilestone({ 
-              id: context.row.id, 
-              name: newValue as string 
-            }));
+            dispatch(
+              actions.updateMilestone({
+                id: context.row.id,
+                name: newValue as string,
+              })
+            );
             toast("Milestone name updated", {
               type: "success",
             });
@@ -50,7 +66,7 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
         title: `Amount (${currency})`,
         editable: true,
         align: "right" as ColumnAlignment,
-        renderCell: (value: any) => {
+        renderCell: (value: Milestone["amount"]) => {
           return value ? `${value.value} ${value.unit}` : "";
         },
         onSave: (newValue, context) => {
@@ -61,10 +77,12 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
             });
             return false;
           }
-          dispatch(actions.updateMilestone({ 
-            id: context.row.id, 
-            amount: { value: amount, unit: currency }
-          }));
+          dispatch(
+            actions.updateMilestone({
+              id: context.row.id,
+              amount: { value: amount, unit: currency },
+            })
+          );
           toast("Milestone amount updated", {
             type: "success",
           });
@@ -81,10 +99,12 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
         },
         onSave: (newValue, context) => {
           const dateValue = newValue as string;
-          dispatch(actions.updateMilestone({ 
-            id: context.row.id, 
-            expectedCompletionDate: dateValue || undefined
-          }));
+          dispatch(
+            actions.updateMilestone({
+              id: context.row.id,
+              expectedCompletionDate: dateValue || undefined,
+            })
+          );
           toast("Expected completion date updated", {
             type: "success",
           });
@@ -96,13 +116,15 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
         title: "Requires Approval",
         editable: true,
         align: "center" as ColumnAlignment,
-        renderCell: (value: boolean) => value ? "Yes" : "No",
+        renderCell: (value: boolean) => (value ? "Yes" : "No"),
         onSave: (newValue, context) => {
           const approved = newValue === "true" || newValue === true;
-          dispatch(actions.updateMilestone({ 
-            id: context.row.id, 
-            requiresApproval: approved 
-          }));
+          dispatch(
+            actions.updateMilestone({
+              id: context.row.id,
+              requiresApproval: approved,
+            })
+          );
           toast("Approval requirement updated", {
             type: "success",
           });
@@ -120,15 +142,17 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
             READY_FOR_REVIEW: "Ready for Review",
             APPROVED: "Approved",
             PAID: "Paid",
-            REJECTED: "Rejected"
+            REJECTED: "Rejected",
           };
           return statusMap[value] || value;
         },
         onSave: (newValue, context) => {
-          dispatch(actions.updateMilestone({ 
-            id: context.row.id, 
-            payoutStatus: newValue as MilestonePayoutStatus 
-          }));
+          dispatch(
+            actions.updateMilestoneStatus({
+              id: context.row.id,
+              payoutStatus: newValue as MilestonePayoutStatus,
+            })
+          );
           toast("Milestone status updated", {
             type: "success",
           });
@@ -154,55 +178,62 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
             <Icon name="Trash" size={16} />
           </Button>
         ),
-      }
+      },
     ],
     [actions, currency, dispatch]
   );
 
-  const handleAddMilestone = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!newMilestone.name.trim()) {
-      toast('Name is required', {
-        type: "error",
+  const handleAddMilestone = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (!newMilestone.name.trim()) {
+        toast("Name is required", {
+          type: "error",
+        });
+        return;
+      }
+      if (!newMilestone.amount || isNaN(parseFloat(newMilestone.amount))) {
+        toast("Valid amount is required", {
+          type: "error",
+        });
+        return;
+      }
+
+      const milestoneData: Milestone = {
+        id: generateId(),
+        name: newMilestone.name,
+        amount: {
+          value: parseFloat(newMilestone.amount),
+          unit: currency,
+        },
+        requiresApproval: newMilestone.requiresApproval,
+        expectedCompletionDate: null,
+        payoutStatus: "PENDING",
+      };
+
+      if (newMilestone.expectedCompletionDate) {
+        milestoneData.expectedCompletionDate = new Date(
+          newMilestone.expectedCompletionDate
+        ).toISOString();
+      }
+
+      dispatch(actions.addMilestone(milestoneData));
+      toast("Milestone added successfully", {
+        type: "success",
       });
-      return;
-    }
-    if (!newMilestone.amount || isNaN(parseFloat(newMilestone.amount))) {
-      toast('Valid amount is required', {
-        type: "error",
+
+      // Reset form and close edit section
+      setNewMilestone({
+        name: "",
+        amount: "",
+        expectedCompletionDate: "",
+        requiresApproval: true,
       });
-      return;
-    }
-    
-    const milestoneData: any = {
-      id: generateId(),
-      name: newMilestone.name,
-      amount: {
-        value: parseFloat(newMilestone.amount),
-        unit: currency
-      },
-      requiresApproval: newMilestone.requiresApproval
-    };
-
-    if (newMilestone.expectedCompletionDate) {
-      milestoneData.expectedCompletionDate = new Date(newMilestone.expectedCompletionDate).toISOString();
-    }
-
-    dispatch(actions.addMilestone(milestoneData));
-    toast("Milestone added successfully", {
-      type: "success",
-    });
-
-    // Reset form and close edit section
-    setNewMilestone({
-      name: "",
-      amount: "",
-      expectedCompletionDate: "",
-      requiresApproval: true
-    });
-    setIsAddingNew(false);
-  }, [newMilestone, dispatch, actions, currency]);
+      setIsAddingNew(false);
+    },
+    [newMilestone, dispatch, actions, currency]
+  );
 
   return (
     <div className="space-y-6">
@@ -226,13 +257,17 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
 
       {isAddingNew && (
         <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border dark:border-gray-600">
-          <h3 className="text-lg font-medium mb-4 dark:text-white">Add New Milestone</h3>
+          <h3 className="text-lg font-medium mb-4 dark:text-white">
+            Add New Milestone
+          </h3>
           <form onSubmit={handleAddMilestone} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <TextInput
                 label="Name *"
                 value={newMilestone.name}
-                onChange={(e) => setNewMilestone({...newMilestone, name: e.target.value})}
+                onChange={(e) =>
+                  setNewMilestone({ ...newMilestone, name: e.target.value })
+                }
                 className="w-full"
                 required
               />
@@ -241,39 +276,56 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
                 label={`Amount (${currency}) *`}
                 type="number"
                 value={newMilestone.amount}
-                onChange={(e) => setNewMilestone({...newMilestone, amount: e.target.value})}
+                onChange={(e) =>
+                  setNewMilestone({ ...newMilestone, amount: e.target.value })
+                }
                 className="w-full"
                 placeholder="0.00"
                 step="0.01"
                 required
               />
 
-                              <DatePicker
-                  value={newMilestone.expectedCompletionDate ? new Date(newMilestone.expectedCompletionDate) : undefined}
-                  onChange={(e) => {
-                    const date = e.target.value ? new Date(e.target.value) : null;
-                    setNewMilestone({...newMilestone, expectedCompletionDate: date?.toISOString() || ""});
-                  }}
-                  name="expected-completion-date"
-                  placeholder="Select expected completion date"
-                />
+              <DatePicker
+                value={
+                  newMilestone.expectedCompletionDate
+                    ? new Date(newMilestone.expectedCompletionDate)
+                    : undefined
+                }
+                onChange={(e) => {
+                  const date = e.target.value ? new Date(e.target.value) : null;
+                  setNewMilestone({
+                    ...newMilestone,
+                    expectedCompletionDate: date?.toISOString() || "",
+                  });
+                }}
+                name="expected-completion-date"
+                placeholder="Select expected completion date"
+              />
 
               <div className="flex items-center pt-6">
                 <input
                   type="checkbox"
                   id="requiresApproval"
                   checked={newMilestone.requiresApproval}
-                  onChange={(e) => setNewMilestone({...newMilestone, requiresApproval: e.target.checked})}
+                  onChange={(e) =>
+                    setNewMilestone({
+                      ...newMilestone,
+                      requiresApproval: e.target.checked,
+                    })
+                  }
                   className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="requiresApproval" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label
+                  htmlFor="requiresApproval"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
                   Requires Approval
                 </label>
               </div>
             </div>
 
             <div className="flex gap-3">
-              <Button 
+              <Button
                 type="submit"
                 color="light"
                 size="small"
@@ -281,15 +333,15 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
               >
                 Add Milestone
               </Button>
-              <Button 
-                type="button" 
+              <Button
+                type="button"
                 onClick={() => {
                   setIsAddingNew(false);
                   setNewMilestone({
                     name: "",
                     amount: "",
                     expectedCompletionDate: "",
-                    requiresApproval: true
+                    requiresApproval: true,
                   });
                 }}
                 color="light"
@@ -308,8 +360,8 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
           data={milestones}
           columns={columns}
           onAdd={() => setIsAddingNew(true)}
-          onDelete={(row) => {
-            dispatch(actions.deleteMilestone({ id: (row as any).id }));
+          onDelete={(row: Milestone[]) => {
+            dispatch(actions.deleteMilestone({ id: (row as unknown as Milestone).id }));
             toast("Milestone deleted", {
               type: "success",
             });
@@ -317,7 +369,11 @@ export function MilestonesTab({ milestones, dispatch, actions, currency = "USD" 
         />
       ) : (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-          <Icon name="Calendar" size={48} className="mx-auto mb-4 text-gray-400" />
+          <Icon
+            name="Calendar"
+            size={48}
+            className="mx-auto mb-4 text-gray-400"
+          />
           <p className="text-lg font-medium">No milestones defined yet</p>
           <p className="text-sm">Add your first milestone to get started</p>
         </div>

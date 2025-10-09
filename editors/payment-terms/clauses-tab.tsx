@@ -7,12 +7,14 @@ import type {
   BonusClause,
   PenaltyClause
 } from "../../document-models/payment-terms/gen/types.js";
+import type { PaymentTermsAction } from "../../document-models/payment-terms/gen/actions.js";
+import { actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
 
 export interface ClausesTabProps {
   bonusClauses: BonusClause[];
   penaltyClauses: PenaltyClause[];
-  dispatch: (action: any) => void;
-  actions: any;
+  dispatch: (action: PaymentTermsAction) => void;
+  actions: typeof paymentTermsActions;
   currency: string;
 }
 
@@ -48,7 +50,7 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
         title: `Bonus Amount (${currency})`,
         editable: true,
         align: "right" as ColumnAlignment,
-        renderCell: (value: any) => {
+        renderCell: (value: BonusClause["bonusAmount"]) => {
           return value ? `${value.value} ${value.unit}` : "";
         },
         onSave: (newValue, context) => {
@@ -113,7 +115,7 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
         title: `Deduction Amount (${currency})`,
         editable: true,
         align: "right" as ColumnAlignment,
-        renderCell: (value: any) => {
+        renderCell: (value: PenaltyClause["deductionAmount"]) => {
           return value ? `${value.value} ${value.unit}` : "";
         },
         onSave: (newValue, context) => {
@@ -323,8 +325,8 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
             data={bonusClauses}
             columns={bonusColumns}
             onAdd={() => setIsAddingNew(true)}
-            onDelete={(row) => {
-              dispatch(actions.deleteBonusClause({ id: (row as any).id }));
+            onDelete={(row: BonusClause[]) => {
+              dispatch(actions.deleteBonusClause({ id: (row as unknown as BonusClause).id }));
               toast("Bonus clause deleted", {
               type: "success",
             });
@@ -335,8 +337,8 @@ export function ClausesTab({ bonusClauses, penaltyClauses, dispatch, actions, cu
             data={penaltyClauses}
             columns={penaltyColumns}
             onAdd={() => setIsAddingNew(true)}
-            onDelete={(row) => {
-              dispatch(actions.deletePenaltyClause({ id: (row as any).id }));
+            onDelete={(row: PenaltyClause[]) => {
+              dispatch(actions.deletePenaltyClause({ id: (row as unknown as PenaltyClause).id }));
               toast("Penalty clause deleted", {
               type: "success",
             });

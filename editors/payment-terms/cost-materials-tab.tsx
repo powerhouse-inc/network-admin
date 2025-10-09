@@ -1,54 +1,69 @@
 import { useState, useCallback } from "react";
 import { TextInput, Select } from "@powerhousedao/document-engineering";
 import { Button, toast } from "@powerhousedao/design-system";
-import type { 
-  PaymentTermsState, 
-  BillingFrequency 
+import type {
+  PaymentTermsState,
+  BillingFrequency,
 } from "../../document-models/payment-terms/gen/schema/types.js";
+import type { PaymentTermsAction } from "../../document-models/payment-terms/gen/actions.js";
+import { actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
 
 export interface CostMaterialsTabProps {
   state: PaymentTermsState;
-  dispatch: (action: any) => void;
-  actions: any;
+  dispatch: (action: PaymentTermsAction) => void;
+  actions: typeof paymentTermsActions;
 }
 
-export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabProps) {
+export function CostMaterialsTab({
+  state,
+  dispatch,
+  actions,
+}: CostMaterialsTabProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     hourlyRate: state.costAndMaterials?.hourlyRate?.value?.toString() || "",
     variableCap: state.costAndMaterials?.variableCap?.value?.toString() || "",
     billingFrequency: state.costAndMaterials?.billingFrequency || "MONTHLY",
-    timesheetRequired: state.costAndMaterials?.timesheetRequired || false
+    timesheetRequired: state.costAndMaterials?.timesheetRequired || false,
   });
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    
-    dispatch(actions.setCostAndMaterials({
-      hourlyRate: formData.hourlyRate ? {
-        value: parseFloat(formData.hourlyRate),
-        unit: state.currency
-      } : undefined,
-      variableCap: formData.variableCap ? {
-        value: parseFloat(formData.variableCap),
-        unit: state.currency
-      } : undefined,
-      billingFrequency: formData.billingFrequency,
-      timesheetRequired: formData.timesheetRequired
-    }));
-    
-    toast("Cost & Materials configuration saved", {
-      type: "success",
-    });
-    setIsEditing(false);
-  }, [formData, dispatch, actions, state.currency]);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+
+      dispatch(
+        actions.setCostAndMaterials({
+          hourlyRate: formData.hourlyRate
+            ? {
+                value: parseFloat(formData.hourlyRate),
+                unit: state.currency,
+              }
+            : undefined,
+          variableCap: formData.variableCap
+            ? {
+                value: parseFloat(formData.variableCap),
+                unit: state.currency,
+              }
+            : undefined,
+          billingFrequency: formData.billingFrequency,
+          timesheetRequired: formData.timesheetRequired,
+        })
+      );
+
+      toast("Cost & Materials configuration saved", {
+        type: "success",
+      });
+      setIsEditing(false);
+    },
+    [formData, dispatch, actions, state.currency]
+  );
 
   const handleCancel = useCallback(() => {
     setFormData({
       hourlyRate: state.costAndMaterials?.hourlyRate?.value?.toString() || "",
       variableCap: state.costAndMaterials?.variableCap?.value?.toString() || "",
       billingFrequency: state.costAndMaterials?.billingFrequency || "MONTHLY",
-      timesheetRequired: state.costAndMaterials?.timesheetRequired || false
+      timesheetRequired: state.costAndMaterials?.timesheetRequired || false,
     });
     setIsEditing(false);
   }, [state.costAndMaterials]);
@@ -57,48 +72,66 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold dark:text-white">Cost & Materials Configuration</h2>
+          <h2 className="text-xl font-semibold dark:text-white">
+            Cost & Materials Configuration
+          </h2>
           <Button
             onClick={() => setIsEditing(true)}
             color="light"
             size="small"
             className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
-            {state.costAndMaterials ? "Edit Configuration" : "Configure Cost & Materials"}
+            {state.costAndMaterials
+              ? "Edit Configuration"
+              : "Configure Cost & Materials"}
           </Button>
         </div>
 
         {state.costAndMaterials ? (
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hourly Rate</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Hourly Rate
+              </label>
               <p className="text-lg dark:text-white">
-                {state.costAndMaterials.hourlyRate 
-                  ? `${state.costAndMaterials.hourlyRate.value} ${state.costAndMaterials.hourlyRate.unit}` 
+                {state.costAndMaterials.hourlyRate
+                  ? `${state.costAndMaterials.hourlyRate.value} ${state.costAndMaterials.hourlyRate.unit}`
                   : "Not set"}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Variable Cap</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Variable Cap
+              </label>
               <p className="text-lg dark:text-white">
-                {state.costAndMaterials.variableCap 
-                  ? `${state.costAndMaterials.variableCap.value} ${state.costAndMaterials.variableCap.unit}` 
+                {state.costAndMaterials.variableCap
+                  ? `${state.costAndMaterials.variableCap.value} ${state.costAndMaterials.variableCap.unit}`
                   : "Not set"}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Billing Frequency</label>
-              <p className="text-lg dark:text-white">{state.costAndMaterials.billingFrequency}</p>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Billing Frequency
+              </label>
+              <p className="text-lg dark:text-white">
+                {state.costAndMaterials.billingFrequency}
+              </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Timesheet Required</label>
-              <p className="text-lg dark:text-white">{state.costAndMaterials.timesheetRequired ? "Yes" : "No"}</p>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Timesheet Required
+              </label>
+              <p className="text-lg dark:text-white">
+                {state.costAndMaterials.timesheetRequired ? "Yes" : "No"}
+              </p>
             </div>
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <p>No cost & materials configuration set up yet.</p>
-            <p className="text-sm">Click "Configure Cost & Materials" to get started.</p>
+            <p className="text-sm">
+              Click "Configure Cost & Materials" to get started.
+            </p>
           </div>
         )}
       </div>
@@ -108,7 +141,9 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold dark:text-white">Configure Cost & Materials</h2>
+        <h2 className="text-xl font-semibold dark:text-white">
+          Configure Cost & Materials
+        </h2>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
@@ -118,7 +153,9 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
           </label>
           <TextInput
             value={formData.hourlyRate}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, hourlyRate: e.target.value})}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData({ ...formData, hourlyRate: e.target.value })
+            }
             placeholder="0.00"
             type="number"
             step="0.01"
@@ -131,7 +168,9 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
           </label>
           <TextInput
             value={formData.variableCap}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, variableCap: e.target.value})}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData({ ...formData, variableCap: e.target.value })
+            }
             placeholder="0.00"
             type="number"
             step="0.01"
@@ -144,11 +183,16 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
           </label>
           <Select
             value={formData.billingFrequency}
-            onChange={(value) => setFormData({...formData, billingFrequency: value as BillingFrequency})}
+            onChange={(value) =>
+              setFormData({
+                ...formData,
+                billingFrequency: value as BillingFrequency,
+              })
+            }
             options={[
               { value: "WEEKLY", label: "Weekly" },
               { value: "BIWEEKLY", label: "Biweekly" },
-              { value: "MONTHLY", label: "Monthly" }
+              { value: "MONTHLY", label: "Monthly" },
             ]}
             placeholder="Select billing frequency"
             required
@@ -160,10 +204,15 @@ export function CostMaterialsTab({ state, dispatch, actions }: CostMaterialsTabP
             type="checkbox"
             id="timesheetRequired"
             checked={formData.timesheetRequired}
-            onChange={(e) => setFormData({...formData, timesheetRequired: e.target.checked})}
+            onChange={(e) =>
+              setFormData({ ...formData, timesheetRequired: e.target.checked })
+            }
             className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
-          <label htmlFor="timesheetRequired" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="timesheetRequired"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Timesheet Required
           </label>
         </div>

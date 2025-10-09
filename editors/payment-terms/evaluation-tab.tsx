@@ -5,11 +5,13 @@ import type {
   PaymentTermsState, 
   EvaluationFrequency 
 } from "../../document-models/payment-terms/gen/schema/types.js";
+import type { PaymentTermsAction } from "../../document-models/payment-terms/gen/actions.js";
+import { actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
 
 export interface EvaluationTabProps {
   state: PaymentTermsState;
-  dispatch: (action: any) => void;
-  actions: any;
+  dispatch: (action: PaymentTermsAction) => void;
+  actions: typeof paymentTermsActions;
 }
 
 export function EvaluationTab({ state, dispatch, actions }: EvaluationTabProps) {

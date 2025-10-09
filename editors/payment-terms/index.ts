@@ -1,6 +1,5 @@
 import type { EditorModule } from "document-model";
 import Editor from "./editor.js";
-import type { PaymentTermsDocument } from "../../document-models/payment-terms/index.js";
 
 export const module: EditorModule = {
   Component: Editor,

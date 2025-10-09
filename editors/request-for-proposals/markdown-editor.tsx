@@ -6,7 +6,7 @@ import { useLocalStorage } from "usehooks-ts";
 // Custom preview renderer to make links open in new tabs and ensure proper list rendering
 const previewOptions = {
   components: {
-    a: ({ ...props }: { node: any; [key: string]: any }) => (
+    a: ({ ...props }: { node: unknown; [key: string]: unknown }) => (
       <a {...props} target="_blank" rel="noopener noreferrer" />
     ),
   },

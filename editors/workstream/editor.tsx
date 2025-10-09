@@ -1,10 +1,14 @@
-import type { Action, EditorProps, PHDocument } from "document-model";
+import type {
+  Action,
+  EditorProps,
+  PHDocument,
+  PHDocumentState,
+} from "document-model";
 import { Button, toast, ToastContainer } from "@powerhousedao/design-system";
 import {
   TextInput,
   Select,
   OIDInput,
-  Icon,
   ObjectSetTable,
   ColumnDef,
   ColumnAlignment,
@@ -21,6 +25,7 @@ import {
   actions as rfpActions,
 } from "../../document-models/request-for-proposals/index.js";
 import { ScopeOfWork } from "@powerhousedao/project-management/document-models";
+import { ScopeOfWorkState } from "@powerhousedao/project-management/document-models/scope-of-work";
 import { generateId } from "document-model";
 import {
   useDocumentById,
@@ -31,7 +36,8 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { useEffect, useMemo, useState } from "react";
 import { useSelectedWorkstreamDocument } from "../hooks/useWorkstreamDocument.js";
-
+import type { WorkstreamState } from "../../document-models/workstream/gen/schema/types.js";
+import type { Proposal } from "../../document-models/workstream/gen/schema/types.js";
 export type IProps = EditorProps;
 
 // Status options for the dropdown
@@ -54,20 +60,18 @@ const statusStyles = {
   REJECTED: "bg-[#ffaea8] text-[#de3333] rounded px-2 py-1 font-semibold",
 };
 
-export default function Editor(props: any) {
+export default function Editor() {
   const [doc, dispatch] = useSelectedWorkstreamDocument() as [
     WorkstreamDocument,
     (actionOrActions: Action | Action[] | undefined) => void,
   ];
 
   // Try to get dispatch from context or props
-  const [state, setState] = useState(doc.state.global as any);
+  const [state, setState] = useState(doc.state.global as WorkstreamState);
 
   useEffect(() => {
-    setState(doc.state.global as any);
+    setState(doc.state.global as WorkstreamState);
   }, [doc.state.global]);
-  const setActiveDocumentId = props.setActiveDocumentId;
-  const setActiveSidebarNodeId = props.setActiveSidebarNodeId;
 
   const [selectedDrive] = useSelectedDrive();
 
@@ -222,12 +226,19 @@ export default function Editor(props: any) {
       rfpDocumentNode &&
       rfpDocumentNode.header.id &&
       rfpDocumentNode.header.id !== "" &&
-      (rfpDocumentDataState?.state as any)?.global
+      (
+        rfpDocumentDataState?.state as unknown as PHDocumentState & {
+          global: RequestForProposalsState;
+        }
+      )?.global
     ) {
       const newRfpDocument = {
         ...rfpDocumentNode,
-        document: (rfpDocumentDataState?.state as any)
-          .global as RequestForProposalsState,
+        document: (
+          rfpDocumentDataState?.state as unknown as PHDocumentState & {
+            global: RequestForProposalsState;
+          }
+        ).global,
       };
 
       // Only update if the ID changed or if we don't have a document yet
@@ -274,14 +285,20 @@ export default function Editor(props: any) {
         (!userInput ||
           node.header.name.toLowerCase().includes(userInput.toLowerCase()) ||
           node.header.id.toLowerCase().includes(userInput.toLowerCase()) ||
-          ((node.state as any)?.global?.title
+          ((
+            node.state as unknown as PHDocumentState & {
+              global: ScopeOfWorkState;
+            }
+          )?.global?.title
             ?.toLowerCase()
             .includes(userInput.toLowerCase()) ??
             false))
     );
     return results?.map((doc) => ({
       value: doc.header.id,
-      title: (doc.state as any)?.global?.title || doc.header.name,
+      title:
+        (doc.state as unknown as PHDocumentState & { global: ScopeOfWorkState })
+          ?.global?.title || doc.header.name,
       path: "",
     }));
   };
@@ -296,7 +313,7 @@ export default function Editor(props: any) {
     );
     return results?.map((doc) => ({
       value: doc.header.id,
-      title: (doc.state as any)?.global?.title || doc.header.name,
+      title: doc.header.name,
       path: "",
     }));
   };
@@ -374,7 +391,7 @@ export default function Editor(props: any) {
   };
 
   const alternativeProposalsData = useMemo(() => {
-    return state.alternativeProposals.flatMap((p: any) => [
+    return state.alternativeProposals.flatMap((p) => [
       {
         ...p,
         authorName: p.author.name,
@@ -384,19 +401,19 @@ export default function Editor(props: any) {
     ]);
   }, [state.alternativeProposals]);
 
-  const alternativeProposalsColumns = useMemo<Array<ColumnDef<any>>>(
+  const alternativeProposalsColumns = useMemo<Array<ColumnDef<Proposal>>>(
     () => [
       {
         field: "authorName",
         title: "Author",
         editable: true,
-        onSave: (newValue: any, context: any) => {
-          if (newValue !== context.row.title) {
+        onSave: (newValue, context) => {
+          if (newValue !== context.row.author.name) {
             dispatch(
               actions.editAlternativeProposal({
                 id: context.row.id,
                 proposalAuthor: {
-                  id: context.row.authorId,
+                  id: context.row.author.id,
                   name: newValue as string,
                 },
               })
@@ -405,7 +422,7 @@ export default function Editor(props: any) {
           }
           return false;
         },
-        renderCell: (value: any, context: any) => {
+        renderCell: (value: Proposal["author"]["name"]) => {
           if (value === undefined) {
             return (
               <div className="font-light italic text-left text-gray-500 text-xs">
@@ -422,8 +439,8 @@ export default function Editor(props: any) {
         type: "oid",
         editable: true,
         align: "center" as ColumnAlignment,
-        onSave: (newValue: any, context: any) => {
-          if (newValue !== context.row.title) {
+        onSave: (newValue, context) => {
+          if (newValue !== context.row.sow) {
             dispatch(
               actions.editAlternativeProposal({
                 id: context.row.id as string,
@@ -441,8 +458,8 @@ export default function Editor(props: any) {
         type: "oid",
         editable: true,
         align: "center" as ColumnAlignment,
-        onSave: (newValue: any, context: any) => {
-          if (newValue !== context.row.title) {
+        onSave: (newValue, context) => {
+          if (newValue !== context.row.paymentTerms) {
             dispatch(
               actions.editAlternativeProposal({
                 id: context.row.id as string,
@@ -460,8 +477,8 @@ export default function Editor(props: any) {
         editable: true,
         align: "center" as ColumnAlignment,
         type: "enum",
-        valueGetter: (row: any) => row.status,
-        onSave: (newValue: any, context: any) => {
+        valueGetter: (row: Proposal) => row.status,
+        onSave: (newValue, context) => {
           if (newValue !== context.row.status) {
             dispatch(
               actions.editAlternativeProposal({
@@ -482,7 +499,7 @@ export default function Editor(props: any) {
             { value: "REJECTED", label: "Rejected" },
           ],
         }),
-        renderCell: (value: any) => {
+        renderCell: (value: Proposal["status"]) => {
           if (!value) return null;
           return (
             <div
@@ -812,10 +829,10 @@ export default function Editor(props: any) {
                       ]}
                       value={state.initialProposal.status || "DRAFT"}
                       onChange={(value) => {
-                        if (value !== state.initialProposal.status) {
+                        if (value !== state.initialProposal?.status) {
                           dispatch(
                             actions.editInitialProposal({
-                              id: state.initialProposal.id,
+                              id: state.initialProposal?.id || "",
                               status: value as ProposalStatusInput,
                             })
                           );
@@ -889,8 +906,12 @@ export default function Editor(props: any) {
                               {
                                 value: sowDocumentNode.header.id,
                                 title:
-                                  (sowDocumentNode.state as any)?.global
-                                    ?.title || sowDocumentNode.header.name,
+                                  (
+                                    sowDocumentNode.state as unknown as PHDocumentState & {
+                                      global: ScopeOfWorkState;
+                                    }
+                                  )?.global?.title ||
+                                  sowDocumentNode.header.name,
                                 path: {
                                   text: sowDocumentNode.header.name,
                                   url: sowDocumentNode.header.id,
@@ -991,10 +1012,7 @@ export default function Editor(props: any) {
                           ? [
                               {
                                 value: paymentTermsDocumentNode.header.id,
-                                title:
-                                  (paymentTermsDocumentNode.state as any)
-                                    ?.global?.title ||
-                                  paymentTermsDocumentNode.header.name,
+                                title: paymentTermsDocumentNode.header.name,
                                 path: {
                                   text: paymentTermsDocumentNode.header.name,
                                   url: paymentTermsDocumentNode.header.id,
@@ -1036,9 +1054,9 @@ export default function Editor(props: any) {
                     columns={alternativeProposalsColumns}
                     data={alternativeProposalsData}
                     allowRowSelection={true}
-                    onDelete={(data: any) => {
+                    onDelete={(data: Proposal[]) => {
                       if (data.length > 0) {
-                        data.forEach((d: any) => {
+                        data.forEach((d: Proposal) => {
                           dispatch(
                             actions.removeAlternativeProposal({
                               id: d.id,

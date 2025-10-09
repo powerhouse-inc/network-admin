@@ -63,8 +63,8 @@ export default function Editor() {
 
   const totalMilestones = state.milestoneSchedule?.length || 0;
   const completedMilestones =
-    state.milestoneSchedule?.filter((m: any) => m.payoutStatus === "PAID")
-      .length || 0;
+    state.milestoneSchedule?.filter((m) => m.payoutStatus === "PAID").length ||
+    0;
 
   return (
     <>
