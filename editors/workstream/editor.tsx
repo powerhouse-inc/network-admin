@@ -34,7 +34,7 @@ import {
   useSelectedDriveDocuments,
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSelectedWorkstreamDocument } from "../hooks/useWorkstreamDocument.js";
 import type { WorkstreamState } from "../../document-models/workstream/gen/schema/types.js";
 import type { Proposal } from "../../document-models/workstream/gen/schema/types.js";
@@ -75,79 +75,107 @@ export default function Editor() {
 
   const [selectedDrive] = useSelectedDrive();
 
-  const createRfpDocument = async () => {
-    const createdNode = await addDocument(
-      selectedDrive?.header.id || "",
-      `RFP-${state.title || ""}`,
-      "powerhouse/rfp",
-      undefined,
-      undefined,
-      undefined,
-      "request-for-proposals-editor"
-    );
-    console.log("Created RFP document", createdNode);
-    if (createdNode) {
-      await dispatchActions(
-        rfpActions.editRfp({
-          title: `RFP-${state.title || ""}`,
-        }),
-        createdNode.id
-      );
-    }
-    return createdNode;
-  };
-
-  const createSowDocument = async () => {
-    const createdNode = await addDocument(
-      selectedDrive?.header.id || "",
-      `SOW-${state.title || ""}`,
-      "powerhouse/scopeofwork",
-      undefined,
-      undefined,
-      undefined,
-      "scope-of-work-editor"
-    );
-    console.log("Created SOW document", createdNode);
-    if (createdNode) {
-      await dispatchActions(
-        ScopeOfWork.actions.editScopeOfWork({
-          title: `SOW-${state.title || ""}`,
-        }),
-        createdNode.id
-      );
-    }
-    return createdNode;
-  };
-
-  const createPaymentTermsDocument = async () => {
-    const createdNode = await addDocument(
-      selectedDrive?.header.id || "",
-      `Payment Terms-${state.title || ""}`,
-      "payment-terms",
-      undefined,
-      undefined,
-      undefined,
-      "payment-terms-editor"
-    );
-    console.log("Created Payment Terms document", createdNode);
-    // Note: Payment Terms might not have actions to initialize, so we just create it
-    return createdNode;
-  };
-
-  // Local state to track newly created SOW document ID
+  // Local state to track newly created document IDs
   const [newlyCreatedSowId, setNewlyCreatedSowId] = useState<string | null>(
     null
   );
-
-  // Local state to track newly created Payment Terms document ID
   const [newlyCreatedPaymentTermsId, setNewlyCreatedPaymentTermsId] = useState<
     string | null
   >(null);
-
-  // Local state to track newly created RFP document ID
   const [newlyCreatedRfpId, setNewlyCreatedRfpId] = useState<string | null>(
     null
   );
+
+  // Loading states to prevent double-clicks
+  const [isCreatingRfp, setIsCreatingRfp] = useState(false);
+  const [isCreatingSow, setIsCreatingSow] = useState(false);
+  const [isCreatingPaymentTerms, setIsCreatingPaymentTerms] = useState(false);
+
+  const createRfpDocument = useCallback(async () => {
+    if (isCreatingRfp) return null; // Prevent double-calls
+    setIsCreatingRfp(true);
+    try {
+      const createdNode = await addDocument(
+        selectedDrive?.header.id || "",
+        `RFP-${state.title || ""}`,
+        "powerhouse/rfp",
+        undefined,
+        undefined,
+        undefined,
+        "request-for-proposals-editor"
+      );
+      console.log("Created RFP document", createdNode);
+      if (createdNode) {
+        await dispatchActions(
+          rfpActions.editRfp({
+            title: `RFP-${state.title || ""}`,
+          }),
+          createdNode.id
+        );
+      }
+      return createdNode;
+    } catch (error) {
+      console.error("Failed to create RFP document:", error);
+      return null;
+    } finally {
+      setIsCreatingRfp(false);
+    }
+  }, [isCreatingRfp, selectedDrive?.header.id, state.title]);
+
+  const createSowDocument = useCallback(async () => {
+    if (isCreatingSow) return null; // Prevent double-calls
+    setIsCreatingSow(true);
+    try {
+      const createdNode = await addDocument(
+        selectedDrive?.header.id || "",
+        `SOW-${state.title || ""}`,
+        "powerhouse/scopeofwork",
+        undefined,
+        undefined,
+        undefined,
+        "scope-of-work-editor"
+      );
+      console.log("Created SOW document", createdNode);
+      if (createdNode) {
+        await dispatchActions(
+          ScopeOfWork.actions.editScopeOfWork({
+            title: `SOW-${state.title || ""}`,
+          }),
+          createdNode.id
+        );
+      }
+      return createdNode;
+    } catch (error) {
+      console.error("Failed to create SOW document:", error);
+      return null;
+    } finally {
+      setIsCreatingSow(false);
+    }
+  }, [isCreatingSow, selectedDrive?.header.id, state.title]);
+
+  const createPaymentTermsDocument = useCallback(async () => {
+    if (isCreatingPaymentTerms) return null; // Prevent double-calls
+    setIsCreatingPaymentTerms(true);
+    try {
+      const createdNode = await addDocument(
+        selectedDrive?.header.id || "",
+        `Payment Terms-${state.title || ""}`,
+        "payment-terms",
+        undefined,
+        undefined,
+        undefined,
+        "payment-terms-editor"
+      );
+      console.log("Created Payment Terms document", createdNode);
+      // Note: Payment Terms might not have actions to initialize, so we just create it
+      return createdNode;
+    } catch (error) {
+      console.error("Failed to create Payment Terms document:", error);
+      return null;
+    } finally {
+      setIsCreatingPaymentTerms(false);
+    }
+  }, [isCreatingPaymentTerms, selectedDrive?.header.id, state.title]);
 
   // Local state to track manual input values
   const [manualAuthorInput, setManualAuthorInput] = useState<string>("");
@@ -754,9 +782,10 @@ export default function Editor() {
               <Button
                 color="light"
                 size="small"
-                className="cursor-pointer hover:bg-gray-600 hover:text-white"
+                className="cursor-pointer hover:bg-gray-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 title={"Save Workstream"}
                 aria-description={"Save Workstream"}
+                disabled={isCreatingRfp}
                 onClick={async () => {
                   const createdNode = await createRfpDocument();
                   if (createdNode) {
@@ -772,7 +801,7 @@ export default function Editor() {
                   }
                 }}
               >
-                Create RFP Document
+                {isCreatingRfp ? "Creating..." : "Create RFP Document"}
               </Button>
             </div>
           ) : (
@@ -924,7 +953,8 @@ export default function Editor() {
                       }
                     />
                     <button
-                      className="text-sm bg-gray-100 rounded-md mt-1 p-1 hover:bg-gray-200"
+                      className="text-sm bg-gray-100 rounded-md mt-1 p-1 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isCreatingSow}
                       onClick={async () => {
                         console.log("Creating sow");
                         const createdNode = await createSowDocument();
@@ -941,7 +971,7 @@ export default function Editor() {
                         }
                       }}
                     >
-                      Create sow
+                      {isCreatingSow ? "Creating..." : "Create sow"}
                     </button>
                   </div>
                   <div className="flex-1">
@@ -1025,7 +1055,8 @@ export default function Editor() {
                       }
                     />
                     <button
-                      className="text-sm bg-gray-100 rounded-md mt-1 p-1 hover:bg-gray-200"
+                      className="text-sm bg-gray-100 rounded-md mt-1 p-1 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isCreatingPaymentTerms}
                       onClick={async () => {
                         console.log("Creating payment terms");
                         const createdNode = await createPaymentTermsDocument();
@@ -1042,7 +1073,7 @@ export default function Editor() {
                         }
                       }}
                     >
-                      Create Payment Terms
+                      {isCreatingPaymentTerms ? "Creating..." : "Create Payment Terms"}
                     </button>
                   </div>
                 </div>

@@ -575,12 +575,7 @@ export function DriveExplorer(props: { children?: any }) {
         console.error("Failed to create document:", error);
       }
     },
-    [
-      addDocument,
-      selectedDrive?.header.id,
-      selectedFolder?.id,
-      modalDocumentType,
-    ]
+    [selectedDrive?.header.id, modalDocumentType]
   );
   // === RENDER ===
   return (
