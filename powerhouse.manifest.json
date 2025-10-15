@@ -56,6 +56,13 @@
             "documentTypes": [
                 "powerhouse/network-profile"
             ]
+        },
+        {
+            "id": "builder-profile-editor",
+            "name": "Builder Profile Editor",
+            "documentTypes": [
+                "powerhouse/builder-profile"
+            ]
         }
     ],
     "apps": [
