@@ -16,8 +16,8 @@
       "provider": "npm"
     },
     {
-      "packageName": "@powerhousedao/vetra",
-      "version": "5.0.0-staging.25",
+      "packageName": "@powerhousedao/builder-profile",
+      "version": "latest",
       "provider": "npm"
     }
   ]
