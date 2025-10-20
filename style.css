@@ -5,7 +5,6 @@
 @import './node_modules/@uiw/react-md-editor/markdown-editor.css';
 @import './node_modules/@uiw/react-markdown-preview/markdown.css';
 @import './node_modules/@powerhousedao/project-management/dist/style.css';
-@import './node_modules/@powerhousedao/vetra/dist/style.css';
 
 /* Uses .dark class for dark mode */
 @custom-variant dark (&:where(.dark, .dark *));

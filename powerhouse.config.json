@@ -12,12 +12,7 @@
   "packages": [
     {
       "packageName": "@powerhousedao/project-management",
-      "version": "0.0.43",
-      "provider": "npm"
-    },
-    {
-      "packageName": "@powerhousedao/vetra",
-      "version": "5.0.0-staging.25",
+      "version": "0.0.44",
       "provider": "npm"
     }
   ]
