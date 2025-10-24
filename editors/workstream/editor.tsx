@@ -381,7 +381,10 @@ export default function Editor() {
   };
 
   // Handle client field changes
-  const handleClientChange = (field: "name" | "icon", value: string) => {
+  const handleClientChange = (
+    field: "name" | "icon",
+    value: string
+  ) => {
     if (!dispatch) {
       console.error("Dispatch function not available");
       toast(`Failed to update client ${field} - no dispatch function`, {
@@ -391,10 +394,18 @@ export default function Editor() {
     }
 
     const clientId = state.client?.id || generateId();
-    const action = actions.editClientInfo({
-      clientId,
-      [field]: value || undefined,
-    });
+
+    let clientInfoUpdate: { clientId: string; name?: string; icon?: string } = { clientId };
+
+    if (field === "name") {
+      clientInfoUpdate.name = value === "" ? "" : value || undefined;
+      clientInfoUpdate.icon = state.client?.icon || undefined;
+    } else if (field === "icon") {
+      clientInfoUpdate.icon = value === "" ? "" : value || undefined;
+      clientInfoUpdate.name = state.client?.name || undefined;
+    }
+
+    const action = actions.editClientInfo(clientInfoUpdate);
 
     dispatch(action);
   };
@@ -692,16 +703,27 @@ export default function Editor() {
                     />
                   </svg>
                 </div>
-                <TextInput
-                  className="flex-1"
-                  defaultValue={state.client?.icon || ""}
-                  onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                    if (e.target.value !== state.client?.icon) {
-                      handleClientChange("icon", e.target.value);
-                    }
-                  }}
-                  placeholder="Enter client icon URL"
-                />
+                <div className="flex items-center space-x-2">
+                  <TextInput
+                    className="flex-1"
+                    defaultValue={state.client?.icon || ""}
+                    onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                      if (e.target.value !== state.client?.icon) {
+                        handleClientChange("icon", e.target.value);
+                      }
+                    }}
+                    placeholder="Enter client icon URL"
+                  />
+                  {state.client?.icon ? (
+                    <img
+                      src={state.client?.icon}
+                      alt="Client Icon"
+                      className="w-10 h-10 object-cover"
+                    />
+                  ) : (
+                    ""
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -1073,7 +1095,9 @@ export default function Editor() {
                         }
                       }}
                     >
-                      {isCreatingPaymentTerms ? "Creating..." : "Create Payment Terms"}
+                      {isCreatingPaymentTerms
+                        ? "Creating..."
+                        : "Create Payment Terms"}
                     </button>
                   </div>
                 </div>
