@@ -25,6 +25,7 @@ import { PaymentIcon } from "./icons/PaymentIcon.js";
 import { RfpIcon } from "./icons/RfpIcon.js";
 import { SowIcon } from "./icons/SowIcon.js";
 import { WorkstreamIcon } from "./icons/WorkstreamIcon.js";
+import { Earth } from 'lucide-react';
 import type { WorkstreamDocument } from "../../../document-models/workstream/index.js";
 import type { NetworkProfileDocument } from "../../../document-models/network-profile/index.js";
 import type { RequestForProposalsDocument } from "../../../document-models/request-for-proposals/index.js";
@@ -268,6 +269,7 @@ export function DriveExplorer(props: { children?: any }) {
         ...networkProfileDocs.map((doc) => ({
           id: `editor-${doc.header.id}`,
           title: doc.state.global.name || doc.header.name,
+          icon: <Earth className="w-5 h-5" />,
         })),
       ],
     };
