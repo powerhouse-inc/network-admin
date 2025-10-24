@@ -349,6 +349,10 @@ export function DriveExplorer(props: { children?: any }) {
       }
     }
 
+    const networkProfileDoc = networkAdminDocuments?.find(
+      (doc) => doc.header.documentType === "powerhouse/network-profile"
+    ) as NetworkProfileDocument | undefined;
+
     switch (nodeType) {
       case "workstreams":
         return (
@@ -358,10 +362,41 @@ export function DriveExplorer(props: { children?: any }) {
                 <h1 className="text-2xl font-bold">
                   Welcome to the Network Admin
                 </h1>
-                <p className="text-center">
-                  Create a new workstream to get started, or select an existing
-                  workstream on the left
-                </p>
+                {/* Card to display the network profile */}
+                {isNetworkProfileCreated && (
+                  <div className="bg-white rounded-lg shadow-md border border-gray-300 p-4 max-w-lg mx-auto text-sm">
+                    <div className="flex items-start justify-between">
+                      {networkProfileDoc?.state.global.logo ? (
+                        <img
+                          src={networkProfileDoc?.state.global.logo}
+                          alt="Network Profile Logo"
+                          className="mb-4"
+                        />
+                      ) : (
+                        <div></div>
+                      )}
+                      <div>
+                        {networkProfileDoc?.state.global.category.map(
+                          (category) => (
+                            <span
+                              key={category}
+                              className={`inline-flex items-center justify-center rounded-md w-fit whitespace-nowrap shrink-0 border-2 px-2 py-0 text-sm font-extrabold mb-4 ${
+                                category.toLowerCase() === "oss"
+                                  ? "bg-purple-600/30 text-purple-600 border-purple-600/70"
+                                  : category.toLowerCase() === "defi"
+                                    ? "bg-blue-600/30 text-blue-600 border-blue-600/70"
+                                    : "bg-gray-500/30 text-gray-500 border-gray-500/70"
+                              }`}
+                            >
+                              {category}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </div>
+                    <p>{networkProfileDoc?.state.global.description}</p>
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-3 justify-center">
                   <Button
                     color="dark" // Customize button appearance
