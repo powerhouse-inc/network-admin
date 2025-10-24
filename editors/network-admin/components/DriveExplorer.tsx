@@ -410,6 +410,7 @@ export function DriveExplorer(props: { children?: any }) {
                       setModalDocumentType("powerhouse/workstream");
                       setOpenModal(true);
                     }}
+                    disabled={!isNetworkProfileCreated}
                   >
                     <span className="flex items-center gap-2">
                       <WorkstreamIcon className="w-7 h-7 text-white" />
