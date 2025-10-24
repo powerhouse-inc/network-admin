@@ -268,7 +268,7 @@ export function DriveExplorer(props: { children?: any }) {
         // Add network profile documents
         ...networkProfileDocs.map((doc) => ({
           id: `editor-${doc.header.id}`,
-          title: doc.state.global.name || doc.header.name,
+          title: "Network Profile",
           icon: <Earth className="w-5 h-5" />,
         })),
       ],
