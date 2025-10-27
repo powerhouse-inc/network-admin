@@ -1,10 +1,10 @@
 {
     "author": {
         "name": "powerhouse ",
-        "website": ""
+        "website": "https://powerhouse.inc/"
     },
-    "description": "An RFP (Request for Proposal) is a formal invitation issued by a client to gather tailored proposals addressing specific needs. It outlines objectives, requirements, and deadlines, enabling external parties to submit competitive solutions. ",
-    "extension": "",
+    "description": "An RFP (Request for Proposal) is a formal invitation issued by a client to gather tailored proposals addressing specific needs. It outlines objectives, requirements, and deadlines, enabling external parties to submit competitive solutions",
+    "extension": ".phdm",
     "id": "powerhouse/rfp",
     "name": "RequestForProposals",
     "specifications": [
@@ -12,89 +12,89 @@
             "changeLog": [],
             "modules": [
                 {
+                    "description": "",
                     "id": "b85e13af-fd90-48bd-bea4-54c10b68a304",
                     "name": "rfp_state",
-                    "description": "",
                     "operations": [
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "e2a1c68c-35d8-4801-941f-ddf2c22190df",
                             "name": "EDIT_RFP",
-                            "description": "",
-                            "schema": "input EditRfpInput {\n  title: String\n  code: String\n  summary: String\n  briefing: String\n  eligibilityCriteria: String\n  evaluationCriteria: String\n  budgetRange: BudgetRangeInput\n  status: RFPStatusInput\n  deadline: DateTime\n  tags: [String!]\n}\n\ninput BudgetRangeInput {\n  min: Float\n  max: Float\n  currency: String\n}\n\nenum RFPStatusInput {\n  DRAFT\n  REQUEST_FOR_COMMMENTS\n  CANCELED\n  OPEN_FOR_PROPOSALS\n  AWARDED\n  NOT_AWARDED\n  CLOSED\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input EditRfpInput {\n  title: String\n  code: String\n  summary: String\n  briefing: String\n  eligibilityCriteria: String\n  evaluationCriteria: String\n  budgetRange: BudgetRangeInput\n  status: RFPStatusInput\n  deadline: DateTime\n  tags: [String!]\n}\n\ninput BudgetRangeInput {\n  min: Float\n  max: Float\n  currency: String\n}\n\nenum RFPStatusInput {\n  DRAFT\n  REQUEST_FOR_COMMMENTS\n  CANCELED\n  OPEN_FOR_PROPOSALS\n  AWARDED\n  NOT_AWARDED\n  CLOSED\n}",
+                            "scope": "global",
+                            "template": ""
                         }
                     ]
                 },
                 {
+                    "description": "",
                     "id": "58153b72-6b58-4a0e-ac49-2c42494a8ba1",
                     "name": "contex_document",
-                    "description": "",
                     "operations": [
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "268caa5a-8957-4095-beef-26ee255e3a6e",
                             "name": "ADD_CONTEXT_DOCUMENT",
-                            "description": "",
-                            "schema": "input AddContextDocumentInput {\n  rfpId: OID!\n  name: String!\n  url: URL!\n}",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input AddContextDocumentInput {\n  rfpId: OID!\n  name: String!\n  url: URL!\n}",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
-                            "id": "8230c407-a167-416e-abc7-f4db00b9a3a8",
-                            "name": "REMOVE_CONTEXT_DOCUMENT",
                             "description": "",
-                            "schema": "input RemoveContextDocumentInput {\n  rfpId: OID!\n  name: String!\n}",
-                            "template": "",
-                            "reducer": "",
                             "errors": [],
                             "examples": [],
-                            "scope": "global"
+                            "id": "8230c407-a167-416e-abc7-f4db00b9a3a8",
+                            "name": "REMOVE_CONTEXT_DOCUMENT",
+                            "reducer": "",
+                            "schema": "input RemoveContextDocumentInput {\n  rfpId: OID!\n  name: String!\n}",
+                            "scope": "global",
+                            "template": ""
                         }
                     ]
                 },
                 {
+                    "description": "",
                     "id": "0ddd0d1d-36a5-43a2-b0f9-a9250fb34baf",
                     "name": "proposals",
-                    "description": "",
                     "operations": [
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "14b1d474-d0af-4270-b54b-59773953a0d2",
                             "name": "ADD_PROPOSAL",
-                            "description": "",
-                            "schema": "input AddProposalInput {\n  rfpId: OID!\n  id: OID!\n  title: String!\n  summary: String!\n  proposalStatus: RfpProposalStatusInput! \n  submittedby: OID\n  budgetEstimate: String!\n  paymentTerms: RfpPaymentTermInput!\n}\n\nenum RfpPaymentTermInput {\n  MILESTONE_BASED_FIXED_PRICE\n  MILESTONE_BASED_ADVANCE_PAYMENT\n  RETAINER_BASED\n  VARIABLE_COST\n  ESCROW\n}\n\nenum RfpProposalStatusInput {\n  SUBMITTED # or received from an RFP issuer POV\n  OPENED\n  UNDER_REVIEW\n  NEEDS_REVISION\n  REVISED\n  APPROVED\n  CONDITIONALLY_APPROVED #\n  REJECTED\n  WITHDRAWN\n}\n\n",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input AddProposalInput {\n  rfpId: OID!\n  id: OID!\n  title: String!\n  summary: String!\n  proposalStatus: RfpProposalStatusInput! \n  submittedby: OID\n  budgetEstimate: String!\n  paymentTerms: RfpPaymentTermInput!\n}\n\nenum RfpPaymentTermInput {\n  MILESTONE_BASED_FIXED_PRICE\n  MILESTONE_BASED_ADVANCE_PAYMENT\n  RETAINER_BASED\n  VARIABLE_COST\n  ESCROW\n}\n\nenum RfpProposalStatusInput {\n  SUBMITTED # or received from an RFP issuer POV\n  OPENED\n  UNDER_REVIEW\n  NEEDS_REVISION\n  REVISED\n  APPROVED\n  CONDITIONALLY_APPROVED #\n  REJECTED\n  WITHDRAWN\n}\n\n",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
                             "id": "a563e5c8-cacf-4585-ac28-91d613efb9fb",
                             "name": "CHANGE_PROPOSAL_STATUS",
-                            "description": "",
-                            "schema": "input ChangeProposalStatusInput {\n  proposalId: OID!\n  status: RfpProposalStatusInput!\n}\n\n",
-                            "template": "",
                             "reducer": "",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
+                            "schema": "input ChangeProposalStatusInput {\n  proposalId: OID!\n  status: RfpProposalStatusInput!\n}\n\n",
+                            "scope": "global",
+                            "template": ""
                         },
                         {
-                            "id": "a97014b8-081b-40e9-b2aa-954a53e48934",
-                            "name": "REMOVE_PROPOSAL",
                             "description": "",
-                            "schema": "input RemoveProposalInput {\n  rfpId: OID!\n  id: OID!\n}",
-                            "template": "",
-                            "reducer": "",
                             "errors": [],
                             "examples": [],
-                            "scope": "global"
+                            "id": "a97014b8-081b-40e9-b2aa-954a53e48934",
+                            "name": "REMOVE_PROPOSAL",
+                            "reducer": "",
+                            "schema": "input RemoveProposalInput {\n  rfpId: OID!\n  id: OID!\n}",
+                            "scope": "global",
+                            "template": ""
                         }
                     ]
                 }

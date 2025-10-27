@@ -6,8 +6,8 @@ import { getResolvers } from "./resolvers.js";
 export class RequestForProposalsSubgraph extends Subgraph {
   name = "request-for-proposals";
   typeDefs: DocumentNode = schema;
-  resolvers: Record<string, unknown> = getResolvers(this);
+  resolvers = getResolvers(this);
   additionalContextFields = {};
-  async onSetup() { }
-  async onDisconnect() { }
+  async onSetup() {}
+  async onDisconnect() {}
 }

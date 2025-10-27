@@ -25,12 +25,10 @@ export function defaultGlobalState(): RequestForProposalsState {
   return {
     issuer: "placeholder-id",
     title: "",
-    code: "",
-    summary: "",
-    briefing: "",
+    description: "",
     rfpCommenter: [],
-    eligibilityCriteria: "",
-    evaluationCriteria: "",
+    eligibilityCriteria: [],
+    evaluationCriteria: [],
     budgetRange: {
       min: null,
       max: null,
