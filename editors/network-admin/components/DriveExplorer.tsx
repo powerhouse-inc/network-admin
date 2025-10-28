@@ -370,22 +370,22 @@ export function DriveExplorer(props: { children?: any }) {
                 {/* Card to display the network profile */}
                 {isNetworkProfileCreated && (
                   <div className="bg-white rounded-lg shadow-md border border-gray-300 p-4 max-w-lg mx-auto text-sm">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-4">
                       {networkProfileDoc?.state.global.logo ? (
                         <img
                           src={networkProfileDoc?.state.global.logo}
                           alt="Network Profile Logo"
-                          className="mb-4"
+                          className="mb-4 max-w-32 max-h-32 sm:max-w-48 sm:max-h-48 md:max-w-64 md:max-h-64 w-auto h-auto object-contain flex-shrink-0"
                         />
                       ) : (
                         <div></div>
                       )}
-                      <div>
+                      <div className="flex flex-wrap gap-2 justify-end flex-shrink-0">
                         {networkProfileDoc?.state.global.category.map(
                           (category) => (
                             <span
                               key={category}
-                              className={`inline-flex items-center justify-center rounded-md w-fit whitespace-nowrap shrink-0 border-2 px-2 py-0 text-sm font-extrabold mb-4 ${
+                              className={`inline-flex items-center justify-center rounded-md w-fit whitespace-nowrap shrink-0 border-2 px-2 py-0 text-sm font-extrabold ${
                                 category.toLowerCase() === "oss"
                                   ? "bg-purple-600/30 text-purple-600 border-purple-600/70"
                                   : category.toLowerCase() === "defi"
@@ -399,7 +399,7 @@ export function DriveExplorer(props: { children?: any }) {
                         )}
                       </div>
                     </div>
-                    <p>{networkProfileDoc?.state.global.description}</p>
+                    <p className="mt-4">{networkProfileDoc?.state.global.description}</p>
                   </div>
                 )}
                 <div className="flex flex-wrap gap-3 justify-center">
