@@ -59,7 +59,7 @@
     "@powerhousedao/common": "^5.0.0-staging.30",
     "@powerhousedao/design-system": "^5.0.0-staging.30",
     "@powerhousedao/document-engineering": "^1.39.0",
-    "@powerhousedao/project-management": "0.0.44",
+    "@powerhousedao/project`-management": "0.0.45",
     "@uiw/react-md-editor": "^4.0.8",
     "document-model": "^5.0.0-staging.30",
     "error": "^10.4.0",
