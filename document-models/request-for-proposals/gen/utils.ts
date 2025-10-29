@@ -21,10 +21,12 @@ import { reducer } from "./reducer.js";
 export const initialGlobalState: RequestForProposalsState = {
   issuer: "placeholder-id",
   title: "",
-  description: "",
+  summary: "",
+  briefing: "",
+  code: "",
   rfpCommenter: [],
-  eligibilityCriteria: [],
-  evaluationCriteria: [],
+  eligibilityCriteria: "",
+  evaluationCriteria: ""	,
   budgetRange: {
     min: null,
     max: null,
