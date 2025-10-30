@@ -7,6 +7,7 @@ export const schema: DocumentNode = gql`
   """
   type Query {
     workstreams(driveId: String!): [ProcessorWorkstream!]!
+    workstream(filter: WorkstreamFilter!): FullQueryWorkstream
   }
 
   type ProcessorWorkstream {
@@ -40,5 +41,231 @@ export const schema: DocumentNode = gql`
     SUBMITTED
     ACCEPTED
     REJECTED
+  }
+
+  """
+  Filter to fetch a single workstream
+  """
+  input WorkstreamFilter {
+    workstreamId: PHID
+    workstreamSlug: String
+    networkId: PHID
+    networkSlug: String
+    networkName: String
+  }
+
+  """
+  Detailed Workstream hydrated from DB + documents
+  """
+  type FullQueryWorkstream {
+    code: String
+    title: String
+    status: WorkstreamStatus
+    client: ClientInfo
+    rfp: RFP
+    initialProposal: FullProposal
+    alternativeProposals: [FullProposal!]!
+    sow: SOW_ScopeOfWorkState
+    paymentTerms: PT_PaymentTermsState
+    paymentRequests: [PHID!]!
+  }
+
+  type ClientInfo {
+    id: PHID!
+    name: String
+    icon: URL
+  }
+
+  type RFP {
+    id: PHID!
+    title: String!
+  }
+
+  type ProposalAuthor {
+    id: PHID!
+    name: String
+    icon: URL
+  }
+
+  # Must match type from Workstream subgraph to compose
+  type Proposal {
+    id: OID!
+    sow: PHID!
+    paymentTerms: PHID!
+    status: ProposalStatus!
+    author: ProposalAuthor!
+  }
+
+  scalar JSON
+
+  type LinkedDocument {
+    id: PHID!
+    stateJSON: JSON
+  }
+
+  # ==========================
+  # ScopeOfWork (typed schema)
+  # ==========================
+  type SOW_ScopeOfWorkState {
+    title: String!
+    description: String!
+    status: SOW_ScopeOfWorkStatus!
+    deliverables: [SOW_Deliverable!]!
+    projects: [SOW_Project!]!
+    roadmaps: [SOW_Roadmap!]!
+    contributors: [SOW_Agent!]!
+  }
+
+  enum SOW_ScopeOfWorkStatus {
+    DRAFT
+    SUBMITTED
+    IN_PROGRESS
+    REJECTED
+    APPROVED
+    DELIVERED
+    CANCELED
+  }
+
+  type SOW_Agent {
+    id: PHID!
+    name: String!
+    icon: URL
+    description: String
+  }
+
+  type SOW_Deliverable {
+    id: OID!
+    owner: ID
+    title: String!
+    code: String!
+    description: String!
+    status: SOW_DeliverableStatus!
+    workProgress: SOW_Progress
+    keyResults: [SOW_KeyResult!]!
+    budgetAnchor: SOW_BudgetAnchorProject
+  }
+
+  type SOW_BudgetAnchorProject {
+    project: OID
+    unit: SOW_Unit
+    unitCost: Float!
+    quantity: Float!
+    margin: Float!
+  }
+
+  enum SOW_Unit {
+    StoryPoints
+    Hours
+  }
+
+  enum SOW_DeliverableStatus {
+    WONT_DO
+    DRAFT
+    TODO
+    BLOCKED
+    IN_PROGRESS
+    DELIVERED
+    CANCELED
+  }
+
+  union SOW_Progress = SOW_StoryPoint | SOW_Percentage | SOW_Binary
+
+  type SOW_Percentage { value: Float! }
+  type SOW_Binary { done: Boolean }
+  type SOW_StoryPoint { total: Int!, completed: Int! }
+
+  type SOW_KeyResult { id: OID!, title: String!, link: String! }
+
+  type SOW_Project {
+    id: OID!
+    code: String!
+    title: String!
+    projectOwner: ID
+    abstract: String
+    imageUrl: URL
+    scope: SOW_DeliverablesSet
+    budgetType: SOW_BudgetType
+    currency: SOW_PMCurrency
+    budget: Float
+    expenditure: SOW_BudgetExpenditure
+  }
+
+  enum SOW_PMCurrency { DAI USDS EUR USD }
+  enum SOW_BudgetType { CONTINGENCY OPEX CAPEX OVERHEAD }
+
+  type SOW_BudgetExpenditure { percentage: Float!, actuals: Float!, cap: Float! }
+
+  type SOW_Roadmap {
+    id: OID!
+    slug: String!
+    title: String!
+    description: String!
+    milestones: [SOW_Milestone!]!
+  }
+
+  type SOW_Milestone {
+    id: OID!
+    sequenceCode: String!
+    title: String!
+    description: String!
+    deliveryTarget: String!
+    scope: SOW_DeliverablesSet
+    coordinators: [ID!]!
+    budget: Float
+  }
+
+  type SOW_DeliverablesSet {
+    deliverables: [OID!]!
+    status: SOW_DeliverableSetStatus!
+    progress: SOW_Progress!
+    deliverablesCompleted: SOW_DeliverablesCompleted!
+  }
+
+  type SOW_DeliverablesCompleted { total: Int!, completed: Int! }
+  enum SOW_DeliverableSetStatus { DRAFT TODO IN_PROGRESS FINISHED CANCELED }
+
+  # ==========================
+  # Payment Terms (typed)
+  # ==========================
+  enum PT_PaymentTermsStatus { DRAFT SUBMITTED ACCEPTED CANCELLED }
+  enum PT_PaymentCurrency { USD EUR GBP }
+  enum PT_PaymentModel { MILESTONE COST_AND_MATERIALS RETAINER }
+  enum PT_MilestonePayoutStatus { PENDING READY_FOR_REVIEW APPROVED PAID REJECTED }
+  enum PT_BillingFrequency { WEEKLY BIWEEKLY MONTHLY }
+  enum PT_EvaluationFrequency { WEEKLY MONTHLY PER_MILESTONE }
+
+  type PT_Milestone { id: OID! name: String! amount: Amount! expectedCompletionDate: Date requiresApproval: Boolean! payoutStatus: PT_MilestonePayoutStatus! }
+  type PT_CostAndMaterials { hourlyRate: Amount variableCap: Amount billingFrequency: PT_BillingFrequency! timesheetRequired: Boolean! }
+  type PT_Retainer { retainerAmount: Amount! billingFrequency: PT_BillingFrequency! startDate: Date! endDate: Date autoRenew: Boolean! servicesIncluded: String! }
+  type PT_Escrow { amountHeld: Amount! proofOfFundsDocumentId: String releaseConditions: String! escrowProvider: String }
+  type PT_EvaluationTerms { evaluationFrequency: PT_EvaluationFrequency! evaluatorTeam: String! criteria: [String!]! impactsPayout: Boolean! impactsReputation: Boolean! commentsVisibleToClient: Boolean! }
+  type PT_BonusClause { id: OID! condition: String! bonusAmount: Amount! comment: String }
+  type PT_PenaltyClause { id: OID! condition: String! deductionAmount: Amount! comment: String }
+
+  type PT_PaymentTermsState {
+    status: PT_PaymentTermsStatus!
+    proposer: String!
+    payer: String!
+    currency: PT_PaymentCurrency!
+    paymentModel: PT_PaymentModel!
+    totalAmount: Amount
+    milestoneSchedule: [PT_Milestone!]!
+    costAndMaterials: PT_CostAndMaterials
+    retainerDetails: PT_Retainer
+    escrowDetails: PT_Escrow
+    evaluation: PT_EvaluationTerms
+    bonusClauses: [PT_BonusClause!]!
+    penaltyClauses: [PT_PenaltyClause!]!
+  }
+
+  # ==========================
+  # Full Proposal (typed links)
+  # ==========================
+  type FullProposal {
+    id: OID!
+    status: ProposalStatus!
+    author: ProposalAuthor!
+    sow: SOW_ScopeOfWorkState
+    paymentTerms: PT_PaymentTermsState
   }
 `;
