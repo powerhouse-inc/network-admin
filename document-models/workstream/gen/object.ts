@@ -18,7 +18,7 @@ interface Workstream extends Workstream_Workstream, Workstream_Proposals {}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 class Workstream extends BaseDocumentClass<WorkstreamPHState> {
-  static fileExtension = "";
+  static fileExtension = ".phdm";
 
   constructor(
     initialState?: Partial<WorkstreamPHState>,

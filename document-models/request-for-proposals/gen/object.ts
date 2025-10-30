@@ -23,7 +23,7 @@ interface RequestForProposals
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 class RequestForProposals extends BaseDocumentClass<RequestForProposalsPHState> {
-  static fileExtension = "";
+  static fileExtension = ".phdm";
 
   constructor(
     initialState?: Partial<RequestForProposalsPHState>,

@@ -20,11 +20,15 @@ import {
 import { type DocumentModelModule } from "document-model";
 import { type Node } from "document-drive";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
-import { editWorkstream } from "../../../document-models/workstream/gen/creators.js";
+import {
+  editClientInfo,
+  editWorkstream,
+} from "../../../document-models/workstream/gen/creators.js";
 import { PaymentIcon } from "./icons/PaymentIcon.js";
 import { RfpIcon } from "./icons/RfpIcon.js";
 import { SowIcon } from "./icons/SowIcon.js";
 import { WorkstreamIcon } from "./icons/WorkstreamIcon.js";
+import { Earth } from "lucide-react";
 import type { WorkstreamDocument } from "../../../document-models/workstream/index.js";
 import type { NetworkProfileDocument } from "../../../document-models/network-profile/index.js";
 import type { RequestForProposalsDocument } from "../../../document-models/request-for-proposals/index.js";
@@ -267,7 +271,8 @@ export function DriveExplorer(props: { children?: any }) {
         // Add network profile documents
         ...networkProfileDocs.map((doc) => ({
           id: `editor-${doc.header.id}`,
-          title: doc.state.global.name || doc.header.name,
+          title: "Network Profile",
+          icon: <Earth className="w-5 h-5" />,
         })),
       ],
     };
@@ -349,6 +354,10 @@ export function DriveExplorer(props: { children?: any }) {
       }
     }
 
+    const networkProfileDoc = networkAdminDocuments?.find(
+      (doc) => doc.header.documentType === "powerhouse/network-profile"
+    ) as NetworkProfileDocument | undefined;
+
     switch (nodeType) {
       case "workstreams":
         return (
@@ -358,10 +367,41 @@ export function DriveExplorer(props: { children?: any }) {
                 <h1 className="text-2xl font-bold">
                   Welcome to the Network Admin
                 </h1>
-                <p className="text-center">
-                  Create a new workstream to get started, or select an existing
-                  workstream on the left
-                </p>
+                {/* Card to display the network profile */}
+                {isNetworkProfileCreated && (
+                  <div className="bg-white rounded-lg shadow-md border border-gray-300 p-4 max-w-lg mx-auto text-sm">
+                    <div className="flex items-start justify-between gap-4">
+                      {networkProfileDoc?.state.global.logo ? (
+                        <img
+                          src={networkProfileDoc?.state.global.logo}
+                          alt="Network Profile Logo"
+                          className="mb-4 max-w-32 max-h-32 sm:max-w-48 sm:max-h-48 md:max-w-64 md:max-h-64 w-auto h-auto object-contain flex-shrink-0"
+                        />
+                      ) : (
+                        <div></div>
+                      )}
+                      <div className="flex flex-wrap gap-2 justify-end flex-shrink-0">
+                        {networkProfileDoc?.state.global.category.map(
+                          (category) => (
+                            <span
+                              key={category}
+                              className={`inline-flex items-center justify-center rounded-md w-fit whitespace-nowrap shrink-0 border-2 px-2 py-0 text-sm font-extrabold ${
+                                category.toLowerCase() === "oss"
+                                  ? "bg-purple-600/30 text-purple-600 border-purple-600/70"
+                                  : category.toLowerCase() === "defi"
+                                    ? "bg-blue-600/30 text-blue-600 border-blue-600/70"
+                                    : "bg-gray-500/30 text-gray-500 border-gray-500/70"
+                              }`}
+                            >
+                              {category}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </div>
+                    <p className="mt-4">{networkProfileDoc?.state.global.description}</p>
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-3 justify-center">
                   <Button
                     color="dark" // Customize button appearance
@@ -373,6 +413,7 @@ export function DriveExplorer(props: { children?: any }) {
                       setModalDocumentType("powerhouse/workstream");
                       setOpenModal(true);
                     }}
+                    disabled={!isNetworkProfileCreated}
                   >
                     <span className="flex items-center gap-2">
                       <WorkstreamIcon className="w-7 h-7 text-white" />
@@ -553,7 +594,20 @@ export function DriveExplorer(props: { children?: any }) {
           return;
         }
 
-        await dispatchActions(editWorkstream({ title: fileName }), node.id);
+        if (documentType === "powerhouse/workstream") {
+          const networkProfileDoc = networkAdminDocuments?.find(
+            (doc) => doc.header.documentType === "powerhouse/network-profile"
+          ) as NetworkProfileDocument | undefined;
+          const actionsToDispatch = [
+            editWorkstream({ title: fileName }),
+            editClientInfo({
+              clientId: networkProfileDoc?.header.id || "",
+              name: networkProfileDoc?.state.global.name || "",
+              icon: networkProfileDoc?.state.global.icon || "",
+            }),
+          ];
+          await dispatchActions(actionsToDispatch, node.id);
+        }
 
         selectedDocumentModel.current = null;
 

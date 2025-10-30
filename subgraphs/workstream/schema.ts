@@ -31,7 +31,7 @@ export const schema: DocumentNode = gql`
   }
 
   type Proposal {
-    id: ID!
+    id: OID!
     sow: PHID! # a link with a fixed label (i.e, sow)
     paymentTerms: PHID! # a link with a fixed label (i.e., payment terms)
     status: ProposalStatus!

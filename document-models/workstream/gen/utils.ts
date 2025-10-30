@@ -46,7 +46,7 @@ export const createDocument: CreateDocument<WorkstreamPHState> = (state) => {
 };
 
 export const saveToFile = (document: any, path: string, name?: string) => {
-  return baseSaveToFile(document, path, "", name);
+  return baseSaveToFile(document, path, ".phdm", name);
 };
 
 export const saveToFileHandle = (document: any, input: any) => {
@@ -62,7 +62,7 @@ export const loadFromInput: LoadFromInput<WorkstreamPHState> = (input) => {
 };
 
 const utils = {
-  fileExtension: "",
+  fileExtension: ".phdm",
   createState,
   createDocument,
   saveToFile,

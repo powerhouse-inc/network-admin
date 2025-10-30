@@ -3,8 +3,8 @@ import type { DocumentNode } from "graphql";
 import { schema } from "./schema.js";
 import { getResolvers } from "./resolvers.js";
 
-export class RequestForProposalsSubgraph extends Subgraph {
-  name = "request-for-proposals";
+export class WorkstreamsSubgraph extends Subgraph {
+  name = "workstreams";
   typeDefs: DocumentNode = schema;
   resolvers = getResolvers(this);
   additionalContextFields = {};

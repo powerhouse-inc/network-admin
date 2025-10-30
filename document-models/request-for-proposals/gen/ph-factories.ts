@@ -25,9 +25,9 @@ export function defaultGlobalState(): RequestForProposalsState {
   return {
     issuer: "placeholder-id",
     title: "",
-    code: "",
     summary: "",
     briefing: "",
+    code: "",
     rfpCommenter: [],
     eligibilityCriteria: "",
     evaluationCriteria: "",

@@ -106,7 +106,7 @@ export type EditWorkstreamInput = {
 
 export type Proposal = {
   author: ProposalAuthor;
-  id: Scalars["ID"]["output"];
+  id: Scalars["OID"]["output"];
   paymentTerms: Scalars["PHID"]["output"];
   sow: Scalars["PHID"]["output"];
   status: ProposalStatus | `${ProposalStatus}`;

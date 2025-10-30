@@ -21,12 +21,12 @@ import { reducer } from "./reducer.js";
 export const initialGlobalState: RequestForProposalsState = {
   issuer: "placeholder-id",
   title: "",
-  code: "",
   summary: "",
   briefing: "",
+  code: "",
   rfpCommenter: [],
   eligibilityCriteria: "",
-  evaluationCriteria: "",
+  evaluationCriteria: ""	,
   budgetRange: {
     min: null,
     max: null,
@@ -59,7 +59,7 @@ export const createDocument: CreateDocument<RequestForProposalsPHState> = (
 };
 
 export const saveToFile = (document: any, path: string, name?: string) => {
-  return baseSaveToFile(document, path, "", name);
+  return baseSaveToFile(document, path, ".phdm", name);
 };
 
 export const saveToFileHandle = (document: any, input: any) => {
@@ -79,7 +79,7 @@ export const loadFromInput: LoadFromInput<RequestForProposalsPHState> = (
 };
 
 const utils = {
-  fileExtension: "",
+  fileExtension: ".phdm",
   createState,
   createDocument,
   saveToFile,

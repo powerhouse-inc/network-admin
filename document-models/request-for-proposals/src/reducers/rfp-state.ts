@@ -19,11 +19,13 @@ export const reducer: RequestForProposalsRfpStateOperations = {
     state.status = action.input.status || state.status;
     state.deadline = action.input.deadline || state.deadline;
     state.tags = action.input.tags || state.tags;
-    state.budgetRange = action.input.budgetRange ? {
-      min: action.input.budgetRange.min ?? null,
-      max: action.input.budgetRange.max ?? null,
-      currency: action.input.budgetRange.currency ?? null,
-    } : state.budgetRange;
+    if (action.input.budgetRange) {
+      state.budgetRange = {
+        min: action.input.budgetRange.min ?? state.budgetRange?.min ?? null,
+        max: action.input.budgetRange.max ?? state.budgetRange?.max ?? null,
+        currency: action.input.budgetRange.currency ?? state.budgetRange?.currency ?? null,
+      };
+    }
 
   },
 };
