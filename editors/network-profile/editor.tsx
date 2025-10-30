@@ -380,7 +380,7 @@ export default function Editor() {
               <Select
                 label="Category:"
                 options={categoryOptions}
-                value={state?.category?.[0] || "OSS"}
+                value={state?.category?.[0] || undefined}
                 onChange={(value) =>
                   handleFieldChange("category", [value as NetworkCategory])
                 }

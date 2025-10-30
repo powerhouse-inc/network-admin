@@ -399,7 +399,9 @@ export function DriveExplorer(props: { children?: any }) {
                         )}
                       </div>
                     </div>
-                    <p className="mt-4">{networkProfileDoc?.state.global.description}</p>
+                    <p className="mt-4">
+                      {networkProfileDoc?.state.global.description}
+                    </p>
                   </div>
                 )}
                 <div className="flex flex-wrap gap-3 justify-center">
