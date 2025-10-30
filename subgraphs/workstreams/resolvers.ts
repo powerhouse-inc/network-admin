@@ -14,6 +14,8 @@ export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
           .selectAll()
           .execute();
 
+          console.log("dbWorkstreams", dbWorkstreams);
+
 
         return dbWorkstreams.map((workstream) => ({
           network_phid: workstream.network_phid,
