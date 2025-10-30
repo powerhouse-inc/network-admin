@@ -3,7 +3,7 @@ import { RelationalDbProcessor } from "document-drive/processors/relational";
 import { type InternalTransmitterUpdate, type InternalOperationUpdate } from "document-drive/server/listener/transmitter/internal";
 import { up } from "./migrations.js";
 import { type DB } from "./schema.js";
-import { EditInitialProposalInput, EditClientInfoInput } from "document-models/workstream/index.js";
+import { EditInitialProposalInput, EditClientInfoInput, EditWorkstreamInput } from "document-models/workstream/index.js";
 
 export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
   static override getNamespace(driveId: string): string {
@@ -33,10 +33,10 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
       // console.log("strand", { documentType: strand.documentType, docId: strand.documentId, state: strand.state });
 
       for (const operation of strand.operations) {
-
         if (strand.documentType === "powerhouse/workstream") {
-          this.addSowToWorkstream(strand, operation)
+          this.updateWorkstream(strand, operation)
           this.updateNetworkInWorkstream(strand, operation)
+          this.updateInitialProposalInWorkstream(strand, operation)
         }
 
         // await this.relationalDb
@@ -80,8 +80,8 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
           workstream_title: strand.state.title,
           workstream_status: strand.state.status,
           // sow_phid: strand.state.sow,
-          roadmap_oid: "which roadmmap Id ? there's many roadmaps in a sow doc",
-          final_milestone_target: new Date(),
+          // roadmap_oid: "which roadmmap Id ? there's many roadmaps in a sow doc",
+          // final_milestone_target: new Date(),
           // initial_proposal_status: strand.state.initialProposal.status,
           // initial_proposal_author: strand.state.initialProposal.author.name
         })
@@ -90,7 +90,7 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
     }
   }
 
-  addSowToWorkstream = async (strand: InternalTransmitterUpdate, operation: InternalOperationUpdate) => {
+  updateInitialProposalInWorkstream = async (strand: InternalTransmitterUpdate, operation: InternalOperationUpdate) => {
     const docId = strand.documentId;
     const existingWorkstreamPhids = await this.relationalDb
       .selectFrom("workstreams")
@@ -106,16 +106,26 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
 
         const input = operation.action.input as EditInitialProposalInput;
         if (!input) return;
-        if (Object.hasOwn(input, 'sowId') || Object.hasOwn(input, "status")) {
 
-          console.log('updating sowId in workstream', operation.action.input)
+        console.log('updating initial proposal in workstream', operation.action.input)
+        
+        // Build update object with only defined values
+        const updateData: any = {};
+        if (input.sowId) {
+          updateData.sow_phid = input.sowId;
+        }
+        if (input.proposalAuthor) {
+          updateData.initial_proposal_author = input.proposalAuthor.name;
+        }
+        if (input.status) {
+          updateData.initial_proposal_status = input.status;
+        }
+        
+        // Only execute update if there are fields to update
+        if (Object.keys(updateData).length > 0) {
           await this.relationalDb
             .updateTable('workstreams')
-            .set({
-              sow_phid: input.sowId,
-              initial_proposal_author: strand.state.initialProposal.author.name,
-              initial_proposal_status: strand.state.initialProposal.status
-            })
+            .set(updateData)
             .where("workstream_phid", "=", docId)
             .execute();
         }
@@ -141,15 +151,66 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
 
         const input = operation.action.input as EditClientInfoInput;
         if (!input) return;
-        if (Object.hasOwn(input, 'clientId')) {
 
-          console.log('updating client in workstream', operation.action.input)
+        console.log('updating client in workstream', operation.action.input)
+        
+        // Build update object with only defined values
+        const updateData: any = {};
+        if (input.clientId) {
+          updateData.network_phid = input.clientId;
+        }
+        if (input.name) {
+          updateData.network_slug = input.name.toLowerCase().split(' ').join("-");
+        }
+        
+        // Only execute update if there are fields to update
+        if (Object.keys(updateData).length > 0) {
           await this.relationalDb
             .updateTable('workstreams')
-            .set({
-              network_phid: input.clientId,
-              network_slug: input.name && input.name.toLowerCase().split(' ').join("-"),
-            })
+            .set(updateData)
+            .where("workstream_phid", "=", docId)
+            .execute();
+        }
+
+      }
+
+    }
+  }
+
+  updateWorkstream = async (strand: InternalTransmitterUpdate, operation: InternalOperationUpdate) => {
+    const docId = strand.documentId;
+    const existingWorkstreamPhids = await this.relationalDb
+      .selectFrom("workstreams")
+      .select("workstream_phid")
+      .where("workstream_phid", "=", docId)
+      .execute();
+
+    const [foundWorkstreamId] = existingWorkstreamPhids;
+
+    if (foundWorkstreamId) {
+      // update existing workstream row
+      if (operation.action.type === 'EDIT_WORKSTREAM') {
+
+        const input = operation.action.input as EditWorkstreamInput;
+        if (!input) return;
+
+        console.log('updating workstream', operation.action.input)
+        
+        // Build update object with only defined values
+        const updateData: any = {};
+        if (input.title) {
+          updateData.workstream_title = input.title;
+          updateData.workstream_slug = input.title.toLowerCase().split(' ').join("-");
+        }
+        if (input.status) {
+          updateData.workstream_status = input.status;
+        }
+        
+        // Only execute update if there are fields to update
+        if (Object.keys(updateData).length > 0) {
+          await this.relationalDb
+            .updateTable('workstreams')
+            .set(updateData)
             .where("workstream_phid", "=", docId)
             .execute();
         }
