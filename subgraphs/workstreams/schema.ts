@@ -8,6 +8,7 @@ export const schema: DocumentNode = gql`
   type Query {
     workstreams(driveId: String!): [ProcessorWorkstream!]!
     workstream(filter: WorkstreamFilter!): FullQueryWorkstream
+    rfpByWorkstream(filter: WorkstreamFilter!): [WorkstreamRfp!]!
   }
 
   type ProcessorWorkstream {
@@ -36,6 +37,16 @@ export const schema: DocumentNode = gql`
     FINISHED
   }
 
+  enum RFPStatus {
+    DRAFT
+    REQUEST_FOR_COMMMENTS
+    CANCELED
+    OPEN_FOR_PROPOSALS
+    AWARDED
+    NOT_AWARDED
+    CLOSED
+  }
+
   enum ProposalStatus {
     DRAFT
     SUBMITTED
@@ -52,6 +63,8 @@ export const schema: DocumentNode = gql`
     networkId: PHID
     networkSlug: String
     networkName: String
+    workstreamStatus: WorkstreamStatus
+    workstreamStatuses: [WorkstreamStatus!]
   }
 
   """
@@ -70,6 +83,13 @@ export const schema: DocumentNode = gql`
     paymentRequests: [PHID!]!
   }
 
+  type WorkstreamRfp {
+    code: String
+    title: String
+    status: WorkstreamStatus
+    rfp: RFP
+  }
+
   type ClientInfo {
     id: PHID!
     name: String
@@ -78,7 +98,17 @@ export const schema: DocumentNode = gql`
 
   type RFP {
     id: PHID!
+    code: String
     title: String!
+    status: RFPStatus
+    summary: String
+    submissionDeadline: DateTime
+    budgetMin: Float
+    budgetMax: Float
+    budgetCurrency: String
+    eligibilityCriteria: String
+    evaluationCriteria: String
+    briefing: String
   }
 
   type ProposalAuthor {

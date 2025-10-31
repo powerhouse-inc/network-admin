@@ -1,11 +1,217 @@
 import { type Subgraph } from "@powerhousedao/reactor-api";
-import { WorkstreamsProcessor } from "../../processors/workstreams/index.js"
-import { Workstreams } from "processors/workstreams/schema.js";
+import { WorkstreamsProcessor } from "../../processors/workstreams/index.js";
+import {
+  type RequestForProposalsDocument,
+} from "../../document-models/request-for-proposals/index.js";
 import { type WorkstreamDocument } from "../../document-models/workstream/index.js";
+
+type WorkstreamFilterArgs = {
+  workstreamId?: string | null;
+  workstreamSlug?: string | null;
+  networkId?: string | null;
+  networkSlug?: string | null;
+  networkName?: string | null;
+  workstreamStatus?: string | null;
+  workstreamStatuses?: (string | null)[] | null;
+};
 
 export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
   const reactor = subgraph.reactor;
   const db = subgraph.relationalDb
+
+  const deriveSlug = (name: string) =>
+    name.toLowerCase().trim().split(/\s+/).join("-");
+
+  const getCandidateDrives = async (): Promise<string[]> => {
+    try {
+      const drives = await (reactor as any).getDrives?.();
+      if (Array.isArray(drives) && drives.length > 0) return drives as string[];
+    } catch {}
+    return [] as string[];
+  };
+
+  const loadLinkedDocument = async (id?: string | null) => {
+    if (!id) return null;
+    try {
+      const linked = await reactor.getDocument<any>(id);
+      return { id, stateJSON: linked.state.global };
+    } catch {
+      return { id, stateJSON: null };
+    }
+  };
+
+  const loadRfpDetails = async (
+    rfpRef?: { id?: string | null; title?: string | null } | null,
+  ) => {
+    if (!rfpRef?.id) {
+      return null;
+    }
+
+    try {
+      const rfpDoc =
+        await reactor.getDocument<RequestForProposalsDocument>(rfpRef.id);
+      const rfpState = rfpDoc.state.global as any;
+
+      return {
+        id: rfpRef.id,
+        code: rfpState?.code ?? null,
+        title: rfpRef.title ?? rfpState?.title ?? null,
+        status: rfpState?.status ?? null,
+        summary: rfpState?.summary ?? null,
+        submissionDeadline: rfpState?.deadline ?? null,
+        budgetMin: rfpState?.budgetRange?.min ?? null,
+        budgetMax: rfpState?.budgetRange?.max ?? null,
+        budgetCurrency: rfpState?.budgetRange?.currency ?? null,
+        eligibilityCriteria: rfpState?.eligibilityCriteria ?? null,
+        evaluationCriteria: rfpState?.evaluationCriteria ?? null,
+        briefing: rfpState?.briefing ?? null,
+      };
+    } catch {
+      return {
+        id: rfpRef.id,
+        code: null,
+        title: rfpRef.title ?? null,
+        status: null,
+        summary: null,
+        submissionDeadline: null,
+        budgetMin: null,
+        budgetMax: null,
+        budgetCurrency: null,
+        eligibilityCriteria: null,
+        evaluationCriteria: null,
+        briefing: null,
+      };
+    }
+  };
+
+  const hydrateWorkstreamRow = async (row: any) => {
+    try {
+      const doc = await reactor.getDocument<WorkstreamDocument>(
+        row.workstream_phid,
+      );
+      const state = doc.state.global as any;
+
+      const initialProposalBase = state.initialProposal
+        ? {
+            id: state.initialProposal.id,
+            status: state.initialProposal.status,
+            author: state.initialProposal.author,
+          }
+        : null;
+
+      const alternativeProposalsBase = (state.alternativeProposals || []).map(
+        (p: any) => ({
+          id: p.id,
+          status: p.status,
+          author: p.author,
+        }),
+      );
+
+      const [
+        topSowDoc,
+        topPaymentTermsDoc,
+        initialSowDoc,
+        initialPaymentTermsDoc,
+        altSowDocs,
+        altPaymentDocs,
+        rfpDetails,
+      ] = await Promise.all([
+        loadLinkedDocument(state.sow || row.sow_phid || null),
+        loadLinkedDocument(state.paymentTerms || null),
+        loadLinkedDocument(state.initialProposal?.sow || row.sow_phid || null),
+        loadLinkedDocument(state.initialProposal?.paymentTerms || null),
+        Promise.all(
+          (state.alternativeProposals || []).map((p: any) =>
+            loadLinkedDocument(p.sow || null),
+          ),
+        ),
+        Promise.all(
+          (state.alternativeProposals || []).map((p: any) =>
+            loadLinkedDocument(p.paymentTerms || null),
+          ),
+        ),
+        loadRfpDetails(state.rfp || null),
+      ]);
+
+      const client =
+        state.client ??
+        (row.network_phid
+          ? { id: row.network_phid, name: row.network_slug, icon: null }
+          : null);
+
+      return {
+        code: state.code || null,
+        title: state.title || row.workstream_title || null,
+        status: state.status || row.workstream_status || null,
+        client,
+        rfp: rfpDetails,
+        initialProposal: initialProposalBase
+          ? {
+              ...initialProposalBase,
+              sow: initialSowDoc?.stateJSON || null,
+              paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
+            }
+          : null,
+        alternativeProposals: alternativeProposalsBase.map(
+          (proposal: any, index: number) => ({
+            ...proposal,
+            sow: altSowDocs[index]?.stateJSON || null,
+            paymentTerms: altPaymentDocs[index]?.stateJSON || null,
+          }),
+        ),
+        sow: topSowDoc?.stateJSON || null,
+        paymentTerms: topPaymentTermsDoc?.stateJSON || null,
+        paymentRequests: state.paymentRequests || [],
+      };
+    } catch {
+      return {
+        code: row.workstream_title || null,
+        title: row.workstream_title || null,
+        status: row.workstream_status || null,
+        client: row.network_phid
+          ? { id: row.network_phid, name: row.network_slug, icon: null }
+          : null,
+        rfp: null,
+        initialProposal: null,
+        alternativeProposals: [],
+        sow: null,
+        paymentTerms: null,
+        paymentRequests: [],
+      };
+    }
+  };
+
+  const applyWorkstreamFilters = (
+    qb: any,
+    filters: WorkstreamFilterArgs,
+    wantedSlug?: string,
+  ) => {
+    if (filters.workstreamId) {
+      qb = qb.where("workstream_phid", "=", filters.workstreamId);
+    } else if (filters.workstreamSlug) {
+      qb = qb.where("workstream_slug", "=", filters.workstreamSlug);
+    }
+
+    if (filters.networkId) {
+      qb = qb.where("network_phid", "=", filters.networkId);
+    } else if (filters.networkSlug) {
+      qb = qb.where("network_slug", "=", filters.networkSlug);
+    } else if (filters.networkName && wantedSlug) {
+      qb = qb.where("network_slug", "=", wantedSlug);
+    }
+
+    const statuses = (filters.workstreamStatuses || []).filter(
+      (status): status is string => Boolean(status),
+    );
+
+    if (statuses.length > 0) {
+      qb = qb.where("workstream_status", "in", statuses as any);
+    } else if (filters.workstreamStatus) {
+      qb = qb.where("workstream_status", "=", filters.workstreamStatus);
+    }
+
+    return qb;
+  };
 
   return {
     Query: {
@@ -34,20 +240,13 @@ export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
       },
       workstream: async (
         parent: unknown,
-        args: { filter: { workstreamId?: string | null; workstreamSlug?: string | null; networkId?: string | null; networkSlug?: string | null; networkName?: string | null } },
+        args: { filter: WorkstreamFilterArgs },
       ) => {
-        const { workstreamId, workstreamSlug, networkId, networkSlug, networkName } = args.filter;
-
-        const candidateDrives: string[] = (await (async () => {
-          try {
-            const drives = await (reactor as any).getDrives?.();
-            if (Array.isArray(drives) && drives.length > 0) return drives as string[];
-          } catch {}
-          return [] as string[];
-        })());
-
-        const deriveSlug = (name: string) => name.toLowerCase().trim().split(/\s+/).join("-");
-        const wantedSlug = networkSlug || (networkName ? deriveSlug(networkName) : undefined);
+        const filters = args.filter || {};
+        const candidateDrives = await getCandidateDrives();
+        const wantedSlug =
+          filters.networkSlug ||
+          (filters.networkName ? deriveSlug(filters.networkName) : undefined);
 
         let resolved: any = null;
         for (const driveId of candidateDrives) {
@@ -55,101 +254,59 @@ export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
             .selectFrom("workstreams")
             .selectAll();
 
-          if (workstreamId) {
-            qb = qb.where("workstream_phid", "=", workstreamId);
-          } else if (workstreamSlug) {
-            qb = qb.where("workstream_slug", "=", workstreamSlug);
-          }
+          qb = applyWorkstreamFilters(qb, filters, wantedSlug);
 
-          if (networkId) {
-            qb = qb.where("network_phid", "=", networkId);
-          } else if (networkSlug) {
-            qb = qb.where("network_slug", "=", networkSlug);
-          } else if (networkName) {
-            qb = qb.where("network_slug", "=", wantedSlug as string);
-          }
-
-          let row = await qb.executeTakeFirst();
-
-          // No fallback scanning: DB is source of truth
+          const row = await qb.executeTakeFirst();
 
           if (!row) continue;
 
-          // Reuse the existing hydration flow below; capture in local scope
-          const doc = await reactor.getDocument<WorkstreamDocument>(row.workstream_phid);
-          const state = doc.state.global;
-
-          const loadLinked = async (id?: string | null) => {
-            if (!id) return null;
-            try {
-              const linked = await reactor.getDocument<any>(id);
-              return { id, stateJSON: linked.state.global };
-            } catch {
-              return { id, stateJSON: null };
-            }
-          };
-
-          const [topSowDoc, topPaymentTermsDoc] = await Promise.all([
-            loadLinked(state.sow || row.sow_phid || null),
-            loadLinked(state.paymentTerms || null),
-          ]);
-
-          const initialProposal = state.initialProposal
-            ? {
-                id: state.initialProposal.id,
-                status: state.initialProposal.status,
-                author: state.initialProposal.author,
-                sow: null as any,
-                paymentTerms: null as any,
-              }
-            : null;
-
-          const [initialSowDoc, initialPaymentTermsDoc] = await Promise.all([
-            loadLinked(state.initialProposal?.sow || row.sow_phid || null),
-            loadLinked(state.initialProposal?.paymentTerms || null),
-          ]);
-
-          const altProposalsBase = (state.alternativeProposals || []).map((p: any) => ({
-            id: p.id,
-            status: p.status,
-            author: p.author,
-          }));
-
-          const [altSowDocs, altPaymentDocs] = await Promise.all([
-            Promise.all((state.alternativeProposals || []).map((p: any) => loadLinked(p.sow || null))),
-            Promise.all((state.alternativeProposals || []).map((p: any) => loadLinked(p.paymentTerms || null))),
-          ]);
-
-          resolved = {
-            code: state.code || null,
-            title: state.title || row.workstream_title || null,
-            status: state.status || row.workstream_status || null,
-            client: state.client || (row.network_phid
-              ? { id: row.network_phid, name: row.network_slug, icon: null }
-              : null),
-            rfp: state.rfp || null,
-            initialProposal: initialProposal
-              ? {
-                  ...initialProposal,
-                  sow: initialSowDoc?.stateJSON || null,
-                  paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
-                }
-              : null,
-            alternativeProposals: altProposalsBase.map((p: any, i: number) => ({
-              ...p,
-              sow: altSowDocs[i]?.stateJSON || null,
-              paymentTerms: altPaymentDocs[i]?.stateJSON || null,
-            })),
-            sow: topSowDoc?.stateJSON || null,
-            paymentTerms: topPaymentTermsDoc?.stateJSON || null,
-            paymentRequests: state.paymentRequests || [],
-          };
-
+          resolved = await hydrateWorkstreamRow(row);
           break;
         }
 
         return resolved;
-      }
+      },
+      rfpByWorkstream: async (
+        parent: unknown,
+        args: { filter: WorkstreamFilterArgs },
+      ) => {
+        const filters = args.filter || {};
+        const candidateDrives = await getCandidateDrives();
+        const wantedSlug =
+          filters.networkSlug ||
+          (filters.networkName ? deriveSlug(filters.networkName) : undefined);
+
+        const results: any[] = [];
+
+        for (const driveId of candidateDrives) {
+          let qb = WorkstreamsProcessor.query(driveId, db)
+            .selectFrom("workstreams")
+            .selectAll();
+
+          qb = applyWorkstreamFilters(qb, filters, wantedSlug);
+
+          const rows = await qb.execute();
+          if (rows.length === 0) {
+            continue;
+          }
+
+          for (const row of rows) {
+            const hydrated = await hydrateWorkstreamRow(row);
+            results.push({
+              code: hydrated.code,
+              title: hydrated.title,
+              status: hydrated.status,
+              rfp: hydrated.rfp,
+            });
+          }
+
+          if (filters.workstreamId || filters.workstreamSlug) {
+            break;
+          }
+        }
+
+        return results;
+      },
     },
     SOW_Progress: {
       __resolveType(obj: any) {
