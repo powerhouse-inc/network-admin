@@ -9,6 +9,7 @@ import {
   TextInput,
   Select,
   OIDInput,
+  PHIDInput,
   ObjectSetTable,
   ColumnDef,
   ColumnAlignment,
@@ -33,6 +34,7 @@ import {
   addDocument,
   useSelectedDriveDocuments,
   dispatchActions,
+  useSelectedDocumentId,
 } from "@powerhousedao/reactor-browser";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSelectedWorkstreamDocument } from "../hooks/useWorkstreamDocument.js";
@@ -176,6 +178,15 @@ export default function Editor() {
       setIsCreatingPaymentTerms(false);
     }
   }, [isCreatingPaymentTerms, selectedDrive?.header.id, state.title]);
+
+  const getDocumentNameById = useCallback(
+    (documentId: string) => {
+      const document = useDocumentById(documentId);
+      const [documentData] = document || [];
+      return documentData?.header.name || "";
+    },
+    [useDocumentById]
+  );
 
   // Local state to track manual input values
   const [manualAuthorInput, setManualAuthorInput] = useState<string>("");
@@ -381,10 +392,7 @@ export default function Editor() {
   };
 
   // Handle client field changes
-  const handleClientChange = (
-    field: "name" | "icon",
-    value: string
-  ) => {
+  const handleClientChange = (field: "name" | "icon", value: string) => {
     if (!dispatch) {
       console.error("Dispatch function not available");
       toast(`Failed to update client ${field} - no dispatch function`, {
@@ -395,7 +403,9 @@ export default function Editor() {
 
     const clientId = state.client?.id || generateId();
 
-    let clientInfoUpdate: { clientId: string; name?: string; icon?: string } = { clientId };
+    let clientInfoUpdate: { clientId: string; name?: string; icon?: string } = {
+      clientId,
+    };
 
     if (field === "name") {
       clientInfoUpdate.name = value === "" ? "" : value || undefined;
@@ -440,6 +450,62 @@ export default function Editor() {
     ]);
   }, [state.alternativeProposals]);
 
+  const getSowOptionById = useCallback(
+    (documentId?: string) => {
+      if (!documentId) return undefined;
+      const doc = allDocuments?.find((document: PHDocument) => {
+        return (
+          document.header.documentType === "powerhouse/scopeofwork" &&
+          document.header.id === documentId
+        );
+      });
+
+      if (!doc) return undefined;
+
+      const title = (
+        doc.state as unknown as PHDocumentState & {
+          global: ScopeOfWorkState;
+        }
+      )?.global?.title;
+
+      return {
+        value: doc.header.id,
+        title: title || doc.header.name,
+        path: {
+          text: doc.header.name,
+          url: doc.header.id,
+        },
+        description: "",
+      };
+    },
+    [allDocuments]
+  );
+
+  const getPaymentTermsOptionById = useCallback(
+    (documentId?: string) => {
+      if (!documentId) return undefined;
+      const doc = allDocuments?.find((document: PHDocument) => {
+        return (
+          document.header.documentType === "payment-terms" &&
+          document.header.id === documentId
+        );
+      });
+
+      if (!doc) return undefined;
+
+      return {
+        value: doc.header.id,
+        title: doc.header.name,
+        path: {
+          text: doc.header.name,
+          url: doc.header.id,
+        },
+        description: "",
+      };
+    },
+    [allDocuments]
+  );
+
   const alternativeProposalsColumns = useMemo<Array<ColumnDef<Proposal>>>(
     () => [
       {
@@ -475,7 +541,7 @@ export default function Editor() {
       {
         field: "sow",
         title: "SOW",
-        type: "oid",
+        type: "phid",
         editable: true,
         align: "center" as ColumnAlignment,
         onSave: (newValue, context) => {
@@ -490,11 +556,72 @@ export default function Editor() {
           }
           return false;
         },
+        renderCellEditor: (value, onChange, context) => {
+          const currentValue = (value as string) || "";
+          const initialOption = getSowOptionById(currentValue);
+
+          return (
+            <PHIDInput
+              value={currentValue}
+              onChange={(newValue) => {
+                onChange(newValue);
+              }}
+              onBlur={(e) => {
+                if (e.target.value !== context.row.sow) {
+                  dispatch(
+                    actions.editAlternativeProposal({
+                      id: context.row.id as string,
+                      sowId: e.target.value as string,
+                    })
+                  );
+                }
+              }}
+              placeholder="Search for SOW Document"
+              className="w-full"
+              variant="withValueTitleAndDescription"
+              initialOptions={initialOption ? [initialOption] : undefined}
+              fetchOptionsCallback={async (userInput) => {
+                const results = searchSowDocuments(userInput || "") || [];
+                if (results.length === 0) {
+                  return Promise.reject(new Error("No SOW documents found"));
+                }
+                return results.map((doc) => ({
+                  value: doc.value,
+                  title: doc.title,
+                  path: {
+                    text: doc.path,
+                    url: doc.value,
+                  },
+                  description: "",
+                }));
+              }}
+              fetchSelectedOptionCallback={async (documentId) => {
+                const doc = searchSowDocuments(documentId)?.[0];
+                if (!doc) {
+                  return Promise.reject(new Error("SOW document not found"));
+                }
+                return {
+                  value: doc.value,
+                  title: doc.title,
+                  path: {
+                    text: doc.path,
+                    url: doc.value,
+                  },
+                  description: "",
+                };
+              }}
+            />
+          );
+        },
+        renderCell: (value: Proposal["sow"]) => {
+          if (!value) return null;
+          return <div className="text-left">{getDocumentNameById(value)}</div>;
+        },
       },
       {
         field: "paymentTerms",
         title: "Payment Terms",
-        type: "oid",
+        type: "phid",
         editable: true,
         align: "center" as ColumnAlignment,
         onSave: (newValue, context) => {
@@ -508,6 +635,72 @@ export default function Editor() {
             return true;
           }
           return false;
+        },
+        renderCellEditor: (value, onChange, context) => {
+          const currentValue = (value as string) || "";
+          const initialOption = getPaymentTermsOptionById(currentValue);
+
+          return (
+            <PHIDInput
+              value={currentValue}
+              onChange={(newValue) => {
+                onChange(newValue);
+              }}
+              onBlur={(e) => {
+                if (e.target.value !== context.row.paymentTerms) {
+                  dispatch(
+                    actions.editAlternativeProposal({
+                      id: context.row.id as string,
+                      paymentTermsId: e.target.value as string,
+                    })
+                  );
+                }
+              }}
+              placeholder="Search for Payment Terms Document"
+              className="w-full"
+              variant="withValueTitleAndDescription"
+              initialOptions={initialOption ? [initialOption] : undefined}
+              fetchOptionsCallback={async (userInput) => {
+                const results =
+                  searchPaymentTermsDocuments(userInput || "") || [];
+                if (results.length === 0) {
+                  return Promise.reject(
+                    new Error("No Payment Terms documents found")
+                  );
+                }
+                return results.map((doc) => ({
+                  value: doc.value,
+                  title: doc.title,
+                  path: {
+                    text: doc.path,
+                    url: doc.value,
+                  },
+                  description: "",
+                }));
+              }}
+              fetchSelectedOptionCallback={async (documentId) => {
+                const doc = searchPaymentTermsDocuments(documentId)?.[0];
+                if (!doc) {
+                  return Promise.reject(
+                    new Error("Payment Terms document not found")
+                  );
+                }
+                return {
+                  value: doc.value,
+                  title: doc.title,
+                  path: {
+                    text: doc.path,
+                    url: doc.value,
+                  },
+                  description: "",
+                };
+              }}
+            />
+          );
+        },
+        renderCell: (value: Proposal["paymentTerms"]) => {
+          if (!value) return null;
+          return <div className="text-left">{getDocumentNameById(value)}</div>;
         },
       },
       {
@@ -550,7 +743,13 @@ export default function Editor() {
         },
       },
     ],
-    []
+    [
+      dispatch,
+      getPaymentTermsOptionById,
+      getSowOptionById,
+      searchPaymentTermsDocuments,
+      searchSowDocuments,
+    ]
   );
 
   return (
