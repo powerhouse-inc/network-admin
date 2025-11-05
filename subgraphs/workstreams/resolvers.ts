@@ -36,7 +36,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
     try {
       const drives = await (reactor as any).getDrives?.();
       if (Array.isArray(drives) && drives.length > 0) return drives as string[];
-    } catch {}
+    } catch { }
     return [] as string[];
   };
 
@@ -103,10 +103,10 @@ export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
 
       const initialProposalBase = state.initialProposal
         ? {
-            id: state.initialProposal.id,
-            status: state.initialProposal.status,
-            author: state.initialProposal.author,
-          }
+          id: state.initialProposal.id,
+          status: state.initialProposal.status,
+          author: state.initialProposal.author,
+        }
         : null;
 
       const alternativeProposalsBase = (state.alternativeProposals || []).map(
@@ -157,10 +157,10 @@ export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
         rfp: rfpDetails,
         initialProposal: initialProposalBase
           ? {
-              ...initialProposalBase,
-              sow: initialSowDoc?.stateJSON || null,
-              paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
-            }
+            ...initialProposalBase,
+            sow: initialSowDoc?.stateJSON || null,
+            paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
+          }
           : null,
         alternativeProposals: alternativeProposalsBase.map(
           (proposal: any, index: number) => ({
@@ -251,16 +251,21 @@ export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
 
   return {
     Query: {
-      workstreams: async (parent: unknown, args: { driveId: string }) => {
-        const dbWorkstreams = await WorkstreamsProcessor.query(args.driveId, db)
-          .selectFrom("workstreams")
-          .selectAll()
-          .execute();
+      processorWorkstreams: async (parent: unknown, args: {}) => {
+        const drives = await getCandidateDrives();
+        const allProcessorWorkstreams = await Promise.all(
+          drives.map(async (driveId) => {
+            return WorkstreamsProcessor.query(driveId, db)
+              .selectFrom("workstreams")
+              .selectAll()
+              .execute();
+          }),
+        );
 
-          console.log("dbWorkstreams", dbWorkstreams);
+        // Flatten the array of arrays into a single array
+        const flattenedWorkstreams = allProcessorWorkstreams.flat();
 
-
-        return dbWorkstreams.map((workstream) => ({
+        return flattenedWorkstreams.map((workstream: any) => ({
           network_phid: workstream.network_phid,
           network_slug: workstream.network_slug,
           workstream_phid: workstream.workstream_phid,
@@ -369,7 +374,7 @@ export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
 
           for (const row of rows) {
             const hydrated = await hydrateWorkstreamRow(row);
-            
+
             // Collect SOWs based on proposalRole filter
             const sowDocs: any[] = [];
 

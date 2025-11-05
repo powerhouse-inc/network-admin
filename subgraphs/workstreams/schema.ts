@@ -6,8 +6,9 @@ export const schema: DocumentNode = gql`
   Subgraph definition
   """
   type Query {
-    workstreams(driveId: String!): [ProcessorWorkstream!]!
+    processorWorkstreams: [ProcessorWorkstream!]!
     workstream(filter: WorkstreamFilter!): FullQueryWorkstream
+    workstreams(filter: WorkstreamsFilter!): [FullQueryWorkstream!]!
     rfpByWorkstream(filter: WorkstreamFilter!): [WorkstreamRfp!]!
     scopeOfWorkByNetworkOrStatus(filter: scopeOfWorkByNetworkOrStatusFilter!): [SOW_ScopeOfWorkState!]!
   }
@@ -67,6 +68,14 @@ export const schema: DocumentNode = gql`
     workstreamStatus: WorkstreamStatus
     workstreamStatuses: [WorkstreamStatus!]
 
+  }
+
+  input WorkstreamsFilter {
+    networkId: PHID
+    networkSlug: String
+    networkName: String
+    workstreamStatus: WorkstreamStatus
+    workstreamStatuses: [WorkstreamStatus!]
   }
 
   input scopeOfWorkByNetworkOrStatusFilter {
