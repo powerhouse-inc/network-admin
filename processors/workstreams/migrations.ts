@@ -15,23 +15,62 @@ export async function up(db: IRelationalDb<any>): Promise<void> {
     // Type might already exist, ignore error
   }
 
-  // Create table
-  await db.schema
-    .createTable("workstreams")
-    .addColumn('network_phid', 'varchar(255)')
-    .addColumn('network_slug', 'varchar(255)')
-    .addColumn("workstream_phid", "varchar(255)")
-    .addColumn('workstream_slug', 'varchar(255)')
-    .addColumn('workstream_title', 'varchar(255)')
-    .addColumn('workstream_status', sql`workstream_status`)
-    .addColumn('sow_phid', 'varchar(255)')
-    .addColumn('roadmap_oid', 'varchar(255)')
-    .addColumn('final_milestone_target', 'timestamp')
-    .addColumn('initial_proposal_status', sql`proposal_status`)
-    .addColumn('initial_proposal_author', 'varchar(255)')
-    .addPrimaryKeyConstraint("workstreams_pkey", ["workstream_phid"])
-    .ifNotExists()
-    .execute();
+  // Create table with IF NOT EXISTS
+  try {
+    await db.schema
+      .createTable("workstreams")
+      .addColumn('network_phid', 'varchar(255)')
+      .addColumn('network_slug', 'varchar(255)')
+      .addColumn("workstream_phid", "varchar(255)")
+      .addColumn('workstream_slug', 'varchar(255)')
+      .addColumn('workstream_title', 'varchar(255)')
+      .addColumn('workstream_status', sql`workstream_status`)
+      .addColumn('sow_phid', 'varchar(255)')
+      .addColumn('roadmap_oid', 'varchar(255)')
+      .addColumn('final_milestone_target', 'timestamp')
+      .addColumn('initial_proposal_status', sql`proposal_status`)
+      .addColumn('initial_proposal_author', 'varchar(255)')
+      .addPrimaryKeyConstraint("workstreams_pkey", ["workstream_phid"])
+      .ifNotExists()
+      .execute();
+  } catch (error) {
+    // Table might already exist, continue to add missing columns
+  }
+
+  // Add missing columns if table already existed (migration upgrade path)
+  // Use try-catch since PostgreSQL doesn't support IF NOT EXISTS for ALTER TABLE ADD COLUMN
+  const addColumnIfNotExists = async (columnName: string, columnDef: string | any) => {
+    try {
+      if (typeof columnDef === 'string') {
+        await db.schema.alterTable("workstreams").addColumn(columnName, columnDef as any).execute();
+      } else {
+        // For enum types (sql template), use ALTER TABLE with raw SQL
+        if (columnName === 'workstream_status') {
+          await sql`ALTER TABLE workstreams ADD COLUMN workstream_status workstream_status`.execute(db);
+        } else if (columnName === 'initial_proposal_status') {
+          await sql`ALTER TABLE workstreams ADD COLUMN initial_proposal_status proposal_status`.execute(db);
+        }
+      }
+    } catch (error: any) {
+      // Column already exists (error code 42701) - ignore
+      // Other errors might indicate issues, but we continue
+      if (error?.code !== '42701' && error?.code !== '42P16') {
+        console.warn(`Error adding column ${columnName}:`, error?.message || error);
+      }
+    }
+  };
+
+  await addColumnIfNotExists('network_phid', 'varchar(255)');
+  await addColumnIfNotExists('network_slug', 'varchar(255)');
+  await addColumnIfNotExists('workstream_phid', 'varchar(255)');
+  await addColumnIfNotExists('workstream_slug', 'varchar(255)');
+  await addColumnIfNotExists('workstream_title', 'varchar(255)');
+  await addColumnIfNotExists('workstream_status', sql`workstream_status`);
+  await addColumnIfNotExists('sow_phid', 'varchar(255)');
+  await addColumnIfNotExists('roadmap_oid', 'varchar(255)');
+  await addColumnIfNotExists('final_milestone_target', 'timestamp');
+  await addColumnIfNotExists('initial_proposal_status', sql`proposal_status`);
+  await addColumnIfNotExists('initial_proposal_author', 'varchar(255)');
 }
 
 export async function down(db: IRelationalDb<any>): Promise<void> {
