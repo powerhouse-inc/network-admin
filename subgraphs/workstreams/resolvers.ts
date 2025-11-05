@@ -15,6 +15,14 @@ type WorkstreamFilterArgs = {
   workstreamStatuses?: (string | null)[] | null;
 };
 
+type WorkstreamsFilterArgs = {
+  networkId?: string | null;
+  networkSlug?: string | null;
+  networkName?: string | null;
+  workstreamStatus?: string | null;
+  workstreamStatuses?: (string | null)[] | null;
+};
+
 type ScopeOfWorkFilterArgs = {
   networkId?: string | null;
   networkSlug?: string | null;
@@ -306,6 +314,58 @@ export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
         }
 
         return resolved;
+      },
+      workstreams: async (
+        parent: unknown,
+        args: { filter?: WorkstreamsFilterArgs },
+      ) => {
+        const filters = args.filter || {};
+        const candidateDrives = await getCandidateDrives();
+        
+        // Check if any filters are provided
+        const hasFilters =
+          filters.networkId ||
+          filters.networkSlug ||
+          filters.networkName ||
+          filters.workstreamStatus ||
+          (filters.workstreamStatuses &&
+            filters.workstreamStatuses.length > 0);
+
+        const wantedSlug =
+          filters.networkSlug ||
+          (filters.networkName ? deriveSlug(filters.networkName) : undefined);
+
+        const results: any[] = [];
+
+        for (const driveId of candidateDrives) {
+          let qb = WorkstreamsProcessor.query(driveId, db)
+            .selectFrom("workstreams")
+            .selectAll();
+
+          // Only apply filters if any are provided
+          if (hasFilters) {
+            const filterArgs: WorkstreamFilterArgs = {
+              networkId: filters.networkId,
+              networkSlug: filters.networkSlug,
+              networkName: filters.networkName,
+              workstreamStatus: filters.workstreamStatus,
+              workstreamStatuses: filters.workstreamStatuses,
+            };
+            qb = applyWorkstreamFilters(qb, filterArgs, wantedSlug);
+          }
+
+          const rows = await qb.execute();
+          if (rows.length === 0) {
+            continue;
+          }
+
+          for (const row of rows) {
+            const hydrated = await hydrateWorkstreamRow(row);
+            results.push(hydrated);
+          }
+        }
+
+        return results;
       },
       rfpByWorkstream: async (
         parent: unknown,

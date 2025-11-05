@@ -8,7 +8,7 @@ export const schema: DocumentNode = gql`
   type Query {
     processorWorkstreams: [ProcessorWorkstream!]!
     workstream(filter: WorkstreamFilter!): FullQueryWorkstream
-    workstreams(filter: WorkstreamsFilter!): [FullQueryWorkstream!]!
+    workstreams(filter: WorkstreamsFilter): [FullQueryWorkstream!]!
     rfpByWorkstream(filter: WorkstreamFilter!): [WorkstreamRfp!]!
     scopeOfWorkByNetworkOrStatus(filter: scopeOfWorkByNetworkOrStatusFilter!): [SOW_ScopeOfWorkState!]!
   }
