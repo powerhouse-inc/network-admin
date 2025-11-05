@@ -39,6 +39,7 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
           this.updateInitialProposalInWorkstream(strand, operation)
         }
 
+
         // await this.relationalDb
         //   .insertInto("workstreams")
         //   .values({
@@ -56,7 +57,20 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
     }
   }
 
-  async onDisconnect() { }
+  async onDisconnect() {
+    // Clean up all workstreams for this drive's namespace when the drive is deleted
+    // Since the database is already namespaced per drive, we delete all rows
+    // This ensures no orphaned data remains after drive deletion
+    try {
+      await this.relationalDb
+        .deleteFrom("workstreams")
+        .execute();
+      console.log(`Cleaned up workstreams for namespace: ${this.namespace}`);
+    } catch (error) {
+      console.error(`Error cleaning up workstreams for namespace ${this.namespace}:`, error);
+      // Don't throw - cleanup errors shouldn't prevent drive deletion
+    }
+  }
 
   setWorkstream = async (strand: InternalTransmitterUpdate) => {
     const docId = strand.documentId;
@@ -108,7 +122,7 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
         if (!input) return;
 
         console.log('updating initial proposal in workstream', operation.action.input)
-        
+
         // Build update object with only defined values
         const updateData: any = {};
         if (input.sowId) {
@@ -120,7 +134,7 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
         if (input.status) {
           updateData.initial_proposal_status = input.status;
         }
-        
+
         // Only execute update if there are fields to update
         if (Object.keys(updateData).length > 0) {
           await this.relationalDb
@@ -153,7 +167,7 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
         if (!input) return;
 
         console.log('updating client in workstream', operation.action.input)
-        
+
         // Build update object with only defined values
         const updateData: any = {};
         if (input.clientId) {
@@ -162,7 +176,7 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
         if (input.name) {
           updateData.network_slug = input.name.toLowerCase().split(' ').join("-");
         }
-        
+
         // Only execute update if there are fields to update
         if (Object.keys(updateData).length > 0) {
           await this.relationalDb
@@ -195,7 +209,7 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
         if (!input) return;
 
         console.log('updating workstream', operation.action.input)
-        
+
         // Build update object with only defined values
         const updateData: any = {};
         if (input.title) {
@@ -205,7 +219,7 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
         if (input.status) {
           updateData.workstream_status = input.status;
         }
-        
+
         // Only execute update if there are fields to update
         if (Object.keys(updateData).length > 0) {
           await this.relationalDb
