@@ -9,6 +9,7 @@ export const schema: DocumentNode = gql`
     workstreams(driveId: String!): [ProcessorWorkstream!]!
     workstream(filter: WorkstreamFilter!): FullQueryWorkstream
     rfpByWorkstream(filter: WorkstreamFilter!): [WorkstreamRfp!]!
+    scopeOfWorkByNetworkOrStatus(filter: scopeOfWorkByNetworkOrStatusFilter!): [SOW_ScopeOfWorkState!]!
   }
 
   type ProcessorWorkstream {
@@ -65,6 +66,23 @@ export const schema: DocumentNode = gql`
     networkName: String
     workstreamStatus: WorkstreamStatus
     workstreamStatuses: [WorkstreamStatus!]
+
+  }
+
+  input scopeOfWorkByNetworkOrStatusFilter {
+    networkId: PHID
+    networkSlug: String
+    networkName: String
+    workstreamId: PHID
+    workstreamSlug: String
+    workstreamStatus: WorkstreamStatus
+    proposalRole: ProposalRole
+  }
+
+  enum ProposalRole {
+    INITIAL,
+    ALTERNATIVE,
+    AWARDED
   }
 
   """

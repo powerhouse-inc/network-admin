@@ -15,6 +15,16 @@ type WorkstreamFilterArgs = {
   workstreamStatuses?: (string | null)[] | null;
 };
 
+type ScopeOfWorkFilterArgs = {
+  networkId?: string | null;
+  networkSlug?: string | null;
+  networkName?: string | null;
+  workstreamId?: string | null;
+  workstreamSlug?: string | null;
+  workstreamStatus?: string | null;
+  proposalRole?: string | null;
+};
+
 export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
   const reactor = subgraph.reactor;
   const db = subgraph.relationalDb
@@ -213,6 +223,32 @@ export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
     return qb;
   };
 
+  const applyScopeOfWorkFilters = (
+    qb: any,
+    filters: ScopeOfWorkFilterArgs,
+    wantedSlug?: string,
+  ) => {
+    if (filters.workstreamId) {
+      qb = qb.where("workstream_phid", "=", filters.workstreamId);
+    } else if (filters.workstreamSlug) {
+      qb = qb.where("workstream_slug", "=", filters.workstreamSlug);
+    }
+
+    if (filters.networkId) {
+      qb = qb.where("network_phid", "=", filters.networkId);
+    } else if (filters.networkSlug) {
+      qb = qb.where("network_slug", "=", filters.networkSlug);
+    } else if (filters.networkName && wantedSlug) {
+      qb = qb.where("network_slug", "=", wantedSlug);
+    }
+
+    if (filters.workstreamStatus) {
+      qb = qb.where("workstream_status", "=", filters.workstreamStatus);
+    }
+
+    return qb;
+  };
+
   return {
     Query: {
       workstreams: async (parent: unknown, args: { driveId: string }) => {
@@ -298,6 +334,82 @@ export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
               status: hydrated.status,
               rfp: hydrated.rfp,
             });
+          }
+
+          if (filters.workstreamId || filters.workstreamSlug) {
+            break;
+          }
+        }
+
+        return results;
+      },
+      scopeOfWorkByNetworkOrStatus: async (
+        parent: unknown,
+        args: { filter: ScopeOfWorkFilterArgs },
+      ) => {
+        const filters = args.filter || {};
+        const candidateDrives = await getCandidateDrives();
+        const wantedSlug =
+          filters.networkSlug ||
+          (filters.networkName ? deriveSlug(filters.networkName) : undefined);
+
+        const results: any[] = [];
+
+        for (const driveId of candidateDrives) {
+          let qb = WorkstreamsProcessor.query(driveId, db)
+            .selectFrom("workstreams")
+            .selectAll();
+
+          qb = applyScopeOfWorkFilters(qb, filters, wantedSlug);
+
+          const rows = await qb.execute();
+          if (rows.length === 0) {
+            continue;
+          }
+
+          for (const row of rows) {
+            const hydrated = await hydrateWorkstreamRow(row);
+            
+            // Collect SOWs based on proposalRole filter
+            const sowDocs: any[] = [];
+
+            if (!filters.proposalRole) {
+              // If no proposalRole specified, include all SOWs
+              if (hydrated.sow) {
+                sowDocs.push(hydrated.sow);
+              }
+              if (hydrated.initialProposal?.sow) {
+                sowDocs.push(hydrated.initialProposal.sow);
+              }
+              for (const altProposal of hydrated.alternativeProposals || []) {
+                if (altProposal.sow) {
+                  sowDocs.push(altProposal.sow);
+                }
+              }
+            } else if (filters.proposalRole === "INITIAL") {
+              if (hydrated.initialProposal?.sow) {
+                sowDocs.push(hydrated.initialProposal.sow);
+              }
+            } else if (filters.proposalRole === "ALTERNATIVE") {
+              for (const altProposal of hydrated.alternativeProposals || []) {
+                if (altProposal.sow) {
+                  sowDocs.push(altProposal.sow);
+                }
+              }
+            } else if (filters.proposalRole === "AWARDED") {
+              // For AWARDED, we check if the workstream status is AWARDED
+              // and return the initial proposal's SOW (as it's typically the awarded one)
+              if (hydrated.status === "AWARDED" && hydrated.initialProposal?.sow) {
+                sowDocs.push(hydrated.initialProposal.sow);
+              }
+            }
+
+            // Filter out null/undefined SOWs and add to results
+            for (const sow of sowDocs) {
+              if (sow) {
+                results.push(sow);
+              }
+            }
           }
 
           if (filters.workstreamId || filters.workstreamSlug) {
