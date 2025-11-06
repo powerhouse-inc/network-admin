@@ -19,6 +19,7 @@ import { RetainerTab } from "./retainer-tab.js";
 import { EscrowTab } from "./escrow-tab.js";
 import { EvaluationTab } from "./evaluation-tab.js";
 import { useSelectedPaymentTermsDocument } from "../hooks/usePaymentTermsDocument.js";
+import { DocumentToolbar } from "@powerhousedao/design-system";
 
 export type IProps = EditorProps;
 
@@ -68,6 +69,7 @@ export default function Editor() {
 
   return (
     <>
+      <DocumentToolbar />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto p-6">
           {/* Header */}

@@ -67,7 +67,7 @@
     "@powerhousedao/connect": "5.0.1-staging.9",
     "@powerhousedao/design-system": "^5.0.1-staging.9",
     "@powerhousedao/document-engineering": "^1.39.0",
-    "@powerhousedao/project-management": "0.0.46",
+    "@powerhousedao/project-management": "0.0.47",
     "@sentry/vite-plugin": "^4.6.0",
     "@uiw/react-md-editor": "^4.0.8",
     "document-model": "^5.0.1-staging.9",

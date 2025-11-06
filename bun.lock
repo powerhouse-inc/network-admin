@@ -9,7 +9,7 @@
         "@powerhousedao/connect": "5.0.1-staging.9",
         "@powerhousedao/design-system": "^5.0.1-staging.9",
         "@powerhousedao/document-engineering": "^1.39.0",
-        "@powerhousedao/project-management": "0.0.46",
+        "@powerhousedao/project-management": "0.0.47",
         "@sentry/vite-plugin": "^4.6.0",
         "@uiw/react-md-editor": "^4.0.8",
         "document-model": "^5.0.1-staging.9",
@@ -1018,7 +1018,7 @@
 
     "@powerhousedao/ph-cli": ["@powerhousedao/ph-cli@5.0.1-staging.9", "", { "dependencies": { "@powerhousedao/builder-tools": "5.0.1-staging.9", "@powerhousedao/codegen": "5.0.1-staging.9", "@powerhousedao/config": "5.0.1-staging.9", "@powerhousedao/reactor-local": "5.0.1-staging.9", "@powerhousedao/switchboard": "5.0.1-staging.9", "colorette": "^2.0.20", "commander": "^12.1.0", "document-drive": "5.0.1-staging.9", "document-model": "5.0.1-staging.9", "pm2": "^5.4.3" }, "bin": { "ph-cli": "dist/src/cli.js" } }, "sha512-kOEKnkQUMVaJ74Zus0FI14TI44un+AOKpTBnp1KRSVfbhd/nxVNQdyrbn32X4h+CMkKkMTfjvh7dJY7FLZHdQA=="],
 
-    "@powerhousedao/project-management": ["@powerhousedao/project-management@0.0.46", "", { "dependencies": { "@powerhousedao/builder-tools": "^5.0.0-staging.30", "@powerhousedao/common": "^5.0.0-staging.30", "@powerhousedao/design-system": "^5.0.0-staging.30", "@powerhousedao/document-engineering": "^1.39.0", "document-model": "^5.0.0-staging.30", "error": "^10.4.0", "graphql": "^16.10.0", "graphql-tag": "^2.12.6", "zod": "^3.24.2" }, "peerDependencies": { "react": "^18.3.1", "react-dom": "^18.3.1" } }, "sha512-jMwvyshyHAC5Nxm7NyZZDk32A6noCAlgG2OkC15WgXRSgUllmUy8ARqd/n3wtBAwGUGsI9U6z/dpjcfQCYwHUg=="],
+    "@powerhousedao/project-management": ["@powerhousedao/project-management@0.0.47", "", { "dependencies": { "@powerhousedao/builder-tools": "^5.0.1-staging.9", "@powerhousedao/common": "^5.0.1-staging.9", "@powerhousedao/design-system": "^5.0.1-staging.9", "@powerhousedao/document-engineering": "^1.39.0", "document-model": "^5.0.1-staging.9", "error": "^10.4.0", "graphql": "^16.10.0", "graphql-tag": "^2.12.6", "luxon": "^3.7.2", "uuid": "^11.1.0", "zod": "^3.24.2" }, "peerDependencies": { "react": "^19.2.0", "react-dom": "^19.2.0" } }, "sha512-Gl+b+2KLxXfuv7WRDVLdr4TJ7pt+G4GlmLemrkC/z5VLeLHrxELGiE6Py96Tm8TgRTC9mJGxSqPjMMDsSSgiwQ=="],
 
     "@powerhousedao/reactor": ["@powerhousedao/reactor@5.0.1-staging.9", "", { "dependencies": { "@electric-sql/pglite": "0.2.17", "document-drive": "5.0.1-staging.9", "document-model": "5.0.1-staging.9", "kysely": "^0.28.2", "kysely-pglite": "^0.6.1", "uuid": "^11.0.5" } }, "sha512-lCxjcnba8PEusBSI5/No0xEisuPr+pTZmNq+OwMEsxSSeI2lwumjfmh13bxB+hdCI1uku1zur4Z2MpVmoyySsA=="],
 
@@ -5026,6 +5026,10 @@
 
     "@powerhousedao/project-management/document-model": ["document-model@5.0.2", "", { "dependencies": { "change-case": "^5.4.4", "jszip": "^3.10.1", "mime": "^4.0.4", "mutative": "^1.0.5", "safe-stable-stringify": "^2.4.3", "sha1-uint8array": "^0.10.7", "zod": "^3.24.3" } }, "sha512-AF6iQWZjDtfGMbSyK1IPz7o1i5XqNfo9UMMRvbdLCvhCNVrn8x/raUfVVkny+Xjq5k9OgASSd2vRjbV/2Jrv7g=="],
 
+    "@powerhousedao/project-management/luxon": ["luxon@3.7.2", "", {}, "sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew=="],
+
+    "@powerhousedao/project-management/uuid": ["uuid@11.1.0", "", { "bin": { "uuid": "dist/esm/bin/uuid" } }, "sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A=="],
+
     "@powerhousedao/reactor/uuid": ["uuid@11.1.0", "", { "bin": { "uuid": "dist/esm/bin/uuid" } }, "sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A=="],
 
     "@powerhousedao/reactor-api/change-case": ["change-case@5.4.4", "", {}, "sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w=="],
@@ -5990,9 +5994,9 @@
 
     "@powerhousedao/project-management/@powerhousedao/builder-tools/commander": ["commander@13.1.0", "", {}, "sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw=="],
 
-    "@powerhousedao/project-management/@powerhousedao/builder-tools/uuid": ["uuid@11.1.0", "", { "bin": { "uuid": "dist/esm/bin/uuid" } }, "sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A=="],
-
     "@powerhousedao/project-management/@powerhousedao/common/document-drive": ["document-drive@5.0.2", "", { "dependencies": { "@helia/mfs": "^4.0.3", "@powerhousedao/config": "5.0.2", "@sindresorhus/fnv1a": "^3.1.0", "change-case": "^5.4.4", "document-model": "5.0.2", "exponential-backoff": "^3.1.1", "graphql": "^16.11.0", "graphql-request": "^6.1.0", "helia": "^5.3.0", "json-stringify-deterministic": "^1.0.12", "kysely": "^0.28.2", "lru-cache": "^11.1.0", "nanoevents": "^9.0.0", "object-sizeof": "^2.6.5", "prisma": "5.17.0", "sanitize-filename": "^1.6.3", "uuid": "^11.0.5", "zod": "^3.24.3" }, "optionalDependencies": { "@prisma/client": "5.17.0", "localforage": "^1.10.0", "redis": "^4.6.15", "sequelize": "^6.37.3", "sqlite3": "^5.1.7" } }, "sha512-Tq2rRfkzyfFWRp9FIskldwd4aX+Fiy8WK//Z5WO5yGiBI47eBjtvmSpWPHItuJUFfB8Rfoykw8NGsGN3JPifUg=="],
+
+    "@powerhousedao/project-management/@powerhousedao/common/luxon": ["luxon@3.7.1", "", {}, "sha512-RkRWjA926cTvz5rAb1BqyWkKbbjzCGchDUIKMCUvNi17j6f6j8uHGDV82Aqcqtzd+icoYpELmG3ksgGiFNNcNg=="],
 
     "@powerhousedao/project-management/@powerhousedao/design-system/change-case": ["change-case@5.4.4", "", {}, "sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w=="],
 
@@ -6488,11 +6492,11 @@
 
     "@powerhousedao/project-management/@powerhousedao/builder-tools/@powerhousedao/reactor-browser/document-drive": ["document-drive@5.0.2", "", { "dependencies": { "@helia/mfs": "^4.0.3", "@powerhousedao/config": "5.0.2", "@sindresorhus/fnv1a": "^3.1.0", "change-case": "^5.4.4", "document-model": "5.0.2", "exponential-backoff": "^3.1.1", "graphql": "^16.11.0", "graphql-request": "^6.1.0", "helia": "^5.3.0", "json-stringify-deterministic": "^1.0.12", "kysely": "^0.28.2", "lru-cache": "^11.1.0", "nanoevents": "^9.0.0", "object-sizeof": "^2.6.5", "prisma": "5.17.0", "sanitize-filename": "^1.6.3", "uuid": "^11.0.5", "zod": "^3.24.3" }, "optionalDependencies": { "@prisma/client": "5.17.0", "localforage": "^1.10.0", "redis": "^4.6.15", "sequelize": "^6.37.3", "sqlite3": "^5.1.7" } }, "sha512-Tq2rRfkzyfFWRp9FIskldwd4aX+Fiy8WK//Z5WO5yGiBI47eBjtvmSpWPHItuJUFfB8Rfoykw8NGsGN3JPifUg=="],
 
+    "@powerhousedao/project-management/@powerhousedao/builder-tools/@powerhousedao/reactor-browser/luxon": ["luxon@3.7.1", "", {}, "sha512-RkRWjA926cTvz5rAb1BqyWkKbbjzCGchDUIKMCUvNi17j6f6j8uHGDV82Aqcqtzd+icoYpELmG3ksgGiFNNcNg=="],
+
     "@powerhousedao/project-management/@powerhousedao/common/document-drive/@powerhousedao/config": ["@powerhousedao/config@5.0.2", "", { "dependencies": { "@microsoft/api-extractor": "^7.48.1" } }, "sha512-Bp0AHiVqN7X2dIc0IJJg9vLAmua5HzLWGvSg3wwB35glD1/uWRIZMboR8Y8LnTDuxcMQYEZwVImGPjJvntjrzg=="],
 
     "@powerhousedao/project-management/@powerhousedao/common/document-drive/change-case": ["change-case@5.4.4", "", {}, "sha512-HRQyTk2/YPEkt9TnUPbOpr64Uw3KOicFWPVBb+xiHvd6eBx/qPr9xqfBFDT8P2vWsvvz4jbEkfDe71W3VyNu2w=="],
-
-    "@powerhousedao/project-management/@powerhousedao/common/document-drive/uuid": ["uuid@11.1.0", "", { "bin": { "uuid": "dist/esm/bin/uuid" } }, "sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A=="],
 
     "@reown/appkit-controllers/@walletconnect/universal-provider/@walletconnect/sign-client/@walletconnect/core": ["@walletconnect/core@2.21.0", "", { "dependencies": { "@walletconnect/heartbeat": "1.2.2", "@walletconnect/jsonrpc-provider": "1.0.14", "@walletconnect/jsonrpc-types": "1.0.4", "@walletconnect/jsonrpc-utils": "1.0.8", "@walletconnect/jsonrpc-ws-connection": "1.0.16", "@walletconnect/keyvaluestorage": "1.1.1", "@walletconnect/logger": "2.1.2", "@walletconnect/relay-api": "1.0.11", "@walletconnect/relay-auth": "1.1.0", "@walletconnect/safe-json": "1.0.2", "@walletconnect/time": "1.0.2", "@walletconnect/types": "2.21.0", "@walletconnect/utils": "2.21.0", "@walletconnect/window-getters": "1.0.1", "es-toolkit": "1.33.0", "events": "3.3.0", "uint8arrays": "3.1.0" } }, "sha512-o6R7Ua4myxR8aRUAJ1z3gT9nM+jd2B2mfamu6arzy1Cc6vi10fIwFWb6vg3bC8xJ6o9H3n/cN5TOW3aA9Y1XVw=="],
 

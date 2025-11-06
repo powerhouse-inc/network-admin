@@ -12,7 +12,7 @@
   "packages": [
     {
       "packageName": "@powerhousedao/project-management",
-      "version": "0.0.46",
+      "version": "0.0.47",
       "provider": "npm"
     }
   ]

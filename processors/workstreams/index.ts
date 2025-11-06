@@ -90,7 +90,7 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
           // network_phid: strand.state.client.id,
           // network_slug: strand.state.client.name.toLowerCase().split(' ').join("-"),
           workstream_phid: strand.documentId,
-          workstream_slug: strand.state.title.toLowerCase().split(' ').join("-"),
+          workstream_slug: strand.state.title && strand.state.title.toLowerCase().split(' ').join("-"),
           workstream_title: strand.state.title,
           workstream_status: strand.state.status,
           // sow_phid: strand.state.sow,

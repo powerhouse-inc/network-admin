@@ -17,12 +17,8 @@ import {
   useDocumentsInSelectedDrive,
 } from "@powerhousedao/reactor-browser";
 import { type DocumentModelModule, type PHDocument } from "document-model";
-import { type Node} from "document-drive";
+import { type Node } from "document-drive";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
-import {
-  editClientInfo,
-  editWorkstream,
-} from "../../../document-models/workstream/gen/creators.js";
 import { PaymentIcon } from "./icons/PaymentIcon.js";
 import { RfpIcon } from "./icons/RfpIcon.js";
 import { SowIcon } from "./icons/SowIcon.js";
@@ -32,7 +28,6 @@ import type { WorkstreamDocument } from "../../../document-models/workstream/ind
 import type { NetworkProfileDocument } from "../../../document-models/network-profile/index.js";
 import type { RequestForProposalsDocument } from "../../../document-models/request-for-proposals/index.js";
 import type { PaymentTermsDocument } from "../../../document-models/payment-terms/index.js";
-import type { ScopeOfWorkDocument } from "@powerhousedao/project-management/document-models/scope-of-work";
 
 const WorkstreamStatusEnums = [
   "RFP_DRAFT",
@@ -85,7 +80,8 @@ export function DriveExplorer(props: { children?: any }) {
   //check if network profile doc is created, set isNetworkProfileCreated to true
   const isNetworkProfileCreated =
     networkAdminDocuments?.some(
-      (doc: PHDocument) => doc.header.documentType === "powerhouse/network-profile"
+      (doc: PHDocument) =>
+        doc.header.documentType === "powerhouse/network-profile"
     ) || false;
 
   // Sync global selected document with local activeDocumentId
@@ -146,7 +142,7 @@ export function DriveExplorer(props: { children?: any }) {
 
                 const sowDoc = allDocuments?.find(
                   (doc) => doc.header.id === sow
-                ) as ScopeOfWorkDocument | undefined;
+                ) as PHDocument | undefined;
                 const rfpDoc = allDocuments?.find(
                   (doc) => doc.header.id === rfp
                 ) as RequestForProposalsDocument | undefined;
@@ -210,7 +206,7 @@ export function DriveExplorer(props: { children?: any }) {
                         // Find documents for this specific proposal
                         const proposalSowDoc = allDocuments?.find(
                           (doc) => doc.header.id === proposal.sow
-                        ) as ScopeOfWorkDocument | undefined;
+                        ) as PHDocument | undefined;
                         const proposalPaymentTermsDoc = allDocuments?.find(
                           (doc) => doc.header.id === proposal.paymentTerms
                         ) as PaymentTermsDocument | undefined;

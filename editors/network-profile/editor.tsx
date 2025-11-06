@@ -12,6 +12,7 @@ import {
 } from "../../document-models/network-profile/index.js";
 import { useCallback, useState, useEffect } from "react";
 import { useSelectedNetworkProfileDocument } from "../hooks/useNetworkProfileDocument.js";
+import { DocumentToolbar } from "@powerhousedao/design-system";
 
 export type IProps = EditorProps;
 
@@ -284,6 +285,7 @@ export default function Editor() {
 
   return (
     <div className="w-full bg-gray-50 min-h-screen">
+      <DocumentToolbar />
       <div className="p-6 max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">

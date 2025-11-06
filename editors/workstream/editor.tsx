@@ -26,7 +26,15 @@ import {
   actions as rfpActions,
 } from "../../document-models/request-for-proposals/index.js";
 import { ScopeOfWork } from "@powerhousedao/project-management/document-models";
-import { type ScopeOfWorkState } from "@powerhousedao/project-management/document-models/scope-of-work";
+import type { DocumentModelModule } from "document-model";
+
+// Extract ScopeOfWorkState from the module type
+type ScopeOfWorkModule = typeof ScopeOfWork;
+type ScopeOfWorkPHState =
+  ScopeOfWorkModule extends DocumentModelModule<infer T> ? T : never;
+type ScopeOfWorkState = ScopeOfWorkPHState extends { global: infer G }
+  ? G
+  : never;
 import { generateId } from "document-model/core";
 import {
   useDocumentById,
@@ -36,9 +44,9 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSelectedWorkstreamDocument } from "../hooks/useWorkstreamDocument.js";
-import type { WorkstreamState } from "../../document-models/workstream/gen/schema/types.js";
 import type { Proposal } from "../../document-models/workstream/gen/schema/types.js";
 import type { FileNode } from "document-drive";
+import { DocumentToolbar } from "@powerhousedao/design-system";
 export type IProps = EditorProps;
 
 // Status options for the dropdown
@@ -773,6 +781,7 @@ export default function Editor() {
 
   return (
     <div className="w-full bg-gray-50">
+      <DocumentToolbar />
       <div className="p-6 max-w-4xl mx-auto min-h-screen">
         {/* Header Section */}
         <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
