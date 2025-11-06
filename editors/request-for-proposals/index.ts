@@ -6,9 +6,7 @@ export const module: EditorModule = {
   documentTypes: ["powerhouse/rfp"],
   config: {
     id: "request-for-proposals-editor",
-    disableExternalControls: true,
-    documentToolbarEnabled: true,
-    showSwitchboardLink: true,
+    name: "Request for Proposals Editor",
   },
 };
 

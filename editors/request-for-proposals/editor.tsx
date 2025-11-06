@@ -1,7 +1,7 @@
 import type { Action, EditorProps } from "document-model";
 import {
   type RequestForProposalsDocument,
-  RequestForProposalsState,
+  type RequestForProposalsState,
   actions,
   type RfpStatusInput,
 } from "../../document-models/request-for-proposals/index.js";
@@ -33,7 +33,7 @@ export default function Editor() {
     (actionOrActions: Action | Action[] | undefined) => void,
   ];
 
-  const state = doc?.state.global as RequestForProposalsState;
+  const state = doc?.state.global;
 
   // Validation function for budget range
   const validateBudgetRange = (min: number | null, max: number | null) => {

@@ -12,33 +12,39 @@
   },
   "exports": {
     ".": {
+      "development": "./index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./document-models": {
+      "development": "./document-models/index.ts",
       "types": "./dist/document-models/index.d.ts",
       "default": "./dist/document-models/index.js"
     },
     "./editors": {
+      "development": "./editors/index.ts",
       "types": "./dist/editors/index.d.ts",
       "default": "./dist/editors/index.js"
     },
     "./subgraphs": {
+      "development": "./subgraphs/index.ts",
       "types": "./dist/subgraphs/index.d.ts",
       "default": "./dist/subgraphs/index.js"
     },
     "./processors": {
+      "development": "./processors/index.ts",
       "types": "./dist/processors/index.d.ts",
       "default": "./dist/processors/index.js"
     },
     "./manifest": {
-      "types": "./dist/manifest.d.ts",
-      "default": "./dist/manifest.js"
+      "development": "./powerhouse.manifest.json",
+      "default": "./dist/powerhouse.manifest.json"
     },
     "./style.css": "./dist/style.css"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint . --cache",
+    "lint:fix": "eslint . --fix --cache",
     "build:tsc": "tsc",
     "build:tsc:watch": "tsc --watch",
     "build:css": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css",
@@ -46,6 +52,7 @@
     "build": "bun run build:tsc && bun run build:css",
     "test": "vitest run",
     "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run build",
     "generate": "ph-cli generate",
     "connect": "ph-cli connect",
@@ -55,54 +62,65 @@
     "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh"
   },
   "dependencies": {
-    "@powerhousedao/builder-tools": "^5.0.0-staging.30",
-    "@powerhousedao/common": "^5.0.0-staging.30",
-    "@powerhousedao/design-system": "^5.0.0-staging.30",
+    "@powerhousedao/builder-tools": "^5.0.1-staging.9",
+    "@powerhousedao/common": "^5.0.1-staging.9",
+    "@powerhousedao/connect": "5.0.1-staging.9",
+    "@powerhousedao/design-system": "^5.0.1-staging.9",
     "@powerhousedao/document-engineering": "^1.39.0",
     "@powerhousedao/project-management": "0.0.46",
+    "@sentry/vite-plugin": "^4.6.0",
     "@uiw/react-md-editor": "^4.0.8",
-    "document-model": "^5.0.0-staging.30",
+    "document-model": "^5.0.1-staging.9",
     "error": "^10.4.0",
     "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6",
     "lucide-react": "^0.546.0",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
+    "vite-plugin-html": "^3.2.2",
+    "vite-plugin-svgr": "^4.5.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.2.12",
     "@eslint/js": "^9.25.0",
     "@powerhousedao/analytics-engine-core": "^0.5.0",
-    "@powerhousedao/codegen": "^5.0.0-staging.30",
-    "@powerhousedao/ph-cli": "^5.0.0-staging.30",
-    "@powerhousedao/reactor-api": "^5.0.0-staging.30",
-    "@powerhousedao/reactor-browser": "^5.0.0-staging.30",
-    "@powerhousedao/reactor-local": "^5.0.0-staging.30",
+    "@powerhousedao/codegen": "^5.0.1-staging.9",
+    "@powerhousedao/ph-cli": "^5.0.1-staging.9",
+    "@powerhousedao/reactor-api": "^5.0.1-staging.9",
+    "@powerhousedao/reactor-browser": "^5.0.1-staging.9",
+    "@powerhousedao/reactor-local": "^5.0.1-staging.9",
     "@powerhousedao/scalars": "^1.33.1-staging.5",
-    "@powerhousedao/switchboard": "^5.0.0-staging.30",
-    "@tailwindcss/cli": "^4.1.4",
+    "@powerhousedao/switchboard": "^5.0.1-staging.9",
     "@testing-library/react": "^16.3.0",
-    "@types/node": "^22.14.1",
-    "@types/react": "^18.3.20",
-    "@vitejs/plugin-react": "^4.4.1",
-    "document-drive": "^5.0.0-staging.30",
-    "eslint": "^9.25.0",
+    "@tailwindcss/cli": "^4.1.14",
+    "@types/node": "^22.13.11",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.0.4",
+    "document-drive": "^5.0.1-staging.9",
+    "eslint": "^9.37.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^16.0.0",
     "package-manager-detector": "^0.2.8",
     "pm2": "^5.4.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "tailwindcss": "^4.1.4",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.30.1",
-    "vite": "^6.2.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "storybook": "^8.6.14",
+    "tailwindcss": "^4.1.14",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vite": "^7.1.9",
+    "vite-plugin-node-polyfills": "^0.24.0",
     "vitest": "^3.0.9"
   },
   "peerDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "overrides": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   }
 }

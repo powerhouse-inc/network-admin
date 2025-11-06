@@ -4,14 +4,15 @@ import {
   Select,
   Textarea,
   DatePicker,
+  Button
 } from "@powerhousedao/document-engineering";
-import { Button, toast } from "@powerhousedao/design-system";
+import { toast } from "@powerhousedao/design-system";
 import type {
   PaymentTermsState,
   BillingFrequency,
 } from "../../document-models/payment-terms/gen/schema/types.js";
 import type { PaymentTermsAction } from "../../document-models/payment-terms/gen/actions.js";
-import { actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
+import { type actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
 
 export interface RetainerTabProps {
   state: PaymentTermsState;
@@ -119,7 +120,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
           <Button
             onClick={() => setIsEditing(true)}
             color="light"
-            size="small"
+            size="sm"
             className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
             {state.retainerDetails
@@ -289,7 +290,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
         <Button
           type="submit"
           color="light"
-          size="small"
+          size="sm"
           className="cursor-pointer hover:bg-blue-600 hover:text-white"
         >
           Save Configuration
@@ -298,7 +299,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
           type="button"
           onClick={handleCancel}
           color="light"
-          size="small"
+          size="sm"
           className="cursor-pointer hover:bg-gray-600 hover:text-white"
         >
           Cancel

@@ -1,27 +1,17 @@
 /**
  * Factory methods for creating WorkstreamDocument instances
  */
-
-import {
-  createBaseState,
-  defaultBaseState,
-  type PHAuthState,
-  type PHDocumentState,
-  type PHBaseState,
-} from "document-model";
+import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
+import { createBaseState, defaultBaseState } from "document-model/core";
 import type {
   WorkstreamDocument,
   WorkstreamLocalState,
-  WorkstreamState,
+  WorkstreamGlobalState,
+  WorkstreamPHState,
 } from "./types.js";
 import { createDocument } from "./utils.js";
 
-export type WorkstreamPHState = PHBaseState & {
-  global: WorkstreamState;
-  local: WorkstreamLocalState;
-};
-
-export function defaultGlobalState(): WorkstreamState {
+export function defaultGlobalState(): WorkstreamGlobalState {
   return {
     code: null,
     title: null,
@@ -49,12 +39,12 @@ export function defaultPHState(): WorkstreamPHState {
 }
 
 export function createGlobalState(
-  state?: Partial<WorkstreamState>,
-): WorkstreamState {
+  state?: Partial<WorkstreamGlobalState>,
+): WorkstreamGlobalState {
   return {
     ...defaultGlobalState(),
     ...(state || {}),
-  } as WorkstreamState;
+  } as WorkstreamGlobalState;
 }
 
 export function createLocalState(
@@ -68,7 +58,7 @@ export function createLocalState(
 
 export function createState(
   baseState?: Partial<PHBaseState>,
-  globalState?: Partial<WorkstreamState>,
+  globalState?: Partial<WorkstreamGlobalState>,
   localState?: Partial<WorkstreamLocalState>,
 ): WorkstreamPHState {
   return {
@@ -87,7 +77,7 @@ export function createWorkstreamDocument(
   state?: Partial<{
     auth?: Partial<PHAuthState>;
     document?: Partial<PHDocumentState>;
-    global?: Partial<WorkstreamState>;
+    global?: Partial<WorkstreamGlobalState>;
     local?: Partial<WorkstreamLocalState>;
   }>,
 ): WorkstreamDocument {

@@ -1,15 +1,20 @@
-import type { PHDocument } from "document-model";
+import type { PHDocument, PHBaseState } from "document-model";
 import type { RequestForProposalsAction } from "./actions.js";
-import type { RequestForProposalsPHState } from "./ph-factories.js";
-import type { RequestForProposalsState } from "./schema/types.js";
+import type { RequestForProposalsState as RequestForProposalsGlobalState } from "./schema/types.js";
 
 export { z } from "./schema/index.js";
-export type * from "./schema/types.js";
+export * from "./schema/types.js";
 type RequestForProposalsLocalState = Record<PropertyKey, never>;
-export type RequestForProposalsDocument =
-  PHDocument<RequestForProposalsPHState>;
+type RequestForProposalsPHState = PHBaseState & {
+  global: RequestForProposalsGlobalState;
+  local: RequestForProposalsLocalState;
+};
+type RequestForProposalsDocument = PHDocument<RequestForProposalsPHState>;
+
 export type {
-  RequestForProposalsState,
+  RequestForProposalsGlobalState,
   RequestForProposalsLocalState,
+  RequestForProposalsPHState,
   RequestForProposalsAction,
+  RequestForProposalsDocument,
 };

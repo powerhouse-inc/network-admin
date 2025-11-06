@@ -6,9 +6,7 @@ export const module: EditorModule = {
   documentTypes: ["powerhouse/workstream"],
   config: {
     id: "workstream-editor",
-    disableExternalControls: true,
-    documentToolbarEnabled: true,
-    showSwitchboardLink: true,
+    name: "Workstream Editor",
   },
 };
 

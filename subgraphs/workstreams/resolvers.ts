@@ -1,4 +1,4 @@
-import { type Subgraph } from "@powerhousedao/reactor-api";
+import { type ISubgraph } from "@powerhousedao/reactor-api";
 import { WorkstreamsProcessor } from "../../processors/workstreams/index.js";
 import {
   type RequestForProposalsDocument,
@@ -33,7 +33,7 @@ type ScopeOfWorkFilterArgs = {
   proposalRole?: string | null;
 };
 
-export const getResolvers = (subgraph: Subgraph): Record<string, unknown> => {
+export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
   const reactor = subgraph.reactor;
   const db = subgraph.relationalDb
 

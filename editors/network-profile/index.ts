@@ -6,9 +6,7 @@ export const module: EditorModule = {
   documentTypes: ["powerhouse/network-profile"],
   config: {
     id: "network-profile-editor",
-    disableExternalControls: true,
-    documentToolbarEnabled: true,
-    showSwitchboardLink: true,
+    name: "Network Profile Editor",
   },
 };
 

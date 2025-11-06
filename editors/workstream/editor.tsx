@@ -11,35 +11,34 @@ import {
   OIDInput,
   PHIDInput,
   ObjectSetTable,
-  ColumnDef,
-  ColumnAlignment,
+  type ColumnDef,
+  type ColumnAlignment,
   buildEnumCellEditor,
 } from "@powerhousedao/document-engineering";
 import {
   type WorkstreamDocument,
   actions,
   type WorkstreamStatusInput,
-  ProposalStatusInput,
+  type ProposalStatusInput,
 } from "../../document-models/workstream/index.js";
 import {
   type RequestForProposalsState,
   actions as rfpActions,
 } from "../../document-models/request-for-proposals/index.js";
 import { ScopeOfWork } from "@powerhousedao/project-management/document-models";
-import { ScopeOfWorkState } from "@powerhousedao/project-management/document-models/scope-of-work";
-import { generateId } from "document-model";
+import { type ScopeOfWorkState } from "@powerhousedao/project-management/document-models/scope-of-work";
+import { generateId } from "document-model/core";
 import {
   useDocumentById,
   useSelectedDrive,
   addDocument,
-  useSelectedDriveDocuments,
-  dispatchActions,
-  useSelectedDocumentId,
+  useDocumentsInSelectedDrive,
 } from "@powerhousedao/reactor-browser";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSelectedWorkstreamDocument } from "../hooks/useWorkstreamDocument.js";
 import type { WorkstreamState } from "../../document-models/workstream/gen/schema/types.js";
 import type { Proposal } from "../../document-models/workstream/gen/schema/types.js";
+import type { FileNode } from "document-drive";
 export type IProps = EditorProps;
 
 // Status options for the dropdown
@@ -67,15 +66,15 @@ export default function Editor() {
     WorkstreamDocument,
     (actionOrActions: Action | Action[] | undefined) => void,
   ];
-
   // Try to get dispatch from context or props
-  const [state, setState] = useState(doc.state.global as WorkstreamState);
+  const [state, setState] = useState(doc.state.global);
 
   useEffect(() => {
-    setState(doc.state.global as WorkstreamState);
+    setState(doc.state.global);
   }, [doc.state.global]);
 
   const [selectedDrive] = useSelectedDrive();
+  const [newNode, setNewNode] = useState<FileNode | null>(null);
 
   // Local state to track newly created document IDs
   const [newlyCreatedSowId, setNewlyCreatedSowId] = useState<string | null>(
@@ -93,6 +92,35 @@ export default function Editor() {
   const [isCreatingSow, setIsCreatingSow] = useState(false);
   const [isCreatingPaymentTerms, setIsCreatingPaymentTerms] = useState(false);
 
+  const [document, dispatchAction] = useDocumentById(newNode?.id);
+
+  const updateRFPDocWithDispatch = () => {
+    dispatchAction(
+      rfpActions.editRfp({
+        title: `RFP-${state.title || ""}`,
+      })
+    );
+  };
+
+  const updateSOWDocWithDispatch = () => {
+    dispatchAction(
+      ScopeOfWork.actions.editScopeOfWork({
+        title: `SOW-${state.title || ""}`,
+      })
+    );
+  };
+
+  useEffect(() => {
+    if (newNode) {
+      if (newNode.documentType === "powerhouse/rfp") {
+        updateRFPDocWithDispatch();
+      } else if (newNode.documentType === "powerhouse/scopeofwork") {
+        updateSOWDocWithDispatch();
+      }
+      setNewNode(null);
+    }
+  }, [newNode]);
+
   const createRfpDocument = useCallback(async () => {
     if (isCreatingRfp) return null; // Prevent double-calls
     setIsCreatingRfp(true);
@@ -108,12 +136,7 @@ export default function Editor() {
       );
       console.log("Created RFP document", createdNode);
       if (createdNode) {
-        await dispatchActions(
-          rfpActions.editRfp({
-            title: `RFP-${state.title || ""}`,
-          }),
-          createdNode.id
-        );
+        setNewNode(createdNode);
       }
       return createdNode;
     } catch (error) {
@@ -139,12 +162,7 @@ export default function Editor() {
       );
       console.log("Created SOW document", createdNode);
       if (createdNode) {
-        await dispatchActions(
-          ScopeOfWork.actions.editScopeOfWork({
-            title: `SOW-${state.title || ""}`,
-          }),
-          createdNode.id
-        );
+        setNewNode(createdNode);
       }
       return createdNode;
     } catch (error) {
@@ -212,7 +230,7 @@ export default function Editor() {
     }
   }, [state.rfp?.id, newlyCreatedRfpId]);
 
-  const allDocuments = useSelectedDriveDocuments();
+  const allDocuments = useDocumentsInSelectedDrive();
 
   let rfpDocumentNode: PHDocument | undefined = undefined;
   if (state.rfp?.id) {
@@ -403,9 +421,10 @@ export default function Editor() {
 
     const clientId = state.client?.id || generateId();
 
-    let clientInfoUpdate: { clientId: string; name?: string; icon?: string } = {
-      clientId,
-    };
+    const clientInfoUpdate: { clientId: string; name?: string; icon?: string } =
+      {
+        clientId,
+      };
 
     if (field === "name") {
       clientInfoUpdate.name = value === "" ? "" : value || undefined;
@@ -548,7 +567,7 @@ export default function Editor() {
           if (newValue !== context.row.sow) {
             dispatch(
               actions.editAlternativeProposal({
-                id: context.row.id as string,
+                id: context.row.id,
                 sowId: newValue as string,
               })
             );
@@ -570,8 +589,8 @@ export default function Editor() {
                 if (e.target.value !== context.row.sow) {
                   dispatch(
                     actions.editAlternativeProposal({
-                      id: context.row.id as string,
-                      sowId: e.target.value as string,
+                      id: context.row.id,
+                      sowId: e.target.value,
                     })
                   );
                 }
@@ -628,7 +647,7 @@ export default function Editor() {
           if (newValue !== context.row.paymentTerms) {
             dispatch(
               actions.editAlternativeProposal({
-                id: context.row.id as string,
+                id: context.row.id,
                 paymentTermsId: newValue as string,
               })
             );
@@ -650,8 +669,8 @@ export default function Editor() {
                 if (e.target.value !== context.row.paymentTerms) {
                   dispatch(
                     actions.editAlternativeProposal({
-                      id: context.row.id as string,
-                      paymentTermsId: e.target.value as string,
+                      id: context.row.id,
+                      paymentTermsId: e.target.value,
                     })
                   );
                 }
@@ -714,7 +733,7 @@ export default function Editor() {
           if (newValue !== context.row.status) {
             dispatch(
               actions.editAlternativeProposal({
-                id: context.row.id as string,
+                id: context.row.id,
                 status: newValue as ProposalStatusInput,
               })
             );
@@ -1002,7 +1021,7 @@ export default function Editor() {
             <div className="mt-4">
               <Button
                 color="light"
-                size="small"
+                // size="sm"
                 className="cursor-pointer hover:bg-gray-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 title={"Save Workstream"}
                 aria-description={"Save Workstream"}
@@ -1343,7 +1362,7 @@ export default function Editor() {
                 <div className="mt-4">
                   <Button
                     color="light"
-                    size="small"
+                    // size="small"
                     className="cursor-pointer hover:bg-gray-600 hover:text-white"
                     title={"Create Initial Proposal"}
                     aria-description={"Create Initial Proposal"}

@@ -1,27 +1,17 @@
 /**
  * Factory methods for creating NetworkProfileDocument instances
  */
-
-import {
-  createBaseState,
-  defaultBaseState,
-  type PHAuthState,
-  type PHDocumentState,
-  type PHBaseState,
-} from "document-model";
+import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
+import { createBaseState, defaultBaseState } from "document-model/core";
 import type {
   NetworkProfileDocument,
   NetworkProfileLocalState,
-  NetworkProfileState,
+  NetworkProfileGlobalState,
+  NetworkProfilePHState,
 } from "./types.js";
 import { createDocument } from "./utils.js";
 
-export type NetworkProfilePHState = PHBaseState & {
-  global: NetworkProfileState;
-  local: NetworkProfileLocalState;
-};
-
-export function defaultGlobalState(): NetworkProfileState {
+export function defaultGlobalState(): NetworkProfileGlobalState {
   return {
     name: "",
     icon: "",
@@ -50,12 +40,12 @@ export function defaultPHState(): NetworkProfilePHState {
 }
 
 export function createGlobalState(
-  state?: Partial<NetworkProfileState>,
-): NetworkProfileState {
+  state?: Partial<NetworkProfileGlobalState>,
+): NetworkProfileGlobalState {
   return {
     ...defaultGlobalState(),
     ...(state || {}),
-  } as NetworkProfileState;
+  } as NetworkProfileGlobalState;
 }
 
 export function createLocalState(
@@ -69,7 +59,7 @@ export function createLocalState(
 
 export function createState(
   baseState?: Partial<PHBaseState>,
-  globalState?: Partial<NetworkProfileState>,
+  globalState?: Partial<NetworkProfileGlobalState>,
   localState?: Partial<NetworkProfileLocalState>,
 ): NetworkProfilePHState {
   return {
@@ -88,7 +78,7 @@ export function createNetworkProfileDocument(
   state?: Partial<{
     auth?: Partial<PHAuthState>;
     document?: Partial<PHDocumentState>;
-    global?: Partial<NetworkProfileState>;
+    global?: Partial<NetworkProfileGlobalState>;
     local?: Partial<NetworkProfileLocalState>;
   }>,
 ): NetworkProfileDocument {

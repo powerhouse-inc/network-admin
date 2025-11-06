@@ -23,19 +23,19 @@ export const reducer: NetworkProfileNetworkProfileManagementOperations = {
         state.description = action.input.description || "";
     },
     setCategoryOperation(state, action, dispatch) {
-        state.category = action.input.category || [];
+        state.category = action.input.category || null;
     },
     setXOperation(state, action, dispatch) {
-        state.x = action.input.x || "";
+        state.x = action.input.x || null;
     },
     setGithubOperation(state, action, dispatch) {
-        state.github = action.input.github || "";
+        state.github = action.input.github || null;
     },
     setDiscordOperation(state, action, dispatch) {
-        state.discord = action.input.discord || "";
+        state.discord = action.input.discord || null;
     },
     setYoutubeOperation(state, action, dispatch) {
-        state.youtube = action.input.youtube || "";
+        state.youtube = action.input.youtube || null;
     },
     setProfileNameOperation(state, action, dispatch) {
         state.name = action.input.name || "";

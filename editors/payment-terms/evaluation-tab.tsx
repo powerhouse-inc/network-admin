@@ -1,12 +1,12 @@
 import { useState, useCallback, useMemo } from "react";
-import { TextInput, Select, Textarea } from "@powerhousedao/document-engineering";
-import { Button, toast } from "@powerhousedao/design-system";
+import { TextInput, Select, Textarea, Button } from "@powerhousedao/document-engineering";
+import { toast } from "@powerhousedao/design-system";
 import type { 
   PaymentTermsState, 
   EvaluationFrequency 
 } from "../../document-models/payment-terms/gen/schema/types.js";
 import type { PaymentTermsAction } from "../../document-models/payment-terms/gen/actions.js";
-import { actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
+import { type actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
 
 export interface EvaluationTabProps {
   state: PaymentTermsState;
@@ -83,7 +83,7 @@ export function EvaluationTab({ state, dispatch, actions }: EvaluationTabProps) 
           <Button
             onClick={() => setIsEditing(true)}
             color="light"
-            size="small"
+            size="sm"
             className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
             {state.evaluation ? "Edit Terms" : "Configure Evaluation"}
@@ -216,7 +216,7 @@ export function EvaluationTab({ state, dispatch, actions }: EvaluationTabProps) 
         <Button
           type="submit"
           color="light"
-          size="small"
+          size="sm"
           className="cursor-pointer hover:bg-blue-600 hover:text-white"
         >
           Save Evaluation Terms
@@ -225,7 +225,7 @@ export function EvaluationTab({ state, dispatch, actions }: EvaluationTabProps) 
           type="button"
           onClick={handleCancel}
           color="light"
-          size="small"
+          size="sm"
           className="cursor-pointer hover:bg-gray-600 hover:text-white"
         >
           Cancel

@@ -1,21 +1,16 @@
+import type { DocumentModelUtils } from "document-model";
 import {
-  type CreateDocument,
-  type CreateState,
-  type LoadFromFile,
-  type LoadFromInput,
   baseCreateDocument,
-  baseSaveToFile,
   baseSaveToFileHandle,
-  baseLoadFromFile,
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model";
-import { type WorkstreamState, type WorkstreamLocalState } from "./types.js";
-import { WorkstreamPHState } from "./ph-factories.js";
+} from "document-model/core";
+import type { WorkstreamGlobalState, WorkstreamLocalState } from "./types.js";
+import type { WorkstreamPHState } from "./types.js";
 import { reducer } from "./reducer.js";
 
-export const initialGlobalState: WorkstreamState = {
+export const initialGlobalState: WorkstreamGlobalState = {
   code: null,
   title: null,
   status: "RFP_DRAFT",
@@ -29,46 +24,36 @@ export const initialGlobalState: WorkstreamState = {
 };
 export const initialLocalState: WorkstreamLocalState = {};
 
-export const createState: CreateState<WorkstreamPHState> = (state) => {
-  return {
-    ...defaultBaseState(),
-    global: { ...initialGlobalState, ...(state?.global ?? {}) },
-    local: { ...initialLocalState, ...(state?.local ?? {}) },
-  };
-};
-
-export const createDocument: CreateDocument<WorkstreamPHState> = (state) => {
-  const document = baseCreateDocument(createState, state);
-  document.header.documentType = "powerhouse/workstream";
-  // for backwards compatibility, but this is NOT a valid signed document id
-  document.header.id = generateId();
-  return document;
-};
-
-export const saveToFile = (document: any, path: string, name?: string) => {
-  return baseSaveToFile(document, path, ".phdm", name);
-};
-
-export const saveToFileHandle = (document: any, input: any) => {
-  return baseSaveToFileHandle(document, input);
-};
-
-export const loadFromFile: LoadFromFile<WorkstreamPHState> = (path) => {
-  return baseLoadFromFile(path, reducer);
-};
-
-export const loadFromInput: LoadFromInput<WorkstreamPHState> = (input) => {
-  return baseLoadFromInput(input, reducer);
-};
-
-const utils = {
+const utils: DocumentModelUtils<WorkstreamPHState> = {
   fileExtension: ".phdm",
-  createState,
-  createDocument,
-  saveToFile,
-  saveToFileHandle,
-  loadFromFile,
-  loadFromInput,
+  createState(state) {
+    return {
+      ...defaultBaseState(),
+      global: { ...initialGlobalState, ...state?.global },
+      local: { ...initialLocalState, ...state?.local },
+    };
+  },
+  createDocument(state) {
+    const document = baseCreateDocument(utils.createState, state);
+
+    document.header.documentType = "powerhouse/workstream";
+
+    // for backwards compatibility, but this is NOT a valid signed document id
+    document.header.id = generateId();
+
+    return document;
+  },
+  saveToFileHandle(document, input) {
+    return baseSaveToFileHandle(document, input);
+  },
+  loadFromInput(input) {
+    return baseLoadFromInput(input, reducer);
+  },
 };
+
+export const createDocument = utils.createDocument;
+export const createState = utils.createState;
+export const saveToFileHandle = utils.saveToFileHandle;
+export const loadFromInput = utils.loadFromInput;
 
 export default utils;

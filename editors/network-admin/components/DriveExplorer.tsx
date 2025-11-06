@@ -1,24 +1,23 @@
-import { Button, CreateDocumentModal } from "@powerhousedao/design-system";
+import { CreateDocumentModal } from "@powerhousedao/design-system";
 import {
   Sidebar,
   SidebarProvider,
+  Button,
   type SidebarNode,
 } from "@powerhousedao/document-engineering";
 import {
   addDocument,
   setSelectedNode,
-  useAllFolderNodes,
-  useFileChildNodes,
   useSelectedDrive,
   useSelectedFolder,
-  dispatchActions,
   useSelectedDocument,
-  useSelectedDriveDocuments,
   showDeleteNodeModal,
   useNodeActions,
+  useFileNodesInSelectedDrive,
+  useDocumentsInSelectedDrive,
 } from "@powerhousedao/reactor-browser";
-import { type DocumentModelModule } from "document-model";
-import { type Node } from "document-drive";
+import { type DocumentModelModule, type PHDocument } from "document-model";
+import { type Node} from "document-drive";
 import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import {
   editClientInfo,
@@ -67,20 +66,15 @@ export function DriveExplorer(props: { children?: any }) {
   // Core state hooks for drive navigation
   const [selectedDrive] = useSelectedDrive(); // Currently selected drive
   const selectedFolder = useSelectedFolder(); // Currently selected folder
-  const allDocuments = useSelectedDriveDocuments();
-
+  const allDocuments = useDocumentsInSelectedDrive();
+  const fileChildren = useFileNodesInSelectedDrive();
   const { onRenameNode } = useNodeActions();
 
   // Listen to global selected document state (for external editors like Scope of Work)
   const [globalSelectedDocument] = useSelectedDocument();
 
-  // All folders for the sidebar tree view
-  const allFolders = useAllFolderNodes();
-
-  const fileChildren = useFileChildNodes();
-
   const networkAdminDocuments = allDocuments?.filter(
-    (doc) =>
+    (doc: PHDocument) =>
       doc.header.documentType === "powerhouse/network-profile" ||
       doc.header.documentType === "powerhouse/workstream" ||
       doc.header.documentType === "powerhouse/scopeofwork" ||
@@ -91,7 +85,7 @@ export function DriveExplorer(props: { children?: any }) {
   //check if network profile doc is created, set isNetworkProfileCreated to true
   const isNetworkProfileCreated =
     networkAdminDocuments?.some(
-      (doc) => doc.header.documentType === "powerhouse/network-profile"
+      (doc: PHDocument) => doc.header.documentType === "powerhouse/network-profile"
     ) || false;
 
   // Sync global selected document with local activeDocumentId
@@ -321,7 +315,7 @@ export function DriveExplorer(props: { children?: any }) {
         setSelectedNode(fileId);
       }
     },
-    [allFolders, fileChildren, setSelectedNode, sidebarNodes]
+    [setSelectedNode, sidebarNodes]
   );
 
   // === EVENT HANDLERS ===
@@ -339,19 +333,6 @@ export function DriveExplorer(props: { children?: any }) {
     } else if (activeNodeId.startsWith("editor-")) {
       nodeType = "file";
       actualId = activeNodeId.replace("editor-", "");
-    } else {
-      // Check if it's a folder
-      const folder = allFolders.find((f) => f.id === activeNodeId);
-      if (folder) {
-        nodeType = "folder";
-      } else {
-        // Check if it's a file (direct ID)
-        const file = fileChildren.find((f) => f.id === activeNodeId);
-        if (file) {
-          nodeType = "file";
-          actualId = activeNodeId; // Use the ID as-is for files
-        }
-      }
     }
 
     const networkProfileDoc = networkAdminDocuments?.find(
@@ -407,7 +388,7 @@ export function DriveExplorer(props: { children?: any }) {
                 <div className="flex flex-wrap gap-3 justify-center">
                   <Button
                     color="dark" // Customize button appearance
-                    size="medium"
+                    size="sm"
                     className="cursor-pointer hover:bg-gray-600 hover:text-white"
                     title={"Create Workstream Document"}
                     aria-description={"Create Workstream Document"}
@@ -425,7 +406,7 @@ export function DriveExplorer(props: { children?: any }) {
 
                   <Button
                     color="dark" // Customize button appearance
-                    size="medium"
+                    size="sm"
                     className="cursor-pointer hover:bg-gray-600 hover:text-white"
                     title={"Create Network Profile Document"}
                     aria-description={"Create Network Profile Document"}
@@ -597,18 +578,18 @@ export function DriveExplorer(props: { children?: any }) {
         }
 
         if (documentType === "powerhouse/workstream") {
-          const networkProfileDoc = networkAdminDocuments?.find(
-            (doc) => doc.header.documentType === "powerhouse/network-profile"
-          ) as NetworkProfileDocument | undefined;
-          const actionsToDispatch = [
-            editWorkstream({ title: fileName }),
-            editClientInfo({
-              clientId: networkProfileDoc?.header.id || "",
-              name: networkProfileDoc?.state.global.name || "",
-              icon: networkProfileDoc?.state.global.icon || "",
-            }),
-          ];
-          await dispatchActions(actionsToDispatch, node.id);
+          // const networkProfileDoc = networkAdminDocuments?.find(
+          //   (doc) => doc.header.documentType === "powerhouse/network-profile"
+          // ) as NetworkProfileDocument | undefined;
+          // const actionsToDispatch = [
+          //   editWorkstream({ title: fileName }),
+          //   editClientInfo({
+          //     clientId: networkProfileDoc?.header.id || "",
+          //     name: networkProfileDoc?.state.global.name || "",
+          //     icon: networkProfileDoc?.state.global.icon || "",
+          //   }),
+          // ];
+          // await dispatchActions(actionsToDispatch, node.id);
         }
 
         selectedDocumentModel.current = null;

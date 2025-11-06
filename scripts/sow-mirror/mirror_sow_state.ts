@@ -253,7 +253,7 @@ function generateActions(remoteState: any, localState: any): any[] {
       // Add missing deliverables to project scope
       if (project.scope && project.scope.deliverables && project.scope.deliverables.length > 0) {
         const localDeliverables = new Set(
-          ((localProject as any)?.scope?.deliverables) || []
+          ((localProject)?.scope?.deliverables) || []
         );
 
         project.scope.deliverables.forEach((deliverableId: string) => {
@@ -312,7 +312,7 @@ function generateActions(remoteState: any, localState: any): any[] {
       // Add milestones for this roadmap
       if (roadmap.milestones && roadmap.milestones.length > 0) {
         const localMilestonesMap = new Map<string, any>(
-          ((localRoadmap as any)?.milestones || []).map((m: any) => [m.id, m])
+          ((localRoadmap)?.milestones || []).map((m: any) => [m.id, m])
         );
 
         roadmap.milestones.forEach((milestone: any) => {
@@ -335,7 +335,7 @@ function generateActions(remoteState: any, localState: any): any[] {
 
           // Add coordinators for milestone
           if (milestone.coordinators && milestone.coordinators.length > 0) {
-            const localCoordinators = new Set((localMilestone as any)?.coordinators || []);
+            const localCoordinators = new Set((localMilestone)?.coordinators || []);
 
             milestone.coordinators.forEach((coordinatorId: string) => {
               if (!localCoordinators.has(coordinatorId)) {
@@ -354,7 +354,7 @@ function generateActions(remoteState: any, localState: any): any[] {
           // Add deliverables to milestone
           if (milestone.scope && milestone.scope.deliverables && milestone.scope.deliverables.length > 0) {
             const localMilestoneDeliverables = new Set(
-              ((localMilestone as any)?.scope?.deliverables) || []
+              ((localMilestone)?.scope?.deliverables) || []
             );
 
             milestone.scope.deliverables.forEach((deliverableId: string) => {

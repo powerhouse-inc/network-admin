@@ -1,24 +1,19 @@
+import type { DocumentModelUtils } from "document-model";
 import {
-  type CreateDocument,
-  type CreateState,
-  type LoadFromFile,
-  type LoadFromInput,
   baseCreateDocument,
-  baseSaveToFile,
   baseSaveToFileHandle,
-  baseLoadFromFile,
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model";
-import {
-  type PaymentTermsState,
-  type PaymentTermsLocalState,
+} from "document-model/core";
+import type {
+  PaymentTermsGlobalState,
+  PaymentTermsLocalState,
 } from "./types.js";
-import { PaymentTermsPHState } from "./ph-factories.js";
+import type { PaymentTermsPHState } from "./types.js";
 import { reducer } from "./reducer.js";
 
-export const initialGlobalState: PaymentTermsState = {
+export const initialGlobalState: PaymentTermsGlobalState = {
   status: "DRAFT",
   proposer: "",
   payer: "",
@@ -35,46 +30,36 @@ export const initialGlobalState: PaymentTermsState = {
 };
 export const initialLocalState: PaymentTermsLocalState = {};
 
-export const createState: CreateState<PaymentTermsPHState> = (state) => {
-  return {
-    ...defaultBaseState(),
-    global: { ...initialGlobalState, ...(state?.global ?? {}) },
-    local: { ...initialLocalState, ...(state?.local ?? {}) },
-  };
-};
-
-export const createDocument: CreateDocument<PaymentTermsPHState> = (state) => {
-  const document = baseCreateDocument(createState, state);
-  document.header.documentType = "payment-terms";
-  // for backwards compatibility, but this is NOT a valid signed document id
-  document.header.id = generateId();
-  return document;
-};
-
-export const saveToFile = (document: any, path: string, name?: string) => {
-  return baseSaveToFile(document, path, "pterms", name);
-};
-
-export const saveToFileHandle = (document: any, input: any) => {
-  return baseSaveToFileHandle(document, input);
-};
-
-export const loadFromFile: LoadFromFile<PaymentTermsPHState> = (path) => {
-  return baseLoadFromFile(path, reducer);
-};
-
-export const loadFromInput: LoadFromInput<PaymentTermsPHState> = (input) => {
-  return baseLoadFromInput(input, reducer);
-};
-
-const utils = {
+const utils: DocumentModelUtils<PaymentTermsPHState> = {
   fileExtension: "pterms",
-  createState,
-  createDocument,
-  saveToFile,
-  saveToFileHandle,
-  loadFromFile,
-  loadFromInput,
+  createState(state) {
+    return {
+      ...defaultBaseState(),
+      global: { ...initialGlobalState, ...state?.global },
+      local: { ...initialLocalState, ...state?.local },
+    };
+  },
+  createDocument(state) {
+    const document = baseCreateDocument(utils.createState, state);
+
+    document.header.documentType = "payment-terms";
+
+    // for backwards compatibility, but this is NOT a valid signed document id
+    document.header.id = generateId();
+
+    return document;
+  },
+  saveToFileHandle(document, input) {
+    return baseSaveToFileHandle(document, input);
+  },
+  loadFromInput(input) {
+    return baseLoadFromInput(input, reducer);
+  },
 };
+
+export const createDocument = utils.createDocument;
+export const createState = utils.createState;
+export const saveToFileHandle = utils.saveToFileHandle;
+export const loadFromInput = utils.loadFromInput;
 
 export default utils;

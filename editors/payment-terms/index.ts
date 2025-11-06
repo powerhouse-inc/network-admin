@@ -6,9 +6,7 @@ export const module: EditorModule = {
   documentTypes: ["payment-terms"],
   config: {
     id: "payment-terms-editor",
-    disableExternalControls: true,
-    documentToolbarEnabled: true,
-    showSwitchboardLink: true,
+    name: "Payment Terms Editor",
   },
 };
 

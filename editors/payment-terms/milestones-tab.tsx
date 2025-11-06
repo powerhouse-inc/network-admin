@@ -4,18 +4,20 @@ import {
   TextInput,
   DatePicker,
 } from "@powerhousedao/document-engineering";
-import type {
-  ColumnDef,
-  ColumnAlignment,
+import {
+  type ColumnDef,
+  type ColumnAlignment,
+  Button,
 } from "@powerhousedao/document-engineering";
-import { Button, Icon, toast } from "@powerhousedao/design-system";
-import { generateId } from "document-model";
+
+import { Icon, toast } from "@powerhousedao/design-system";
+import { generateId } from "document-model/core";
 import type {
   Milestone,
   MilestonePayoutStatus,
   PaymentTermsAction,
 } from "../../document-models/payment-terms/gen/types.js";
-import { actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
+import { type actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
 
 export interface MilestonesTabProps {
   milestones: Milestone[];
@@ -172,7 +174,7 @@ export function MilestonesTab({
                 type: "success",
               });
             }}
-            size="small"
+            size="sm"
             className="text-red-600 hover:text-red-800"
           >
             <Icon name="Trash" size={16} />
@@ -247,7 +249,7 @@ export function MilestonesTab({
         <Button
           onClick={() => setIsAddingNew(!isAddingNew)}
           color="light"
-          size="small"
+          size="sm"
           className="cursor-pointer hover:bg-blue-600 hover:text-white"
         >
           <Icon name="Plus" size={16} className="mr-2" />
@@ -328,7 +330,7 @@ export function MilestonesTab({
               <Button
                 type="submit"
                 color="light"
-                size="small"
+                size="sm"
                 className="cursor-pointer hover:bg-blue-600 hover:text-white"
               >
                 Add Milestone
@@ -345,7 +347,7 @@ export function MilestonesTab({
                   });
                 }}
                 color="light"
-                size="small"
+                size="sm"
                 className="cursor-pointer hover:bg-gray-600 hover:text-white"
               >
                 Cancel
@@ -361,7 +363,9 @@ export function MilestonesTab({
           columns={columns}
           onAdd={() => setIsAddingNew(true)}
           onDelete={(row: Milestone[]) => {
-            dispatch(actions.deleteMilestone({ id: (row as unknown as Milestone).id }));
+            dispatch(
+              actions.deleteMilestone({ id: (row as unknown as Milestone).id })
+            );
             toast("Milestone deleted", {
               type: "success",
             });

@@ -1,9 +1,13 @@
 import { useState, useCallback } from "react";
-import { TextInput, Textarea } from "@powerhousedao/document-engineering";
-import { Button, toast } from "@powerhousedao/design-system";
+import {
+  TextInput,
+  Textarea,
+  Button,
+} from "@powerhousedao/document-engineering";
+import { toast } from "@powerhousedao/design-system";
 import type { PaymentTermsState } from "../../document-models/payment-terms/gen/schema/types.js";
 import type { PaymentTermsAction } from "../../document-models/payment-terms/gen/actions.js";
-import { actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
+import { type actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
 
 export interface EscrowTabProps {
   state: PaymentTermsState;
@@ -78,7 +82,7 @@ export function EscrowTab({ state, dispatch, actions }: EscrowTabProps) {
           <Button
             onClick={() => setIsEditing(true)}
             color="light"
-            size="small"
+            size="sm"
             className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
             {state.escrowDetails ? "Edit Escrow" : "Configure Escrow"}

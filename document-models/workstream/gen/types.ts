@@ -1,10 +1,20 @@
-import type { PHDocument } from "document-model";
+import type { PHDocument, PHBaseState } from "document-model";
 import type { WorkstreamAction } from "./actions.js";
-import type { WorkstreamPHState } from "./ph-factories.js";
-import type { WorkstreamState } from "./schema/types.js";
+import type { WorkstreamState as WorkstreamGlobalState } from "./schema/types.js";
 
 export { z } from "./schema/index.js";
-export type * from "./schema/types.js";
+export * from "./schema/types.js";
 type WorkstreamLocalState = Record<PropertyKey, never>;
-export type WorkstreamDocument = PHDocument<WorkstreamPHState>;
-export type { WorkstreamState, WorkstreamLocalState, WorkstreamAction };
+type WorkstreamPHState = PHBaseState & {
+  global: WorkstreamGlobalState;
+  local: WorkstreamLocalState;
+};
+type WorkstreamDocument = PHDocument<WorkstreamPHState>;
+
+export type {
+  WorkstreamGlobalState,
+  WorkstreamLocalState,
+  WorkstreamPHState,
+  WorkstreamAction,
+  WorkstreamDocument,
+};

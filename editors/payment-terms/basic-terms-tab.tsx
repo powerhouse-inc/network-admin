@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
-import { toast, Button } from "@powerhousedao/design-system";
-import { Select, TextInput } from "@powerhousedao/document-engineering";
+import { toast } from "@powerhousedao/design-system";
+import { Select, TextInput, Button } from "@powerhousedao/document-engineering";
 import type {
   PaymentTermsState,
   PaymentCurrency,
@@ -8,7 +8,7 @@ import type {
   PaymentTermsStatus,
 } from "../../document-models/payment-terms/gen/types.js";
 import type { PaymentTermsAction } from "../../document-models/payment-terms/gen/actions.js";
-import { actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
+import { type actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
 
 export interface BasicTermsTabProps {
   state: PaymentTermsState;
@@ -107,7 +107,7 @@ export function BasicTermsTab({
           <Button
             onClick={() => setIsEditing(true)}
             color="light"
-            size="small"
+            size="sm"
             className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
             Edit Terms
@@ -303,7 +303,7 @@ export function BasicTermsTab({
         <Button
           type="submit"
           color="light"
-          size="small"
+          size="sm"
           className="cursor-pointer hover:bg-blue-600 hover:text-white"
         >
           Save Terms
@@ -312,7 +312,7 @@ export function BasicTermsTab({
           type="button"
           onClick={handleCancel}
           color="light"
-          size="small"
+          size="sm"
           className="cursor-pointer hover:bg-gray-600 hover:text-white"
         >
           Cancel

@@ -8,3 +8,4 @@ node_modules
 .ph
 projects-import.js
 .playwright-mcp
+.eslintcache

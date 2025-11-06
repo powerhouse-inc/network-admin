@@ -29,7 +29,7 @@ export default function Editor() {
     (actionOrActions: Action | Action[] | undefined) => void,
   ];
 
-  const state = doc?.state.global as PaymentTermsState;
+  const state = doc?.state.global;
 
   const getStatusColor = (status: string) => {
     switch (status) {

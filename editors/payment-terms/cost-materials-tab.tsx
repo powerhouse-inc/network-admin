@@ -1,12 +1,12 @@
 import { useState, useCallback } from "react";
-import { TextInput, Select } from "@powerhousedao/document-engineering";
-import { Button, toast } from "@powerhousedao/design-system";
+import { TextInput, Select, Button } from "@powerhousedao/document-engineering";
+import { toast } from "@powerhousedao/design-system";
 import type {
   PaymentTermsState,
   BillingFrequency,
 } from "../../document-models/payment-terms/gen/schema/types.js";
 import type { PaymentTermsAction } from "../../document-models/payment-terms/gen/actions.js";
-import { actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
+import { type actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";
 
 export interface CostMaterialsTabProps {
   state: PaymentTermsState;
@@ -78,7 +78,7 @@ export function CostMaterialsTab({
           <Button
             onClick={() => setIsEditing(true)}
             color="light"
-            size="small"
+            size="sm"
             className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
             {state.costAndMaterials
@@ -222,7 +222,7 @@ export function CostMaterialsTab({
         <Button
           type="submit"
           color="light"
-          size="small"
+          size="sm"
           className="cursor-pointer hover:bg-blue-600 hover:text-white"
         >
           Save Configuration
@@ -231,7 +231,7 @@ export function CostMaterialsTab({
           type="button"
           onClick={handleCancel}
           color="light"
-          size="small"
+          size="sm"
           className="cursor-pointer hover:bg-gray-600 hover:text-white"
         >
           Cancel

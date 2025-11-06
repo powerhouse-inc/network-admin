@@ -1,27 +1,17 @@
 /**
  * Factory methods for creating PaymentTermsDocument instances
  */
-
-import {
-  createBaseState,
-  defaultBaseState,
-  type PHAuthState,
-  type PHDocumentState,
-  type PHBaseState,
-} from "document-model";
+import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
+import { createBaseState, defaultBaseState } from "document-model/core";
 import type {
   PaymentTermsDocument,
   PaymentTermsLocalState,
-  PaymentTermsState,
+  PaymentTermsGlobalState,
+  PaymentTermsPHState,
 } from "./types.js";
 import { createDocument } from "./utils.js";
 
-export type PaymentTermsPHState = PHBaseState & {
-  global: PaymentTermsState;
-  local: PaymentTermsLocalState;
-};
-
-export function defaultGlobalState(): PaymentTermsState {
+export function defaultGlobalState(): PaymentTermsGlobalState {
   return {
     status: "DRAFT",
     proposer: "",
@@ -52,12 +42,12 @@ export function defaultPHState(): PaymentTermsPHState {
 }
 
 export function createGlobalState(
-  state?: Partial<PaymentTermsState>,
-): PaymentTermsState {
+  state?: Partial<PaymentTermsGlobalState>,
+): PaymentTermsGlobalState {
   return {
     ...defaultGlobalState(),
     ...(state || {}),
-  } as PaymentTermsState;
+  } as PaymentTermsGlobalState;
 }
 
 export function createLocalState(
@@ -71,7 +61,7 @@ export function createLocalState(
 
 export function createState(
   baseState?: Partial<PHBaseState>,
-  globalState?: Partial<PaymentTermsState>,
+  globalState?: Partial<PaymentTermsGlobalState>,
   localState?: Partial<PaymentTermsLocalState>,
 ): PaymentTermsPHState {
   return {
@@ -90,7 +80,7 @@ export function createPaymentTermsDocument(
   state?: Partial<{
     auth?: Partial<PHAuthState>;
     document?: Partial<PHDocumentState>;
-    global?: Partial<PaymentTermsState>;
+    global?: Partial<PaymentTermsGlobalState>;
     local?: Partial<PaymentTermsLocalState>;
   }>,
 ): PaymentTermsDocument {

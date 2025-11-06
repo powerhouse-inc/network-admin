@@ -1,24 +1,11 @@
-import { type DriveEditorModule } from "@powerhousedao/reactor-browser";
+import { type EditorModule } from "document-model";
 import { Editor } from "./editor.js";
 
-export const module: DriveEditorModule = {
+export const module: EditorModule = {
   Component: Editor,
   documentTypes: ["powerhouse/document-drive"],
   config: {
     id: "network-admin",
-    disableExternalControls: true,
-    documentToolbarEnabled: true,
-    showSwitchboardLink: true,
-    documentTypes: [
-      // List all document types that can be dropped
-      "powerhouse/network-profile",
-      "powerhouse/workstream",
-      "powerhouse/scopeofwork",
-      "payment-terms",
-      "powerhouse/rfp",
-    ],
-    dragAndDrop: {
-      enabled: true, // Enable drag-and-drop functionality
-    },
+    name: "Network Admin Editor",
   },
 };

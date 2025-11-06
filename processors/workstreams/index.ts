@@ -1,9 +1,9 @@
-import { type IRelationalDb } from "document-drive/processors/types";
-import { RelationalDbProcessor } from "document-drive/processors/relational";
-import { type InternalTransmitterUpdate, type InternalOperationUpdate } from "document-drive/server/listener/transmitter/internal";
+import { type IRelationalDb } from "document-drive";
+import { RelationalDbProcessor } from "document-drive";
+import { type InternalTransmitterUpdate, type InternalOperationUpdate } from "document-drive";
 import { up } from "./migrations.js";
 import { type DB } from "./schema.js";
-import { EditInitialProposalInput, EditClientInfoInput, EditWorkstreamInput } from "document-models/workstream/index.js";
+import { type EditInitialProposalInput, type EditClientInfoInput, type EditWorkstreamInput } from "../../document-models/workstream/index.js";
 
 export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
   static override getNamespace(driveId: string): string {

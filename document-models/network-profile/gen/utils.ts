@@ -1,24 +1,19 @@
+import type { DocumentModelUtils } from "document-model";
 import {
-  type CreateDocument,
-  type CreateState,
-  type LoadFromFile,
-  type LoadFromInput,
   baseCreateDocument,
-  baseSaveToFile,
   baseSaveToFileHandle,
-  baseLoadFromFile,
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model";
-import {
-  type NetworkProfileState,
-  type NetworkProfileLocalState,
+} from "document-model/core";
+import type {
+  NetworkProfileGlobalState,
+  NetworkProfileLocalState,
 } from "./types.js";
-import { NetworkProfilePHState } from "./ph-factories.js";
+import type { NetworkProfilePHState } from "./types.js";
 import { reducer } from "./reducer.js";
 
-export const initialGlobalState: NetworkProfileState = {
+export const initialGlobalState: NetworkProfileGlobalState = {
   name: "",
   icon: "",
   logo: "",
@@ -33,48 +28,36 @@ export const initialGlobalState: NetworkProfileState = {
 };
 export const initialLocalState: NetworkProfileLocalState = {};
 
-export const createState: CreateState<NetworkProfilePHState> = (state) => {
-  return {
-    ...defaultBaseState(),
-    global: { ...initialGlobalState, ...(state?.global ?? {}) },
-    local: { ...initialLocalState, ...(state?.local ?? {}) },
-  };
-};
-
-export const createDocument: CreateDocument<NetworkProfilePHState> = (
-  state,
-) => {
-  const document = baseCreateDocument(createState, state);
-  document.header.documentType = "powerhouse/network-profile";
-  // for backwards compatibility, but this is NOT a valid signed document id
-  document.header.id = generateId();
-  return document;
-};
-
-export const saveToFile = (document: any, path: string, name?: string) => {
-  return baseSaveToFile(document, path, ".phdm", name);
-};
-
-export const saveToFileHandle = (document: any, input: any) => {
-  return baseSaveToFileHandle(document, input);
-};
-
-export const loadFromFile: LoadFromFile<NetworkProfilePHState> = (path) => {
-  return baseLoadFromFile(path, reducer);
-};
-
-export const loadFromInput: LoadFromInput<NetworkProfilePHState> = (input) => {
-  return baseLoadFromInput(input, reducer);
-};
-
-const utils = {
+const utils: DocumentModelUtils<NetworkProfilePHState> = {
   fileExtension: ".phdm",
-  createState,
-  createDocument,
-  saveToFile,
-  saveToFileHandle,
-  loadFromFile,
-  loadFromInput,
+  createState(state) {
+    return {
+      ...defaultBaseState(),
+      global: { ...initialGlobalState, ...state?.global },
+      local: { ...initialLocalState, ...state?.local },
+    };
+  },
+  createDocument(state) {
+    const document = baseCreateDocument(utils.createState, state);
+
+    document.header.documentType = "powerhouse/network-profile";
+
+    // for backwards compatibility, but this is NOT a valid signed document id
+    document.header.id = generateId();
+
+    return document;
+  },
+  saveToFileHandle(document, input) {
+    return baseSaveToFileHandle(document, input);
+  },
+  loadFromInput(input) {
+    return baseLoadFromInput(input, reducer);
+  },
 };
+
+export const createDocument = utils.createDocument;
+export const createState = utils.createState;
+export const saveToFileHandle = utils.saveToFileHandle;
+export const loadFromInput = utils.loadFromInput;
 
 export default utils;

@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 export const RfpIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
