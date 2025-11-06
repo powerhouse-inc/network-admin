@@ -1,10 +1,9 @@
 import { type IRelationalDb } from "document-drive";
-import { sql } from "kysely";
 
 export async function up(db: IRelationalDb<any>): Promise<void> {
   // Create table with IF NOT EXISTS
   let tableCreated = false;
-  // await down(db);
+  await db.schema.dropTable("workstreams").ifExists().execute();
   try {
     await db.schema
       .createTable("workstreams")
