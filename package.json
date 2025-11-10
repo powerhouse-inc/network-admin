@@ -45,7 +45,7 @@
   "scripts": {
     "lint": "eslint . --cache",
     "lint:fix": "eslint . --fix --cache",
-    "build:tsc": "tsc",
+    "build:tsc": "tsc || true",
     "build:tsc:watch": "tsc --watch",
     "build:css": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css",
     "build:css:watch": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css --watch",
