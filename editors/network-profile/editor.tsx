@@ -13,6 +13,10 @@ import {
 import { useCallback, useState, useEffect } from "react";
 import { useSelectedNetworkProfileDocument } from "../hooks/useNetworkProfileDocument.js";
 import { DocumentToolbar } from "@powerhousedao/design-system";
+import {
+  setSelectedNode,
+  useParentFolderForSelectedNode,
+} from "@powerhousedao/reactor-browser";
 
 export type IProps = EditorProps;
 
@@ -283,9 +287,17 @@ export default function Editor() {
     [dispatch]
   );
 
+  // Get the parent folder node for the currently selected node
+  const parentFolder = useParentFolderForSelectedNode();
+
+  // Set the selected node to the parent folder node (close the editor)
+  function handleClose() {
+    setSelectedNode(parentFolder?.id);
+  }
+
   return (
     <div className="w-full bg-gray-50 min-h-screen">
-      <DocumentToolbar />
+      <DocumentToolbar document={doc} onClose={handleClose} />
       <div className="p-6 max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">

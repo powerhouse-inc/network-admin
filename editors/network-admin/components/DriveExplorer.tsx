@@ -1,24 +1,30 @@
-import { CreateDocumentModal } from "@powerhousedao/design-system";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   Sidebar,
   SidebarProvider,
   Button,
   type SidebarNode,
 } from "@powerhousedao/document-engineering";
+
 import {
-  addDocument,
   setSelectedNode,
+  isFileNodeKind,
+  isFolderNodeKind,
+  useNodesInSelectedDriveOrFolder,
   useSelectedDrive,
   useSelectedFolder,
+  useUserPermissions,
+  useDocumentsInSelectedDrive,
+  useFileNodesInSelectedDrive,
+  useNodeActions,
   useSelectedDocument,
   showDeleteNodeModal,
-  useNodeActions,
-  useFileNodesInSelectedDrive,
-  useDocumentsInSelectedDrive,
+  addDocument,
+  showCreateDocumentModal,
 } from "@powerhousedao/reactor-browser";
+import type { EditorProps } from "document-model";
+import { type FileNode } from "document-drive";
 import { type DocumentModelModule, type PHDocument } from "document-model";
-import { type Node } from "document-drive";
-import { useCallback, useRef, useState, useMemo, useEffect } from "react";
 import { PaymentIcon } from "./icons/PaymentIcon.js";
 import { RfpIcon } from "./icons/RfpIcon.js";
 import { SowIcon } from "./icons/SowIcon.js";
@@ -28,6 +34,8 @@ import type { WorkstreamDocument } from "../../../document-models/workstream/ind
 import type { NetworkProfileDocument } from "../../../document-models/network-profile/index.js";
 import type { RequestForProposalsDocument } from "../../../document-models/request-for-proposals/index.js";
 import type { PaymentTermsDocument } from "../../../document-models/payment-terms/index.js";
+import { CreateDocument } from "./CreateDocument.js";
+import { FolderTree } from "./FolderTree.js";
 
 const WorkstreamStatusEnums = [
   "RFP_DRAFT",
@@ -41,11 +49,14 @@ const WorkstreamStatusEnums = [
   "FINISHED",
 ];
 
-/**1
+/**
  * Main drive explorer component with sidebar navigation and content area.
  * Layout: Left sidebar (folder tree) + Right content area (files/folders + document editor)
  */
-export function DriveExplorer(props: { children?: any }) {
+export function DriveExplorer(props: EditorProps) {
+  const { children } = props;
+  const { isAllowedToCreateDocuments } = useUserPermissions();
+
   // === DOCUMENT EDITOR STATE ===
   const [activeSidebarNodeId, setActiveSidebarNodeId] =
     useState<string>("workstreams");
@@ -389,8 +400,9 @@ export function DriveExplorer(props: { children?: any }) {
                     title={"Create Workstream Document"}
                     aria-description={"Create Workstream Document"}
                     onClick={() => {
-                      setModalDocumentType("powerhouse/workstream");
-                      setOpenModal(true);
+                      // setModalDocumentType("powerhouse/workstream");
+                      // setOpenModal(true);
+                      showCreateDocumentModal("powerhouse/workstream");
                     }}
                     disabled={!isNetworkProfileCreated}
                   >
@@ -407,8 +419,9 @@ export function DriveExplorer(props: { children?: any }) {
                     title={"Create Network Profile Document"}
                     aria-description={"Create Network Profile Document"}
                     onClick={() => {
-                      setModalDocumentType("powerhouse/network-profile");
-                      setOpenModal(true);
+                      // setModalDocumentType("powerhouse/network-profile");
+                      // setOpenModal(true);
+                      showCreateDocumentModal("powerhouse/network-profile");
                     }}
                     disabled={isNetworkProfileCreated}
                   >
@@ -499,7 +512,7 @@ export function DriveExplorer(props: { children?: any }) {
                                         try {
                                           await onRenameNode(
                                             newName.trim(),
-                                            fileNode as Node
+                                            fileNode as FileNode
                                           );
                                         } catch (error) {
                                           console.error(
@@ -648,11 +661,11 @@ export function DriveExplorer(props: { children?: any }) {
           {/* === DOCUMENT CREATION MODAL === */}
           {/* Modal for entering document name after selecting type */}
           {/* Note: Modal title is fixed, but document type is determined by selectedRootNode */}
-          <CreateDocumentModal
+          {/* <CreateDocumentModal
             onContinue={onCreateDocument}
             onOpenChange={(open) => setOpenModal(open)}
             open={openModal}
-          />
+          /> */}
         </div>
       )}
     </SidebarProvider>

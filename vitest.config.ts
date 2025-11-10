@@ -5,5 +5,5 @@ export default defineConfig({
   test: {
     globals: true,
   },
-  plugins: [react()] as any,
+  plugins: [react()],
 });

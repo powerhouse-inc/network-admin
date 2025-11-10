@@ -15,6 +15,10 @@ import { toast, ToastContainer } from "@powerhousedao/design-system";
 import { MarkdownEditor } from "./markdown-editor.js";
 import { useSelectedRequestForProposalsDocument } from "../hooks/useRequestForProposalsDocument.js";
 import { DocumentToolbar } from "@powerhousedao/design-system";
+import {
+  setSelectedNode,
+  useParentFolderForSelectedNode,
+} from "@powerhousedao/reactor-browser";
 
 export type IProps = EditorProps;
 
@@ -34,6 +38,14 @@ export default function Editor() {
     (actionOrActions: Action | Action[] | undefined) => void,
   ];
 
+  // Get the parent folder node for the currently selected node
+  const parentFolder = useParentFolderForSelectedNode();
+
+  // Set the selected node to the parent folder node (close the editor)
+  function handleClose() {
+    setSelectedNode(parentFolder?.id);
+  }
+
   const state = doc?.state.global;
 
   // Validation function for budget range
@@ -49,8 +61,7 @@ export default function Editor() {
 
   return (
     <>
-      <DocumentToolbar />
-
+      <DocumentToolbar document={doc} onClose={handleClose} />
       <div className="w-full bg-gray-50">
         <div className="p-6 max-w-4xl mx-auto min-h-screen">
           {/* Header Section */}

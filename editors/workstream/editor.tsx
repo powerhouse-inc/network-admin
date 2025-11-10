@@ -25,7 +25,7 @@ import {
   type RequestForProposalsState,
   actions as rfpActions,
 } from "../../document-models/request-for-proposals/index.js";
-import { ScopeOfWork } from "@powerhousedao/project-management/document-models";
+import { ScopeOfWork } from "./project-management-import.js";
 import type { DocumentModelModule } from "document-model";
 
 // Extract ScopeOfWorkState from the module type
@@ -41,6 +41,8 @@ import {
   useSelectedDrive,
   addDocument,
   useDocumentsInSelectedDrive,
+  useParentFolderForSelectedNode,
+  setSelectedNode,
 } from "@powerhousedao/reactor-browser";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSelectedWorkstreamDocument } from "../hooks/useWorkstreamDocument.js";
@@ -94,6 +96,14 @@ export default function Editor() {
   const [newlyCreatedRfpId, setNewlyCreatedRfpId] = useState<string | null>(
     null
   );
+
+  // Get the parent folder node for the currently selected node
+  const parentFolder = useParentFolderForSelectedNode();
+
+  // Set the selected node to the parent folder node (close the editor)
+  function handleClose() {
+    setSelectedNode(parentFolder?.id);
+  }
 
   // Loading states to prevent double-clicks
   const [isCreatingRfp, setIsCreatingRfp] = useState(false);
@@ -781,7 +791,7 @@ export default function Editor() {
 
   return (
     <div className="w-full bg-gray-50">
-      <DocumentToolbar />
+      <DocumentToolbar document={doc} onClose={handleClose} />
       <div className="p-6 max-w-4xl mx-auto min-h-screen">
         {/* Header Section */}
         <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">

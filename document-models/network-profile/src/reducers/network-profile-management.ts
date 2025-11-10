@@ -8,19 +8,19 @@ import type { NetworkProfileNetworkProfileManagementOperations } from "../../gen
 
 export const reducer: NetworkProfileNetworkProfileManagementOperations = {
     setIconOperation(state, action, dispatch) {
-        state.icon = action.input.icon || "";
+        state.icon = action.input.icon || '';
     },
     setLogoOperation(state, action, dispatch) {
-        state.logo = action.input.logo || "";
+        state.logo = action.input.logo || '';
     },
     setLogoBigOperation(state, action, dispatch) {
-        state.logoBig = action.input.logoBig || "";
+        state.logoBig = action.input.logoBig || '';
     },
     setWebsiteOperation(state, action, dispatch) {
-        state.website = action.input.website || "";
+        state.website = action.input.website || '';
     },
     setDescriptionOperation(state, action, dispatch) {
-        state.description = action.input.description || "";
+        state.description = action.input.description || '';
     },
     setCategoryOperation(state, action, dispatch) {
         state.category = action.input.category || null;
@@ -38,6 +38,6 @@ export const reducer: NetworkProfileNetworkProfileManagementOperations = {
         state.youtube = action.input.youtube || null;
     },
     setProfileNameOperation(state, action, dispatch) {
-        state.name = action.input.name || "";
+        state.name = action.input.name || '';
     },
 };

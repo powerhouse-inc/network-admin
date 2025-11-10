@@ -1,4 +1,8 @@
-import { useDocumentById } from "@powerhousedao/reactor-browser";
+import {
+  setSelectedNode,
+  useDocumentById,
+  useParentFolderForSelectedNode,
+} from "@powerhousedao/reactor-browser";
 import {
   Button,
   Icon,
@@ -67,9 +71,17 @@ export default function Editor() {
     state.milestoneSchedule?.filter((m) => m.payoutStatus === "PAID").length ||
     0;
 
+  // Get the parent folder node for the currently selected node
+  const parentFolder = useParentFolderForSelectedNode();
+
+  // Set the selected node to the parent folder node (close the editor)
+  function handleClose() {
+    setSelectedNode(parentFolder?.id);
+  }
+
   return (
     <>
-      <DocumentToolbar />
+      <DocumentToolbar document={doc} onClose={handleClose} />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto p-6">
           {/* Header */}

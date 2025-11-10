@@ -15,19 +15,23 @@ import { reducer } from "./reducer.js";
 
 export const initialGlobalState: RequestForProposalsGlobalState = {
   issuer: "placeholder-id",
+  code: "",
   title: "",
   summary: "",
-  code: "",
   briefing: "",
   rfpCommenter: [],
-  eligibilityCriteria: "",
-  evaluationCriteria: "",
-  budgetRange: { min: 0, max: 0, currency: "USD" },
+  eligibilityCriteria: '',
+  evaluationCriteria: '',
+  budgetRange: {
+    min: null,
+    max: null,
+    currency: null,
+  },
   contextDocuments: [],
   status: "DRAFT",
   proposals: [],
-  deadline: new Date().toISOString(),
-  tags: [],
+  deadline: null,
+  tags: null,
 };
 export const initialLocalState: RequestForProposalsLocalState = {};
 

@@ -1,88 +1,14 @@
 {
-    "name": "network-admin",
-    "description": "A place to handle all network related info.",
-    "category": "Project Management",
+    "name": "",
+    "description": "",
+    "category": "",
     "publisher": {
-        "name": "Powerhouse",
-        "url": "https://powerhouse.inc/"
+        "name": "",
+        "url": ""
     },
-    "documentModels": [
-        {
-            "id": "powerhouse/workstream",
-            "name": "Workstream"
-        },
-        {
-            "id": "powerhouse/rfp",
-            "name": "Request for Proposals"
-        },
-        {
-            "id": "payment-terms",
-            "name": "Payment Terms"
-        },
-        {
-            "id": "powerhouse/network-profile",
-            "name": "Network Profile"
-        },
-        {
-            "id": "powerhouse/builder-profile",
-            "name": "Builder Profile"
-        }
-    ],
-    "editors": [
-        {
-            "id": "workstream-editor",
-            "name": "Workstream Editor",
-            "documentTypes": [
-                "powerhouse/workstream"
-            ]
-        },
-        {
-            "id": "request-for-proposals-editor",
-            "name": "Request for Proposals Editor",
-            "documentTypes": [
-                "powerhouse/rfp"
-            ]
-        },
-        {
-            "id": "payment-terms-editor",
-            "name": "Payment Terms Editor",
-            "documentTypes": [
-                "payment-terms"
-            ]
-        },
-        {
-            "id": "network-profile-editor",
-            "name": "Network Profile Editor",
-            "documentTypes": [
-                "powerhouse/network-profile"
-            ]
-        },
-        {
-            "id": "builder-profile-editor",
-            "name": "Builder Profile Editor",
-            "documentTypes": [
-                "powerhouse/builder-profile"
-            ]
-        }
-    ],
-    "apps": [
-        {
-            "id": "powerhouse/network-admin",
-            "name": "Network Admin Drive Explorer",
-            "description": "Custom drive explorer for managing and organizing network administration documents and workstreams",
-            "documentTypes": [
-                "powerhouse/document-drive"
-            ]
-        }
-    ],
-    "subgraphs": [
-        {
-            "id": "powerhouse/workstream-subgraph",
-            "name": "Workstream Subgraph",
-            "documentTypes": [
-                "powerhouse/workstream"
-            ]
-        }
-    ],
+    "documentModels": [],
+    "editors": [],
+    "apps": [],
+    "subgraphs": [],
     "importScripts": []
 }
