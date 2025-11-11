@@ -9,11 +9,5 @@
   "reactor": {
     "port": 4001
   },
-  "packages": [
-    {
-      "packageName": "@powerhousedao/project-management",
-      "version": "0.0.49",
-      "provider": "npm"
-    }
-  ]
+  "packages": []
 }
