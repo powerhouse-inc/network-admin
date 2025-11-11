@@ -70,10 +70,17 @@ export default function Editor() {
 
   // Try to get dispatch from context or props
   const [state, setState] = useState(doc.state.global as WorkstreamState);
+  const [clientInputValue, setClientInputValue] = useState(
+    doc.state.global.client?.id || ""
+  );
 
   useEffect(() => {
     setState(doc.state.global as WorkstreamState);
   }, [doc.state.global]);
+
+  useEffect(() => {
+    setClientInputValue(state.client?.id || "");
+  }, [state.client?.id]);
 
   const [selectedDrive] = useSelectedDrive();
 
@@ -317,6 +324,20 @@ export default function Editor() {
       path: "",
     }));
   };
+  const searchClientDocuments = (userInput: string) => {
+    const results = allDocuments?.filter(
+      (node): node is PHDocument =>
+        node.header.documentType === "powerhouse/network-profile" &&
+        (!userInput ||
+          node.header.name.toLowerCase().includes(userInput.toLowerCase()) ||
+          node.header.id.toLowerCase().includes(userInput.toLowerCase()))
+    );
+    return results?.map((doc) => ({
+      value: doc.header.id,
+      title: doc.header.name,
+      path: "",
+    }));
+  };
   const searchSowDocuments = (userInput: string) => {
     const results = allDocuments?.filter(
       (node): node is PHDocument =>
@@ -471,16 +492,33 @@ export default function Editor() {
       return {
         value: doc.header.id,
         title: title || doc.header.name,
-        path: {
-          text: doc.header.name,
-          url: doc.header.id,
-        },
+        path: "",
         description: "",
       };
     },
     [allDocuments]
   );
+  const getClientOptionById = useCallback(
+    (documentId?: string) => {
+      if (!documentId) return undefined;
+      const doc = allDocuments?.find((document: PHDocument) => {
+        return (
+          document.header.documentType === "powerhouse/network-profile" &&
+          document.header.id === documentId
+        );
+      });
 
+      if (!doc) return undefined;
+
+      return {
+        value: doc.header.id,
+        title: doc.header.name,
+        path: "",
+        description: "",
+      };
+    },
+    [allDocuments]
+  );
   const getPaymentTermsOptionById = useCallback(
     (documentId?: string) => {
       if (!documentId) return undefined;
@@ -496,14 +534,16 @@ export default function Editor() {
       return {
         value: doc.header.id,
         title: doc.header.name,
-        path: {
-          text: doc.header.name,
-          url: doc.header.id,
-        },
+        path: "",
         description: "",
       };
     },
     [allDocuments]
+  );
+
+  const clientInitialOption = useMemo(
+    () => getClientOptionById(state.client?.id),
+    [getClientOptionById, state.client?.id]
   );
 
   const alternativeProposalsColumns = useMemo<Array<ColumnDef<Proposal>>>(
@@ -588,10 +628,7 @@ export default function Editor() {
                 return results.map((doc) => ({
                   value: doc.value,
                   title: doc.title,
-                  path: {
-                    text: doc.path,
-                    url: doc.value,
-                  },
+                  path: "",
                   description: "",
                 }));
               }}
@@ -603,10 +640,7 @@ export default function Editor() {
                 return {
                   value: doc.value,
                   title: doc.title,
-                  path: {
-                    text: doc.path,
-                    url: doc.value,
-                  },
+                  path: "",
                   description: "",
                 };
               }}
@@ -671,10 +705,7 @@ export default function Editor() {
                 return results.map((doc) => ({
                   value: doc.value,
                   title: doc.title,
-                  path: {
-                    text: doc.path,
-                    url: doc.value,
-                  },
+                  path: "",
                   description: "",
                 }));
               }}
@@ -688,10 +719,7 @@ export default function Editor() {
                 return {
                   value: doc.value,
                   title: doc.title,
-                  path: {
-                    text: doc.path,
-                    url: doc.value,
-                  },
+                  path: "",
                   description: "",
                 };
               }}
@@ -820,50 +848,52 @@ export default function Editor() {
         <div className="bg-white border border-gray-300 rounded-lg p-6 shadow-sm">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Client</h2>
 
-          <div className="space-y-4">
-            {/* Client ID Field */}
+          <div className="space-y-4 w-[350px]">
+            {/* Client Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Client ID
+                Client
               </label>
-              <div className="flex items-center space-x-2">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <TextInput
-                  className="flex-1"
-                  defaultValue={state.client?.id || ""}
-                  onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                    if (e.target.value !== state.client?.id) {
-                      handleClientIdChange(e.target.value);
-                    }
-                  }}
-                  placeholder="Enter client ID"
-                />
-                <div className="flex-shrink-0">
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
+              <PHIDInput
+                value={clientInputValue}
+                onChange={(newValue) => {
+                  setClientInputValue((newValue as string) || "");
+                }}
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                  if (e.target.value !== (state.client?.id || "")) {
+                    handleClientIdChange(e.target.value);
+                  }
+                }}
+                placeholder="Search for Client Profile"
+                className="w-full"
+                variant="withValueTitleAndDescription"
+                initialOptions={
+                  clientInitialOption ? [clientInitialOption] : undefined
+                }
+                fetchOptionsCallback={async (userInput) => {
+                  const results = searchClientDocuments(userInput || "") || [];
+                  if (results.length === 0) {
+                    return Promise.reject(
+                      new Error("No client profiles found")
+                    );
+                  }
+                  return results.map((doc) => ({
+                    value: doc.value,
+                    title: doc.title,
+                    path: "",
+                    description: "",
+                  }));
+                }}
+                fetchSelectedOptionCallback={async (documentId) => {
+                  const option = getClientOptionById(documentId);
+                  if (!option) {
+                    return Promise.reject(
+                      new Error("Client profile not found")
+                    );
+                  }
+                  return option;
+                }}
+              />
             </div>
 
             {/* Client Name Field */}
@@ -936,7 +966,7 @@ export default function Editor() {
                 name="Request for Proposal"
                 label="RFP Document"
                 placeholder="Search for RFP Document"
-                variant="withValueTitleAndDescription"
+                variant="withValueAndTitle"
                 value={newlyCreatedRfpId || state.rfp?.id || ""}
                 onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                   if (e.target.value !== state.rfp?.id) {
@@ -957,10 +987,7 @@ export default function Editor() {
                   return results?.map((doc) => ({
                     value: doc.value, // unique document ID
                     title: doc.title, // document title or name
-                    path: {
-                      text: doc.path,
-                      url: doc.value,
-                    }, // document path or location
+                    path: "",
                     description: "", // document description or summary
                     icon: "File", // document icon
                   }));
@@ -975,10 +1002,7 @@ export default function Editor() {
                   return {
                     value: doc.value,
                     title: doc.title,
-                    path: {
-                      text: doc.path,
-                      url: doc.title,
-                    },
+                    path: "",
                     description: "",
                     icon: "File",
                   };
@@ -987,10 +1011,7 @@ export default function Editor() {
                   {
                     value: rfpDocument?.header.id || "",
                     title: rfpDocument?.document.title || "",
-                    path: {
-                      text: rfpDocument?.document.title || "",
-                      url: rfpDocument?.header.id || "",
-                    },
+                    path: "",
                     description: "",
                     icon: "File",
                   },
@@ -1123,10 +1144,7 @@ export default function Editor() {
                         return results?.map((doc) => ({
                           value: doc.value, // unique document ID
                           title: doc.title, // document title or name
-                          path: {
-                            text: doc.path,
-                            url: doc.value,
-                          }, // document path or location
+                          path: "",
                           description: "", // document description or summary
                           icon: "File", // document icon
                         }));
@@ -1142,10 +1160,7 @@ export default function Editor() {
                         return {
                           value: doc.value,
                           title: doc.title,
-                          path: {
-                            text: doc.path,
-                            url: doc.title,
-                          },
+                          path: "",
                           description: "",
                           icon: "File",
                         };
@@ -1162,10 +1177,7 @@ export default function Editor() {
                                     }
                                   )?.global?.title ||
                                   sowDocumentNode.header.name,
-                                path: {
-                                  text: sowDocumentNode.header.name,
-                                  url: sowDocumentNode.header.id,
-                                },
+                                path: "",
                                 description: "",
                                 icon: "File",
                               },
@@ -1230,10 +1242,7 @@ export default function Editor() {
                         return results?.map((doc) => ({
                           value: doc.value, // unique document ID
                           title: doc.title, // document title or name
-                          path: {
-                            text: doc.path,
-                            url: doc.value,
-                          }, // document path or location
+                          path: "",
                           description: "", // document description or summary
                           icon: "File", // document icon
                         }));
@@ -1250,10 +1259,7 @@ export default function Editor() {
                         return {
                           value: doc.value,
                           title: doc.title,
-                          path: {
-                            text: doc.path,
-                            url: doc.title,
-                          },
+                          path: "",
                           description: "",
                           icon: "File",
                         };
@@ -1264,10 +1270,7 @@ export default function Editor() {
                               {
                                 value: paymentTermsDocumentNode.header.id,
                                 title: paymentTermsDocumentNode.header.name,
-                                path: {
-                                  text: paymentTermsDocumentNode.header.name,
-                                  url: paymentTermsDocumentNode.header.id,
-                                },
+                                path: "",
                                 description: "",
                                 icon: "File",
                               },
