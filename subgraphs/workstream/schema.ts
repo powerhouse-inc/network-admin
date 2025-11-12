@@ -132,15 +132,15 @@ export const schema: DocumentNode = gql`
     id: ID!
     sowId: PHID
     paymentTermsId: PHID
-    status: ProposalStatusInput
-    proposalAuthor: ProposalAuthorInput
+    status: Workstream_ProposalStatusInput
+    proposalAuthor: Workstream_ProposalAuthorInput
   }
   input Workstream_EditAlternativeProposalInput {
     id: ID!
     sowId: PHID
     paymentTermsId: PHID
-    status: ProposalStatusInput
-    proposalAuthor: ProposalAuthorInput
+    status: Workstream_ProposalStatusInput
+    proposalAuthor: Workstream_ProposalAuthorInput
   }
   input Workstream_RemoveAlternativeProposalInput {
     id: ID!

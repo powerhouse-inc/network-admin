@@ -133,7 +133,7 @@ export const schema: DocumentNode = gql`
 
   input RequestForProposals_ChangeProposalStatusInput {
     proposalId: OID!
-    status: RfpProposalStatusInput!
+    status: RequestForProposals_RfpProposalStatusInput!
   }
 
   input RequestForProposals_RemoveProposalInput {
