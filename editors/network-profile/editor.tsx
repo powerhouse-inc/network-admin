@@ -5,14 +5,14 @@ import {
   Select,
   Icon,
 } from "@powerhousedao/document-engineering";
-import { toast, ToastContainer } from "@powerhousedao/design-system";
+import { toast, ToastContainer } from "@powerhousedao/design-system/connect";
 import {
   actions,
   type NetworkCategory,
 } from "../../document-models/network-profile/index.js";
 import { useCallback, useState, useEffect } from "react";
-import { useSelectedNetworkProfileDocument } from "../hooks/useNetworkProfileDocument.js";
-import { DocumentToolbar } from "@powerhousedao/design-system";
+import { useSelectedNetworkProfileDocument } from "../../document-models/network-profile/hooks.js";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
@@ -227,7 +227,10 @@ function ImageUrlInput({
 export default function Editor() {
   // Getting dispatch from selected document
   const [doc, dispatch] = useSelectedNetworkProfileDocument();
-  const state = doc.state.global;
+  const state = doc?.state.global;
+  if (!doc) {
+    return null;
+  }
 
   // Handle field changes
   const handleFieldChange = useCallback(

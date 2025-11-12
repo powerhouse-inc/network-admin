@@ -1,16 +1,21 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type EditInitialProposalInput,
-  type AddAlternativeProposalInput,
-  type EditAlternativeProposalInput,
-  type RemoveAlternativeProposalInput,
+  EditInitialProposalInputSchema,
+  AddAlternativeProposalInputSchema,
+  EditAlternativeProposalInputSchema,
+  RemoveAlternativeProposalInputSchema,
+} from "../schema/zod.js";
+import type {
+  EditInitialProposalInput,
+  AddAlternativeProposalInput,
+  EditAlternativeProposalInput,
+  RemoveAlternativeProposalInput,
 } from "../types.js";
-import {
-  type EditInitialProposalAction,
-  type AddAlternativeProposalAction,
-  type EditAlternativeProposalAction,
-  type RemoveAlternativeProposalAction,
+import type {
+  EditInitialProposalAction,
+  AddAlternativeProposalAction,
+  EditAlternativeProposalAction,
+  RemoveAlternativeProposalAction,
 } from "./actions.js";
 
 export const editInitialProposal = (input: EditInitialProposalInput) =>
@@ -18,7 +23,7 @@ export const editInitialProposal = (input: EditInitialProposalInput) =>
     "EDIT_INITIAL_PROPOSAL",
     { ...input },
     undefined,
-    z.EditInitialProposalInputSchema,
+    EditInitialProposalInputSchema,
     "global",
   );
 
@@ -27,7 +32,7 @@ export const addAlternativeProposal = (input: AddAlternativeProposalInput) =>
     "ADD_ALTERNATIVE_PROPOSAL",
     { ...input },
     undefined,
-    z.AddAlternativeProposalInputSchema,
+    AddAlternativeProposalInputSchema,
     "global",
   );
 
@@ -36,7 +41,7 @@ export const editAlternativeProposal = (input: EditAlternativeProposalInput) =>
     "EDIT_ALTERNATIVE_PROPOSAL",
     { ...input },
     undefined,
-    z.EditAlternativeProposalInputSchema,
+    EditAlternativeProposalInputSchema,
     "global",
   );
 
@@ -47,6 +52,6 @@ export const removeAlternativeProposal = (
     "REMOVE_ALTERNATIVE_PROPOSAL",
     { ...input },
     undefined,
-    z.RemoveAlternativeProposalInputSchema,
+    RemoveAlternativeProposalInputSchema,
     "global",
   );

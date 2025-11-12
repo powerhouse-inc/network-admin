@@ -1,21 +1,27 @@
-import { type ISubgraph } from "@powerhousedao/reactor-api";
+import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
+import { setName } from "document-model";
 import {
   actions,
-  type EditWorkstreamInput,
-  type EditClientInfoInput,
-  type SetRequestForProposalInput,
-  type AddPaymentRequestInput,
-  type RemovePaymentRequestInput,
-  type EditInitialProposalInput,
-  type AddAlternativeProposalInput,
-  type EditAlternativeProposalInput,
-  type RemoveAlternativeProposalInput,
-  type WorkstreamDocument,
+  workstreamDocumentType,
 } from "../../document-models/workstream/index.js";
-import { setName } from "document-model";
 
-export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
+import type {
+  WorkstreamDocument,
+  EditWorkstreamInput,
+  EditClientInfoInput,
+  SetRequestForProposalInput,
+  AddPaymentRequestInput,
+  RemovePaymentRequestInput,
+  EditInitialProposalInput,
+  AddAlternativeProposalInput,
+  EditAlternativeProposalInput,
+  RemoveAlternativeProposalInput,
+} from "../../document-models/workstream/index.js";
+
+export const getResolvers = (
+  subgraph: BaseSubgraph,
+): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
@@ -71,7 +77,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             );
 
             return docs.filter(
-              (doc) => doc.header.documentType === "powerhouse/workstream",
+              (doc) => doc.header.documentType === workstreamDocumentType,
             );
           },
         };
@@ -83,7 +89,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         args: { name: string; driveId?: string },
       ) => {
         const { driveId, name } = args;
-        const document = await reactor.addDocument("powerhouse/workstream");
+        const document = await reactor.addDocument(workstreamDocumentType);
 
         if (driveId) {
           await reactor.addAction(
@@ -91,7 +97,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             addFile({
               name,
               id: document.header.id,
-              documentType: "powerhouse/workstream",
+              documentType: workstreamDocumentType,
             }),
           );
         }

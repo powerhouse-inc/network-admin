@@ -14,13 +14,13 @@ import { createDocument } from "./utils.js";
 export function defaultGlobalState(): RequestForProposalsGlobalState {
   return {
     issuer: "placeholder-id",
-    code: "",
     title: "",
-    summary: "",
+    code: "",
     briefing: "",
+    summary: "",
     rfpCommenter: [],
-    eligibilityCriteria: '',
-    evaluationCriteria: '',
+    eligibilityCriteria: "",
+    evaluationCriteria: "",
     budgetRange: {
       min: null,
       max: null,
@@ -92,10 +92,10 @@ export function createRequestForProposalsDocument(
   const document = createDocument(
     state
       ? createState(
-          createBaseState(state.auth, state.document),
-          state.global,
-          state.local,
-        )
+        createBaseState(state.auth, state.document),
+        state.global,
+        state.local,
+      )
       : undefined,
   );
 

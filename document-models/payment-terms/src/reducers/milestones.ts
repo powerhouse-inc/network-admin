@@ -1,8 +1,8 @@
-import type { PaymentTermsMilestonesOperations } from "../../gen/milestones/operations.js";
+import type { PaymentTermsMilestonesOperations } from "../../index.js";
 import { DuplicateMilestoneIdError, MilestoneNotFoundError } from "../../gen/milestones/error.js";
 
-export const reducer: PaymentTermsMilestonesOperations = {
-    addMilestoneOperation(state, action, dispatch) {
+export const paymentTermsMilestonesOperations: PaymentTermsMilestonesOperations = {
+    addMilestoneOperation(state, action) {
         const existingIndex = state.milestoneSchedule.findIndex(m => m.id === action.input.id);
         if (existingIndex !== -1) {
           throw new DuplicateMilestoneIdError(`Milestone with ID ${action.input.id} already exists`);
@@ -19,7 +19,7 @@ export const reducer: PaymentTermsMilestonesOperations = {
 
         state.milestoneSchedule.push(newMilestone);
     },
-    updateMilestoneOperation(state, action, dispatch) {
+    updateMilestoneOperation(state, action) {
         const milestoneIndex = state.milestoneSchedule.findIndex(m => m.id === action.input.id);
         if (milestoneIndex === -1) {
           throw new MilestoneNotFoundError(`Milestone with ID ${action.input.id} not found`);
@@ -31,7 +31,7 @@ export const reducer: PaymentTermsMilestonesOperations = {
         if (action.input.expectedCompletionDate !== undefined) milestone.expectedCompletionDate = action.input.expectedCompletionDate || null;
         if (action.input.requiresApproval !== undefined && action.input.requiresApproval !== null) milestone.requiresApproval = action.input.requiresApproval;
     },
-    updateMilestoneStatusOperation(state, action, dispatch) {
+    updateMilestoneStatusOperation(state, action) {
         const milestoneIndex = state.milestoneSchedule.findIndex(m => m.id === action.input.id);
         if (milestoneIndex === -1) {
           throw new MilestoneNotFoundError(`Milestone with ID ${action.input.id} not found`);
@@ -39,7 +39,7 @@ export const reducer: PaymentTermsMilestonesOperations = {
 
         state.milestoneSchedule[milestoneIndex].payoutStatus = action.input.payoutStatus;
     },
-    deleteMilestoneOperation(state, action, dispatch) {
+    deleteMilestoneOperation(state, action) {
         const milestoneIndex = state.milestoneSchedule.findIndex(m => m.id === action.input.id);
         if (milestoneIndex === -1) {
           throw new MilestoneNotFoundError(`Milestone with ID ${action.input.id} not found`);
@@ -47,7 +47,7 @@ export const reducer: PaymentTermsMilestonesOperations = {
 
         state.milestoneSchedule.splice(milestoneIndex, 1);
     },
-    reorderMilestonesOperation(state, action, dispatch) {
+    reorderMilestonesOperation(state, action) {
         const reorderedMilestones = [];
         for (const id of action.input.order) {
           const milestone = state.milestoneSchedule.find(m => m.id === id);

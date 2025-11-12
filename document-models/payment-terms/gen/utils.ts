@@ -12,6 +12,13 @@ import type {
 } from "./types.js";
 import type { PaymentTermsPHState } from "./types.js";
 import { reducer } from "./reducer.js";
+import { paymentTermsDocumentType } from "./document-type.js";
+import {
+  isPaymentTermsDocument,
+  assertIsPaymentTermsDocument,
+  isPaymentTermsState,
+  assertIsPaymentTermsState,
+} from "./document-schema.js";
 
 export const initialGlobalState: PaymentTermsGlobalState = {
   status: "DRAFT",
@@ -21,8 +28,7 @@ export const initialGlobalState: PaymentTermsGlobalState = {
   paymentModel: "MILESTONE",
   totalAmount: null,
   milestoneSchedule: [],
-  costAndMaterials: null,
-  retainerDetails: null,
+  timeAndMaterials: null,
   escrowDetails: null,
   evaluation: null,
   bonusClauses: [],
@@ -30,7 +36,7 @@ export const initialGlobalState: PaymentTermsGlobalState = {
 };
 export const initialLocalState: PaymentTermsLocalState = {};
 
-const utils: DocumentModelUtils<PaymentTermsPHState> = {
+export const utils: DocumentModelUtils<PaymentTermsPHState> = {
   fileExtension: "pterms",
   createState(state) {
     return {
@@ -42,7 +48,7 @@ const utils: DocumentModelUtils<PaymentTermsPHState> = {
   createDocument(state) {
     const document = baseCreateDocument(utils.createState, state);
 
-    document.header.documentType = "payment-terms";
+    document.header.documentType = paymentTermsDocumentType;
 
     // for backwards compatibility, but this is NOT a valid signed document id
     document.header.id = generateId();
@@ -55,11 +61,25 @@ const utils: DocumentModelUtils<PaymentTermsPHState> = {
   loadFromInput(input) {
     return baseLoadFromInput(input, reducer);
   },
+  isStateOfType(state) {
+    return isPaymentTermsState(state);
+  },
+  assertIsStateOfType(state) {
+    return assertIsPaymentTermsState(state);
+  },
+  isDocumentOfType(document) {
+    return isPaymentTermsDocument(document);
+  },
+  assertIsDocumentOfType(document) {
+    return assertIsPaymentTermsDocument(document);
+  },
 };
 
 export const createDocument = utils.createDocument;
 export const createState = utils.createState;
 export const saveToFileHandle = utils.saveToFileHandle;
 export const loadFromInput = utils.loadFromInput;
-
-export default utils;
+export const isStateOfType = utils.isStateOfType;
+export const assertIsStateOfType = utils.assertIsStateOfType;
+export const isDocumentOfType = utils.isDocumentOfType;
+export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

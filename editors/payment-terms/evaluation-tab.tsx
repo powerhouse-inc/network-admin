@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { TextInput, Select, Textarea, Button } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system";
+import { toast } from "@powerhousedao/design-system/connect";
 import type { 
   PaymentTermsState, 
   EvaluationFrequency 

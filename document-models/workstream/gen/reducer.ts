@@ -4,12 +4,23 @@
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
 import type { WorkstreamPHState } from "./types.js";
-import { z } from "./types.js";
 
-import { reducer as WorkstreamReducer } from "../src/reducers/workstream.js";
-import { reducer as ProposalsReducer } from "../src/reducers/proposals.js";
+import { workstreamWorkstreamOperations } from "../src/reducers/workstream.js";
+import { workstreamProposalsOperations } from "../src/reducers/proposals.js";
 
-export const stateReducer: StateReducer<WorkstreamPHState> = (
+import {
+  EditWorkstreamInputSchema,
+  EditClientInfoInputSchema,
+  SetRequestForProposalInputSchema,
+  AddPaymentRequestInputSchema,
+  RemovePaymentRequestInputSchema,
+  EditInitialProposalInputSchema,
+  AddAlternativeProposalInputSchema,
+  EditAlternativeProposalInputSchema,
+  RemoveAlternativeProposalInputSchema,
+} from "./schema/zod.js";
+
+const stateReducer: StateReducer<WorkstreamPHState> = (
   state,
   action,
   dispatch,
@@ -20,8 +31,8 @@ export const stateReducer: StateReducer<WorkstreamPHState> = (
 
   switch (action.type) {
     case "EDIT_WORKSTREAM":
-      z.EditWorkstreamInputSchema().parse(action.input);
-      WorkstreamReducer.editWorkstreamOperation(
+      EditWorkstreamInputSchema().parse(action.input);
+      workstreamWorkstreamOperations.editWorkstreamOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -29,8 +40,8 @@ export const stateReducer: StateReducer<WorkstreamPHState> = (
       break;
 
     case "EDIT_CLIENT_INFO":
-      z.EditClientInfoInputSchema().parse(action.input);
-      WorkstreamReducer.editClientInfoOperation(
+      EditClientInfoInputSchema().parse(action.input);
+      workstreamWorkstreamOperations.editClientInfoOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -38,8 +49,8 @@ export const stateReducer: StateReducer<WorkstreamPHState> = (
       break;
 
     case "SET_REQUEST_FOR_PROPOSAL":
-      z.SetRequestForProposalInputSchema().parse(action.input);
-      WorkstreamReducer.setRequestForProposalOperation(
+      SetRequestForProposalInputSchema().parse(action.input);
+      workstreamWorkstreamOperations.setRequestForProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -47,8 +58,8 @@ export const stateReducer: StateReducer<WorkstreamPHState> = (
       break;
 
     case "ADD_PAYMENT_REQUEST":
-      z.AddPaymentRequestInputSchema().parse(action.input);
-      WorkstreamReducer.addPaymentRequestOperation(
+      AddPaymentRequestInputSchema().parse(action.input);
+      workstreamWorkstreamOperations.addPaymentRequestOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -56,8 +67,8 @@ export const stateReducer: StateReducer<WorkstreamPHState> = (
       break;
 
     case "REMOVE_PAYMENT_REQUEST":
-      z.RemovePaymentRequestInputSchema().parse(action.input);
-      WorkstreamReducer.removePaymentRequestOperation(
+      RemovePaymentRequestInputSchema().parse(action.input);
+      workstreamWorkstreamOperations.removePaymentRequestOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -65,8 +76,8 @@ export const stateReducer: StateReducer<WorkstreamPHState> = (
       break;
 
     case "EDIT_INITIAL_PROPOSAL":
-      z.EditInitialProposalInputSchema().parse(action.input);
-      ProposalsReducer.editInitialProposalOperation(
+      EditInitialProposalInputSchema().parse(action.input);
+      workstreamProposalsOperations.editInitialProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -74,8 +85,8 @@ export const stateReducer: StateReducer<WorkstreamPHState> = (
       break;
 
     case "ADD_ALTERNATIVE_PROPOSAL":
-      z.AddAlternativeProposalInputSchema().parse(action.input);
-      ProposalsReducer.addAlternativeProposalOperation(
+      AddAlternativeProposalInputSchema().parse(action.input);
+      workstreamProposalsOperations.addAlternativeProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -83,8 +94,8 @@ export const stateReducer: StateReducer<WorkstreamPHState> = (
       break;
 
     case "EDIT_ALTERNATIVE_PROPOSAL":
-      z.EditAlternativeProposalInputSchema().parse(action.input);
-      ProposalsReducer.editAlternativeProposalOperation(
+      EditAlternativeProposalInputSchema().parse(action.input);
+      workstreamProposalsOperations.editAlternativeProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -92,8 +103,8 @@ export const stateReducer: StateReducer<WorkstreamPHState> = (
       break;
 
     case "REMOVE_ALTERNATIVE_PROPOSAL":
-      z.RemoveAlternativeProposalInputSchema().parse(action.input);
-      ProposalsReducer.removeAlternativeProposalOperation(
+      RemoveAlternativeProposalInputSchema().parse(action.input);
+      workstreamProposalsOperations.removeAlternativeProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

@@ -9,6 +9,13 @@ import {
 import type { WorkstreamGlobalState, WorkstreamLocalState } from "./types.js";
 import type { WorkstreamPHState } from "./types.js";
 import { reducer } from "./reducer.js";
+import { workstreamDocumentType } from "./document-type.js";
+import {
+  isWorkstreamDocument,
+  assertIsWorkstreamDocument,
+  isWorkstreamState,
+  assertIsWorkstreamState,
+} from "./document-schema.js";
 
 export const initialGlobalState: WorkstreamGlobalState = {
   code: null,
@@ -24,8 +31,8 @@ export const initialGlobalState: WorkstreamGlobalState = {
 };
 export const initialLocalState: WorkstreamLocalState = {};
 
-const utils: DocumentModelUtils<WorkstreamPHState> = {
-  fileExtension: ".phdm",
+export const utils: DocumentModelUtils<WorkstreamPHState> = {
+  fileExtension: "",
   createState(state) {
     return {
       ...defaultBaseState(),
@@ -36,7 +43,7 @@ const utils: DocumentModelUtils<WorkstreamPHState> = {
   createDocument(state) {
     const document = baseCreateDocument(utils.createState, state);
 
-    document.header.documentType = "powerhouse/workstream";
+    document.header.documentType = workstreamDocumentType;
 
     // for backwards compatibility, but this is NOT a valid signed document id
     document.header.id = generateId();
@@ -49,11 +56,25 @@ const utils: DocumentModelUtils<WorkstreamPHState> = {
   loadFromInput(input) {
     return baseLoadFromInput(input, reducer);
   },
+  isStateOfType(state) {
+    return isWorkstreamState(state);
+  },
+  assertIsStateOfType(state) {
+    return assertIsWorkstreamState(state);
+  },
+  isDocumentOfType(document) {
+    return isWorkstreamDocument(document);
+  },
+  assertIsDocumentOfType(document) {
+    return assertIsWorkstreamDocument(document);
+  },
 };
 
 export const createDocument = utils.createDocument;
 export const createState = utils.createState;
 export const saveToFileHandle = utils.saveToFileHandle;
 export const loadFromInput = utils.loadFromInput;
-
-export default utils;
+export const isStateOfType = utils.isStateOfType;
+export const assertIsStateOfType = utils.assertIsStateOfType;
+export const isDocumentOfType = utils.isDocumentOfType;
+export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

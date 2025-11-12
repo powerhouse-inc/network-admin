@@ -4,13 +4,31 @@
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
 import type { PaymentTermsPHState } from "./types.js";
-import { z } from "./types.js";
 
-import { reducer as TermsReducer } from "../src/reducers/terms.js";
-import { reducer as MilestonesReducer } from "../src/reducers/milestones.js";
-import { reducer as ClausesReducer } from "../src/reducers/clauses.js";
+import { paymentTermsTermsOperations } from "../src/reducers/terms.js";
+import { paymentTermsMilestonesOperations } from "../src/reducers/milestones.js";
+import { paymentTermsClausesOperations } from "../src/reducers/clauses.js";
 
-export const stateReducer: StateReducer<PaymentTermsPHState> = (
+import {
+  SetBasicTermsInputSchema,
+  UpdateStatusInputSchema,
+  SetTimeAndMaterialsInputSchema,
+  SetEscrowDetailsInputSchema,
+  SetEvaluationTermsInputSchema,
+  AddMilestoneInputSchema,
+  UpdateMilestoneInputSchema,
+  UpdateMilestoneStatusInputSchema,
+  DeleteMilestoneInputSchema,
+  ReorderMilestonesInputSchema,
+  AddBonusClauseInputSchema,
+  UpdateBonusClauseInputSchema,
+  DeleteBonusClauseInputSchema,
+  AddPenaltyClauseInputSchema,
+  UpdatePenaltyClauseInputSchema,
+  DeletePenaltyClauseInputSchema,
+} from "./schema/zod.js";
+
+const stateReducer: StateReducer<PaymentTermsPHState> = (
   state,
   action,
   dispatch,
@@ -21,8 +39,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
 
   switch (action.type) {
     case "SET_BASIC_TERMS":
-      z.SetBasicTermsInputSchema().parse(action.input);
-      TermsReducer.setBasicTermsOperation(
+      SetBasicTermsInputSchema().parse(action.input);
+      paymentTermsTermsOperations.setBasicTermsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -30,17 +48,17 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "UPDATE_STATUS":
-      z.UpdateStatusInputSchema().parse(action.input);
-      TermsReducer.updateStatusOperation(
+      UpdateStatusInputSchema().parse(action.input);
+      paymentTermsTermsOperations.updateStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
       break;
 
-    case "SET_COST_AND_MATERIALS":
-      z.SetCostAndMaterialsInputSchema().parse(action.input);
-      TermsReducer.setCostAndMaterialsOperation(
+    case "SET_TIME_AND_MATERIALS":
+      SetTimeAndMaterialsInputSchema().parse(action.input);
+      paymentTermsTermsOperations.setTimeAndMaterialsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -48,8 +66,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "SET_ESCROW_DETAILS":
-      z.SetEscrowDetailsInputSchema().parse(action.input);
-      TermsReducer.setEscrowDetailsOperation(
+      SetEscrowDetailsInputSchema().parse(action.input);
+      paymentTermsTermsOperations.setEscrowDetailsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -57,17 +75,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "SET_EVALUATION_TERMS":
-      z.SetEvaluationTermsInputSchema().parse(action.input);
-      TermsReducer.setEvaluationTermsOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-      break;
-
-    case "SET_RETAINER_DETAILS":
-      z.SetRetainerDetailsInputSchema().parse(action.input);
-      TermsReducer.setRetainerDetailsOperation(
+      SetEvaluationTermsInputSchema().parse(action.input);
+      paymentTermsTermsOperations.setEvaluationTermsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -75,8 +84,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "ADD_MILESTONE":
-      z.AddMilestoneInputSchema().parse(action.input);
-      MilestonesReducer.addMilestoneOperation(
+      AddMilestoneInputSchema().parse(action.input);
+      paymentTermsMilestonesOperations.addMilestoneOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -84,8 +93,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "UPDATE_MILESTONE":
-      z.UpdateMilestoneInputSchema().parse(action.input);
-      MilestonesReducer.updateMilestoneOperation(
+      UpdateMilestoneInputSchema().parse(action.input);
+      paymentTermsMilestonesOperations.updateMilestoneOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -93,8 +102,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "UPDATE_MILESTONE_STATUS":
-      z.UpdateMilestoneStatusInputSchema().parse(action.input);
-      MilestonesReducer.updateMilestoneStatusOperation(
+      UpdateMilestoneStatusInputSchema().parse(action.input);
+      paymentTermsMilestonesOperations.updateMilestoneStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -102,8 +111,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "DELETE_MILESTONE":
-      z.DeleteMilestoneInputSchema().parse(action.input);
-      MilestonesReducer.deleteMilestoneOperation(
+      DeleteMilestoneInputSchema().parse(action.input);
+      paymentTermsMilestonesOperations.deleteMilestoneOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -111,8 +120,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "REORDER_MILESTONES":
-      z.ReorderMilestonesInputSchema().parse(action.input);
-      MilestonesReducer.reorderMilestonesOperation(
+      ReorderMilestonesInputSchema().parse(action.input);
+      paymentTermsMilestonesOperations.reorderMilestonesOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -120,8 +129,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "ADD_BONUS_CLAUSE":
-      z.AddBonusClauseInputSchema().parse(action.input);
-      ClausesReducer.addBonusClauseOperation(
+      AddBonusClauseInputSchema().parse(action.input);
+      paymentTermsClausesOperations.addBonusClauseOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -129,8 +138,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "UPDATE_BONUS_CLAUSE":
-      z.UpdateBonusClauseInputSchema().parse(action.input);
-      ClausesReducer.updateBonusClauseOperation(
+      UpdateBonusClauseInputSchema().parse(action.input);
+      paymentTermsClausesOperations.updateBonusClauseOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -138,8 +147,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "DELETE_BONUS_CLAUSE":
-      z.DeleteBonusClauseInputSchema().parse(action.input);
-      ClausesReducer.deleteBonusClauseOperation(
+      DeleteBonusClauseInputSchema().parse(action.input);
+      paymentTermsClausesOperations.deleteBonusClauseOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -147,8 +156,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "ADD_PENALTY_CLAUSE":
-      z.AddPenaltyClauseInputSchema().parse(action.input);
-      ClausesReducer.addPenaltyClauseOperation(
+      AddPenaltyClauseInputSchema().parse(action.input);
+      paymentTermsClausesOperations.addPenaltyClauseOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -156,8 +165,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "UPDATE_PENALTY_CLAUSE":
-      z.UpdatePenaltyClauseInputSchema().parse(action.input);
-      ClausesReducer.updatePenaltyClauseOperation(
+      UpdatePenaltyClauseInputSchema().parse(action.input);
+      paymentTermsClausesOperations.updatePenaltyClauseOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -165,8 +174,8 @@ export const stateReducer: StateReducer<PaymentTermsPHState> = (
       break;
 
     case "DELETE_PENALTY_CLAUSE":
-      z.DeletePenaltyClauseInputSchema().parse(action.input);
-      ClausesReducer.deletePenaltyClauseOperation(
+      DeletePenaltyClauseInputSchema().parse(action.input);
+      paymentTermsClausesOperations.deletePenaltyClauseOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

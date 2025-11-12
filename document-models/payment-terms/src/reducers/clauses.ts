@@ -1,8 +1,8 @@
-import type { PaymentTermsClausesOperations } from "../../gen/clauses/operations.js";
+import type { PaymentTermsClausesOperations } from "../../index.js";
 import { DuplicateBonusClauseIdError, BonusClauseNotFoundError, DuplicatePenaltyClauseIdError, PenaltyClauseNotFoundError } from "../../gen/clauses/error.js";
 
-export const reducer: PaymentTermsClausesOperations = {
-    addBonusClauseOperation(state, action, dispatch) {
+export const paymentTermsClausesOperations: PaymentTermsClausesOperations = {
+    addBonusClauseOperation(state, action) {
         const existingIndex = state.bonusClauses.findIndex(c => c.id === action.input.id);
         if (existingIndex !== -1) {
           throw new DuplicateBonusClauseIdError(`Bonus clause with ID ${action.input.id} already exists`);
@@ -17,7 +17,7 @@ export const reducer: PaymentTermsClausesOperations = {
 
         state.bonusClauses.push(newClause);
     },
-    updateBonusClauseOperation(state, action, dispatch) {
+    updateBonusClauseOperation(state, action) {
         const clauseIndex = state.bonusClauses.findIndex(c => c.id === action.input.id);
         if (clauseIndex === -1) {
           throw new BonusClauseNotFoundError(`Bonus clause with ID ${action.input.id} not found`);
@@ -28,7 +28,7 @@ export const reducer: PaymentTermsClausesOperations = {
         if (action.input.bonusAmount) clause.bonusAmount = action.input.bonusAmount;
         if (action.input.comment !== undefined) clause.comment = action.input.comment || null;
     },
-    deleteBonusClauseOperation(state, action, dispatch) {
+    deleteBonusClauseOperation(state, action) {
         const clauseIndex = state.bonusClauses.findIndex(c => c.id === action.input.id);
         if (clauseIndex === -1) {
           throw new BonusClauseNotFoundError(`Bonus clause with ID ${action.input.id} not found`);
@@ -36,7 +36,7 @@ export const reducer: PaymentTermsClausesOperations = {
 
         state.bonusClauses.splice(clauseIndex, 1);
     },
-    addPenaltyClauseOperation(state, action, dispatch) {
+    addPenaltyClauseOperation(state, action) {
         const existingIndex = state.penaltyClauses.findIndex(c => c.id === action.input.id);
         if (existingIndex !== -1) {
           throw new DuplicatePenaltyClauseIdError(`Penalty clause with ID ${action.input.id} already exists`);
@@ -51,7 +51,7 @@ export const reducer: PaymentTermsClausesOperations = {
 
         state.penaltyClauses.push(newClause);
     },
-    updatePenaltyClauseOperation(state, action, dispatch) {
+    updatePenaltyClauseOperation(state, action) {
         const clauseIndex = state.penaltyClauses.findIndex(c => c.id === action.input.id);
         if (clauseIndex === -1) {
           throw new PenaltyClauseNotFoundError(`Penalty clause with ID ${action.input.id} not found`);
@@ -62,7 +62,7 @@ export const reducer: PaymentTermsClausesOperations = {
         if (action.input.deductionAmount) clause.deductionAmount = action.input.deductionAmount;
         if (action.input.comment !== undefined) clause.comment = action.input.comment || null;
     },
-    deletePenaltyClauseOperation(state, action, dispatch) {
+    deletePenaltyClauseOperation(state, action) {
         const clauseIndex = state.penaltyClauses.findIndex(c => c.id === action.input.id);
         if (clauseIndex === -1) {
           throw new PenaltyClauseNotFoundError(`Penalty clause with ID ${action.input.id} not found`);

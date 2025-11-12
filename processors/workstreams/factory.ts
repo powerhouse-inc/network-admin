@@ -22,7 +22,7 @@ export const workstreamsProcessorFactory =
     const filter: RelationalDbProcessorFilter = {
       branch: ["main"],
       documentId: ["*"],
-      documentType: ["powerhouse/workstream", "powerhouse/network-profile", "powerhouse/scopeofwork"],
+      documentType: ["powerhouse/workstream"],
       scope: ["global"],
     };
 

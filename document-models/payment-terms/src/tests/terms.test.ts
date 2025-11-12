@@ -3,36 +3,32 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { generateMock } from "@powerhousedao/codegen";
-import utils from "../../gen/utils.js";
 import {
-  z,
-  type SetBasicTermsInput,
-  type UpdateStatusInput,
-  type SetCostAndMaterialsInput,
-  type SetRetainerDetailsInput,
-  type SetEscrowDetailsInput,
-  type SetEvaluationTermsInput,
-} from "../../gen/schema/index.js";
-import { reducer } from "../../gen/reducer.js";
-import * as creators from "../../gen/terms/creators.js";
-import type { PaymentTermsDocument } from "../../gen/types.js";
+  reducer,
+  utils,
+  isPaymentTermsDocument,
+  setBasicTerms,
+  SetBasicTermsInputSchema,
+  updateStatus,
+  UpdateStatusInputSchema,
+  setTimeAndMaterials,
+  SetTimeAndMaterialsInputSchema,
+  setEscrowDetails,
+  SetEscrowDetailsInputSchema,
+  setEvaluationTerms,
+  SetEvaluationTermsInputSchema,
+} from "../../gen/index.js";
 
 describe("Terms Operations", () => {
-  let document: PaymentTermsDocument;
-
-  beforeEach(() => {
-    document = utils.createDocument();
-  });
-
   it("should handle setBasicTerms operation", () => {
-    const input: SetBasicTermsInput = generateMock(
-      z.SetBasicTermsInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(SetBasicTermsInputSchema());
 
-    const updatedDocument = reducer(document, creators.setBasicTerms(input));
+    const updatedDocument = reducer(document, setBasicTerms(input));
 
+    expect(isPaymentTermsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "SET_BASIC_TERMS",
@@ -43,10 +39,12 @@ describe("Terms Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle updateStatus operation", () => {
-    const input: UpdateStatusInput = generateMock(z.UpdateStatusInputSchema());
+    const document = utils.createDocument();
+    const input = generateMock(UpdateStatusInputSchema());
 
-    const updatedDocument = reducer(document, creators.updateStatus(input));
+    const updatedDocument = reducer(document, updateStatus(input));
 
+    expect(isPaymentTermsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "UPDATE_STATUS",
@@ -56,38 +54,16 @@ describe("Terms Operations", () => {
     );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
-  it("should handle setCostAndMaterials operation", () => {
-    const input: SetCostAndMaterialsInput = generateMock(
-      z.SetCostAndMaterialsInputSchema(),
-    );
+  it("should handle setTimeAndMaterials operation", () => {
+    const document = utils.createDocument();
+    const input = generateMock(SetTimeAndMaterialsInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.setCostAndMaterials(input),
-    );
+    const updatedDocument = reducer(document, setTimeAndMaterials(input));
 
+    expect(isPaymentTermsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
-      "SET_COST_AND_MATERIALS",
-    );
-    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
-      input,
-    );
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
-  });
-  it("should handle setRetainerDetails operation", () => {
-    const input: SetRetainerDetailsInput = generateMock(
-      z.SetRetainerDetailsInputSchema(),
-    );
-
-    const updatedDocument = reducer(
-      document,
-      creators.setRetainerDetails(input),
-    );
-
-    expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].action.type).toBe(
-      "SET_RETAINER_DETAILS",
+      "SET_TIME_AND_MATERIALS",
     );
     expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
       input,
@@ -95,12 +71,12 @@ describe("Terms Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle setEscrowDetails operation", () => {
-    const input: SetEscrowDetailsInput = generateMock(
-      z.SetEscrowDetailsInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(SetEscrowDetailsInputSchema());
 
-    const updatedDocument = reducer(document, creators.setEscrowDetails(input));
+    const updatedDocument = reducer(document, setEscrowDetails(input));
 
+    expect(isPaymentTermsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "SET_ESCROW_DETAILS",
@@ -111,15 +87,12 @@ describe("Terms Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle setEvaluationTerms operation", () => {
-    const input: SetEvaluationTermsInput = generateMock(
-      z.SetEvaluationTermsInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(SetEvaluationTermsInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.setEvaluationTerms(input),
-    );
+    const updatedDocument = reducer(document, setEvaluationTerms(input));
 
+    expect(isPaymentTermsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "SET_EVALUATION_TERMS",

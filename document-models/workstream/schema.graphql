@@ -42,7 +42,7 @@ enum WorkstreamStatus {
 }
 
 type Proposal {
-  id: OID!
+  id: ID!
   sow: PHID! # a link with a fixed label (i.e, sow)
   paymentTerms: PHID! # a link with a fixed label (i.e., payment terms)
   status: ProposalStatus!

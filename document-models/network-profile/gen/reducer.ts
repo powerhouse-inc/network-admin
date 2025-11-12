@@ -3,12 +3,25 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { NetworkProfilePHState } from "./types.js";
-import { z } from "./types.js";
+import type { NetworkProfilePHState } from "../gen/types.js";
 
-import { reducer as NetworkProfileManagementReducer } from "../src/reducers/network-profile-management.js";
+import { networkProfileNetworkProfileManagementOperations } from "../src/reducers/network-profile-management.js";
 
-export const stateReducer: StateReducer<NetworkProfilePHState> = (
+import {
+  SetIconInputSchema,
+  SetLogoInputSchema,
+  SetLogoBigInputSchema,
+  SetWebsiteInputSchema,
+  SetDescriptionInputSchema,
+  SetCategoryInputSchema,
+  SetXInputSchema,
+  SetGithubInputSchema,
+  SetDiscordInputSchema,
+  SetYoutubeInputSchema,
+  SetProfileNameInputSchema,
+} from "./schema/zod.js";
+
+const stateReducer: StateReducer<NetworkProfilePHState> = (
   state,
   action,
   dispatch,
@@ -19,8 +32,8 @@ export const stateReducer: StateReducer<NetworkProfilePHState> = (
 
   switch (action.type) {
     case "SET_ICON":
-      z.SetIconInputSchema().parse(action.input);
-      NetworkProfileManagementReducer.setIconOperation(
+      SetIconInputSchema().parse(action.input);
+      networkProfileNetworkProfileManagementOperations.setIconOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -28,8 +41,8 @@ export const stateReducer: StateReducer<NetworkProfilePHState> = (
       break;
 
     case "SET_LOGO":
-      z.SetLogoInputSchema().parse(action.input);
-      NetworkProfileManagementReducer.setLogoOperation(
+      SetLogoInputSchema().parse(action.input);
+      networkProfileNetworkProfileManagementOperations.setLogoOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -37,8 +50,8 @@ export const stateReducer: StateReducer<NetworkProfilePHState> = (
       break;
 
     case "SET_LOGO_BIG":
-      z.SetLogoBigInputSchema().parse(action.input);
-      NetworkProfileManagementReducer.setLogoBigOperation(
+      SetLogoBigInputSchema().parse(action.input);
+      networkProfileNetworkProfileManagementOperations.setLogoBigOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -46,8 +59,8 @@ export const stateReducer: StateReducer<NetworkProfilePHState> = (
       break;
 
     case "SET_WEBSITE":
-      z.SetWebsiteInputSchema().parse(action.input);
-      NetworkProfileManagementReducer.setWebsiteOperation(
+      SetWebsiteInputSchema().parse(action.input);
+      networkProfileNetworkProfileManagementOperations.setWebsiteOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -55,8 +68,8 @@ export const stateReducer: StateReducer<NetworkProfilePHState> = (
       break;
 
     case "SET_DESCRIPTION":
-      z.SetDescriptionInputSchema().parse(action.input);
-      NetworkProfileManagementReducer.setDescriptionOperation(
+      SetDescriptionInputSchema().parse(action.input);
+      networkProfileNetworkProfileManagementOperations.setDescriptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -64,8 +77,8 @@ export const stateReducer: StateReducer<NetworkProfilePHState> = (
       break;
 
     case "SET_CATEGORY":
-      z.SetCategoryInputSchema().parse(action.input);
-      NetworkProfileManagementReducer.setCategoryOperation(
+      SetCategoryInputSchema().parse(action.input);
+      networkProfileNetworkProfileManagementOperations.setCategoryOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -73,8 +86,8 @@ export const stateReducer: StateReducer<NetworkProfilePHState> = (
       break;
 
     case "SET_X":
-      z.SetXInputSchema().parse(action.input);
-      NetworkProfileManagementReducer.setXOperation(
+      SetXInputSchema().parse(action.input);
+      networkProfileNetworkProfileManagementOperations.setXOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -82,8 +95,8 @@ export const stateReducer: StateReducer<NetworkProfilePHState> = (
       break;
 
     case "SET_GITHUB":
-      z.SetGithubInputSchema().parse(action.input);
-      NetworkProfileManagementReducer.setGithubOperation(
+      SetGithubInputSchema().parse(action.input);
+      networkProfileNetworkProfileManagementOperations.setGithubOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -91,8 +104,8 @@ export const stateReducer: StateReducer<NetworkProfilePHState> = (
       break;
 
     case "SET_DISCORD":
-      z.SetDiscordInputSchema().parse(action.input);
-      NetworkProfileManagementReducer.setDiscordOperation(
+      SetDiscordInputSchema().parse(action.input);
+      networkProfileNetworkProfileManagementOperations.setDiscordOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -100,8 +113,8 @@ export const stateReducer: StateReducer<NetworkProfilePHState> = (
       break;
 
     case "SET_YOUTUBE":
-      z.SetYoutubeInputSchema().parse(action.input);
-      NetworkProfileManagementReducer.setYoutubeOperation(
+      SetYoutubeInputSchema().parse(action.input);
+      networkProfileNetworkProfileManagementOperations.setYoutubeOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -109,8 +122,8 @@ export const stateReducer: StateReducer<NetworkProfilePHState> = (
       break;
 
     case "SET_PROFILE_NAME":
-      z.SetProfileNameInputSchema().parse(action.input);
-      NetworkProfileManagementReducer.setProfileNameOperation(
+      SetProfileNameInputSchema().parse(action.input);
+      networkProfileNetworkProfileManagementOperations.setProfileNameOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

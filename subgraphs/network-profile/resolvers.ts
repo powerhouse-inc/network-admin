@@ -1,23 +1,29 @@
-import { type ISubgraph } from "@powerhousedao/reactor-api";
+import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
+import { setName } from "document-model";
 import {
   actions,
-  type SetIconInput,
-  type SetLogoInput,
-  type SetLogoBigInput,
-  type SetWebsiteInput,
-  type SetDescriptionInput,
-  type SetCategoryInput,
-  type SetXInput,
-  type SetGithubInput,
-  type SetDiscordInput,
-  type SetYoutubeInput,
-  type SetProfileNameInput,
-  type NetworkProfileDocument,
+  networkProfileDocumentType,
 } from "../../document-models/network-profile/index.js";
-import { setName } from "document-model";
 
-export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
+import type {
+  NetworkProfileDocument,
+  SetIconInput,
+  SetLogoInput,
+  SetLogoBigInput,
+  SetWebsiteInput,
+  SetDescriptionInput,
+  SetCategoryInput,
+  SetXInput,
+  SetGithubInput,
+  SetDiscordInput,
+  SetYoutubeInput,
+  SetProfileNameInput,
+} from "../../document-models/network-profile/index.js";
+
+export const getResolvers = (
+  subgraph: BaseSubgraph,
+): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
@@ -74,7 +80,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             );
 
             return docs.filter(
-              (doc) => doc.header.documentType === "powerhouse/network-profile",
+              (doc) => doc.header.documentType === networkProfileDocumentType,
             );
           },
         };
@@ -86,9 +92,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         args: { name: string; driveId?: string },
       ) => {
         const { driveId, name } = args;
-        const document = await reactor.addDocument(
-          "powerhouse/network-profile",
-        );
+        const document = await reactor.addDocument(networkProfileDocumentType);
 
         if (driveId) {
           await reactor.addAction(
@@ -96,7 +100,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             addFile({
               name,
               id: document.header.id,
-              documentType: "powerhouse/network-profile",
+              documentType: networkProfileDocumentType,
             }),
           );
         }

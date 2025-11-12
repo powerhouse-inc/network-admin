@@ -1,12 +1,15 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type AddContextDocumentInput,
-  type RemoveContextDocumentInput,
+  AddContextDocumentInputSchema,
+  RemoveContextDocumentInputSchema,
+} from "../schema/zod.js";
+import type {
+  AddContextDocumentInput,
+  RemoveContextDocumentInput,
 } from "../types.js";
-import {
-  type AddContextDocumentAction,
-  type RemoveContextDocumentAction,
+import type {
+  AddContextDocumentAction,
+  RemoveContextDocumentAction,
 } from "./actions.js";
 
 export const addContextDocument = (input: AddContextDocumentInput) =>
@@ -14,7 +17,7 @@ export const addContextDocument = (input: AddContextDocumentInput) =>
     "ADD_CONTEXT_DOCUMENT",
     { ...input },
     undefined,
-    z.AddContextDocumentInputSchema,
+    AddContextDocumentInputSchema,
     "global",
   );
 
@@ -23,6 +26,6 @@ export const removeContextDocument = (input: RemoveContextDocumentInput) =>
     "REMOVE_CONTEXT_DOCUMENT",
     { ...input },
     undefined,
-    z.RemoveContextDocumentInputSchema,
+    RemoveContextDocumentInputSchema,
     "global",
   );

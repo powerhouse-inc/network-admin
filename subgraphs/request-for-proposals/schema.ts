@@ -3,98 +3,7 @@ import type { DocumentNode } from "graphql";
 
 export const schema: DocumentNode = gql`
   """
-  Subgraph definition for RequestForProposals (powerhouse/rfp)
-  """
-  type RequestForProposalsState {
-    issuer: ID!
-    code: String
-    title: String!
-    summary: String! # udpated
-    briefing: String! # updated
-    rfpCommenter: [RfpCommenter!]!
-    eligibilityCriteria: String!
-    evaluationCriteria: String!
-    budgetRange: BudgetRange!
-    contextDocuments: [ContextDocument!]!
-    status: RFPStatus!
-    proposals: [RfpProposal!]!
-    deadline: DateTime
-    tags: [String!]
-  }
-
-  type RfpCommenter {
-    id: ID!
-    rfpCommentatorType: RFPCommentatorType!
-    agentType: RfpAgentType!
-    name: String!
-    code: String!
-    imageUrl: String
-  }
-
-  enum RFPCommentatorType {
-    INTERNAL # client team
-    EXTERNAL # outsourced (if RGH asks BAI team)
-  }
-
-  enum RfpAgentType {
-    HUMAN
-    GROUP
-    AI
-  }
-
-  type BudgetRange {
-    min: Float
-    max: Float
-    currency: String
-  }
-
-  type ContextDocument {
-    name: String!
-    url: URL!
-  }
-
-  enum RFPStatus {
-    DRAFT
-    REQUEST_FOR_COMMMENTS
-    CANCELED
-    OPEN_FOR_PROPOSALS
-    AWARDED
-    NOT_AWARDED
-    CLOSED
-  }
-
-  type RfpProposal {
-    id: OID!
-    title: String!
-    summary: String!
-    proposalStatus: RfpProposalStatus!
-    submittedby: OID
-    budgetEstimate: String! # a rolled-up total from the payment terms
-    paymentTerms: RfpPaymentTerm!
-  }
-
-  enum RfpPaymentTerm {
-    MILESTONE_BASED_FIXED_PRICE
-    MILESTONE_BASED_ADVANCE_PAYMENT
-    RETAINER_BASED
-    VARIABLE_COST
-    ESCROW
-  }
-
-  enum RfpProposalStatus {
-    SUBMITTED # or received from an RFP issuer POV
-    OPENED
-    UNDER_REVIEW
-    NEEDS_REVISION
-    REVISED
-    APPROVED
-    CONDITIONALLY_APPROVED #
-    REJECTED
-    WITHDRAWN
-  }
-
-  """
-  Queries: RequestForProposals
+  Queries: RequestForProposals Document
   """
   type RequestForProposalsQueries {
     getDocument(docId: PHID!, driveId: PHID): RequestForProposals
@@ -153,19 +62,19 @@ export const schema: DocumentNode = gql`
     briefing: String
     eligibilityCriteria: String
     evaluationCriteria: String
-    budgetRange: BudgetRangeInput
-    status: RFPStatusInput
+    budgetRange: RequestForProposals_BudgetRangeInput
+    status: RequestForProposals_RFPStatusInput
     deadline: DateTime
     tags: [String!]
   }
 
-  input BudgetRangeInput {
+  input RequestForProposals_BudgetRangeInput {
     min: Float
     max: Float
     currency: String
   }
 
-  enum RFPStatusInput {
+  enum RequestForProposals_RFPStatusInput {
     DRAFT
     REQUEST_FOR_COMMMENTS
     CANCELED
@@ -196,13 +105,13 @@ export const schema: DocumentNode = gql`
     id: OID!
     title: String!
     summary: String!
-    proposalStatus: RfpProposalStatusInput!
+    proposalStatus: RequestForProposals_RfpProposalStatusInput!
     submittedby: OID
     budgetEstimate: String!
-    paymentTerms: RfpPaymentTermInput!
+    paymentTerms: RequestForProposals_RfpPaymentTermInput!
   }
 
-  enum RfpPaymentTermInput {
+  enum RequestForProposals_RfpPaymentTermInput {
     MILESTONE_BASED_FIXED_PRICE
     MILESTONE_BASED_ADVANCE_PAYMENT
     RETAINER_BASED
@@ -210,7 +119,7 @@ export const schema: DocumentNode = gql`
     ESCROW
   }
 
-  enum RfpProposalStatusInput {
+  enum RequestForProposals_RfpProposalStatusInput {
     SUBMITTED # or received from an RFP issuer POV
     OPENED
     UNDER_REVIEW

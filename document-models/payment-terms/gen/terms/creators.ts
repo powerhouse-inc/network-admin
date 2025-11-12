@@ -1,20 +1,24 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type SetBasicTermsInput,
-  type UpdateStatusInput,
-  type SetCostAndMaterialsInput,
-  type SetEscrowDetailsInput,
-  type SetEvaluationTermsInput,
-  type SetRetainerDetailsInput,
+  SetBasicTermsInputSchema,
+  UpdateStatusInputSchema,
+  SetTimeAndMaterialsInputSchema,
+  SetEscrowDetailsInputSchema,
+  SetEvaluationTermsInputSchema,
+} from "../schema/zod.js";
+import type {
+  SetBasicTermsInput,
+  UpdateStatusInput,
+  SetTimeAndMaterialsInput,
+  SetEscrowDetailsInput,
+  SetEvaluationTermsInput,
 } from "../types.js";
-import {
-  type SetBasicTermsAction,
-  type UpdateStatusAction,
-  type SetCostAndMaterialsAction,
-  type SetEscrowDetailsAction,
-  type SetEvaluationTermsAction,
-  type SetRetainerDetailsAction,
+import type {
+  SetBasicTermsAction,
+  UpdateStatusAction,
+  SetTimeAndMaterialsAction,
+  SetEscrowDetailsAction,
+  SetEvaluationTermsAction,
 } from "./actions.js";
 
 export const setBasicTerms = (input: SetBasicTermsInput) =>
@@ -22,7 +26,7 @@ export const setBasicTerms = (input: SetBasicTermsInput) =>
     "SET_BASIC_TERMS",
     { ...input },
     undefined,
-    z.SetBasicTermsInputSchema,
+    SetBasicTermsInputSchema,
     "global",
   );
 
@@ -31,16 +35,16 @@ export const updateStatus = (input: UpdateStatusInput) =>
     "UPDATE_STATUS",
     { ...input },
     undefined,
-    z.UpdateStatusInputSchema,
+    UpdateStatusInputSchema,
     "global",
   );
 
-export const setCostAndMaterials = (input: SetCostAndMaterialsInput) =>
-  createAction<SetCostAndMaterialsAction>(
-    "SET_COST_AND_MATERIALS",
+export const setTimeAndMaterials = (input: SetTimeAndMaterialsInput) =>
+  createAction<SetTimeAndMaterialsAction>(
+    "SET_TIME_AND_MATERIALS",
     { ...input },
     undefined,
-    z.SetCostAndMaterialsInputSchema,
+    SetTimeAndMaterialsInputSchema,
     "global",
   );
 
@@ -49,7 +53,7 @@ export const setEscrowDetails = (input: SetEscrowDetailsInput) =>
     "SET_ESCROW_DETAILS",
     { ...input },
     undefined,
-    z.SetEscrowDetailsInputSchema,
+    SetEscrowDetailsInputSchema,
     "global",
   );
 
@@ -58,15 +62,6 @@ export const setEvaluationTerms = (input: SetEvaluationTermsInput) =>
     "SET_EVALUATION_TERMS",
     { ...input },
     undefined,
-    z.SetEvaluationTermsInputSchema,
-    "global",
-  );
-
-export const setRetainerDetails = (input: SetRetainerDetailsInput) =>
-  createAction<SetRetainerDetailsAction>(
-    "SET_RETAINER_DETAILS",
-    { ...input },
-    undefined,
-    z.SetRetainerDetailsInputSchema,
+    SetEvaluationTermsInputSchema,
     "global",
   );

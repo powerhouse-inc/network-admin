@@ -1,13 +1,12 @@
 import type { EditorModule } from "document-model";
-import Editor from "./editor.js";
+import { lazy } from "react";
 
-export const module: EditorModule = {
-  Component: Editor,
+/** Document editor module for the Todo List document type */
+export const NetworkProfile: EditorModule = {
+  Component: lazy(() => import("./editor.js")),
   documentTypes: ["powerhouse/network-profile"],
   config: {
     id: "network-profile-editor",
     name: "Network Profile Editor",
   },
 };
-
-export default module;

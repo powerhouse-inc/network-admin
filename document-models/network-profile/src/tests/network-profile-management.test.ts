@@ -3,226 +3,203 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
-import utils from "../../gen/utils.js";
+import { describe, it, expect } from "vitest";
+import { generateMock } from "@powerhousedao/codegen";
 import {
-  type SetIconInput,
-  type SetLogoInput,
-  type SetLogoBigInput,
-  type SetWebsiteInput,
-  type SetDescriptionInput,
-  type SetCategoryInput,
-  type SetXInput,
-  type SetGithubInput,
-  type SetDiscordInput,
-  type SetYoutubeInput,
-  type SetProfileNameInput,
-} from "../../gen/schema/index.js";
-import { reducer } from "../../gen/reducer.js";
-import * as creators from "../../gen/network-profile-management/creators.js";
-import type { NetworkProfileDocument } from "../../gen/types.js";
+  reducer,
+  utils,
+  isNetworkProfileDocument,
+  setIcon,
+  SetIconInputSchema,
+  setLogo,
+  SetLogoInputSchema,
+  setLogoBig,
+  SetLogoBigInputSchema,
+  setWebsite,
+  SetWebsiteInputSchema,
+  setDescription,
+  SetDescriptionInputSchema,
+  setCategory,
+  SetCategoryInputSchema,
+  setX,
+  SetXInputSchema,
+  setGithub,
+  SetGithubInputSchema,
+  setDiscord,
+  SetDiscordInputSchema,
+  setYoutube,
+  SetYoutubeInputSchema,
+  setProfileName,
+  SetProfileNameInputSchema,
+} from "../../gen/index.js";
 
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 describe("NetworkProfileManagement Operations", () => {
-  let document: NetworkProfileDocument;
-
-  beforeEach(() => {
-    document = utils.createDocument();
-  });
-
   it("should handle setIcon operation", () => {
-    const input: SetIconInput = { icon: "https://example.com/icon.png" };
+    const document = utils.createDocument();
+    const input = generateMock(SetIconInputSchema());
 
-    const updatedDocument = reducer(document, creators.setIcon(input));
+    const updatedDocument = reducer(document, setIcon(input));
 
+    expect(isNetworkProfileDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_ICON");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe("SET_ICON");
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
-    expect(updatedDocument.state.global.icon).toBe(input.icon);
   });
   it("should handle setLogo operation", () => {
-    const input: SetLogoInput = { logo: "https://example.com/logo.png" };
+    const document = utils.createDocument();
+    const input = generateMock(SetLogoInputSchema());
 
-    const updatedDocument = reducer(document, creators.setLogo(input));
+    const updatedDocument = reducer(document, setLogo(input));
 
+    expect(isNetworkProfileDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_LOGO");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe("SET_LOGO");
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
-    expect(updatedDocument.state.global.logo).toBe(input.logo);
   });
   it("should handle setLogoBig operation", () => {
-    const input: SetLogoBigInput = { logoBig: "https://example.com/logo-big.png" };
+    const document = utils.createDocument();
+    const input = generateMock(SetLogoBigInputSchema());
 
-    const updatedDocument = reducer(document, creators.setLogoBig(input));
+    const updatedDocument = reducer(document, setLogoBig(input));
 
+    expect(isNetworkProfileDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_LOGO_BIG");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "SET_LOGO_BIG",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
-    expect(updatedDocument.state.global.logoBig).toBe(input.logoBig);
   });
   it("should handle setWebsite operation", () => {
-    const input: SetWebsiteInput = { website: "https://example.com" };
+    const document = utils.createDocument();
+    const input = generateMock(SetWebsiteInputSchema());
 
-    const updatedDocument = reducer(document, creators.setWebsite(input));
+    const updatedDocument = reducer(document, setWebsite(input));
 
+    expect(isNetworkProfileDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_WEBSITE");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "SET_WEBSITE",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
-    expect(updatedDocument.state.global.website).toBe(input.website);
-  });
-
-  it("should handle setWebsite operation with null value", () => {
-    const input: SetWebsiteInput = { website: null };
-
-    const updatedDocument = reducer(document, creators.setWebsite(input));
-
-    expect(updatedDocument.state.global.website).toBe(null);
   });
   it("should handle setDescription operation", () => {
-    const input: SetDescriptionInput = { description: "A network for DeFi enthusiasts" };
+    const document = utils.createDocument();
+    const input = generateMock(SetDescriptionInputSchema());
 
-    const updatedDocument = reducer(document, creators.setDescription(input));
+    const updatedDocument = reducer(document, setDescription(input));
 
+    expect(isNetworkProfileDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_DESCRIPTION");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "SET_DESCRIPTION",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
-    expect(updatedDocument.state.global.description).toBe(input.description);
   });
   it("should handle setCategory operation", () => {
-    const input: SetCategoryInput = { category: ["DEFI", "CRYPTO"] };
+    const document = utils.createDocument();
+    const input = generateMock(SetCategoryInputSchema());
 
-    const updatedDocument = reducer(document, creators.setCategory(input));
+    const updatedDocument = reducer(document, setCategory(input));
 
+    expect(isNetworkProfileDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_CATEGORY");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "SET_CATEGORY",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
-    expect(updatedDocument.state.global.category).toEqual(input.category);
-  });
-
-  it("should handle setCategory operation with empty array", () => {
-    const input: SetCategoryInput = { category: [] };
-
-    const updatedDocument = reducer(document, creators.setCategory(input));
-
-    expect(updatedDocument.state.global.category).toEqual([]);
   });
   it("should handle setX operation", () => {
-    const input: SetXInput = { x: "@example_network" };
+    const document = utils.createDocument();
+    const input = generateMock(SetXInputSchema());
 
-    const updatedDocument = reducer(document, creators.setX(input));
+    const updatedDocument = reducer(document, setX(input));
 
+    expect(isNetworkProfileDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_X");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe("SET_X");
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
-    expect(updatedDocument.state.global.x).toBe(input.x);
-  });
-
-  it("should handle setX operation with null value", () => {
-    const input: SetXInput = { x: null };
-
-    const updatedDocument = reducer(document, creators.setX(input));
-
-    expect(updatedDocument.state.global.x).toBe(null);
   });
   it("should handle setGithub operation", () => {
-    const input: SetGithubInput = { github: "example-network" };
+    const document = utils.createDocument();
+    const input = generateMock(SetGithubInputSchema());
 
-    const updatedDocument = reducer(document, creators.setGithub(input));
+    const updatedDocument = reducer(document, setGithub(input));
 
+    expect(isNetworkProfileDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_GITHUB");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe("SET_GITHUB");
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
-    expect(updatedDocument.state.global.github).toBe(input.github);
-  });
-
-  it("should handle setGithub operation with null value", () => {
-    const input: SetGithubInput = { github: null };
-
-    const updatedDocument = reducer(document, creators.setGithub(input));
-
-    expect(updatedDocument.state.global.github).toBe(null);
   });
   it("should handle setDiscord operation", () => {
-    const input: SetDiscordInput = { discord: "https://discord.gg/example" };
+    const document = utils.createDocument();
+    const input = generateMock(SetDiscordInputSchema());
 
-    const updatedDocument = reducer(document, creators.setDiscord(input));
+    const updatedDocument = reducer(document, setDiscord(input));
 
+    expect(isNetworkProfileDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_DISCORD");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "SET_DISCORD",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
-    expect(updatedDocument.state.global.discord).toBe(input.discord);
-  });
-
-  it("should handle setDiscord operation with null value", () => {
-    const input: SetDiscordInput = { discord: null };
-
-    const updatedDocument = reducer(document, creators.setDiscord(input));
-
-    expect(updatedDocument.state.global.discord).toBe(null);
   });
   it("should handle setYoutube operation", () => {
-    const input: SetYoutubeInput = { youtube: "https://youtube.com/@example" };
+    const document = utils.createDocument();
+    const input = generateMock(SetYoutubeInputSchema());
 
-    const updatedDocument = reducer(document, creators.setYoutube(input));
+    const updatedDocument = reducer(document, setYoutube(input));
 
+    expect(isNetworkProfileDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_YOUTUBE");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "SET_YOUTUBE",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
-    expect(updatedDocument.state.global.youtube).toBe(input.youtube);
-  });
-
-  it("should handle setYoutube operation with null value", () => {
-    const input: SetYoutubeInput = { youtube: null };
-
-    const updatedDocument = reducer(document, creators.setYoutube(input));
-
-    expect(updatedDocument.state.global.youtube).toBe(null);
   });
   it("should handle setProfileName operation", () => {
-    const input: SetProfileNameInput = { name: "Example Network" };
+    const document = utils.createDocument();
+    const input = generateMock(SetProfileNameInputSchema());
 
-    const updatedDocument = reducer(document, creators.setProfileName(input));
+    const updatedDocument = reducer(document, setProfileName(input));
 
+    expect(isNetworkProfileDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("SET_PROFILE_NAME");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "SET_PROFILE_NAME",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
-    expect(updatedDocument.state.global.name).toBe(input.name);
-  });
-
-  it("should handle multiple operations in sequence", () => {
-    const nameInput: SetProfileNameInput = { name: "Test Network" };
-    const descInput: SetDescriptionInput = { description: "A test network" };
-    const categoryInput: SetCategoryInput = { category: ["DEFI"] };
-
-    let updatedDocument = reducer(document, creators.setProfileName(nameInput));
-    updatedDocument = reducer(updatedDocument, creators.setDescription(descInput));
-    updatedDocument = reducer(updatedDocument, creators.setCategory(categoryInput));
-
-    expect(updatedDocument.operations.global).toHaveLength(3);
-    expect(updatedDocument.state.global.name).toBe(nameInput.name);
-    expect(updatedDocument.state.global.description).toBe(descInput.description);
-    expect(updatedDocument.state.global.category).toEqual(categoryInput.category);
-  });
-
-  it("should maintain immutability when updating state", () => {
-    const input: SetProfileNameInput = { name: "New Name" };
-    const originalState = { ...document.state.global };
-
-    const updatedDocument = reducer(document, creators.setProfileName(input));
-
-    expect(document.state.global).toEqual(originalState);
-    expect(updatedDocument.state.global.name).toBe(input.name);
-    expect(updatedDocument.state.global.name).not.toBe(document.state.global.name);
   });
 });

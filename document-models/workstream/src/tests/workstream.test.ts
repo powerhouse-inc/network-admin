@@ -3,101 +3,103 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { generateMock } from "@powerhousedao/codegen";
-import utils from "../../gen/utils.js";
 import {
-  z,
-  type EditWorkstreamInput,
-  type EditClientInfoInput,
-  type SetRequestForProposalInput,
-  type AddPaymentRequestInput,
-  type RemovePaymentRequestInput,
-} from "../../gen/schema/index.js";
-import { reducer } from "../../gen/reducer.js";
-import * as creators from "../../gen/workstream/creators.js";
-import type { WorkstreamDocument } from "../../gen/types.js";
+  reducer,
+  utils,
+  isWorkstreamDocument,
+  editWorkstream,
+  EditWorkstreamInputSchema,
+  editClientInfo,
+  EditClientInfoInputSchema,
+  setRequestForProposal,
+  SetRequestForProposalInputSchema,
+  addPaymentRequest,
+  AddPaymentRequestInputSchema,
+  removePaymentRequest,
+  RemovePaymentRequestInputSchema,
+} from "../../index.js";
 
 describe("Workstream Operations", () => {
-  let document: WorkstreamDocument;
-
-  beforeEach(() => {
-    document = utils.createDocument();
-  });
-
   it("should handle editWorkstream operation", () => {
-    const input: EditWorkstreamInput = generateMock(
-      z.EditWorkstreamInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(EditWorkstreamInputSchema());
 
-    const updatedDocument = reducer(document, creators.editWorkstream(input));
+    const updatedDocument = reducer(document, editWorkstream(input));
 
+    expect(isWorkstreamDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_WORKSTREAM");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
-    expect((updatedDocument.operations.global[0] as any).index).toEqual(0);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "EDIT_WORKSTREAM",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle editClientInfo operation", () => {
-    const input: EditClientInfoInput = generateMock(
-      z.EditClientInfoInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(EditClientInfoInputSchema());
 
-    const updatedDocument = reducer(document, creators.editClientInfo(input));
+    const updatedDocument = reducer(document, editClientInfo(input));
 
+    expect(isWorkstreamDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe("EDIT_CLIENT_INFO");
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
-    expect((updatedDocument.operations.global[0] as any).index).toEqual(0);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "EDIT_CLIENT_INFO",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle setRequestForProposal operation", () => {
-    const input: SetRequestForProposalInput = generateMock(
-      z.SetRequestForProposalInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(SetRequestForProposalInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.setRequestForProposal(input),
-    );
+    const updatedDocument = reducer(document, setRequestForProposal(input));
 
+    expect(isWorkstreamDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe(
+    expect(updatedDocument.operations.global[0].action.type).toBe(
       "SET_REQUEST_FOR_PROPOSAL",
     );
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
-    expect((updatedDocument.operations.global[0] as any).index).toEqual(0);
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle addPaymentRequest operation", () => {
-    const input: AddPaymentRequestInput = generateMock(
-      z.AddPaymentRequestInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(AddPaymentRequestInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.addPaymentRequest(input),
-    );
+    const updatedDocument = reducer(document, addPaymentRequest(input));
 
+    expect(isWorkstreamDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe(
+    expect(updatedDocument.operations.global[0].action.type).toBe(
       "ADD_PAYMENT_REQUEST",
     );
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
-    expect((updatedDocument.operations.global[0] as any).index).toEqual(0);
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle removePaymentRequest operation", () => {
-    const input: RemovePaymentRequestInput = generateMock(
-      z.RemovePaymentRequestInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(RemovePaymentRequestInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.removePaymentRequest(input),
-    );
+    const updatedDocument = reducer(document, removePaymentRequest(input));
 
+    expect(isWorkstreamDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
-    expect((updatedDocument.operations.global[0] as any).type).toBe(
+    expect(updatedDocument.operations.global[0].action.type).toBe(
       "REMOVE_PAYMENT_REQUEST",
     );
-    expect((updatedDocument.operations.global[0] as any).input).toStrictEqual(input);
-    expect((updatedDocument.operations.global[0] as any).index).toEqual(0);
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
 });

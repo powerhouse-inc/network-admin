@@ -1,18 +1,24 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type EditWorkstreamInput,
-  type EditClientInfoInput,
-  type SetRequestForProposalInput,
-  type AddPaymentRequestInput,
-  type RemovePaymentRequestInput,
+  EditWorkstreamInputSchema,
+  EditClientInfoInputSchema,
+  SetRequestForProposalInputSchema,
+  AddPaymentRequestInputSchema,
+  RemovePaymentRequestInputSchema,
+} from "../schema/zod.js";
+import type {
+  EditWorkstreamInput,
+  EditClientInfoInput,
+  SetRequestForProposalInput,
+  AddPaymentRequestInput,
+  RemovePaymentRequestInput,
 } from "../types.js";
-import {
-  type EditWorkstreamAction,
-  type EditClientInfoAction,
-  type SetRequestForProposalAction,
-  type AddPaymentRequestAction,
-  type RemovePaymentRequestAction,
+import type {
+  EditWorkstreamAction,
+  EditClientInfoAction,
+  SetRequestForProposalAction,
+  AddPaymentRequestAction,
+  RemovePaymentRequestAction,
 } from "./actions.js";
 
 export const editWorkstream = (input: EditWorkstreamInput) =>
@@ -20,7 +26,7 @@ export const editWorkstream = (input: EditWorkstreamInput) =>
     "EDIT_WORKSTREAM",
     { ...input },
     undefined,
-    z.EditWorkstreamInputSchema,
+    EditWorkstreamInputSchema,
     "global",
   );
 
@@ -29,7 +35,7 @@ export const editClientInfo = (input: EditClientInfoInput) =>
     "EDIT_CLIENT_INFO",
     { ...input },
     undefined,
-    z.EditClientInfoInputSchema,
+    EditClientInfoInputSchema,
     "global",
   );
 
@@ -38,7 +44,7 @@ export const setRequestForProposal = (input: SetRequestForProposalInput) =>
     "SET_REQUEST_FOR_PROPOSAL",
     { ...input },
     undefined,
-    z.SetRequestForProposalInputSchema,
+    SetRequestForProposalInputSchema,
     "global",
   );
 
@@ -47,7 +53,7 @@ export const addPaymentRequest = (input: AddPaymentRequestInput) =>
     "ADD_PAYMENT_REQUEST",
     { ...input },
     undefined,
-    z.AddPaymentRequestInputSchema,
+    AddPaymentRequestInputSchema,
     "global",
   );
 
@@ -56,6 +62,6 @@ export const removePaymentRequest = (input: RemovePaymentRequestInput) =>
     "REMOVE_PAYMENT_REQUEST",
     { ...input },
     undefined,
-    z.RemovePaymentRequestInputSchema,
+    RemovePaymentRequestInputSchema,
     "global",
   );

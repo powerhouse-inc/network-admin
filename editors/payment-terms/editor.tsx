@@ -4,15 +4,13 @@ import {
   useParentFolderForSelectedNode,
 } from "@powerhousedao/reactor-browser";
 import {
-  Button,
-  Icon,
   toast,
   ToastContainer,
-} from "@powerhousedao/design-system";
+  DocumentToolbar,
+} from "@powerhousedao/design-system/connect";
 import type { Action, EditorProps } from "document-model";
 import {
   type PaymentTermsDocument,
-  type PaymentTermsState,
   actions,
 } from "../../document-models/payment-terms/index.js";
 import { BasicTermsTab } from "./basic-terms-tab.js";
@@ -22,8 +20,8 @@ import { CostMaterialsTab } from "./cost-materials-tab.js";
 import { RetainerTab } from "./retainer-tab.js";
 import { EscrowTab } from "./escrow-tab.js";
 import { EvaluationTab } from "./evaluation-tab.js";
-import { useSelectedPaymentTermsDocument } from "../hooks/usePaymentTermsDocument.js";
-import { DocumentToolbar } from "@powerhousedao/design-system";
+import { useSelectedPaymentTermsDocument } from "../../document-models/payment-terms/hooks.js";
+import { Icon } from "@powerhousedao/document-engineering";
 
 export type IProps = EditorProps;
 
@@ -239,7 +237,7 @@ export default function Editor() {
               </div>
             )}
 
-            {state.paymentModel === "COST_AND_MATERIALS" && (
+            {state.paymentModel === "TIME_AND_MATERIALS" && (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
                 <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-3">
@@ -268,7 +266,7 @@ export default function Editor() {
               </div>
             )}
 
-            {state.paymentModel === "RETAINER" && (
+            {state.paymentModel === "TIME_AND_MATERIALS" && (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
                 <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-3">
@@ -301,7 +299,7 @@ export default function Editor() {
             {state.escrowDetails &&
               state.escrowDetails.releaseConditions &&
               (state.paymentModel === "MILESTONE" ||
-                state.paymentModel === "COST_AND_MATERIALS" ||
+                state.paymentModel === "TIME_AND_MATERIALS" ||
                 state.paymentModel === "RETAINER") && (
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
                   <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">

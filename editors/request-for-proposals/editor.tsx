@@ -1,7 +1,6 @@
 import type { Action, EditorProps } from "document-model";
 import {
   type RequestForProposalsDocument,
-  type RequestForProposalsState,
   actions,
   type RfpStatusInput,
 } from "../../document-models/request-for-proposals/index.js";
@@ -11,10 +10,10 @@ import {
   TextInput,
   NumberInput,
 } from "@powerhousedao/document-engineering";
-import { toast, ToastContainer } from "@powerhousedao/design-system";
-import { MarkdownEditor } from "./markdown-editor.js";
-import { useSelectedRequestForProposalsDocument } from "../hooks/useRequestForProposalsDocument.js";
-import { DocumentToolbar } from "@powerhousedao/design-system";
+import { toast, ToastContainer } from "@powerhousedao/design-system/connect";
+import { MarkdownEditor } from "./markdown-editor.jsx";
+import { useSelectedRequestForProposalsDocument } from "../../document-models/request-for-proposals/hooks.js";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
@@ -131,7 +130,9 @@ export default function Editor() {
               label="Summary"
               value={state.summary ?? ""}
               onChange={() => {}}
-              onBlur={(value) => dispatch(actions.editRfp({ summary: value }))}
+              onBlur={(value: string) =>
+                dispatch(actions.editRfp({ summary: value }))
+              }
             />
           </div>
 
@@ -248,7 +249,7 @@ export default function Editor() {
               label="Eligibility Criteria"
               value={state.eligibilityCriteria ?? ""}
               onChange={() => {}}
-              onBlur={(value) =>
+              onBlur={(value: string) =>
                 dispatch(actions.editRfp({ eligibilityCriteria: value }))
               }
             />
@@ -261,7 +262,7 @@ export default function Editor() {
               label="Evaluation Criteria"
               value={state.evaluationCriteria ?? ""}
               onChange={() => {}}
-              onBlur={(value) =>
+              onBlur={(value: string) =>
                 dispatch(actions.editRfp({ evaluationCriteria: value }))
               }
             />

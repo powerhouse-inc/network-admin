@@ -12,6 +12,13 @@ import type {
 } from "./types.js";
 import type { NetworkProfilePHState } from "./types.js";
 import { reducer } from "./reducer.js";
+import { networkProfileDocumentType } from "./document-type.js";
+import {
+  isNetworkProfileDocument,
+  assertIsNetworkProfileDocument,
+  isNetworkProfileState,
+  assertIsNetworkProfileState,
+} from "./document-schema.js";
 
 export const initialGlobalState: NetworkProfileGlobalState = {
   name: "",
@@ -28,7 +35,7 @@ export const initialGlobalState: NetworkProfileGlobalState = {
 };
 export const initialLocalState: NetworkProfileLocalState = {};
 
-const utils: DocumentModelUtils<NetworkProfilePHState> = {
+export const utils: DocumentModelUtils<NetworkProfilePHState> = {
   fileExtension: ".phdm",
   createState(state) {
     return {
@@ -40,7 +47,7 @@ const utils: DocumentModelUtils<NetworkProfilePHState> = {
   createDocument(state) {
     const document = baseCreateDocument(utils.createState, state);
 
-    document.header.documentType = "powerhouse/network-profile";
+    document.header.documentType = networkProfileDocumentType;
 
     // for backwards compatibility, but this is NOT a valid signed document id
     document.header.id = generateId();
@@ -53,11 +60,25 @@ const utils: DocumentModelUtils<NetworkProfilePHState> = {
   loadFromInput(input) {
     return baseLoadFromInput(input, reducer);
   },
+  isStateOfType(state) {
+    return isNetworkProfileState(state);
+  },
+  assertIsStateOfType(state) {
+    return assertIsNetworkProfileState(state);
+  },
+  isDocumentOfType(document) {
+    return isNetworkProfileDocument(document);
+  },
+  assertIsDocumentOfType(document) {
+    return assertIsNetworkProfileDocument(document);
+  },
 };
 
 export const createDocument = utils.createDocument;
 export const createState = utils.createState;
 export const saveToFileHandle = utils.saveToFileHandle;
 export const loadFromInput = utils.loadFromInput;
-
-export default utils;
+export const isStateOfType = utils.isStateOfType;
+export const assertIsStateOfType = utils.assertIsStateOfType;
+export const isDocumentOfType = utils.isDocumentOfType;
+export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

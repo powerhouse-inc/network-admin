@@ -10,7 +10,8 @@ import {
   Button,
 } from "@powerhousedao/document-engineering";
 
-import { Icon, toast } from "@powerhousedao/design-system";
+import { Icon } from "@powerhousedao/document-engineering";
+import { toast } from "@powerhousedao/design-system/connect";
 import { generateId } from "document-model/core";
 import type {
   Milestone,

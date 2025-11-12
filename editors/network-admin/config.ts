@@ -1,5 +1,6 @@
 import type { PHDriveEditorConfig } from "@powerhousedao/reactor-browser";
 
+/** Editor config for the NetworkAdmin */
 export const editorConfig: PHDriveEditorConfig = {
   isDragAndDropEnabled: true,
   allowedDocumentTypes: [

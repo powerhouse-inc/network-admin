@@ -1,9 +1,6 @@
 @import "tailwindcss";
 @import "@powerhousedao/design-system/theme.css";
-@import './node_modules/@powerhousedao/document-engineering/dist/style.css';
 @import './node_modules/@powerhousedao/project-management/dist/style.css';
-@import './node_modules/@uiw/react-md-editor/markdown-editor.css';
-@import './node_modules/@uiw/react-markdown-preview/markdown.css';
 
 @theme {
   /* You can customize the theme by overriding the theme variables here */

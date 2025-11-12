@@ -1,30 +1,42 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type SetIconInput,
-  type SetLogoInput,
-  type SetLogoBigInput,
-  type SetWebsiteInput,
-  type SetDescriptionInput,
-  type SetCategoryInput,
-  type SetXInput,
-  type SetGithubInput,
-  type SetDiscordInput,
-  type SetYoutubeInput,
-  type SetProfileNameInput,
+  SetIconInputSchema,
+  SetLogoInputSchema,
+  SetLogoBigInputSchema,
+  SetWebsiteInputSchema,
+  SetDescriptionInputSchema,
+  SetCategoryInputSchema,
+  SetXInputSchema,
+  SetGithubInputSchema,
+  SetDiscordInputSchema,
+  SetYoutubeInputSchema,
+  SetProfileNameInputSchema,
+} from "../schema/zod.js";
+import type {
+  SetIconInput,
+  SetLogoInput,
+  SetLogoBigInput,
+  SetWebsiteInput,
+  SetDescriptionInput,
+  SetCategoryInput,
+  SetXInput,
+  SetGithubInput,
+  SetDiscordInput,
+  SetYoutubeInput,
+  SetProfileNameInput,
 } from "../types.js";
-import {
-  type SetIconAction,
-  type SetLogoAction,
-  type SetLogoBigAction,
-  type SetWebsiteAction,
-  type SetDescriptionAction,
-  type SetCategoryAction,
-  type SetXAction,
-  type SetGithubAction,
-  type SetDiscordAction,
-  type SetYoutubeAction,
-  type SetProfileNameAction,
+import type {
+  SetIconAction,
+  SetLogoAction,
+  SetLogoBigAction,
+  SetWebsiteAction,
+  SetDescriptionAction,
+  SetCategoryAction,
+  SetXAction,
+  SetGithubAction,
+  SetDiscordAction,
+  SetYoutubeAction,
+  SetProfileNameAction,
 } from "./actions.js";
 
 export const setIcon = (input: SetIconInput) =>
@@ -32,7 +44,7 @@ export const setIcon = (input: SetIconInput) =>
     "SET_ICON",
     { ...input },
     undefined,
-    z.SetIconInputSchema,
+    SetIconInputSchema,
     "global",
   );
 
@@ -41,7 +53,7 @@ export const setLogo = (input: SetLogoInput) =>
     "SET_LOGO",
     { ...input },
     undefined,
-    z.SetLogoInputSchema,
+    SetLogoInputSchema,
     "global",
   );
 
@@ -50,7 +62,7 @@ export const setLogoBig = (input: SetLogoBigInput) =>
     "SET_LOGO_BIG",
     { ...input },
     undefined,
-    z.SetLogoBigInputSchema,
+    SetLogoBigInputSchema,
     "global",
   );
 
@@ -59,7 +71,7 @@ export const setWebsite = (input: SetWebsiteInput) =>
     "SET_WEBSITE",
     { ...input },
     undefined,
-    z.SetWebsiteInputSchema,
+    SetWebsiteInputSchema,
     "global",
   );
 
@@ -68,7 +80,7 @@ export const setDescription = (input: SetDescriptionInput) =>
     "SET_DESCRIPTION",
     { ...input },
     undefined,
-    z.SetDescriptionInputSchema,
+    SetDescriptionInputSchema,
     "global",
   );
 
@@ -77,7 +89,7 @@ export const setCategory = (input: SetCategoryInput) =>
     "SET_CATEGORY",
     { ...input },
     undefined,
-    z.SetCategoryInputSchema,
+    SetCategoryInputSchema,
     "global",
   );
 
@@ -86,7 +98,7 @@ export const setX = (input: SetXInput) =>
     "SET_X",
     { ...input },
     undefined,
-    z.SetXInputSchema,
+    SetXInputSchema,
     "global",
   );
 
@@ -95,7 +107,7 @@ export const setGithub = (input: SetGithubInput) =>
     "SET_GITHUB",
     { ...input },
     undefined,
-    z.SetGithubInputSchema,
+    SetGithubInputSchema,
     "global",
   );
 
@@ -104,7 +116,7 @@ export const setDiscord = (input: SetDiscordInput) =>
     "SET_DISCORD",
     { ...input },
     undefined,
-    z.SetDiscordInputSchema,
+    SetDiscordInputSchema,
     "global",
   );
 
@@ -113,7 +125,7 @@ export const setYoutube = (input: SetYoutubeInput) =>
     "SET_YOUTUBE",
     { ...input },
     undefined,
-    z.SetYoutubeInputSchema,
+    SetYoutubeInputSchema,
     "global",
   );
 
@@ -122,6 +134,6 @@ export const setProfileName = (input: SetProfileNameInput) =>
     "SET_PROFILE_NAME",
     { ...input },
     undefined,
-    z.SetProfileNameInputSchema,
+    SetProfileNameInputSchema,
     "global",
   );

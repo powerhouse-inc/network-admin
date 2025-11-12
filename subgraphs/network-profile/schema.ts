@@ -3,32 +3,7 @@ import type { DocumentNode } from "graphql";
 
 export const schema: DocumentNode = gql`
   """
-  Subgraph definition for NetworkProfile (powerhouse/network-profile)
-  """
-  enum NetworkCategory {
-    DEFI
-    OSS
-    CRYPTO
-    NGO
-    CHARITY
-  }
-
-  type NetworkProfileState {
-    name: String!
-    icon: String!
-    logo: String!
-    logoBig: String!
-    website: String
-    description: String!
-    category: [NetworkCategory!]!
-    x: String
-    github: String
-    discord: String
-    youtube: String
-  }
-
-  """
-  Queries: NetworkProfile
+  Queries: NetworkProfile Document
   """
   type NetworkProfileQueries {
     getDocument(docId: PHID!, driveId: PHID): NetworkProfile
@@ -121,7 +96,7 @@ export const schema: DocumentNode = gql`
     description: String!
   }
   input NetworkProfile_SetCategoryInput {
-    category: [NetworkCategory!]!
+    category: [NetworkProfile_NetworkCategory!]!
   }
   input NetworkProfile_SetXInput {
     x: String

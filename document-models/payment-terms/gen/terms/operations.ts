@@ -2,10 +2,9 @@ import { type SignalDispatch } from "document-model";
 import {
   type SetBasicTermsAction,
   type UpdateStatusAction,
-  type SetCostAndMaterialsAction,
+  type SetTimeAndMaterialsAction,
   type SetEscrowDetailsAction,
   type SetEvaluationTermsAction,
-  type SetRetainerDetailsAction,
 } from "./actions.js";
 import { type PaymentTermsState } from "../types.js";
 
@@ -20,9 +19,9 @@ export interface PaymentTermsTermsOperations {
     action: UpdateStatusAction,
     dispatch?: SignalDispatch,
   ) => void;
-  setCostAndMaterialsOperation: (
+  setTimeAndMaterialsOperation: (
     state: PaymentTermsState,
-    action: SetCostAndMaterialsAction,
+    action: SetTimeAndMaterialsAction,
     dispatch?: SignalDispatch,
   ) => void;
   setEscrowDetailsOperation: (
@@ -33,11 +32,6 @@ export interface PaymentTermsTermsOperations {
   setEvaluationTermsOperation: (
     state: PaymentTermsState,
     action: SetEvaluationTermsAction,
-    dispatch?: SignalDispatch,
-  ) => void;
-  setRetainerDetailsOperation: (
-    state: PaymentTermsState,
-    action: SetRetainerDetailsAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

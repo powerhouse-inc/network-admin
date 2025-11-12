@@ -4,7 +4,7 @@ import {
   Textarea,
   Button,
 } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system";
+import { toast } from "@powerhousedao/design-system/connect";
 import type { PaymentTermsState } from "../../document-models/payment-terms/gen/schema/types.js";
 import type { PaymentTermsAction } from "../../document-models/payment-terms/gen/actions.js";
 import { type actions as paymentTermsActions } from "../../document-models/payment-terms/index.js";

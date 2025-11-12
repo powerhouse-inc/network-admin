@@ -1,20 +1,27 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type AddBonusClauseInput,
-  type UpdateBonusClauseInput,
-  type DeleteBonusClauseInput,
-  type AddPenaltyClauseInput,
-  type UpdatePenaltyClauseInput,
-  type DeletePenaltyClauseInput,
+  AddBonusClauseInputSchema,
+  UpdateBonusClauseInputSchema,
+  DeleteBonusClauseInputSchema,
+  AddPenaltyClauseInputSchema,
+  UpdatePenaltyClauseInputSchema,
+  DeletePenaltyClauseInputSchema,
+} from "../schema/zod.js";
+import type {
+  AddBonusClauseInput,
+  UpdateBonusClauseInput,
+  DeleteBonusClauseInput,
+  AddPenaltyClauseInput,
+  UpdatePenaltyClauseInput,
+  DeletePenaltyClauseInput,
 } from "../types.js";
-import {
-  type AddBonusClauseAction,
-  type UpdateBonusClauseAction,
-  type DeleteBonusClauseAction,
-  type AddPenaltyClauseAction,
-  type UpdatePenaltyClauseAction,
-  type DeletePenaltyClauseAction,
+import type {
+  AddBonusClauseAction,
+  UpdateBonusClauseAction,
+  DeleteBonusClauseAction,
+  AddPenaltyClauseAction,
+  UpdatePenaltyClauseAction,
+  DeletePenaltyClauseAction,
 } from "./actions.js";
 
 export const addBonusClause = (input: AddBonusClauseInput) =>
@@ -22,7 +29,7 @@ export const addBonusClause = (input: AddBonusClauseInput) =>
     "ADD_BONUS_CLAUSE",
     { ...input },
     undefined,
-    z.AddBonusClauseInputSchema,
+    AddBonusClauseInputSchema,
     "global",
   );
 
@@ -31,7 +38,7 @@ export const updateBonusClause = (input: UpdateBonusClauseInput) =>
     "UPDATE_BONUS_CLAUSE",
     { ...input },
     undefined,
-    z.UpdateBonusClauseInputSchema,
+    UpdateBonusClauseInputSchema,
     "global",
   );
 
@@ -40,7 +47,7 @@ export const deleteBonusClause = (input: DeleteBonusClauseInput) =>
     "DELETE_BONUS_CLAUSE",
     { ...input },
     undefined,
-    z.DeleteBonusClauseInputSchema,
+    DeleteBonusClauseInputSchema,
     "global",
   );
 
@@ -49,7 +56,7 @@ export const addPenaltyClause = (input: AddPenaltyClauseInput) =>
     "ADD_PENALTY_CLAUSE",
     { ...input },
     undefined,
-    z.AddPenaltyClauseInputSchema,
+    AddPenaltyClauseInputSchema,
     "global",
   );
 
@@ -58,7 +65,7 @@ export const updatePenaltyClause = (input: UpdatePenaltyClauseInput) =>
     "UPDATE_PENALTY_CLAUSE",
     { ...input },
     undefined,
-    z.UpdatePenaltyClauseInputSchema,
+    UpdatePenaltyClauseInputSchema,
     "global",
   );
 
@@ -67,6 +74,6 @@ export const deletePenaltyClause = (input: DeletePenaltyClauseInput) =>
     "DELETE_PENALTY_CLAUSE",
     { ...input },
     undefined,
-    z.DeletePenaltyClauseInputSchema,
+    DeletePenaltyClauseInputSchema,
     "global",
   );

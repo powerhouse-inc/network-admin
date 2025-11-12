@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { TextInput, Select, Button } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system";
+import { toast } from "@powerhousedao/design-system/connect";
 import type {
   PaymentTermsState,
   BillingFrequency,
@@ -21,10 +21,10 @@ export function CostMaterialsTab({
 }: CostMaterialsTabProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    hourlyRate: state.costAndMaterials?.hourlyRate?.value?.toString() || "",
-    variableCap: state.costAndMaterials?.variableCap?.value?.toString() || "",
-    billingFrequency: state.costAndMaterials?.billingFrequency || "MONTHLY",
-    timesheetRequired: state.costAndMaterials?.timesheetRequired || false,
+    hourlyRate: state.timeAndMaterials?.hourlyRate?.value?.toString() || "",
+    variableCap: state.timeAndMaterials?.variableCap?.value?.toString() || "",
+    billingFrequency: state.timeAndMaterials?.billingFrequency || "MONTHLY",
+    timesheetRequired: state.timeAndMaterials?.timesheetRequired || false,
   });
 
   const handleSubmit = useCallback(
@@ -32,7 +32,7 @@ export function CostMaterialsTab({
       e.preventDefault();
 
       dispatch(
-        actions.setCostAndMaterials({
+        actions.setTimeAndMaterials({
           hourlyRate: formData.hourlyRate
             ? {
                 value: parseFloat(formData.hourlyRate),
@@ -60,13 +60,13 @@ export function CostMaterialsTab({
 
   const handleCancel = useCallback(() => {
     setFormData({
-      hourlyRate: state.costAndMaterials?.hourlyRate?.value?.toString() || "",
-      variableCap: state.costAndMaterials?.variableCap?.value?.toString() || "",
-      billingFrequency: state.costAndMaterials?.billingFrequency || "MONTHLY",
-      timesheetRequired: state.costAndMaterials?.timesheetRequired || false,
+      hourlyRate: state.timeAndMaterials?.hourlyRate?.value?.toString() || "",
+      variableCap: state.timeAndMaterials?.variableCap?.value?.toString() || "",
+      billingFrequency: state.timeAndMaterials?.billingFrequency || "MONTHLY",
+      timesheetRequired: state.timeAndMaterials?.timesheetRequired || false,
     });
     setIsEditing(false);
-  }, [state.costAndMaterials]);
+  }, [state.timeAndMaterials]);
 
   if (!isEditing) {
     return (
@@ -81,21 +81,21 @@ export function CostMaterialsTab({
             size="sm"
             className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
-            {state.costAndMaterials
+            {state.timeAndMaterials
               ? "Edit Configuration"
               : "Configure Cost & Materials"}
           </Button>
         </div>
 
-        {state.costAndMaterials ? (
+        {state.timeAndMaterials ? (
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Hourly Rate
               </label>
               <p className="text-lg dark:text-white">
-                {state.costAndMaterials.hourlyRate
-                  ? `${state.costAndMaterials.hourlyRate.value} ${state.costAndMaterials.hourlyRate.unit}`
+                {state.timeAndMaterials.hourlyRate
+                  ? `${state.timeAndMaterials.hourlyRate.value} ${state.timeAndMaterials.hourlyRate.unit}`
                   : "Not set"}
               </p>
             </div>
@@ -104,8 +104,8 @@ export function CostMaterialsTab({
                 Variable Cap
               </label>
               <p className="text-lg dark:text-white">
-                {state.costAndMaterials.variableCap
-                  ? `${state.costAndMaterials.variableCap.value} ${state.costAndMaterials.variableCap.unit}`
+                {state.timeAndMaterials.variableCap
+                  ? `${state.timeAndMaterials.variableCap.value} ${state.timeAndMaterials.variableCap.unit}`
                   : "Not set"}
               </p>
             </div>
@@ -114,7 +114,7 @@ export function CostMaterialsTab({
                 Billing Frequency
               </label>
               <p className="text-lg dark:text-white">
-                {state.costAndMaterials.billingFrequency}
+                {state.timeAndMaterials.billingFrequency}
               </p>
             </div>
             <div>
@@ -122,7 +122,7 @@ export function CostMaterialsTab({
                 Timesheet Required
               </label>
               <p className="text-lg dark:text-white">
-                {state.costAndMaterials.timesheetRequired ? "Yes" : "No"}
+                {state.timeAndMaterials.timesheetRequired ? "Yes" : "No"}
               </p>
             </div>
           </div>

@@ -1,14 +1,18 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type AddProposalInput,
-  type ChangeProposalStatusInput,
-  type RemoveProposalInput,
+  AddProposalInputSchema,
+  ChangeProposalStatusInputSchema,
+  RemoveProposalInputSchema,
+} from "../schema/zod.js";
+import type {
+  AddProposalInput,
+  ChangeProposalStatusInput,
+  RemoveProposalInput,
 } from "../types.js";
-import {
-  type AddProposalAction,
-  type ChangeProposalStatusAction,
-  type RemoveProposalAction,
+import type {
+  AddProposalAction,
+  ChangeProposalStatusAction,
+  RemoveProposalAction,
 } from "./actions.js";
 
 export const addProposal = (input: AddProposalInput) =>
@@ -16,7 +20,7 @@ export const addProposal = (input: AddProposalInput) =>
     "ADD_PROPOSAL",
     { ...input },
     undefined,
-    z.AddProposalInputSchema,
+    AddProposalInputSchema,
     "global",
   );
 
@@ -25,7 +29,7 @@ export const changeProposalStatus = (input: ChangeProposalStatusInput) =>
     "CHANGE_PROPOSAL_STATUS",
     { ...input },
     undefined,
-    z.ChangeProposalStatusInputSchema,
+    ChangeProposalStatusInputSchema,
     "global",
   );
 
@@ -34,6 +38,6 @@ export const removeProposal = (input: RemoveProposalInput) =>
     "REMOVE_PROPOSAL",
     { ...input },
     undefined,
-    z.RemoveProposalInputSchema,
+    RemoveProposalInputSchema,
     "global",
   );

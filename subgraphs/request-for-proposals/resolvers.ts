@@ -1,18 +1,24 @@
-import { type ISubgraph } from "@powerhousedao/reactor-api";
+import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
+import { setName } from "document-model";
 import {
   actions,
-  type EditRfpInput,
-  type AddContextDocumentInput,
-  type RemoveContextDocumentInput,
-  type AddProposalInput,
-  type ChangeProposalStatusInput,
-  type RemoveProposalInput,
-  type RequestForProposalsDocument,
+  requestForProposalsDocumentType,
 } from "../../document-models/request-for-proposals/index.js";
-import { setName } from "document-model";
 
-export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
+import type {
+  RequestForProposalsDocument,
+  EditRfpInput,
+  AddContextDocumentInput,
+  RemoveContextDocumentInput,
+  AddProposalInput,
+  ChangeProposalStatusInput,
+  RemoveProposalInput,
+} from "../../document-models/request-for-proposals/index.js";
+
+export const getResolvers = (
+  subgraph: BaseSubgraph,
+): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
@@ -69,7 +75,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             );
 
             return docs.filter(
-              (doc) => doc.header.documentType === "powerhouse/rfp",
+              (doc) =>
+                doc.header.documentType === requestForProposalsDocumentType,
             );
           },
         };
@@ -81,7 +88,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         args: { name: string; driveId?: string },
       ) => {
         const { driveId, name } = args;
-        const document = await reactor.addDocument("powerhouse/rfp");
+        const document = await reactor.addDocument(
+          requestForProposalsDocumentType,
+        );
 
         if (driveId) {
           await reactor.addAction(
@@ -89,7 +98,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             addFile({
               name,
               id: document.header.id,
-              documentType: "powerhouse/rfp",
+              documentType: requestForProposalsDocumentType,
             }),
           );
         }

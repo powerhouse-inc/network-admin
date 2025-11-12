@@ -1,18 +1,24 @@
 import { createAction } from "document-model/core";
 import {
-  z,
-  type AddMilestoneInput,
-  type UpdateMilestoneInput,
-  type UpdateMilestoneStatusInput,
-  type DeleteMilestoneInput,
-  type ReorderMilestonesInput,
+  AddMilestoneInputSchema,
+  UpdateMilestoneInputSchema,
+  UpdateMilestoneStatusInputSchema,
+  DeleteMilestoneInputSchema,
+  ReorderMilestonesInputSchema,
+} from "../schema/zod.js";
+import type {
+  AddMilestoneInput,
+  UpdateMilestoneInput,
+  UpdateMilestoneStatusInput,
+  DeleteMilestoneInput,
+  ReorderMilestonesInput,
 } from "../types.js";
-import {
-  type AddMilestoneAction,
-  type UpdateMilestoneAction,
-  type UpdateMilestoneStatusAction,
-  type DeleteMilestoneAction,
-  type ReorderMilestonesAction,
+import type {
+  AddMilestoneAction,
+  UpdateMilestoneAction,
+  UpdateMilestoneStatusAction,
+  DeleteMilestoneAction,
+  ReorderMilestonesAction,
 } from "./actions.js";
 
 export const addMilestone = (input: AddMilestoneInput) =>
@@ -20,7 +26,7 @@ export const addMilestone = (input: AddMilestoneInput) =>
     "ADD_MILESTONE",
     { ...input },
     undefined,
-    z.AddMilestoneInputSchema,
+    AddMilestoneInputSchema,
     "global",
   );
 
@@ -29,7 +35,7 @@ export const updateMilestone = (input: UpdateMilestoneInput) =>
     "UPDATE_MILESTONE",
     { ...input },
     undefined,
-    z.UpdateMilestoneInputSchema,
+    UpdateMilestoneInputSchema,
     "global",
   );
 
@@ -38,7 +44,7 @@ export const updateMilestoneStatus = (input: UpdateMilestoneStatusInput) =>
     "UPDATE_MILESTONE_STATUS",
     { ...input },
     undefined,
-    z.UpdateMilestoneStatusInputSchema,
+    UpdateMilestoneStatusInputSchema,
     "global",
   );
 
@@ -47,7 +53,7 @@ export const deleteMilestone = (input: DeleteMilestoneInput) =>
     "DELETE_MILESTONE",
     { ...input },
     undefined,
-    z.DeleteMilestoneInputSchema,
+    DeleteMilestoneInputSchema,
     "global",
   );
 
@@ -56,6 +62,6 @@ export const reorderMilestones = (input: ReorderMilestonesInput) =>
     "REORDER_MILESTONES",
     { ...input },
     undefined,
-    z.ReorderMilestonesInputSchema,
+    ReorderMilestonesInputSchema,
     "global",
   );

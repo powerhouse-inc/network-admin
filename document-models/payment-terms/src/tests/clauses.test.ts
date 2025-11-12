@@ -3,36 +3,34 @@
  * - change it by adding new tests or modifying the existing ones
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { generateMock } from "@powerhousedao/codegen";
-import utils from "../../gen/utils.js";
 import {
-  z,
-  type AddBonusClauseInput,
-  type UpdateBonusClauseInput,
-  type DeleteBonusClauseInput,
-  type AddPenaltyClauseInput,
-  type UpdatePenaltyClauseInput,
-  type DeletePenaltyClauseInput,
-} from "../../gen/schema/index.js";
-import { reducer } from "../../gen/reducer.js";
-import * as creators from "../../gen/clauses/creators.js";
-import type { PaymentTermsDocument } from "../../gen/types.js";
+  reducer,
+  utils,
+  isPaymentTermsDocument,
+  addBonusClause,
+  AddBonusClauseInputSchema,
+  updateBonusClause,
+  UpdateBonusClauseInputSchema,
+  deleteBonusClause,
+  DeleteBonusClauseInputSchema,
+  addPenaltyClause,
+  AddPenaltyClauseInputSchema,
+  updatePenaltyClause,
+  UpdatePenaltyClauseInputSchema,
+  deletePenaltyClause,
+  DeletePenaltyClauseInputSchema,
+} from "../../gen/index.js";
 
 describe("Clauses Operations", () => {
-  let document: PaymentTermsDocument;
-
-  beforeEach(() => {
-    document = utils.createDocument();
-  });
-
   it("should handle addBonusClause operation", () => {
-    const input: AddBonusClauseInput = generateMock(
-      z.AddBonusClauseInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(AddBonusClauseInputSchema());
 
-    const updatedDocument = reducer(document, creators.addBonusClause(input));
+    const updatedDocument = reducer(document, addBonusClause(input));
 
+    expect(isPaymentTermsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "ADD_BONUS_CLAUSE",
@@ -43,15 +41,12 @@ describe("Clauses Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle updateBonusClause operation", () => {
-    const input: UpdateBonusClauseInput = generateMock(
-      z.UpdateBonusClauseInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(UpdateBonusClauseInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.updateBonusClause(input),
-    );
+    const updatedDocument = reducer(document, updateBonusClause(input));
 
+    expect(isPaymentTermsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "UPDATE_BONUS_CLAUSE",
@@ -62,15 +57,12 @@ describe("Clauses Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle deleteBonusClause operation", () => {
-    const input: DeleteBonusClauseInput = generateMock(
-      z.DeleteBonusClauseInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(DeleteBonusClauseInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.deleteBonusClause(input),
-    );
+    const updatedDocument = reducer(document, deleteBonusClause(input));
 
+    expect(isPaymentTermsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "DELETE_BONUS_CLAUSE",
@@ -81,12 +73,12 @@ describe("Clauses Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle addPenaltyClause operation", () => {
-    const input: AddPenaltyClauseInput = generateMock(
-      z.AddPenaltyClauseInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(AddPenaltyClauseInputSchema());
 
-    const updatedDocument = reducer(document, creators.addPenaltyClause(input));
+    const updatedDocument = reducer(document, addPenaltyClause(input));
 
+    expect(isPaymentTermsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "ADD_PENALTY_CLAUSE",
@@ -97,15 +89,12 @@ describe("Clauses Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle updatePenaltyClause operation", () => {
-    const input: UpdatePenaltyClauseInput = generateMock(
-      z.UpdatePenaltyClauseInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(UpdatePenaltyClauseInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.updatePenaltyClause(input),
-    );
+    const updatedDocument = reducer(document, updatePenaltyClause(input));
 
+    expect(isPaymentTermsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "UPDATE_PENALTY_CLAUSE",
@@ -116,15 +105,12 @@ describe("Clauses Operations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
   it("should handle deletePenaltyClause operation", () => {
-    const input: DeletePenaltyClauseInput = generateMock(
-      z.DeletePenaltyClauseInputSchema(),
-    );
+    const document = utils.createDocument();
+    const input = generateMock(DeletePenaltyClauseInputSchema());
 
-    const updatedDocument = reducer(
-      document,
-      creators.deletePenaltyClause(input),
-    );
+    const updatedDocument = reducer(document, deletePenaltyClause(input));
 
+    expect(isPaymentTermsDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "DELETE_PENALTY_CLAUSE",

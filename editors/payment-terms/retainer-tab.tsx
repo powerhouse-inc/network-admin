@@ -4,9 +4,9 @@ import {
   Select,
   Textarea,
   DatePicker,
-  Button
+  Button,
 } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system";
+import { toast } from "@powerhousedao/design-system/connect";
 import type {
   PaymentTermsState,
   BillingFrequency,
@@ -24,12 +24,9 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     retainerAmount:
-      state.retainerDetails?.retainerAmount?.value?.toString() || "",
-    billingFrequency: state.retainerDetails?.billingFrequency || "MONTHLY",
-    startDate: state.retainerDetails?.startDate || "",
-    endDate: state.retainerDetails?.endDate || "",
-    autoRenew: state.retainerDetails?.autoRenew || false,
-    servicesIncluded: state.retainerDetails?.servicesIncluded || "",
+      state.timeAndMaterials?.retainerAmount?.value?.toString() || "",
+    billingFrequency: state.timeAndMaterials?.billingFrequency || "MONTHLY",
+    timesheetRequired: state.timeAndMaterials?.timesheetRequired || false,
   });
 
   const billingFrequencyOptions = useMemo(
@@ -55,37 +52,21 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
         return;
       }
 
-      if (!formData.startDate) {
+      if (!formData.timesheetRequired) {
         toast("Start date is required", {
           type: "error",
         });
         return;
       }
 
-      if (!formData.servicesIncluded.trim()) {
-        toast("Services included description is required", {
-          type: "error",
-        });
-        return;
-      }
-
-      // Convert date strings to ISO format for the schema
-      const startDate = new Date(formData.startDate).toISOString();
-      const endDate = formData.endDate
-        ? new Date(formData.endDate).toISOString()
-        : undefined;
-
       dispatch(
-        actions.setRetainerDetails({
+        actions.setTimeAndMaterials({
           retainerAmount: {
             value: parseFloat(formData.retainerAmount),
             unit: state.currency,
           },
           billingFrequency: formData.billingFrequency,
-          startDate: startDate,
-          endDate: endDate,
-          autoRenew: formData.autoRenew,
-          servicesIncluded: formData.servicesIncluded,
+          timesheetRequired: formData.timesheetRequired,
         })
       );
 
@@ -100,15 +81,12 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
   const handleCancel = useCallback(() => {
     setFormData({
       retainerAmount:
-        state.retainerDetails?.retainerAmount?.value?.toString() || "",
-      billingFrequency: state.retainerDetails?.billingFrequency || "MONTHLY",
-      startDate: state.retainerDetails?.startDate || "",
-      endDate: state.retainerDetails?.endDate || "",
-      autoRenew: state.retainerDetails?.autoRenew || false,
-      servicesIncluded: state.retainerDetails?.servicesIncluded || "",
+        state.timeAndMaterials?.retainerAmount?.value?.toString() || "",
+      billingFrequency: state.timeAndMaterials?.billingFrequency || "MONTHLY",
+      timesheetRequired: state.timeAndMaterials?.timesheetRequired || false,
     });
     setIsEditing(false);
-  }, [state.retainerDetails]);
+  }, [state.timeAndMaterials]);
 
   if (!isEditing) {
     return (
@@ -123,21 +101,21 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
             size="sm"
             className="cursor-pointer hover:bg-blue-600 hover:text-white"
           >
-            {state.retainerDetails
+            {state.timeAndMaterials
               ? "Edit Configuration"
               : "Configure Retainer"}
           </Button>
         </div>
 
-        {state.retainerDetails ? (
+        {state.timeAndMaterials ? (
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Retainer Amount
               </label>
               <p className="text-lg dark:text-white">
-                {state.retainerDetails.retainerAmount
-                  ? `${state.retainerDetails.retainerAmount.value} ${state.retainerDetails.retainerAmount.unit}`
+                {state.timeAndMaterials.retainerAmount
+                  ? `${state.timeAndMaterials.retainerAmount.value} ${state.timeAndMaterials.retainerAmount.unit}`
                   : "Not set"}
               </p>
             </div>
@@ -146,7 +124,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
                 Billing Frequency
               </label>
               <p className="text-lg dark:text-white">
-                {state.retainerDetails.billingFrequency}
+                {state.timeAndMaterials.billingFrequency}
               </p>
             </div>
             <div>
@@ -154,7 +132,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
                 Start Date
               </label>
               <p className="text-lg dark:text-white">
-                {state.retainerDetails.startDate}
+                {state.timeAndMaterials.timesheetRequired ? "Yes" : "No"}
               </p>
             </div>
             <div>
@@ -162,7 +140,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
                 End Date
               </label>
               <p className="text-lg dark:text-white">
-                {state.retainerDetails.endDate || "Ongoing"}
+                {state.timeAndMaterials.timesheetRequired ? "Yes" : "No"}
               </p>
             </div>
             <div>
@@ -170,7 +148,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
                 Auto Renew
               </label>
               <p className="text-lg dark:text-white">
-                {state.retainerDetails.autoRenew ? "Yes" : "No"}
+                {state.timeAndMaterials.timesheetRequired ? "Yes" : "No"}
               </p>
             </div>
             <div className="col-span-2">
@@ -179,7 +157,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
               </label>
               <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded border dark:border-gray-600">
                 <p className="text-sm dark:text-white">
-                  {state.retainerDetails.servicesIncluded}
+                  {state.timeAndMaterials.timesheetRequired ? "Yes" : "No"}
                 </p>
               </div>
             </div>
@@ -231,10 +209,10 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
         />
 
         <DatePicker
-          value={formData.startDate ? new Date(formData.startDate) : undefined}
+          value={formData.timesheetRequired ? new Date() : undefined}
           onChange={(e) => {
             const date = e.target.value ? new Date(e.target.value) : null;
-            setFormData({ ...formData, startDate: date?.toISOString() || "" });
+            setFormData({ ...formData, timesheetRequired: true });
           }}
           name="start-date"
           placeholder="Select start date"
@@ -242,10 +220,10 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
         />
 
         <DatePicker
-          value={formData.endDate ? new Date(formData.endDate) : undefined}
+          value={formData.timesheetRequired ? new Date() : undefined}
           onChange={(e) => {
             const date = e.target.value ? new Date(e.target.value) : null;
-            setFormData({ ...formData, endDate: date?.toISOString() || "" });
+            setFormData({ ...formData, timesheetRequired: true });
           }}
           name="end-date"
           placeholder="Select end date (optional)"
@@ -254,9 +232,9 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
         <div className="col-span-2">
           <Textarea
             label="Services Included *"
-            value={formData.servicesIncluded}
+            value={formData.timesheetRequired ? "Yes" : "No"}
             onChange={(e) =>
-              setFormData({ ...formData, servicesIncluded: e.target.value })
+              setFormData({ ...formData, timesheetRequired: true })
             }
             className="w-full"
             rows={4}
@@ -270,9 +248,9 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
             <input
               type="checkbox"
               id="autoRenew"
-              checked={formData.autoRenew}
+              checked={formData.timesheetRequired}
               onChange={(e) =>
-                setFormData({ ...formData, autoRenew: e.target.checked })
+                setFormData({ ...formData, timesheetRequired: true })
               }
               className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />

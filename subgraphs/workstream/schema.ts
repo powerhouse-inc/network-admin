@@ -3,67 +3,7 @@ import type { DocumentNode } from "graphql";
 
 export const schema: DocumentNode = gql`
   """
-  Subgraph definition for Workstream (powerhouse/workstream)
-  """
-  type WorkstreamState {
-    code: String
-    title: String
-    status: WorkstreamStatus!
-    client: ClientInfo # eventually tie it to the AID?
-    rfp: RFP
-    initialProposal: Proposal
-    alternativeProposals: [Proposal!]!
-    sow: PHID
-    paymentTerms: PHID
-    paymentRequests: [PHID!]!
-  }
-
-  enum WorkstreamStatus {
-    RFP_DRAFT
-    PREWORK_RFC # RFP status change to RFC
-    RFP_CANCELLED
-    OPEN_FOR_PROPOSALS
-    PROPOSAL_SUBMITTED
-    NOT_AWARDED
-    AWARDED
-    IN_PROGRESS
-    FINISHED
-  }
-
-  type Proposal {
-    id: OID!
-    sow: PHID! # a link with a fixed label (i.e, sow)
-    paymentTerms: PHID! # a link with a fixed label (i.e., payment terms)
-    status: ProposalStatus!
-    author: ProposalAuthor! # eventually an AID
-  }
-
-  enum ProposalStatus {
-    DRAFT
-    SUBMITTED
-    ACCEPTED
-    REJECTED
-  }
-
-  type ClientInfo {
-    id: PHID!
-    name: String
-    icon: URL
-  }
-
-  type RFP {
-    id: PHID!
-    title: String!
-  }
-
-  type ProposalAuthor {
-    id: PHID!
-    name: String
-    icon: URL
-  }
-
-  """
-  Queries: Workstream
+  Queries: Workstream Document
   """
   type WorkstreamQueries {
     getDocument(docId: PHID!, driveId: PHID): Workstream
@@ -133,14 +73,14 @@ export const schema: DocumentNode = gql`
   input Workstream_EditWorkstreamInput {
     code: String
     title: String
-    status: WorkstreamStatusInput
+    status: Workstream_WorkstreamStatusInput
     sowId: PHID
     paymentTerms: PHID
   }
 
-  enum WorkstreamStatusInput {
+  enum Workstream_WorkstreamStatusInput {
     RFP_DRAFT
-    PREWORK_RFC # RFP status change to RFC
+    PREWORK_RFC # Workstream_RFP status change to RFC
     RFP_CANCELLED
     OPEN_FOR_PROPOSALS
     PROPOSAL_SUBMITTED
@@ -172,18 +112,18 @@ export const schema: DocumentNode = gql`
     id: ID!
     sowId: PHID
     paymentTermsId: PHID
-    status: ProposalStatusInput
-    proposalAuthor: ProposalAuthorInput
+    status: Workstream_ProposalStatusInput
+    proposalAuthor: Workstream_ProposalAuthorInput
   }
 
-  enum ProposalStatusInput {
+  enum Workstream_ProposalStatusInput {
     DRAFT
     SUBMITTED
     ACCEPTED
     REJECTED
   }
 
-  input ProposalAuthorInput {
+  input Workstream_ProposalAuthorInput {
     id: PHID!
     name: String
     icon: URL

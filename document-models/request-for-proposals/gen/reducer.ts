@@ -4,13 +4,21 @@
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
 import type { RequestForProposalsPHState } from "./types.js";
-import { z } from "./types.js";
 
-import { reducer as RfpStateReducer } from "../src/reducers/rfp-state.js";
-import { reducer as ContexDocumentReducer } from "../src/reducers/contex-document.js";
-import { reducer as ProposalsReducer } from "../src/reducers/proposals.js";
+import { requestForProposalsRfpStateOperations } from "../src/reducers/rfp-state.js";
+import { requestForProposalsContexDocumentOperations } from "../src/reducers/contex-document.js";
+import { requestForProposalsProposalsOperations } from "../src/reducers/proposals.js";
 
-export const stateReducer: StateReducer<RequestForProposalsPHState> = (
+import {
+  EditRfpInputSchema,
+  AddContextDocumentInputSchema,
+  RemoveContextDocumentInputSchema,
+  AddProposalInputSchema,
+  ChangeProposalStatusInputSchema,
+  RemoveProposalInputSchema,
+} from "./schema/zod.js";
+
+const stateReducer: StateReducer<RequestForProposalsPHState> = (
   state,
   action,
   dispatch,
@@ -21,8 +29,8 @@ export const stateReducer: StateReducer<RequestForProposalsPHState> = (
 
   switch (action.type) {
     case "EDIT_RFP":
-      z.EditRfpInputSchema().parse(action.input);
-      RfpStateReducer.editRfpOperation(
+      EditRfpInputSchema().parse(action.input);
+      requestForProposalsRfpStateOperations.editRfpOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -30,8 +38,8 @@ export const stateReducer: StateReducer<RequestForProposalsPHState> = (
       break;
 
     case "ADD_CONTEXT_DOCUMENT":
-      z.AddContextDocumentInputSchema().parse(action.input);
-      ContexDocumentReducer.addContextDocumentOperation(
+      AddContextDocumentInputSchema().parse(action.input);
+      requestForProposalsContexDocumentOperations.addContextDocumentOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -39,8 +47,8 @@ export const stateReducer: StateReducer<RequestForProposalsPHState> = (
       break;
 
     case "REMOVE_CONTEXT_DOCUMENT":
-      z.RemoveContextDocumentInputSchema().parse(action.input);
-      ContexDocumentReducer.removeContextDocumentOperation(
+      RemoveContextDocumentInputSchema().parse(action.input);
+      requestForProposalsContexDocumentOperations.removeContextDocumentOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -48,8 +56,8 @@ export const stateReducer: StateReducer<RequestForProposalsPHState> = (
       break;
 
     case "ADD_PROPOSAL":
-      z.AddProposalInputSchema().parse(action.input);
-      ProposalsReducer.addProposalOperation(
+      AddProposalInputSchema().parse(action.input);
+      requestForProposalsProposalsOperations.addProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -57,8 +65,8 @@ export const stateReducer: StateReducer<RequestForProposalsPHState> = (
       break;
 
     case "CHANGE_PROPOSAL_STATUS":
-      z.ChangeProposalStatusInputSchema().parse(action.input);
-      ProposalsReducer.changeProposalStatusOperation(
+      ChangeProposalStatusInputSchema().parse(action.input);
+      requestForProposalsProposalsOperations.changeProposalStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -66,8 +74,8 @@ export const stateReducer: StateReducer<RequestForProposalsPHState> = (
       break;
 
     case "REMOVE_PROPOSAL":
-      z.RemoveProposalInputSchema().parse(action.input);
-      ProposalsReducer.removeProposalOperation(
+      RemoveProposalInputSchema().parse(action.input);
+      requestForProposalsProposalsOperations.removeProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

@@ -1,43 +1,39 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
-
+import type { SetIconAction } from "../../gen/network-profile-management/actions.js";
 import type { NetworkProfileNetworkProfileManagementOperations } from "../../gen/network-profile-management/operations.js";
+import type { NetworkProfileState, } from "../../gen/types.js";
 
-export const reducer: NetworkProfileNetworkProfileManagementOperations = {
-    setIconOperation(state, action, dispatch) {
-        state.icon = action.input.icon || '';
+export const networkProfileNetworkProfileManagementOperations: NetworkProfileNetworkProfileManagementOperations = {
+    setIconOperation(state: NetworkProfileState, action: SetIconAction) {
+        state.icon = action.input.icon
     },
-    setLogoOperation(state, action, dispatch) {
-        state.logo = action.input.logo || '';
+    setLogoOperation(state, action) {
+        state.logo = action.input.logo;
     },
-    setLogoBigOperation(state, action, dispatch) {
-        state.logoBig = action.input.logoBig || '';
+    setLogoBigOperation(state, action) {
+        state.logoBig = action.input.logoBig;
     },
-    setWebsiteOperation(state, action, dispatch) {
-        state.website = action.input.website || '';
+    setWebsiteOperation(state, action) {
+        state.website = action.input.website || null;
     },
-    setDescriptionOperation(state, action, dispatch) {
-        state.description = action.input.description || '';
+    setDescriptionOperation(state, action) {
+        state.description = action.input.description;
     },
-    setCategoryOperation(state, action, dispatch) {
+    setCategoryOperation(state, action) {
         state.category = action.input.category || null;
     },
-    setXOperation(state, action, dispatch) {
+    setXOperation(state, action) {
         state.x = action.input.x || null;
     },
-    setGithubOperation(state, action, dispatch) {
+    setGithubOperation(state, action) {
         state.github = action.input.github || null;
     },
-    setDiscordOperation(state, action, dispatch) {
+    setDiscordOperation(state, action) {
         state.discord = action.input.discord || null;
     },
-    setYoutubeOperation(state, action, dispatch) {
+    setYoutubeOperation(state, action) {
         state.youtube = action.input.youtube || null;
     },
-    setProfileNameOperation(state, action, dispatch) {
-        state.name = action.input.name || '';
-    },
+    setProfileNameOperation(state, action) {
+        state.name = action.input.name;
+    }
 };

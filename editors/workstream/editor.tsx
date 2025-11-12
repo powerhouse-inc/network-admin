@@ -4,7 +4,7 @@ import type {
   PHDocument,
   PHDocumentState,
 } from "document-model";
-import { Button, toast, ToastContainer } from "@powerhousedao/design-system";
+import { toast, ToastContainer } from "@powerhousedao/design-system/connect";
 import {
   TextInput,
   Select,
@@ -14,6 +14,7 @@ import {
   type ColumnDef,
   type ColumnAlignment,
   buildEnumCellEditor,
+  Button,
 } from "@powerhousedao/document-engineering";
 import {
   type WorkstreamDocument,
@@ -25,17 +26,18 @@ import {
   type RequestForProposalsState,
   actions as rfpActions,
 } from "../../document-models/request-for-proposals/index.js";
-import { ScopeOfWork } from "./project-management-import.js";
-import type { DocumentModelModule } from "document-model";
-
-// Extract ScopeOfWorkState from the module type
-type ScopeOfWorkModule = typeof ScopeOfWork;
-type ScopeOfWorkPHState =
-  ScopeOfWorkModule extends DocumentModelModule<infer T> ? T : never;
-type ScopeOfWorkState = ScopeOfWorkPHState extends { global: infer G }
-  ? G
-  : never;
+import { ScopeOfWork } from "@powerhousedao/project-management/document-models";
 import { generateId } from "document-model/core";
+
+// Define ScopeOfWork types locally since the package doesn't export subpaths
+// These match the types from @powerhousedao/project-management/document-models/scope-of-work/gen/types.js
+type ScopeOfWorkState = {
+  title?: string | null;
+  description?: string | null;
+  status?: string | null;
+  [key: string]: unknown;
+};
+
 import {
   useDocumentById,
   useSelectedDrive,
@@ -43,12 +45,13 @@ import {
   useDocumentsInSelectedDrive,
   useParentFolderForSelectedNode,
   setSelectedNode,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useSelectedWorkstreamDocument } from "../hooks/useWorkstreamDocument.js";
+import { useSelectedWorkstreamDocument } from "../../document-models/workstream/hooks.js";
+import type { WorkstreamState } from "../../document-models/workstream/gen/schema/types.js";
 import type { Proposal } from "../../document-models/workstream/gen/schema/types.js";
-import type { FileNode } from "document-drive";
-import { DocumentToolbar } from "@powerhousedao/design-system";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 export type IProps = EditorProps;
 
 // Status options for the dropdown
@@ -76,15 +79,22 @@ export default function Editor() {
     WorkstreamDocument,
     (actionOrActions: Action | Action[] | undefined) => void,
   ];
+
   // Try to get dispatch from context or props
-  const [state, setState] = useState(doc.state.global);
+  const [state, setState] = useState(doc.state.global as WorkstreamState);
+  const [clientInputValue, setClientInputValue] = useState(
+    doc.state.global.client?.id || ""
+  );
 
   useEffect(() => {
-    setState(doc.state.global);
+    setState(doc.state.global as WorkstreamState);
   }, [doc.state.global]);
 
+  useEffect(() => {
+    setClientInputValue(state.client?.id || "");
+  }, [state.client?.id]);
+
   const [selectedDrive] = useSelectedDrive();
-  const [newNode, setNewNode] = useState<FileNode | null>(null);
 
   // Local state to track newly created document IDs
   const [newlyCreatedSowId, setNewlyCreatedSowId] = useState<string | null>(
@@ -97,51 +107,16 @@ export default function Editor() {
     null
   );
 
-  // Get the parent folder node for the currently selected node
-  const parentFolder = useParentFolderForSelectedNode();
-
-  // Set the selected node to the parent folder node (close the editor)
-  function handleClose() {
-    setSelectedNode(parentFolder?.id);
-  }
-
   // Loading states to prevent double-clicks
   const [isCreatingRfp, setIsCreatingRfp] = useState(false);
   const [isCreatingSow, setIsCreatingSow] = useState(false);
   const [isCreatingPaymentTerms, setIsCreatingPaymentTerms] = useState(false);
 
-  const [document, dispatchAction] = useDocumentById(newNode?.id);
-
-  const updateRFPDocWithDispatch = () => {
-    dispatchAction(
-      rfpActions.editRfp({
-        title: `RFP-${state.title || ""}`,
-      })
-    );
-  };
-
-  const updateSOWDocWithDispatch = () => {
-    dispatchAction(
-      ScopeOfWork.actions.editScopeOfWork({
-        title: `SOW-${state.title || ""}`,
-      })
-    );
-  };
-
-  useEffect(() => {
-    if (newNode) {
-      if (newNode.documentType === "powerhouse/rfp") {
-        updateRFPDocWithDispatch();
-      } else if (newNode.documentType === "powerhouse/scopeofwork") {
-        updateSOWDocWithDispatch();
-      }
-      setNewNode(null);
-    }
-  }, [newNode]);
-
   const createRfpDocument = useCallback(async () => {
     if (isCreatingRfp) return null; // Prevent double-calls
     setIsCreatingRfp(true);
+    // Store current document ID to restore selection after document creation
+    const currentDocId = doc.header.id;
     try {
       const createdNode = await addDocument(
         selectedDrive?.header.id || "",
@@ -154,20 +129,31 @@ export default function Editor() {
       );
       console.log("Created RFP document", createdNode);
       if (createdNode) {
-        setNewNode(createdNode);
+        await dispatchActions(
+          rfpActions.editRfp({
+            title: `RFP-${state.title || ""}`,
+          }),
+          createdNode.id
+        );
       }
+      // Restore selection to current workstream document to prevent navigation
+      setSelectedNode(currentDocId);
       return createdNode;
     } catch (error) {
       console.error("Failed to create RFP document:", error);
+      // Restore selection even on error
+      setSelectedNode(currentDocId);
       return null;
     } finally {
       setIsCreatingRfp(false);
     }
-  }, [isCreatingRfp, selectedDrive?.header.id, state.title]);
+  }, [isCreatingRfp, selectedDrive?.header.id, state.title, doc.header.id]);
 
   const createSowDocument = useCallback(async () => {
     if (isCreatingSow) return null; // Prevent double-calls
     setIsCreatingSow(true);
+    // Store current document ID to restore selection after document creation
+    const currentDocId = doc.header.id;
     try {
       const createdNode = await addDocument(
         selectedDrive?.header.id || "",
@@ -180,20 +166,31 @@ export default function Editor() {
       );
       console.log("Created SOW document", createdNode);
       if (createdNode) {
-        setNewNode(createdNode);
+        await dispatchActions(
+          ScopeOfWork.actions.editScopeOfWork({
+            title: `SOW-${state.title || ""}`,
+          }),
+          createdNode.id
+        );
       }
+      // Restore selection to current workstream document to prevent navigation
+      setSelectedNode(currentDocId);
       return createdNode;
     } catch (error) {
       console.error("Failed to create SOW document:", error);
+      // Restore selection even on error
+      setSelectedNode(currentDocId);
       return null;
     } finally {
       setIsCreatingSow(false);
     }
-  }, [isCreatingSow, selectedDrive?.header.id, state.title]);
+  }, [isCreatingSow, selectedDrive?.header.id, state.title, doc.header.id]);
 
   const createPaymentTermsDocument = useCallback(async () => {
     if (isCreatingPaymentTerms) return null; // Prevent double-calls
     setIsCreatingPaymentTerms(true);
+    // Store current document ID to restore selection after document creation
+    const currentDocId = doc.header.id;
     try {
       const createdNode = await addDocument(
         selectedDrive?.header.id || "",
@@ -206,14 +203,18 @@ export default function Editor() {
       );
       console.log("Created Payment Terms document", createdNode);
       // Note: Payment Terms might not have actions to initialize, so we just create it
+      // Restore selection to current workstream document to prevent navigation
+      setSelectedNode(currentDocId);
       return createdNode;
     } catch (error) {
       console.error("Failed to create Payment Terms document:", error);
+      // Restore selection even on error
+      setSelectedNode(currentDocId);
       return null;
     } finally {
       setIsCreatingPaymentTerms(false);
     }
-  }, [isCreatingPaymentTerms, selectedDrive?.header.id, state.title]);
+  }, [isCreatingPaymentTerms, selectedDrive?.header.id, state.title, doc.header.id]);
 
   const getDocumentNameById = useCallback(
     (documentId: string) => {
@@ -353,6 +354,20 @@ export default function Editor() {
       path: "",
     }));
   };
+  const searchClientDocuments = (userInput: string) => {
+    const results = allDocuments?.filter(
+      (node): node is PHDocument =>
+        node.header.documentType === "powerhouse/network-profile" &&
+        (!userInput ||
+          node.header.name.toLowerCase().includes(userInput.toLowerCase()) ||
+          node.header.id.toLowerCase().includes(userInput.toLowerCase()))
+    );
+    return results?.map((doc) => ({
+      value: doc.header.id,
+      title: doc.header.name,
+      path: "",
+    }));
+  };
   const searchSowDocuments = (userInput: string) => {
     const results = allDocuments?.filter(
       (node): node is PHDocument =>
@@ -439,10 +454,9 @@ export default function Editor() {
 
     const clientId = state.client?.id || generateId();
 
-    const clientInfoUpdate: { clientId: string; name?: string; icon?: string } =
-      {
-        clientId,
-      };
+    let clientInfoUpdate: { clientId: string; name?: string; icon?: string } = {
+      clientId,
+    };
 
     if (field === "name") {
       clientInfoUpdate.name = value === "" ? "" : value || undefined;
@@ -508,16 +522,33 @@ export default function Editor() {
       return {
         value: doc.header.id,
         title: title || doc.header.name,
-        path: {
-          text: doc.header.name,
-          url: doc.header.id,
-        },
+        path: "",
         description: "",
       };
     },
     [allDocuments]
   );
+  const getClientOptionById = useCallback(
+    (documentId?: string) => {
+      if (!documentId) return undefined;
+      const doc = allDocuments?.find((document: PHDocument) => {
+        return (
+          document.header.documentType === "powerhouse/network-profile" &&
+          document.header.id === documentId
+        );
+      });
 
+      if (!doc) return undefined;
+
+      return {
+        value: doc.header.id,
+        title: doc.header.name,
+        path: "",
+        description: "",
+      };
+    },
+    [allDocuments]
+  );
   const getPaymentTermsOptionById = useCallback(
     (documentId?: string) => {
       if (!documentId) return undefined;
@@ -533,14 +564,16 @@ export default function Editor() {
       return {
         value: doc.header.id,
         title: doc.header.name,
-        path: {
-          text: doc.header.name,
-          url: doc.header.id,
-        },
+        path: "",
         description: "",
       };
     },
     [allDocuments]
+  );
+
+  const clientInitialOption = useMemo(
+    () => getClientOptionById(state.client?.id),
+    [getClientOptionById, state.client?.id]
   );
 
   const alternativeProposalsColumns = useMemo<Array<ColumnDef<Proposal>>>(
@@ -585,7 +618,7 @@ export default function Editor() {
           if (newValue !== context.row.sow) {
             dispatch(
               actions.editAlternativeProposal({
-                id: context.row.id,
+                id: context.row.id as string,
                 sowId: newValue as string,
               })
             );
@@ -607,8 +640,8 @@ export default function Editor() {
                 if (e.target.value !== context.row.sow) {
                   dispatch(
                     actions.editAlternativeProposal({
-                      id: context.row.id,
-                      sowId: e.target.value,
+                      id: context.row.id as string,
+                      sowId: e.target.value as string,
                     })
                   );
                 }
@@ -625,10 +658,7 @@ export default function Editor() {
                 return results.map((doc) => ({
                   value: doc.value,
                   title: doc.title,
-                  path: {
-                    text: doc.path,
-                    url: doc.value,
-                  },
+                  path: "",
                   description: "",
                 }));
               }}
@@ -640,10 +670,7 @@ export default function Editor() {
                 return {
                   value: doc.value,
                   title: doc.title,
-                  path: {
-                    text: doc.path,
-                    url: doc.value,
-                  },
+                  path: "",
                   description: "",
                 };
               }}
@@ -665,7 +692,7 @@ export default function Editor() {
           if (newValue !== context.row.paymentTerms) {
             dispatch(
               actions.editAlternativeProposal({
-                id: context.row.id,
+                id: context.row.id as string,
                 paymentTermsId: newValue as string,
               })
             );
@@ -687,8 +714,8 @@ export default function Editor() {
                 if (e.target.value !== context.row.paymentTerms) {
                   dispatch(
                     actions.editAlternativeProposal({
-                      id: context.row.id,
-                      paymentTermsId: e.target.value,
+                      id: context.row.id as string,
+                      paymentTermsId: e.target.value as string,
                     })
                   );
                 }
@@ -708,10 +735,7 @@ export default function Editor() {
                 return results.map((doc) => ({
                   value: doc.value,
                   title: doc.title,
-                  path: {
-                    text: doc.path,
-                    url: doc.value,
-                  },
+                  path: "",
                   description: "",
                 }));
               }}
@@ -725,10 +749,7 @@ export default function Editor() {
                 return {
                   value: doc.value,
                   title: doc.title,
-                  path: {
-                    text: doc.path,
-                    url: doc.value,
-                  },
+                  path: "",
                   description: "",
                 };
               }}
@@ -751,7 +772,7 @@ export default function Editor() {
           if (newValue !== context.row.status) {
             dispatch(
               actions.editAlternativeProposal({
-                id: context.row.id,
+                id: context.row.id as string,
                 status: newValue as ProposalStatusInput,
               })
             );
@@ -788,6 +809,13 @@ export default function Editor() {
       searchSowDocuments,
     ]
   );
+
+  // Get the parent folder node for the currently selected node
+  const parentFolder = useParentFolderForSelectedNode();
+  // Set the selected node to the parent folder node (close the editor)
+  function handleClose() {
+    setSelectedNode(parentFolder?.id);
+  }
 
   return (
     <div className="w-full bg-gray-50">
@@ -858,50 +886,52 @@ export default function Editor() {
         <div className="bg-white border border-gray-300 rounded-lg p-6 shadow-sm">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Client</h2>
 
-          <div className="space-y-4">
-            {/* Client ID Field */}
+          <div className="space-y-4 w-[350px]">
+            {/* Client Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Client ID
+                Client
               </label>
-              <div className="flex items-center space-x-2">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <TextInput
-                  className="flex-1"
-                  defaultValue={state.client?.id || ""}
-                  onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-                    if (e.target.value !== state.client?.id) {
-                      handleClientIdChange(e.target.value);
-                    }
-                  }}
-                  placeholder="Enter client ID"
-                />
-                <div className="flex-shrink-0">
-                  <svg
-                    className="w-5 h-5 text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
+              <PHIDInput
+                value={clientInputValue}
+                onChange={(newValue) => {
+                  setClientInputValue((newValue as string) || "");
+                }}
+                onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+                  if (e.target.value !== (state.client?.id || "")) {
+                    handleClientIdChange(e.target.value);
+                  }
+                }}
+                placeholder="Search for Client Profile"
+                className="w-full"
+                variant="withValueTitleAndDescription"
+                initialOptions={
+                  clientInitialOption ? [clientInitialOption] : undefined
+                }
+                fetchOptionsCallback={async (userInput) => {
+                  const results = searchClientDocuments(userInput || "") || [];
+                  if (results.length === 0) {
+                    return Promise.reject(
+                      new Error("No client profiles found")
+                    );
+                  }
+                  return results.map((doc) => ({
+                    value: doc.value,
+                    title: doc.title,
+                    path: "",
+                    description: "",
+                  }));
+                }}
+                fetchSelectedOptionCallback={async (documentId) => {
+                  const option = getClientOptionById(documentId);
+                  if (!option) {
+                    return Promise.reject(
+                      new Error("Client profile not found")
+                    );
+                  }
+                  return option;
+                }}
+              />
             </div>
 
             {/* Client Name Field */}
@@ -974,7 +1004,7 @@ export default function Editor() {
                 name="Request for Proposal"
                 label="RFP Document"
                 placeholder="Search for RFP Document"
-                variant="withValueTitleAndDescription"
+                variant="withValueAndTitle"
                 value={newlyCreatedRfpId || state.rfp?.id || ""}
                 onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                   if (e.target.value !== state.rfp?.id) {
@@ -995,10 +1025,7 @@ export default function Editor() {
                   return results?.map((doc) => ({
                     value: doc.value, // unique document ID
                     title: doc.title, // document title or name
-                    path: {
-                      text: doc.path,
-                      url: doc.value,
-                    }, // document path or location
+                    path: "",
                     description: "", // document description or summary
                     icon: "File", // document icon
                   }));
@@ -1013,10 +1040,7 @@ export default function Editor() {
                   return {
                     value: doc.value,
                     title: doc.title,
-                    path: {
-                      text: doc.path,
-                      url: doc.title,
-                    },
+                    path: "",
                     description: "",
                     icon: "File",
                   };
@@ -1025,10 +1049,7 @@ export default function Editor() {
                   {
                     value: rfpDocument?.header.id || "",
                     title: rfpDocument?.document.title || "",
-                    path: {
-                      text: rfpDocument?.document.title || "",
-                      url: rfpDocument?.header.id || "",
-                    },
+                    path: "",
                     description: "",
                     icon: "File",
                   },
@@ -1039,25 +1060,37 @@ export default function Editor() {
           {!rfpDocument ? (
             <div className="mt-4">
               <Button
+                type="button"
                 color="light"
-                // size="sm"
+                size="sm"
                 className="cursor-pointer hover:bg-gray-600 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 title={"Save Workstream"}
                 aria-description={"Save Workstream"}
                 disabled={isCreatingRfp}
-                onClick={async () => {
-                  const createdNode = await createRfpDocument();
-                  if (createdNode) {
-                    // Set local state to immediately show the new RFP ID
-                    setNewlyCreatedRfpId(createdNode.id);
-
-                    dispatch(
-                      actions.setRequestForProposal({
-                        rfpId: createdNode.id,
-                        title: createdNode.name,
-                      })
-                    );
+                onClick={(e) => {
+                  if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                   }
+                  (async () => {
+                    try {
+                      const createdNode = await createRfpDocument();
+                      if (createdNode) {
+                        // Set local state to immediately show the new RFP ID
+                        setNewlyCreatedRfpId(createdNode.id);
+
+                        dispatch(
+                          actions.setRequestForProposal({
+                            rfpId: createdNode.id,
+                            title: createdNode.name,
+                          })
+                        );
+                      }
+                    } catch (error) {
+                      console.error("Error creating RFP document:", error);
+                    }
+                  })();
+                  return false;
                 }}
               >
                 {isCreatingRfp ? "Creating..." : "Create RFP Document"}
@@ -1161,10 +1194,7 @@ export default function Editor() {
                         return results?.map((doc) => ({
                           value: doc.value, // unique document ID
                           title: doc.title, // document title or name
-                          path: {
-                            text: doc.path,
-                            url: doc.value,
-                          }, // document path or location
+                          path: "",
                           description: "", // document description or summary
                           icon: "File", // document icon
                         }));
@@ -1180,10 +1210,7 @@ export default function Editor() {
                         return {
                           value: doc.value,
                           title: doc.title,
-                          path: {
-                            text: doc.path,
-                            url: doc.title,
-                          },
+                          path: "",
                           description: "",
                           icon: "File",
                         };
@@ -1200,10 +1227,7 @@ export default function Editor() {
                                     }
                                   )?.global?.title ||
                                   sowDocumentNode.header.name,
-                                path: {
-                                  text: sowDocumentNode.header.name,
-                                  url: sowDocumentNode.header.id,
-                                },
+                                path: "",
                                 description: "",
                                 icon: "File",
                               },
@@ -1212,22 +1236,34 @@ export default function Editor() {
                       }
                     />
                     <button
+                      type="button"
                       className="text-sm bg-gray-100 rounded-md mt-1 p-1 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={isCreatingSow}
-                      onClick={async () => {
-                        console.log("Creating sow");
-                        const createdNode = await createSowDocument();
-                        if (createdNode) {
-                          // Set local state to immediately show the new SOW ID
-                          setNewlyCreatedSowId(createdNode.id);
-
-                          dispatch(
-                            actions.editInitialProposal({
-                              id: state.initialProposal?.id || "",
-                              sowId: createdNode.id,
-                            })
-                          );
+                      onClick={(e) => {
+                        if (e) {
+                          e.preventDefault();
+                          e.stopPropagation();
                         }
+                        (async () => {
+                          try {
+                            console.log("Creating sow");
+                            const createdNode = await createSowDocument();
+                            if (createdNode) {
+                              // Set local state to immediately show the new SOW ID
+                              setNewlyCreatedSowId(createdNode.id);
+
+                              dispatch(
+                                actions.editInitialProposal({
+                                  id: state.initialProposal?.id || "",
+                                  sowId: createdNode.id,
+                                })
+                              );
+                            }
+                          } catch (error) {
+                            console.error("Error creating SOW document:", error);
+                          }
+                        })();
+                        return false;
                       }}
                     >
                       {isCreatingSow ? "Creating..." : "Create sow"}
@@ -1268,10 +1304,7 @@ export default function Editor() {
                         return results?.map((doc) => ({
                           value: doc.value, // unique document ID
                           title: doc.title, // document title or name
-                          path: {
-                            text: doc.path,
-                            url: doc.value,
-                          }, // document path or location
+                          path: "",
                           description: "", // document description or summary
                           icon: "File", // document icon
                         }));
@@ -1288,10 +1321,7 @@ export default function Editor() {
                         return {
                           value: doc.value,
                           title: doc.title,
-                          path: {
-                            text: doc.path,
-                            url: doc.title,
-                          },
+                          path: "",
                           description: "",
                           icon: "File",
                         };
@@ -1302,10 +1332,7 @@ export default function Editor() {
                               {
                                 value: paymentTermsDocumentNode.header.id,
                                 title: paymentTermsDocumentNode.header.name,
-                                path: {
-                                  text: paymentTermsDocumentNode.header.name,
-                                  url: paymentTermsDocumentNode.header.id,
-                                },
+                                path: "",
                                 description: "",
                                 icon: "File",
                               },
@@ -1314,22 +1341,34 @@ export default function Editor() {
                       }
                     />
                     <button
+                      type="button"
                       className="text-sm bg-gray-100 rounded-md mt-1 p-1 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={isCreatingPaymentTerms}
-                      onClick={async () => {
-                        console.log("Creating payment terms");
-                        const createdNode = await createPaymentTermsDocument();
-                        if (createdNode) {
-                          // Set local state to immediately show the new Payment Terms ID
-                          setNewlyCreatedPaymentTermsId(createdNode.id);
-
-                          dispatch(
-                            actions.editInitialProposal({
-                              id: state.initialProposal?.id || "",
-                              paymentTermsId: createdNode.id,
-                            })
-                          );
+                      onClick={(e) => {
+                        if (e) {
+                          e.preventDefault();
+                          e.stopPropagation();
                         }
+                        (async () => {
+                          try {
+                            console.log("Creating payment terms");
+                            const createdNode = await createPaymentTermsDocument();
+                            if (createdNode) {
+                              // Set local state to immediately show the new Payment Terms ID
+                              setNewlyCreatedPaymentTermsId(createdNode.id);
+
+                              dispatch(
+                                actions.editInitialProposal({
+                                  id: state.initialProposal?.id || "",
+                                  paymentTermsId: createdNode.id,
+                                })
+                              );
+                            }
+                          } catch (error) {
+                            console.error("Error creating Payment Terms document:", error);
+                          }
+                        })();
+                        return false;
                       }}
                     >
                       {isCreatingPaymentTerms
@@ -1381,7 +1420,7 @@ export default function Editor() {
                 <div className="mt-4">
                   <Button
                     color="light"
-                    // size="small"
+                    size="sm"
                     className="cursor-pointer hover:bg-gray-600 hover:text-white"
                     title={"Create Initial Proposal"}
                     aria-description={"Create Initial Proposal"}
