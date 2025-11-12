@@ -11,7 +11,7 @@ import {
   NumberInput,
 } from "@powerhousedao/document-engineering";
 import { toast, ToastContainer } from "@powerhousedao/design-system/connect";
-import { MarkdownEditor } from "./markdown-editor.jsx";
+import { MarkdownEditor } from "./markdown-editor.js";
 import { useSelectedRequestForProposalsDocument } from "../../document-models/request-for-proposals/hooks.js";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
