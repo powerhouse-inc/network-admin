@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { NetworkProfilePHState } from "../gen/types.js";
+import type { NetworkProfilePHState } from "./types.js";
 
 import { networkProfileNetworkProfileManagementOperations } from "../src/reducers/network-profile-management.js";
 

@@ -16,8 +16,8 @@ export function defaultGlobalState(): RequestForProposalsGlobalState {
     issuer: "placeholder-id",
     title: "",
     code: "",
-    briefing: "",
     summary: "",
+    briefing: "",
     rfpCommenter: [],
     eligibilityCriteria: "",
     evaluationCriteria: "",
@@ -92,10 +92,10 @@ export function createRequestForProposalsDocument(
   const document = createDocument(
     state
       ? createState(
-        createBaseState(state.auth, state.document),
-        state.global,
-        state.local,
-      )
+          createBaseState(state.auth, state.document),
+          state.global,
+          state.local,
+        )
       : undefined,
   );
 

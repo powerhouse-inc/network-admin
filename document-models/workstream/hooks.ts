@@ -8,7 +8,7 @@ import {
 import type {
   WorkstreamDocument,
   WorkstreamAction,
-} from "./index.js";
+} from "./gen/types.js";
 import { isWorkstreamDocument } from "./gen/document-schema.js";
 
 /** Hook to get a Workstream document by its id */

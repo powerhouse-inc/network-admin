@@ -1,7 +1,7 @@
 import type { DocumentModelModule } from "document-model";
 import { createState } from "document-model";
 import { defaultBaseState } from "document-model/core";
-import type { WorkstreamPHState } from "./index.js";
+import type { WorkstreamPHState } from "./gen/types.js";
 import {
   actions,
   documentModel,
