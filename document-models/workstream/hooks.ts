@@ -8,7 +8,7 @@ import {
 import type {
   WorkstreamDocument,
   WorkstreamAction,
-} from "./gen/types.js";
+} from "@powerhousedao/network-admin/document-models/workstream";
 import { isWorkstreamDocument } from "./gen/document-schema.js";
 
 /** Hook to get a Workstream document by its id */

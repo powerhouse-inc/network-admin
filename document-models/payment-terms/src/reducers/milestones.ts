@@ -1,5 +1,5 @@
-import type { PaymentTermsMilestonesOperations } from "../../index.js";
 import { DuplicateMilestoneIdError, MilestoneNotFoundError } from "../../gen/milestones/error.js";
+import type { PaymentTermsMilestonesOperations } from "@powerhousedao/network-admin/document-models/payment-terms";
 
 export const paymentTermsMilestonesOperations: PaymentTermsMilestonesOperations = {
     addMilestoneOperation(state, action) {

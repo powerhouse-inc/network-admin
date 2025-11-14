@@ -8,7 +8,7 @@ import {
 import type {
   NetworkProfileDocument,
   NetworkProfileAction,
-} from "./gen/types.js";
+} from "@powerhousedao/network-admin/document-models/network-profile";
 import { isNetworkProfileDocument } from "./gen/document-schema.js";
 
 /** Hook to get a NetworkProfile document by its id */

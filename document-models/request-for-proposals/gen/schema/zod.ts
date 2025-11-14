@@ -7,19 +7,11 @@ import type {
   ChangeProposalStatusInput,
   ContextDocument,
   EditRfpInput,
-  RfpCommentatorType,
-  RfpStatus,
-  RfpStatusInput,
   RemoveContextDocumentInput,
   RemoveProposalInput,
   RequestForProposalsState,
-  RfpAgentType,
   RfpCommenter,
-  RfpPaymentTerm,
-  RfpPaymentTermInput,
   RfpProposal,
-  RfpProposalStatus,
-  RfpProposalStatusInput,
 } from "./types.js";
 
 type Properties<T> = Required<{

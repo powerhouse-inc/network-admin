@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { PaymentTermsPHState } from "./types.js";
+import type { PaymentTermsPHState } from "@powerhousedao/network-admin/document-models/payment-terms";
 
 import { paymentTermsTermsOperations } from "../src/reducers/terms.js";
 import { paymentTermsMilestonesOperations } from "../src/reducers/milestones.js";

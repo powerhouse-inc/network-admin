@@ -9,9 +9,6 @@ import {
 
 import {
   setSelectedNode,
-  isFileNodeKind,
-  isFolderNodeKind,
-  useNodesInSelectedDriveOrFolder,
   useSelectedDrive,
   useSelectedFolder,
   useUserPermissions,
@@ -21,7 +18,6 @@ import {
   useSelectedDocument,
   showDeleteNodeModal,
   addDocument,
-  showCreateDocumentModal,
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { CreateDocumentModal } from "@powerhousedao/design-system/connect";

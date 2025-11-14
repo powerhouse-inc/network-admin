@@ -1,4 +1,3 @@
-import { type IRelationalDb } from "document-drive";
 import { RelationalDbProcessor } from "document-drive";
 import { type InternalTransmitterUpdate, type InternalOperationUpdate } from "document-drive";
 import { up } from "./migrations.js";

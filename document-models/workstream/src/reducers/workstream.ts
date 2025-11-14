@@ -1,7 +1,7 @@
-import type { WorkstreamWorkstreamOperations } from "../../index.js";
+import type { WorkstreamWorkstreamOperations } from "@powerhousedao/network-admin/document-models/workstream";
 
 export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
-    editWorkstreamOperation(state, action, dispatch) {
+    editWorkstreamOperation(state, action) {
         const input = action.input;
 
         // Update workstream fields if provided
@@ -22,7 +22,7 @@ export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
         }
     },
 
-    editClientInfoOperation(state, action, dispatch) {
+    editClientInfoOperation(state, action) {
         const input = action.input;
 
         // Create or update client info
@@ -46,7 +46,7 @@ export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
         }
     },
 
-    setRequestForProposalOperation(state, action, dispatch) {
+    setRequestForProposalOperation(state, action) {
         const input = action.input;
 
         // Create or update RFP
@@ -56,7 +56,7 @@ export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
         };
     },
 
-    addPaymentRequestOperation(state, action, dispatch) {
+    addPaymentRequestOperation(state, action) {
         const input = action.input;
 
         // Add payment request ID if not already present
@@ -65,7 +65,7 @@ export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
         }
     },
 
-    removePaymentRequestOperation(state, action, dispatch) {
+    removePaymentRequestOperation(state, action) {
         const input = action.input;
 
         // Remove payment request ID from the array

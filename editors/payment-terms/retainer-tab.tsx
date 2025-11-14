@@ -210,8 +210,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
 
         <DatePicker
           value={formData.timesheetRequired ? new Date() : undefined}
-          onChange={(e) => {
-            const date = e.target.value ? new Date(e.target.value) : null;
+          onChange={() => {
             setFormData({ ...formData, timesheetRequired: true });
           }}
           name="start-date"
@@ -221,8 +220,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
 
         <DatePicker
           value={formData.timesheetRequired ? new Date() : undefined}
-          onChange={(e) => {
-            const date = e.target.value ? new Date(e.target.value) : null;
+          onChange={() => {
             setFormData({ ...formData, timesheetRequired: true });
           }}
           name="end-date"
@@ -233,7 +231,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
           <Textarea
             label="Services Included *"
             value={formData.timesheetRequired ? "Yes" : "No"}
-            onChange={(e) =>
+            onChange={() =>
               setFormData({ ...formData, timesheetRequired: true })
             }
             className="w-full"
@@ -249,7 +247,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
               type="checkbox"
               id="autoRenew"
               checked={formData.timesheetRequired}
-              onChange={(e) =>
+              onChange={() =>
                 setFormData({ ...formData, timesheetRequired: true })
               }
               className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"

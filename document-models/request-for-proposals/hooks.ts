@@ -8,7 +8,7 @@ import {
 import type {
   RequestForProposalsDocument,
   RequestForProposalsAction,
-} from "./gen/types.js";
+} from "@powerhousedao/network-admin/document-models/request-for-proposals";
 import { isRequestForProposalsDocument } from "./gen/document-schema.js";
 
 /** Hook to get a RequestForProposals document by its id */

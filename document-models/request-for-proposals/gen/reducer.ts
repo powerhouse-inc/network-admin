@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { RequestForProposalsPHState } from "./types.js";
+import type { RequestForProposalsPHState } from "@powerhousedao/network-admin/document-models/request-for-proposals";
 
 import { requestForProposalsRfpStateOperations } from "../src/reducers/rfp-state.js";
 import { requestForProposalsContexDocumentOperations } from "../src/reducers/contex-document.js";

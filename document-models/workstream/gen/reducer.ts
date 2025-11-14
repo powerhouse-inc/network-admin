@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { WorkstreamPHState } from "./types.js";
+import type { WorkstreamPHState } from "@powerhousedao/network-admin/document-models/workstream";
 
 import { workstreamWorkstreamOperations } from "../src/reducers/workstream.js";
 import { workstreamProposalsOperations } from "../src/reducers/proposals.js";

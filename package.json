@@ -9,44 +9,46 @@
   ],
   "exports": {
     ".": {
-      "development": "./index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./document-models": {
-      "development": "./document-models/index.ts",
       "types": "./dist/document-models/index.d.ts",
       "default": "./dist/document-models/index.js"
     },
     "./editors": {
-      "development": "./editors/index.ts",
       "types": "./dist/editors/index.d.ts",
       "default": "./dist/editors/index.js"
     },
     "./subgraphs": {
-      "development": "./subgraphs/index.ts",
       "types": "./dist/subgraphs/index.d.ts",
       "default": "./dist/subgraphs/index.js"
     },
     "./processors": {
-      "development": "./processors/index.ts",
       "types": "./dist/processors/index.d.ts",
       "default": "./dist/processors/index.js"
     },
     "./manifest": {
-      "development": "./powerhouse.manifest.json",
       "default": "./dist/powerhouse.manifest.json"
     },
-    "./style.css": "./dist/style.css"
+    "./style.css": "./dist/style.css",
+    "./document-models/*": {
+      "types": "./dist/document-models/*/index.d.ts",
+      "default": "./dist/document-models/*/index.js"
+    },
+    "./editors/*": {
+      "types": "./dist/editors/*/index.d.ts",
+      "default": "./dist/editors/*/index.js"
+    }
   },
   "scripts": {
-    "lint": "eslint . --cache",
-    "lint:fix": "eslint . --fix --cache",
+    "lint": "eslint --config eslint.config.js --cache --cache-strategy content",
+    "lint:fix": "npm run lint --fix",
     "build:tsc": "tsc || true",
     "build:tsc:watch": "tsc --watch",
     "build:css": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css",
     "build:css:watch": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css --watch",
-    "build": "npm run build:tsc && npm run build:css",
+    "build": "npm run tsc && npm run tailwind || true",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
@@ -56,16 +58,22 @@
     "reactor": "ph-cli reactor",
     "service": "ph-cli service",
     "service-startup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-startup.sh",
-    "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh"
+    "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh",
+    "tsc": "tsc",
+    "tsc:watch": "tsc --watch",
+    "tailwind": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css",
+    "check-circular-imports": "npx dpdm -T ./index.ts",
+    "vetra": "ph-cli vetra",
+    "migrate": "ph-cli migrate"
   },
   "dependencies": {
-    "@powerhousedao/builder-tools": "5.0.1-staging.13",
-    "@powerhousedao/common": "5.0.1-staging.13",
-    "@powerhousedao/design-system": "5.0.1-staging.13",
+    "@powerhousedao/builder-tools": "^5.0.1-staging.15",
+    "@powerhousedao/common": "^5.0.1-staging.15",
+    "@powerhousedao/design-system": "^5.0.1-staging.15",
     "@powerhousedao/document-engineering": "^1.39.0",
-    "@powerhousedao/project-management": "0.0.58",
+    "@powerhousedao/project-management": "0.0.62",
     "@uiw/react-md-editor": "^4.0.8",
-    "document-model": "5.0.1-staging.13",
+    "document-model": "^5.0.1-staging.15",
     "error": "^10.4.0",
     "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6",
@@ -77,25 +85,25 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@openfeature/core": "^1.9.1",
     "@electric-sql/pglite": "^0.2.17",
     "@eslint/js": "^9.37.0",
+    "@openfeature/core": "^1.9.1",
     "@powerhousedao/analytics-engine-core": "^0.5.0",
-    "@powerhousedao/codegen": "5.0.1-staging.13",
-    "@powerhousedao/config": "5.0.1-staging.13",
-    "@powerhousedao/connect": "5.0.1-staging.13",
-    "@powerhousedao/ph-cli": "5.0.1-staging.13",
-    "@powerhousedao/reactor-api": "5.0.1-staging.13",
-    "@powerhousedao/reactor-browser": "5.0.1-staging.13",
-    "@powerhousedao/reactor-local": "5.0.1-staging.13",
+    "@powerhousedao/codegen": "^5.0.1-staging.15",
+    "@powerhousedao/config": "^5.0.1-staging.15",
+    "@powerhousedao/connect": "^5.0.1-staging.15",
+    "@powerhousedao/ph-cli": "^5.0.1-staging.15",
+    "@powerhousedao/reactor-api": "^5.0.1-staging.15",
+    "@powerhousedao/reactor-browser": "^5.0.1-staging.15",
+    "@powerhousedao/reactor-local": "^5.0.1-staging.15",
     "@powerhousedao/scalars": "2.0.1",
-    "@powerhousedao/switchboard": "5.0.1-staging.13",
+    "@powerhousedao/switchboard": "^5.0.1-staging.15",
     "@tailwindcss/cli": "^4.1.14",
     "@types/node": "^22.13.11",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.0.4",
-    "document-drive": "5.0.1-staging.13",
+    "document-drive": "^5.0.1-staging.15",
     "eslint": "^9.37.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -118,5 +126,7 @@
   "overrides": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
-  }
+  },
+  "readme": "ERROR: No README data found!",
+  "_id": "@powerhousedao/network-admin@0.0.42"
 }

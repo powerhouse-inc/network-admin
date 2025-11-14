@@ -290,7 +290,6 @@ function generateActions(remoteState: any, localState: any): any[] {
 
   // 5. Add roadmaps if any
   if (remoteState.roadmaps && remoteState.roadmaps.length > 0) {
-    const localRoadmapIds = new Set(localState.roadmaps.map((r: any) => r.id));
     const localRoadmapsMap = new Map<string, any>(localState.roadmaps.map((r: any) => [r.id, r]));
 
     remoteState.roadmaps.forEach((roadmap: any) => {

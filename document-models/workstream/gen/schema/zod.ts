@@ -10,15 +10,11 @@ import type {
   Proposal,
   ProposalAuthor,
   ProposalAuthorInput,
-  ProposalStatus,
-  ProposalStatusInput,
   Rfp,
   RemoveAlternativeProposalInput,
   RemovePaymentRequestInput,
   SetRequestForProposalInput,
   WorkstreamState,
-  WorkstreamStatus,
-  WorkstreamStatusInput,
 } from "./types.js";
 
 type Properties<T> = Required<{

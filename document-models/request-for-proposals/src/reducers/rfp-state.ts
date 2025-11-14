@@ -1,7 +1,7 @@
-import type { RequestForProposalsRfpStateOperations } from "../../index.js";
+import type { RequestForProposalsRfpStateOperations } from "@powerhousedao/network-admin/document-models/request-for-proposals";
 
 export const requestForProposalsRfpStateOperations: RequestForProposalsRfpStateOperations = {
-    editRfpOperation(state, action, dispatch) {
+    editRfpOperation(state, action) {
         // TODO: Implement "editRfpOperation" reducer
 
         state.title = action.input.title || state.title;

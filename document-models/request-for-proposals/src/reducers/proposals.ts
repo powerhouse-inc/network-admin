@@ -1,7 +1,7 @@
-import type { RequestForProposalsProposalsOperations } from "../../index.js";
+import type { RequestForProposalsProposalsOperations } from "@powerhousedao/network-admin/document-models/request-for-proposals";
 
 export const requestForProposalsProposalsOperations: RequestForProposalsProposalsOperations = {
-    addProposalOperation(state, action, dispatch) {
+    addProposalOperation(state, action) {
         // TODO: Implement "addProposalOperation" reducer
         if (action.input.title === undefined || action.input.title === null) {
             throw new Error('Proposal title is required');
@@ -28,7 +28,7 @@ export const requestForProposalsProposalsOperations: RequestForProposalsProposal
             id: action.input.id,
         });
     },
-    changeProposalStatusOperation(state, action, dispatch) {
+    changeProposalStatusOperation(state, action) {
         // TODO: Implement "changeProposalStatusOperation" reducer
         if (action.input.proposalId === undefined || action.input.proposalId === null) {
             throw new Error('Proposal ID is required');
@@ -43,7 +43,7 @@ export const requestForProposalsProposalsOperations: RequestForProposalsProposal
             return proposal;
         });
     },
-    removeProposalOperation(state, action, dispatch) {
+    removeProposalOperation(state, action) {
         // TODO: Implement "removeProposalOperation" reducer
         if (action.input.id === undefined || action.input.id === null) {
             throw new Error('Proposal ID is required');

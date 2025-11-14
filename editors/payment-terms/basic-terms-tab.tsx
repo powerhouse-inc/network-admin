@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { toast } from "@powerhousedao/design-system/connect";
 import { Select, TextInput, Button } from "@powerhousedao/document-engineering";
 import type {

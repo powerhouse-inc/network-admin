@@ -8,7 +8,7 @@ import {
 import type {
   PaymentTermsDocument,
   PaymentTermsAction,
-} from "./gen/types.js";
+} from "@powerhousedao/network-admin/document-models/payment-terms";
 import { isPaymentTermsDocument } from "./gen/document-schema.js";
 
 /** Hook to get a PaymentTerms document by its id */

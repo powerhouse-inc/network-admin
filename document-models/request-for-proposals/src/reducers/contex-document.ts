@@ -1,7 +1,7 @@
-import type { RequestForProposalsContexDocumentOperations } from "../../index.js";
+import type { RequestForProposalsContexDocumentOperations } from "@powerhousedao/network-admin/document-models/request-for-proposals";
 
 export const requestForProposalsContexDocumentOperations: RequestForProposalsContexDocumentOperations = {
-    addContextDocumentOperation(state, action, dispatch) {
+    addContextDocumentOperation(state, action) {
         // TODO: Implement "addContextDocumentOperation" reducer
         if (action.input.name === undefined || action.input.name === null) {
             throw new Error('Context document name is required');
@@ -14,7 +14,7 @@ export const requestForProposalsContexDocumentOperations: RequestForProposalsCon
             url: action.input.url,
         });
     },
-    removeContextDocumentOperation(state, action, dispatch) {
+    removeContextDocumentOperation(state, action) {
         // TODO: Implement "removeContextDocumentOperation" reducer
         if (action.input.name === undefined || action.input.name === null) {
             throw new Error('Context document name is required');

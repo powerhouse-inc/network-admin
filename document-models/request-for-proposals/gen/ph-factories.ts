@@ -14,8 +14,8 @@ import { createDocument } from "./utils.js";
 export function defaultGlobalState(): RequestForProposalsGlobalState {
   return {
     issuer: "placeholder-id",
-    title: "",
     code: "",
+    title: "",
     summary: "",
     briefing: "",
     rfpCommenter: [],

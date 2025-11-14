@@ -2,7 +2,7 @@ import type { EditorModule } from "document-model";
 import { lazy } from "react";
 
 /** Document editor module for the Todo List document type */
-export const PaymentTerms: EditorModule = {
+export const PaymentTermsEditor: EditorModule = {
   Component: lazy(() => import("./editor.js")),
   documentTypes: ["payment-terms"],
   config: {

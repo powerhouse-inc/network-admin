@@ -1,7 +1,7 @@
-import type { WorkstreamProposalsOperations } from "../../index.js";
+import type { WorkstreamProposalsOperations } from "@powerhousedao/network-admin/document-models/workstream";
 
 export const workstreamProposalsOperations: WorkstreamProposalsOperations = {
-    editInitialProposalOperation(state, action, dispatch) {
+    editInitialProposalOperation(state, action) {
         const input = action.input;
 
         // Create initial proposal if it doesn't exist
@@ -43,7 +43,7 @@ export const workstreamProposalsOperations: WorkstreamProposalsOperations = {
         }
     },
 
-    addAlternativeProposalOperation(state, action, dispatch) {
+    addAlternativeProposalOperation(state, action) {
         const input = action.input;
 
         // Check if proposal with this ID already exists
@@ -75,7 +75,7 @@ export const workstreamProposalsOperations: WorkstreamProposalsOperations = {
         }
     },
 
-    editAlternativeProposalOperation(state, action, dispatch) {
+    editAlternativeProposalOperation(state, action) {
         const input = action.input;
 
         // Find the proposal to edit
@@ -108,7 +108,7 @@ export const workstreamProposalsOperations: WorkstreamProposalsOperations = {
         }
     },
 
-    removeAlternativeProposalOperation(state, action, dispatch) {
+    removeAlternativeProposalOperation(state, action) {
         const input = action.input;
 
         // Find and remove the proposal
