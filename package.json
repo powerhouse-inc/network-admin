@@ -44,11 +44,11 @@
   "scripts": {
     "lint": "eslint --config eslint.config.js --cache --cache-strategy content",
     "lint:fix": "npm run lint --fix",
-    "build:tsc": "tsc || true",
+    "build:tsc": "tsc",
     "build:tsc:watch": "tsc --watch",
     "build:css": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css",
     "build:css:watch": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css --watch",
-    "build": "npm run tsc && npm run tailwind || true",
+    "build": "npm run tsc && npm run tailwind",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
