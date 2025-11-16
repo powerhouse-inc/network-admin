@@ -5,8 +5,8 @@ import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
 import type { WorkstreamPHState } from "@powerhousedao/network-admin/document-models/workstream";
 
-import { workstreamWorkstreamOperations } from "../src/reducers/workstream.js";
-import { workstreamProposalsOperations } from "../src/reducers/proposals.js";
+import { reducer as workstreamWorkstreamOperations } from "../src/reducers/workstream.js";
+import { reducer as workstreamProposalsOperations } from "../src/reducers/proposals.js";
 
 import {
   EditWorkstreamInputSchema,
