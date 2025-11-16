@@ -17,7 +17,7 @@ import {
   EditAlternativeProposalInputSchema,
   removeAlternativeProposal,
   RemoveAlternativeProposalInputSchema,
-} from "../../index.js";
+} from "@powerhousedao/network-admin/document-models/workstream";
 
 describe("Proposals Operations", () => {
   it("should handle editInitialProposal operation", () => {

@@ -2,76 +2,23 @@ import type { WorkstreamWorkstreamOperations } from "@powerhousedao/network-admi
 
 export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
     editWorkstreamOperation(state, action) {
-        const input = action.input;
-
-        // Update workstream fields if provided
-        if (input.code !== undefined) {
-            state.code = input.code || null;
-        }
-        if (input.title !== undefined) {
-            state.title = input.title || null;
-        }
-        if (input.status !== undefined) {
-            state.status = input.status || "RFP_DRAFT";
-        }
-        if (input.sowId !== undefined) {
-            state.sow = input.sowId || null;
-        }
-        if (input.paymentTerms !== undefined) {
-            state.paymentTerms = input.paymentTerms || null;
-        }
+        // TODO: Implement "editWorkstreamOperation" reducer
+        throw new Error('Reducer "editWorkstreamOperation" not yet implemented');
     },
-
     editClientInfoOperation(state, action) {
-        const input = action.input;
-
-        // Create or update client info
-        if (!state.client) {
-            state.client = {
-                id: input.clientId,
-                name: null,
-                icon: null,
-            };
-        }
-
-        // Update client ID (required field)
-        state.client.id = input.clientId;
-
-        // Update optional fields if provided
-        if (input.name !== undefined) {
-            state.client.name = input.name || null;
-        }
-        if (input.icon !== undefined) {
-            state.client.icon = input.icon || null;
-        }
+        // TODO: Implement "editClientInfoOperation" reducer
+        throw new Error('Reducer "editClientInfoOperation" not yet implemented');
     },
-
     setRequestForProposalOperation(state, action) {
-        const input = action.input;
-
-        // Create or update RFP
-        state.rfp = {
-            id: input.rfpId,
-            title: input.title,
-        };
+        // TODO: Implement "setRequestForProposalOperation" reducer
+        throw new Error('Reducer "setRequestForProposalOperation" not yet implemented');
     },
-
     addPaymentRequestOperation(state, action) {
-        const input = action.input;
-
-        // Add payment request ID if not already present
-        if (!state.paymentRequests.includes(input.id)) {
-            state.paymentRequests.push(input.id);
-        }
+        // TODO: Implement "addPaymentRequestOperation" reducer
+        throw new Error('Reducer "addPaymentRequestOperation" not yet implemented');
     },
-
     removePaymentRequestOperation(state, action) {
-        const input = action.input;
-
-        // Remove payment request ID from the array
-        const index = state.paymentRequests.indexOf(input.id);
-        if (index > -1) {
-            state.paymentRequests.splice(index, 1);
-        }
-    },
+        // TODO: Implement "removePaymentRequestOperation" reducer
+        throw new Error('Reducer "removePaymentRequestOperation" not yet implemented');
+    }
 };

@@ -11,7 +11,7 @@ import {
   isRequestForProposalsDocument,
   editRfp,
   EditRfpInputSchema,
-} from "../../index.js";
+} from "@powerhousedao/network-admin/document-models/request-for-proposals";
 
 describe("RfpState Operations", () => {
   it("should handle editRfp operation", () => {

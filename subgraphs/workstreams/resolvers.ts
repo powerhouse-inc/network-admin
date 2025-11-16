@@ -259,7 +259,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
   return {
     Query: {
-      processorWorkstreams: async () => {
+      processorWorkstreams: async (parent: unknown, args: {}) => {
         const drives = await getCandidateDrives();
         const allProcessorWorkstreams = await Promise.all(
           drives.map(async (driveId) => {

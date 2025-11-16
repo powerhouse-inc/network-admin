@@ -19,7 +19,7 @@ import {
   DeleteMilestoneInputSchema,
   reorderMilestones,
   ReorderMilestonesInputSchema,
-} from "../../gen/index.js";
+} from "@powerhousedao/network-admin/document-models/payment-terms";
 
 describe("Milestones Operations", () => {
   it("should handle addMilestone operation", () => {

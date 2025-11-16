@@ -2,122 +2,19 @@ import type { WorkstreamProposalsOperations } from "@powerhousedao/network-admin
 
 export const workstreamProposalsOperations: WorkstreamProposalsOperations = {
     editInitialProposalOperation(state, action) {
-        const input = action.input;
-
-        // Create initial proposal if it doesn't exist
-        if (!state.initialProposal) {
-            state.initialProposal = {
-                id: input.id,
-                sow: "", // Will be updated if provided
-                paymentTerms: "", // Will be updated if provided
-                status: "DRAFT",
-                author: {
-                    id: "", // Will be updated if provided
-                    name: null,
-                    icon: null,
-                },
-            };
-        }
-
-        // Update proposal ID
-        state.initialProposal.id = input.id;
-
-        // Update optional fields if provided
-        if (input.sowId !== undefined) {
-            state.initialProposal.sow = input.sowId || "";
-        }
-        if (input.paymentTermsId !== undefined) {
-            state.initialProposal.paymentTerms = input.paymentTermsId || "";
-        }
-        if (input.status !== undefined) {
-            state.initialProposal.status = input.status || "DRAFT";
-        }
-        if (input.proposalAuthor !== undefined) {
-            if (input.proposalAuthor) {
-                state.initialProposal.author = {
-                    id: input.proposalAuthor.id,
-                    name: input.proposalAuthor.name || null,
-                    icon: input.proposalAuthor.icon || null,
-                };
-            }
-        }
+        // TODO: Implement "editInitialProposalOperation" reducer
+        throw new Error('Reducer "editInitialProposalOperation" not yet implemented');
     },
-
     addAlternativeProposalOperation(state, action) {
-        const input = action.input;
-
-        // Check if proposal with this ID already exists
-        const existingIndex = state.alternativeProposals.findIndex(
-            (proposal) => proposal.id === input.id
-        );
-
-        if (existingIndex === -1) {
-            // Create new alternative proposal
-            const newProposal = {
-                id: input.id,
-                sow: input.sowId || "",
-                paymentTerms: input.paymentTermsId || "",
-                status: input.status || "DRAFT",
-                author: input.proposalAuthor
-                    ? {
-                        id: input.proposalAuthor.id,
-                        name: input.proposalAuthor.name || null,
-                        icon: input.proposalAuthor.icon || null,
-                    }
-                    : {
-                        id: "",
-                        name: null,
-                        icon: null,
-                    },
-            };
-
-            state.alternativeProposals.push(newProposal);
-        }
+        // TODO: Implement "addAlternativeProposalOperation" reducer
+        throw new Error('Reducer "addAlternativeProposalOperation" not yet implemented');
     },
-
     editAlternativeProposalOperation(state, action) {
-        const input = action.input;
-
-        // Find the proposal to edit
-        const proposalIndex = state.alternativeProposals.findIndex(
-            (proposal) => proposal.id === input.id
-        );
-
-        if (proposalIndex > -1) {
-            const proposal = state.alternativeProposals[proposalIndex];
-
-            // Update optional fields if provided
-            if (input.sowId !== undefined) {
-                proposal.sow = input.sowId || "";
-            }
-            if (input.paymentTermsId !== undefined) {
-                proposal.paymentTerms = input.paymentTermsId || "";
-            }
-            if (input.status !== undefined) {
-                proposal.status = input.status || "DRAFT";
-            }
-            if (input.proposalAuthor !== undefined) {
-                if (input.proposalAuthor) {
-                    proposal.author = {
-                        id: input.proposalAuthor.id,
-                        name: input.proposalAuthor.name || null,
-                        icon: input.proposalAuthor.icon || null,
-                    };
-                }
-            }
-        }
+        // TODO: Implement "editAlternativeProposalOperation" reducer
+        throw new Error('Reducer "editAlternativeProposalOperation" not yet implemented');
     },
-
     removeAlternativeProposalOperation(state, action) {
-        const input = action.input;
-
-        // Find and remove the proposal
-        const proposalIndex = state.alternativeProposals.findIndex(
-            (proposal) => proposal.id === input.id
-        );
-
-        if (proposalIndex > -1) {
-            state.alternativeProposals.splice(proposalIndex, 1);
-        }
-    },
+        // TODO: Implement "removeAlternativeProposalOperation" reducer
+        throw new Error('Reducer "removeAlternativeProposalOperation" not yet implemented');
+    }
 };

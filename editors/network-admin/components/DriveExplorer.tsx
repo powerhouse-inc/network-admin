@@ -362,7 +362,7 @@ export function DriveExplorer({ children }: EditorProps) {
                         <img
                           src={networkProfileDoc?.state.global.logo}
                           alt="Network Profile Logo"
-                          className="mb-4 max-w-32 max-h-32 sm:max-w-48 sm:max-h-48 md:max-w-64 md:max-h-64 w-auto h-auto object-contain flex-shrink-0"
+                          className="mb-4 max-w-64 max-h-12 w-auto h-auto object-contain flex-shrink-0"
                         />
                       ) : (
                         <div></div>

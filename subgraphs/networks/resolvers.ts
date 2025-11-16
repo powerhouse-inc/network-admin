@@ -1,7 +1,7 @@
-import { type ISubgraph } from "@powerhousedao/reactor-api";
+import { type BaseSubgraph } from "@powerhousedao/reactor-api";
 import type { NetworkProfileDocument } from "../../document-models/network-profile/index.js";
 
-export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
+export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {

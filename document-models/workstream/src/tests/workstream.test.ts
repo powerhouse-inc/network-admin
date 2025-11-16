@@ -19,7 +19,7 @@ import {
   AddPaymentRequestInputSchema,
   removePaymentRequest,
   RemovePaymentRequestInputSchema,
-} from "../../index.js";
+} from "@powerhousedao/network-admin/document-models/workstream";
 
 describe("Workstream Operations", () => {
   it("should handle editWorkstream operation", () => {

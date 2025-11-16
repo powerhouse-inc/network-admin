@@ -21,7 +21,7 @@ import {
   UpdatePenaltyClauseInputSchema,
   deletePenaltyClause,
   DeletePenaltyClauseInputSchema,
-} from "../../gen/index.js";
+} from "@powerhousedao/network-admin/document-models/payment-terms";
 
 describe("Clauses Operations", () => {
   it("should handle addBonusClause operation", () => {

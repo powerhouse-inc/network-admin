@@ -13,7 +13,7 @@ import {
   AddContextDocumentInputSchema,
   removeContextDocument,
   RemoveContextDocumentInputSchema,
-} from "../../index.js";
+} from "@powerhousedao/network-admin/document-models/request-for-proposals";
 
 describe("ContexDocument Operations", () => {
   it("should handle addContextDocument operation", () => {

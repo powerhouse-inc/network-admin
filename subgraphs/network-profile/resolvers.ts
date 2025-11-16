@@ -4,7 +4,7 @@ import { setName } from "document-model";
 import {
   actions,
   networkProfileDocumentType,
-} from "../../document-models/network-profile/index.js";
+} from "@powerhousedao/network-admin/document-models/network-profile";
 
 import type {
   NetworkProfileDocument,
@@ -19,7 +19,7 @@ import type {
   SetDiscordInput,
   SetYoutubeInput,
   SetProfileNameInput,
-} from "../../document-models/network-profile/index.js";
+} from "@powerhousedao/network-admin/document-models/network-profile";
 
 export const getResolvers = (
   subgraph: BaseSubgraph,

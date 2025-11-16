@@ -1,28 +1,34 @@
-import { type ISubgraph } from "@powerhousedao/reactor-api";
+import type { BaseSubgraph } from "@powerhousedao/reactor-api";
 import { addFile } from "document-drive";
+import { setName } from "document-model";
 import {
   actions,
-  type SetBasicTermsInput,
-  type UpdateStatusInput,
-  type SetTimeAndMaterialsInput,
-  type SetEscrowDetailsInput,
-  type SetEvaluationTermsInput,
-  type AddMilestoneInput,
-  type UpdateMilestoneInput,
-  type UpdateMilestoneStatusInput,
-  type DeleteMilestoneInput,
-  type ReorderMilestonesInput,
-  type AddBonusClauseInput,
-  type UpdateBonusClauseInput,
-  type DeleteBonusClauseInput,
-  type AddPenaltyClauseInput,
-  type UpdatePenaltyClauseInput,
-  type DeletePenaltyClauseInput,
-  type PaymentTermsDocument,
-} from "../../document-models/payment-terms/index.js";
-import { setName } from "document-model";
+  paymentTermsDocumentType,
+} from "@powerhousedao/network-admin/document-models/payment-terms";
 
-export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
+import type {
+  PaymentTermsDocument,
+  SetBasicTermsInput,
+  UpdateStatusInput,
+  SetTimeAndMaterialsInput,
+  SetEscrowDetailsInput,
+  SetEvaluationTermsInput,
+  AddMilestoneInput,
+  UpdateMilestoneInput,
+  UpdateMilestoneStatusInput,
+  DeleteMilestoneInput,
+  ReorderMilestonesInput,
+  AddBonusClauseInput,
+  UpdateBonusClauseInput,
+  DeleteBonusClauseInput,
+  AddPenaltyClauseInput,
+  UpdatePenaltyClauseInput,
+  DeletePenaltyClauseInput,
+} from "@powerhousedao/network-admin/document-models/payment-terms";
+
+export const getResolvers = (
+  subgraph: BaseSubgraph,
+): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
@@ -78,7 +84,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             );
 
             return docs.filter(
-              (doc) => doc.header.documentType === "payment-terms",
+              (doc) => doc.header.documentType === paymentTermsDocumentType,
             );
           },
         };
@@ -90,7 +96,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         args: { name: string; driveId?: string },
       ) => {
         const { driveId, name } = args;
-        const document = await reactor.addDocument("payment-terms");
+        const document = await reactor.addDocument(paymentTermsDocumentType);
 
         if (driveId) {
           await reactor.addAction(
@@ -98,7 +104,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             addFile({
               name,
               id: document.header.id,
-              documentType: "payment-terms",
+              documentType: paymentTermsDocumentType,
             }),
           );
         }
@@ -154,7 +160,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         return true;
       },
 
-      PaymentTerms_setCostAndMaterials: async (
+      PaymentTerms_setTimeAndMaterials: async (
         _: unknown,
         args: { docId: string; input: SetTimeAndMaterialsInput },
       ) => {
@@ -171,7 +177,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
         if (result.status !== "SUCCESS") {
           throw new Error(
-            result.error?.message ?? "Failed to setCostAndMaterials",
+            result.error?.message ?? "Failed to setTimeAndMaterials",
           );
         }
 
@@ -220,30 +226,6 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         if (result.status !== "SUCCESS") {
           throw new Error(
             result.error?.message ?? "Failed to setEvaluationTerms",
-          );
-        }
-
-        return true;
-      },
-
-      PaymentTerms_setRetainerDetails: async (
-        _: unknown,
-        args: { docId: string; input: SetTimeAndMaterialsInput },
-      ) => {
-        const { docId, input } = args;
-        const doc = await reactor.getDocument<PaymentTermsDocument>(docId);
-        if (!doc) {
-          throw new Error("Document not found");
-        }
-
-        const result = await reactor.addAction(
-          docId,
-          actions.setTimeAndMaterials(input),
-        );
-
-        if (result.status !== "SUCCESS") {
-          throw new Error(
-            result.error?.message ?? "Failed to setRetainerDetails",
           );
         }
 

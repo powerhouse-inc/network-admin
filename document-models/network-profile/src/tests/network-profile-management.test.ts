@@ -31,7 +31,7 @@ import {
   SetYoutubeInputSchema,
   setProfileName,
   SetProfileNameInputSchema,
-} from "../../gen/index.js";
+} from "@powerhousedao/network-admin/document-models/network-profile";
 
 describe("NetworkProfileManagement Operations", () => {
   it("should handle setIcon operation", () => {

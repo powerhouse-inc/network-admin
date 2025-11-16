@@ -15,7 +15,7 @@ import {
   ChangeProposalStatusInputSchema,
   removeProposal,
   RemoveProposalInputSchema,
-} from "../../index.js";
+} from "@powerhousedao/network-admin/document-models/request-for-proposals";
 
 describe("Proposals Operations", () => {
   it("should handle addProposal operation", () => {

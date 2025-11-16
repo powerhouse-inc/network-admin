@@ -1,5 +1,5 @@
-import { DuplicateBonusClauseIdError, BonusClauseNotFoundError, DuplicatePenaltyClauseIdError, PenaltyClauseNotFoundError } from "../../gen/clauses/error.js";
 import type { PaymentTermsClausesOperations } from "@powerhousedao/network-admin/document-models/payment-terms";
+import { DuplicateBonusClauseIdError, BonusClauseNotFoundError, DuplicatePenaltyClauseIdError, PenaltyClauseNotFoundError } from "../../gen/clauses/error.js";
 
 export const paymentTermsClausesOperations: PaymentTermsClausesOperations = {
     addBonusClauseOperation(state, action) {

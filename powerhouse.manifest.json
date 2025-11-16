@@ -9,14 +9,6 @@
     "documentModels": [],
     "editors": [],
     "apps": [],
-    "subgraphs": [
-        {
-            "id": "powerhouse/network-profile-subgraph",
-            "name": "Network Profile Subgraph",
-            "documentTypes": [
-                "powerhouse/network-profile"
-            ]
-        }
-    ],
+    "subgraphs": [],
     "importScripts": []
 }

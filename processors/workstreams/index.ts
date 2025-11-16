@@ -1,8 +1,8 @@
 import { RelationalDbProcessor } from "document-drive";
-import { type InternalTransmitterUpdate, type InternalOperationUpdate } from "document-drive";
+import type { InternalTransmitterUpdate, InternalOperationUpdate, } from "document-drive";
+import type { EditInitialProposalInput, EditClientInfoInput, EditWorkstreamInput } from "@powerhousedao/network-admin/document-models/workstream";
 import { up } from "./migrations.js";
-import { type DB } from "./schema.js";
-import { type EditInitialProposalInput, type EditClientInfoInput, type EditWorkstreamInput } from "../../document-models/workstream/index.js";
+import type { DB } from "./schema.js";
 
 export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
   static override getNamespace(driveId: string): string {
@@ -37,21 +37,6 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
           this.updateNetworkInWorkstream(strand, operation)
           this.updateInitialProposalInWorkstream(strand, operation)
         }
-
-
-        // await this.relationalDb
-        //   .insertInto("workstreams")
-        //   .values({
-        //     workstream_phid: strand.documentId,
-        //     workstream_slug: strand.documentId.split("-")[1],
-        //     workstream_title: strand.documentId.split("-")[2],
-        //     workstream_status: "RFP_DRAFT",
-        //     sow_phid: strand.documentId.split("-")[3],
-        //     roadmap_oid: strand.documentId.split("-")[4],
-        //     final_milestone_target: new Date(),
-        //   })
-        //   .onConflict((oc) => oc.column("workstream_phid").doNothing())
-        //   .execute();
       }
     }
   }
@@ -89,7 +74,7 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
           // network_phid: strand.state.client.id,
           // network_slug: strand.state.client.name.toLowerCase().split(' ').join("-"),
           workstream_phid: strand.documentId,
-          workstream_slug: strand.state.title && strand.state.title.toLowerCase().split(' ').join("-"),
+          workstream_slug: strand.state.title.toLowerCase().split(' ').join("-"),
           workstream_title: strand.state.title,
           workstream_status: strand.state.status,
           // sow_phid: strand.state.sow,

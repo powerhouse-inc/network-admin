@@ -19,7 +19,7 @@ import {
   SetEscrowDetailsInputSchema,
   setEvaluationTerms,
   SetEvaluationTermsInputSchema,
-} from "../../gen/index.js";
+} from "@powerhousedao/network-admin/document-models/payment-terms";
 
 describe("Terms Operations", () => {
   it("should handle setBasicTerms operation", () => {
