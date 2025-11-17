@@ -13,7 +13,7 @@ export const networkProfileNetworkProfileManagementOperations: NetworkProfileNet
         state.logoBig = action.input.logoBig || "";
     },
     setWebsiteOperation(state, action) {
-        state.website = action.input.website || null;
+        state.website = action.input.website || "";
     },
     setDescriptionOperation(state, action) {
         state.description = action.input.description || "";

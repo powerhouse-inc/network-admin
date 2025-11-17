@@ -5,9 +5,9 @@ import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
 import type { RequestForProposalsPHState } from "@powerhousedao/network-admin/document-models/request-for-proposals";
 
-import { reducer as requestForProposalsRfpStateOperations } from "../src/reducers/rfp-state.js";
-import { reducer as requestForProposalsContexDocumentOperations } from "../src/reducers/contex-document.js";
-import { reducer as requestForProposalsProposalsOperations } from "../src/reducers/proposals.js";
+import { requestForProposalsRfpStateOperations } from "../src/reducers/rfp-state.js";
+import { requestForProposalsContexDocumentOperations } from "../src/reducers/contex-document.js";
+import { requestForProposalsProposalsOperations } from "../src/reducers/proposals.js";
 
 import {
   EditRfpInputSchema,

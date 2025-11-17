@@ -1,13 +1,7 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
+import type { WorkstreamProposalsOperations } from "@powerhousedao/network-admin/document-models/workstream";
 
-import type { WorkstreamProposalsOperations } from "../../gen/proposals/operations.js";
-
-export const reducer: WorkstreamProposalsOperations = {
-  editInitialProposalOperation(state, action, dispatch) {
+export const workstreamProposalsOperations: WorkstreamProposalsOperations = {
+  editInitialProposalOperation(state, action) {
     const input = action.input;
     
     // Create initial proposal if it doesn't exist
@@ -49,7 +43,7 @@ export const reducer: WorkstreamProposalsOperations = {
     }
   },
 
-  addAlternativeProposalOperation(state, action, dispatch) {
+  addAlternativeProposalOperation(state, action) {
     const input = action.input;
     
     // Check if proposal with this ID already exists
@@ -81,7 +75,7 @@ export const reducer: WorkstreamProposalsOperations = {
     }
   },
 
-  editAlternativeProposalOperation(state, action, dispatch) {
+  editAlternativeProposalOperation(state, action) {
     const input = action.input;
     
     // Find the proposal to edit
@@ -114,7 +108,7 @@ export const reducer: WorkstreamProposalsOperations = {
     }
   },
 
-  removeAlternativeProposalOperation(state, action, dispatch) {
+  removeAlternativeProposalOperation(state, action) {
     const input = action.input;
     
     // Find and remove the proposal

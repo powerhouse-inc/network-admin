@@ -23,9 +23,9 @@ import {
 export const initialGlobalState: RequestForProposalsGlobalState = {
   issuer: "placeholder-id",
   title: "",
+  briefing: "",
   code: "",
   summary: "",
-  briefing: "",
   rfpCommenter: [],
   eligibilityCriteria: "",
   evaluationCriteria: "",

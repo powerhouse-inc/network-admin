@@ -10,33 +10,35 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "default": "./dist/index.js"
     },
     "./document-models": {
       "types": "./dist/document-models/index.d.ts",
-      "import": "./dist/document-models/index.js"
+      "default": "./dist/document-models/index.js"
     },
     "./editors": {
       "types": "./dist/editors/index.d.ts",
-      "import": "./dist/editors/index.js"
+      "default": "./dist/editors/index.js"
     },
     "./document-models/*": {
       "types": "./dist/document-models/*/index.d.ts",
-      "import": "./dist/document-models/*/index.js"
+      "default": "./dist/document-models/*/index.js"
     },
     "./editors/*": {
       "types": "./dist/editors/*/index.d.ts",
-      "import": "./dist/editors/*/index.js"
+      "default": "./dist/editors/*/index.js"
     },
     "./subgraphs": {
       "types": "./dist/subgraphs/index.d.ts",
-      "import": "./dist/subgraphs/index.js"
+      "default": "./dist/subgraphs/index.js"
     },
     "./processors": {
       "types": "./dist/processors/index.d.ts",
-      "import": "./dist/processors/index.js"
+      "default": "./dist/processors/index.js"
     },
-    "./manifest": "./dist/powerhouse.manifest.json",
+    "./manifest": {
+      "default": "./dist/powerhouse.manifest.json"
+    },
     "./style.css": "./dist/style.css"
   },
   "scripts": {
@@ -55,6 +57,7 @@
     "reactor": "ph-cli reactor",
     "service": "ph-cli service",
     "vetra": "ph-cli vetra",
+    "migrate": "ph-cli migrate",
     "service-startup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-startup.sh",
     "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh"
   },
@@ -81,13 +84,13 @@
     "@powerhousedao/analytics-engine-core": "^0.5.0",
     "@powerhousedao/codegen": "^5.0.1-staging.15",
     "@powerhousedao/config": "^5.0.1-staging.15",
+    "@powerhousedao/connect": "^5.0.1-staging.15",
     "@powerhousedao/ph-cli": "^5.0.1-staging.15",
     "@powerhousedao/reactor-api": "^5.0.1-staging.15",
     "@powerhousedao/reactor-browser": "^5.0.1-staging.15",
     "@powerhousedao/reactor-local": "^5.0.1-staging.15",
     "@powerhousedao/scalars": "staging",
     "@powerhousedao/switchboard": "^5.0.1-staging.15",
-    "@powerhousedao/connect": "^5.0.1-staging.15",
     "@tailwindcss/cli": "^4.1.4",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^24.9.2",
@@ -95,11 +98,10 @@
     "@vitejs/plugin-react": "^5.1.0",
     "document-drive": "^5.0.1-staging.15",
     "eslint": "^9.38.0",
-    "vite-plugin-node-polyfills": "^0.24.0",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^16.4.0",
     "package-manager-detector": "^0.2.8",
     "pm2": "^5.4.3",
@@ -109,10 +111,13 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
     "vite": "^6.2.3",
+    "vite-plugin-node-polyfills": "^0.24.0",
     "vitest": "^3.0.9"
   },
   "peerDependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
-  }
+  },
+  "readme": "ERROR: No README data found!",
+  "_id": "@powerhousedao/network-admin@0.0.43"
 }

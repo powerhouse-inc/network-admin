@@ -1,13 +1,7 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
+import type { WorkstreamWorkstreamOperations } from "@powerhousedao/network-admin/document-models/workstream";
 
-import type { WorkstreamWorkstreamOperations } from "../../gen/workstream/operations.js";
-
-export const reducer: WorkstreamWorkstreamOperations = {
-  editWorkstreamOperation(state, action, dispatch) {
+export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
+  editWorkstreamOperation(state, action) {
     const input = action.input;
     
     // Update workstream fields if provided
@@ -28,7 +22,7 @@ export const reducer: WorkstreamWorkstreamOperations = {
     }
   },
 
-  editClientInfoOperation(state, action, dispatch) {
+  editClientInfoOperation(state, action) {
     const input = action.input;
     
     // Create or update client info
@@ -52,7 +46,7 @@ export const reducer: WorkstreamWorkstreamOperations = {
     }
   },
 
-  setRequestForProposalOperation(state, action, dispatch) {
+  setRequestForProposalOperation(state, action) {
     const input = action.input;
     
     // Create or update RFP
@@ -62,7 +56,7 @@ export const reducer: WorkstreamWorkstreamOperations = {
     };
   },
 
-  addPaymentRequestOperation(state, action, dispatch) {
+  addPaymentRequestOperation(state, action) {
     const input = action.input;
     
     // Add payment request ID if not already present
@@ -71,7 +65,7 @@ export const reducer: WorkstreamWorkstreamOperations = {
     }
   },
 
-  removePaymentRequestOperation(state, action, dispatch) {
+  removePaymentRequestOperation(state, action) {
     const input = action.input;
     
     // Remove payment request ID from the array

@@ -1,13 +1,7 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
+import type { RequestForProposalsProposalsOperations } from "@powerhousedao/network-admin/document-models/request-for-proposals";
 
-import type { RequestForProposalsProposalsOperations } from "../../gen/proposals/operations.js";
-
-export const reducer: RequestForProposalsProposalsOperations = {
-  addProposalOperation(state, action, dispatch) {
+export const requestForProposalsProposalsOperations: RequestForProposalsProposalsOperations = {
+  addProposalOperation(state, action) {
     // TODO: Implement "addProposalOperation" reducer
     if (action.input.title === undefined || action.input.title === null) {
       throw new Error('Proposal title is required');
@@ -34,7 +28,7 @@ export const reducer: RequestForProposalsProposalsOperations = {
       id: action.input.id,
     });
   },
-  changeProposalStatusOperation(state, action, dispatch) {
+  changeProposalStatusOperation(state, action) {
     // TODO: Implement "changeProposalStatusOperation" reducer
     if (action.input.proposalId === undefined || action.input.proposalId === null) {
       throw new Error('Proposal ID is required');
@@ -49,7 +43,7 @@ export const reducer: RequestForProposalsProposalsOperations = {
       return proposal;
     });
   },
-  removeProposalOperation(state, action, dispatch) {
+  removeProposalOperation(state, action) {
     // TODO: Implement "removeProposalOperation" reducer
     if (action.input.id === undefined || action.input.id === null) {
       throw new Error('Proposal ID is required');

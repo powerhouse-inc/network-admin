@@ -1,13 +1,7 @@
-/**
- * This is a scaffold file meant for customization:
- * - modify it by implementing the reducer functions
- * - delete the file and run the code generator again to have it reset
- */
+import type { RequestForProposalsContexDocumentOperations } from "@powerhousedao/network-admin/document-models/request-for-proposals";
 
-import type { RequestForProposalsContexDocumentOperations } from "../../gen/contex-document/operations.js";
-
-export const reducer: RequestForProposalsContexDocumentOperations = {
-  addContextDocumentOperation(state, action, dispatch) {
+export const requestForProposalsContexDocumentOperations: RequestForProposalsContexDocumentOperations = {
+  addContextDocumentOperation(state, action) {
     // TODO: Implement "addContextDocumentOperation" reducer
     if (action.input.name === undefined || action.input.name === null) {
       throw new Error('Context document name is required');
@@ -20,7 +14,7 @@ export const reducer: RequestForProposalsContexDocumentOperations = {
       url: action.input.url,
     });
   },
-  removeContextDocumentOperation(state, action, dispatch) {
+  removeContextDocumentOperation(state, action) {
     // TODO: Implement "removeContextDocumentOperation" reducer
     if (action.input.name === undefined || action.input.name === null) {
       throw new Error('Context document name is required');

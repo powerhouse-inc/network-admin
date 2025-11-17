@@ -10,15 +10,11 @@ import type {
   Proposal,
   ProposalAuthor,
   ProposalAuthorInput,
-  ProposalStatus,
-  ProposalStatusInput,
   Rfp,
   RemoveAlternativeProposalInput,
   RemovePaymentRequestInput,
   SetRequestForProposalInput,
   WorkstreamState,
-  WorkstreamStatus,
-  WorkstreamStatusInput,
 } from "./types.js";
 
 type Properties<T> = Required<{
@@ -118,7 +114,7 @@ export function EditClientInfoInputSchema(): z.ZodObject<
 > {
   return z.object({
     clientId: z.string(),
-    icon: z.string().nullish(),
+    icon: z.string().url().nullish(),
     name: z.string().nullish(),
   });
 }
