@@ -355,7 +355,7 @@ export function DriveExplorer({ children }: EditorProps) {
                   Welcome to the Network Admin
                 </h1>
                 {/* Card to display the network profile */}
-                {isNetworkProfileCreated && (
+                {isNetworkProfileCreated && networkProfileDoc?.state.global.logo && (
                   <div className="bg-white rounded-lg shadow-md border border-gray-300 p-4 max-w-lg mx-auto text-sm">
                     <div className="flex items-start justify-between gap-4">
                       {networkProfileDoc?.state.global.logo ? (
