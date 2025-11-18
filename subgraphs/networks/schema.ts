@@ -14,6 +14,7 @@ export const schema: DocumentNode = gql`
     id: PHID
     documentType: String
     network: Network
+    builders: [Builder!]!
   }
 
   type Network {
@@ -36,6 +37,13 @@ export const schema: DocumentNode = gql`
     CRYPTO
     NGO
     CHARITY
+  }
+
+  type Builder {
+    id: PHID
+    name: String!
+    icon: String!
+    description: String!
   }
 
 `;

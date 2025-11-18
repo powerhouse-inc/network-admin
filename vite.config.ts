@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => {
 
   const additionalViteConfig: UserConfig = {
     // add your own vite config here
+    // optimizeDeps: {
+    //   exclude: ["AddDriveModal"],
+    // },
   };
 
   const config = mergeConfig(baseConnectViteConfig, additionalViteConfig);
