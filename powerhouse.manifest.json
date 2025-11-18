@@ -1,10 +1,10 @@
 {
-    "name": "",
-    "description": "",
-    "category": "",
+    "name": "Network Admin",
+    "description": "A place where network admin doc models live",
+    "category": "Project Management",
     "publisher": {
-        "name": "",
-        "url": ""
+        "name": "Powerhouse",
+        "url": "https://powerhouse.inc/"
     },
     "documentModels": [],
     "editors": [],

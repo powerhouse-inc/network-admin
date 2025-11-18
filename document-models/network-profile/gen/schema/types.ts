@@ -60,6 +60,8 @@ export type NetworkCategory = "CHARITY" | "CRYPTO" | "DEFI" | "NGO" | "OSS";
 
 export type NetworkProfileState = {
   category: Array<NetworkCategory | `${NetworkCategory}`>;
+  darkThemeIcon: Scalars["String"]["output"];
+  darkThemeLogo: Scalars["String"]["output"];
   description: Scalars["String"]["output"];
   discord: Maybe<Scalars["String"]["output"]>;
   github: Maybe<Scalars["String"]["output"]>;
@@ -89,7 +91,8 @@ export type SetGithubInput = {
 };
 
 export type SetIconInput = {
-  icon: Scalars["String"]["input"];
+  darkThemeIcon?: InputMaybe<Scalars["String"]["input"]>;
+  icon?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type SetLogoBigInput = {
@@ -97,7 +100,8 @@ export type SetLogoBigInput = {
 };
 
 export type SetLogoInput = {
-  logo: Scalars["String"]["input"];
+  darkThemeLogo?: InputMaybe<Scalars["String"]["input"]>;
+  logo?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type SetProfileNameInput = {

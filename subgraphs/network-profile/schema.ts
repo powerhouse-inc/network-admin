@@ -81,10 +81,12 @@ export const schema: DocumentNode = gql`
   Module: NetworkProfileManagement
   """
   input NetworkProfile_SetIconInput {
-    icon: String!
+    icon: String
+    darkThemeIcon: String
   }
   input NetworkProfile_SetLogoInput {
-    logo: String!
+    logo: String
+    darkThemeLogo: String
   }
   input NetworkProfile_SetLogoBigInput {
     logoBig: String!

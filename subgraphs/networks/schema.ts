@@ -20,7 +20,9 @@ export const schema: DocumentNode = gql`
   type Network {
     name: String!
     icon: String!
+    darkThemeIcon: String!
     logo: String!
+    darkThemeLogo: String!
     logoBig: String!
     website: String
     description: String!

@@ -140,9 +140,11 @@ function ImageUrlInput({
   return (
     <>
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          {label}
-        </label>
+        {label && (
+          <label className="block text-sm font-medium text-gray-700">
+            {label}
+          </label>
+        )}
         <div className="border border-gray-300 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -224,6 +226,85 @@ function ImageUrlInput({
   );
 }
 
+// Toggle-enabled image input component for light/dark theme switching
+function ToggleableImageInput({
+  label,
+  lightValue,
+  darkValue,
+  onLightChange,
+  onDarkChange,
+  lightPlaceholder,
+  darkPlaceholder,
+  fileSize = "200KB",
+}: {
+  label: string;
+  lightValue: string;
+  darkValue: string;
+  onLightChange: (value: string) => void;
+  onDarkChange: (value: string) => void;
+  lightPlaceholder?: string;
+  darkPlaceholder?: string;
+  fileSize?: string;
+}) {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between mb-2">
+        <label className="block text-sm font-medium text-gray-700">
+          {label}
+        </label>
+        <div className="flex items-center space-x-2">
+          <span
+            className={`text-xs font-medium ${
+              !isDarkMode ? "text-gray-900" : "text-gray-500"
+            }`}
+          >
+            Light
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+              isDarkMode ? "bg-gray-700" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                isDarkMode ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+          <span
+            className={`text-xs font-medium ${
+              isDarkMode ? "text-gray-900" : "text-gray-500"
+            }`}
+          >
+            Dark
+          </span>
+        </div>
+      </div>
+      {!isDarkMode ? (
+        <ImageUrlInput
+          label=""
+          value={lightValue}
+          onChange={onLightChange}
+          placeholder={lightPlaceholder}
+          fileSize={fileSize}
+        />
+      ) : (
+        <ImageUrlInput
+          label=""
+          value={darkValue}
+          onChange={onDarkChange}
+          placeholder={darkPlaceholder}
+          fileSize={fileSize}
+        />
+      )}
+    </div>
+  );
+}
+
 export default function Editor() {
   // Getting dispatch from selected document
   const [doc, dispatch] = useSelectedNetworkProfileDocument();
@@ -249,10 +330,28 @@ export default function Editor() {
           action = actions.setProfileName({ name: value as string });
           break;
         case "icon":
-          action = actions.setIcon({ icon: value as string });
+          action = actions.setIcon({
+            icon: value as string,
+            darkThemeIcon: state?.darkThemeIcon || "",
+          });
+          break;
+        case "darkThemeIcon":
+          action = actions.setIcon({
+            icon: state?.icon || "",
+            darkThemeIcon: value as string,
+          });
           break;
         case "logo":
-          action = actions.setLogo({ logo: value as string });
+          action = actions.setLogo({
+            logo: value as string,
+            darkThemeLogo: state?.darkThemeLogo || "",
+          });
+          break;
+        case "darkThemeLogo":
+          action = actions.setLogo({
+            logo: state?.logo || "",
+            darkThemeLogo: value as string,
+          });
           break;
         case "logoBig":
           action = actions.setLogoBig({ logoBig: value as string });
@@ -287,7 +386,7 @@ export default function Editor() {
 
       dispatch(action);
     },
-    [dispatch]
+    [dispatch, state]
   );
 
   // Get the parent folder node for the currently selected node
@@ -329,21 +428,27 @@ export default function Editor() {
               />
             </div>
 
-            {/* Icon URL */}
-            <ImageUrlInput
+            {/* Icon URL with Dark Theme Toggle */}
+            <ToggleableImageInput
               label="Icon:"
-              value={state?.icon || ""}
-              onChange={(value) => handleFieldChange("icon", value)}
-              placeholder="PowerhouseIcon.jpg"
+              lightValue={state?.icon || ""}
+              darkValue={state?.darkThemeIcon || ""}
+              onLightChange={(value) => handleFieldChange("icon", value)}
+              onDarkChange={(value) => handleFieldChange("darkThemeIcon", value)}
+              lightPlaceholder="PowerhouseIcon.jpg"
+              darkPlaceholder="PowerhouseIconDark.jpg"
               fileSize="200KB"
             />
 
-            {/* Logo URL */}
-            <ImageUrlInput
+            {/* Logo URL with Dark Theme Toggle */}
+            <ToggleableImageInput
               label="Logo:"
-              value={state?.logo || ""}
-              onChange={(value) => handleFieldChange("logo", value)}
-              placeholder="PowerhouseLogo.jpg"
+              lightValue={state?.logo || ""}
+              darkValue={state?.darkThemeLogo || ""}
+              onLightChange={(value) => handleFieldChange("logo", value)}
+              onDarkChange={(value) => handleFieldChange("darkThemeLogo", value)}
+              lightPlaceholder="PowerhouseLogo.jpg"
+              darkPlaceholder="PowerhouseLogoDark.jpg"
               fileSize="2MB"
             />
 

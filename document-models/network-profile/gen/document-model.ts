@@ -3,9 +3,9 @@ import type { DocumentModelGlobalState } from "document-model";
 export const documentModel: DocumentModelGlobalState = {
   id: "powerhouse/network-profile",
   name: "Network Profile",
-  extension: ".phdm",
+  extension: "",
   description:
-    "Document model for managing network profile information including social media links and branding",
+    "Document model for managing network profile information including social media links and branding and logos.",
   author: {
     name: "Powerhouse",
     website: "https://www.powerhouse.inc/",
@@ -17,9 +17,9 @@ export const documentModel: DocumentModelGlobalState = {
       state: {
         global: {
           schema:
-            "enum NetworkCategory {\n  DEFI\n  OSS\n  CRYPTO\n  NGO\n  CHARITY\n}\n\ntype NetworkProfileState {\n  name: String!\n  icon: String!\n  logo: String!\n  logoBig: String!\n  website: String\n  description: String!\n  category: [NetworkCategory!]!\n  x: String\n  github: String\n  discord: String\n  youtube: String\n}",
+            "enum NetworkCategory {\n  DEFI\n  OSS\n  CRYPTO\n  NGO\n  CHARITY\n}\n\ntype NetworkProfileState {\n  name: String!\n  icon: String!\n  darkThemeIcon: String!\n  logo: String!\n  darkThemeLogo: String!\n  logoBig: String!\n  website: String\n  description: String!\n  category: [NetworkCategory!]!\n  x: String\n  github: String\n  discord: String\n  youtube: String\n}",
           initialValue:
-            '"{\\n  \\"name\\": \\"\\",\\n  \\"icon\\": \\"\\",\\n  \\"logo\\": \\"\\",\\n  \\"logoBig\\": \\"\\",\\n  \\"website\\": null,\\n  \\"description\\": \\"\\",\\n  \\"category\\": [],\\n  \\"x\\": null,\\n  \\"github\\": null,\\n  \\"discord\\": null,\\n  \\"youtube\\": null\\n}"',
+            '"{\\n  \\"name\\": \\"\\",\\n  \\"icon\\": \\"\\",\\n  \\"darkThemeIcon\\": \\"\\",\\n  \\"logo\\": \\"\\",\\n  \\"darkThemeLogo\\": \\"\\",\\n  \\"logoBig\\": \\"\\",\\n  \\"website\\": null,\\n  \\"description\\": \\"\\",\\n  \\"category\\": [],\\n  \\"x\\": null,\\n  \\"github\\": null,\\n  \\"discord\\": null,\\n  \\"youtube\\": null\\n}"',
           examples: [],
         },
         local: {
@@ -39,7 +39,8 @@ export const documentModel: DocumentModelGlobalState = {
               id: "SET_ICON",
               name: "SET_ICON",
               description: "Sets the icon for the network profile",
-              schema: "input SetIconInput {\n  icon: String!\n}",
+              schema:
+                "input SetIconInput {\n  icon: String\n  darkThemeIcon: String\n}",
               template: "Sets the icon for the network profile",
               reducer: "state.icon = action.input.icon || null;",
               errors: [],
@@ -50,7 +51,8 @@ export const documentModel: DocumentModelGlobalState = {
               id: "SET_LOGO",
               name: "SET_LOGO",
               description: "Sets the logo for the network profile",
-              schema: "input SetLogoInput {\n  logo: String!\n}",
+              schema:
+                "input SetLogoInput {\n  logo: String\n  darkThemeLogo: String\n}",
               template: "Sets the logo for the network profile",
               reducer: "state.logo = action.input.logo || null;",
               errors: [],

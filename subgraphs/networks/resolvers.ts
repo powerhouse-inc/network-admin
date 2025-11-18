@@ -111,7 +111,9 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             network: {
               name: state.name,
               icon: state.icon,
+              darkThemeIcon: state.darkThemeIcon ?? null,
               logo: state.logo,
+              darkThemeLogo: state.darkThemeLogo ?? null,
               logoBig: state.logoBig,
               website: state.website ?? null,
               description: state.description,

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type {
+  NetworkCategory,
   NetworkProfileState,
   SetCategoryInput,
   SetDescriptionInput,
@@ -41,6 +42,8 @@ export function NetworkProfileStateSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("NetworkProfileState").optional(),
     category: z.array(NetworkCategorySchema),
+    darkThemeIcon: z.string(),
+    darkThemeLogo: z.string(),
     description: z.string(),
     discord: z.string().nullable(),
     github: z.string().nullable(),
@@ -88,7 +91,8 @@ export function SetGithubInputSchema(): z.ZodObject<
 
 export function SetIconInputSchema(): z.ZodObject<Properties<SetIconInput>> {
   return z.object({
-    icon: z.string(),
+    darkThemeIcon: z.string().nullish(),
+    icon: z.string().nullish(),
   });
 }
 
@@ -102,7 +106,8 @@ export function SetLogoBigInputSchema(): z.ZodObject<
 
 export function SetLogoInputSchema(): z.ZodObject<Properties<SetLogoInput>> {
   return z.object({
-    logo: z.string(),
+    darkThemeLogo: z.string().nullish(),
+    logo: z.string().nullish(),
   });
 }
 

@@ -5,9 +5,11 @@ import type { NetworkProfileNetworkProfileManagementOperations } from "@powerhou
 export const networkProfileNetworkProfileManagementOperations: NetworkProfileNetworkProfileManagementOperations = {
     setIconOperation(state: NetworkProfileState, action: SetIconAction) {
         state.icon = action.input.icon || "";
+        state.darkThemeIcon = action.input.darkThemeIcon || "";
     },
     setLogoOperation(state, action) {
         state.logo = action.input.logo || "";
+        state.darkThemeLogo = action.input.darkThemeLogo || "";
     },
     setLogoBigOperation(state, action) {
         state.logoBig = action.input.logoBig || "";

@@ -23,7 +23,9 @@ import {
 export const initialGlobalState: NetworkProfileGlobalState = {
   name: "",
   icon: "",
+  darkThemeIcon: "",
   logo: "",
+  darkThemeLogo: "",
   logoBig: "",
   website: null,
   description: "",
@@ -36,7 +38,7 @@ export const initialGlobalState: NetworkProfileGlobalState = {
 export const initialLocalState: NetworkProfileLocalState = {};
 
 export const utils: DocumentModelUtils<NetworkProfilePHState> = {
-  fileExtension: ".phdm",
+  fileExtension: "",
   createState(state) {
     return {
       ...defaultBaseState(),
