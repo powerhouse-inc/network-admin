@@ -4,6 +4,7 @@ import { NetworkProfileEditor } from "./network-profile/module.js";
 import { PaymentTermsEditor } from "./payment-terms/module.js";
 import { RequestForProposalsEditor } from "./request-for-proposals/module.js";
 import { WorkstreamEditor } from "./workstream/module.js";
+import { Builders } from "./builders/module.js";
 
 export const editors: EditorModule[] = [
   NetworkAdmin,
@@ -11,4 +12,5 @@ export const editors: EditorModule[] = [
   PaymentTermsEditor,
   RequestForProposalsEditor,
   WorkstreamEditor,
+  Builders,
 ];

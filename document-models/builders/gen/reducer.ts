@@ -1,0 +1,48 @@
+// TODO: remove eslint-disable rules once refactor is done
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+import type { StateReducer } from "document-model";
+import { isDocumentAction, createReducer } from "document-model/core";
+import type { BuildersPHState } from "@powerhousedao/network-admin/document-models/builders";
+
+import { buildersBuildersOperations } from "../src/reducers/builders.js";
+
+import {
+  AddBuilderInputSchema,
+  RemoveBuilderInputSchema,
+} from "./schema/zod.js";
+
+const stateReducer: StateReducer<BuildersPHState> = (
+  state,
+  action,
+  dispatch,
+) => {
+  if (isDocumentAction(action)) {
+    return state;
+  }
+
+  switch (action.type) {
+    case "ADD_BUILDER":
+      AddBuilderInputSchema().parse(action.input);
+      buildersBuildersOperations.addBuilderOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "REMOVE_BUILDER":
+      RemoveBuilderInputSchema().parse(action.input);
+      buildersBuildersOperations.removeBuilderOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    default:
+      return state;
+  }
+};
+
+export const reducer = createReducer<BuildersPHState>(stateReducer);

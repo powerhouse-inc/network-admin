@@ -36,6 +36,8 @@ import {
   editClientInfo,
   editWorkstream,
 } from "../../../document-models/workstream/gen/creators.js";
+import Builders from "./builders.js";
+import type { BuildersDocument } from "../../../document-models/builders/index.js";
 
 const WorkstreamStatusEnums = [
   "RFP_DRAFT",
@@ -84,7 +86,8 @@ export function DriveExplorer({ children }: EditorProps) {
       doc.header.documentType === "powerhouse/workstream" ||
       doc.header.documentType === "powerhouse/scopeofwork" ||
       doc.header.documentType === "powerhouse/rfp" ||
-      doc.header.documentType === "payment-terms"
+      doc.header.documentType === "payment-terms" ||
+      doc.header.documentType === "powerhouse/builders"
   );
 
   //check if network profile doc is created, set isNetworkProfileCreated to true
@@ -115,6 +118,9 @@ export function DriveExplorer({ children }: EditorProps) {
     const networkProfileDocs = (networkAdminDocuments?.filter(
       (doc) => doc.header.documentType === "powerhouse/network-profile"
     ) ?? []) as NetworkProfileDocument[];
+    const [buildersDoc] = (networkAdminDocuments?.filter(
+      (doc) => doc.header.documentType === "powerhouse/builders"
+    ) ?? []) as BuildersDocument[];
 
     const workstreamsNode: SidebarNode = {
       id: "workstreams",
@@ -277,7 +283,13 @@ export function DriveExplorer({ children }: EditorProps) {
       ],
     };
 
-    return [workstreamsNode, networkInfoNode];
+    const buildersNode: SidebarNode = {
+      id: `editor-${buildersDoc?.header.id}`,
+      title: "Builders",
+      children: [],
+    };
+
+    return [workstreamsNode, networkInfoNode, buildersNode];
   }, [networkAdminDocuments]);
 
   // Handle sidebar node selection
@@ -316,6 +328,7 @@ export function DriveExplorer({ children }: EditorProps) {
         setSelectedRootNode("network-information");
         // Handle network information display
       } else if (newNode.id.startsWith("editor-")) {
+        createBuildersDocument();
         // Extract file ID from editor-{file.id} format
         const fileId = newNode.id.replace("editor-", "");
         setSelectedNode(fileId);
@@ -344,7 +357,6 @@ export function DriveExplorer({ children }: EditorProps) {
     const networkProfileDoc = networkAdminDocuments?.find(
       (doc) => doc.header.documentType === "powerhouse/network-profile"
     ) as NetworkProfileDocument | undefined;
-
     switch (nodeType) {
       case "workstreams":
         return (
@@ -355,42 +367,43 @@ export function DriveExplorer({ children }: EditorProps) {
                   Welcome to the Network Admin
                 </h1>
                 {/* Card to display the network profile */}
-                {isNetworkProfileCreated && networkProfileDoc?.state.global.logo && (
-                  <div className="bg-white rounded-lg shadow-md border border-gray-300 p-4 max-w-lg mx-auto text-sm">
-                    <div className="flex items-start justify-between gap-4">
-                      {networkProfileDoc?.state.global.logo ? (
-                        <img
-                          src={networkProfileDoc?.state.global.logo}
-                          alt="Network Profile Logo"
-                          className="mb-4 max-w-64 max-h-12 w-auto h-auto object-contain flex-shrink-0"
-                        />
-                      ) : (
-                        <div></div>
-                      )}
-                      <div className="flex flex-wrap gap-2 justify-end flex-shrink-0">
-                        {networkProfileDoc?.state.global.category.map(
-                          (category) => (
-                            <span
-                              key={category}
-                              className={`inline-flex items-center justify-center rounded-md w-fit whitespace-nowrap shrink-0 border-2 px-2 py-0 text-sm font-extrabold ${
-                                category.toLowerCase() === "oss"
-                                  ? "bg-purple-600/30 text-purple-600 border-purple-600/70"
-                                  : category.toLowerCase() === "defi"
-                                    ? "bg-blue-600/30 text-blue-600 border-blue-600/70"
-                                    : "bg-gray-500/30 text-gray-500 border-gray-500/70"
-                              }`}
-                            >
-                              {category}
-                            </span>
-                          )
+                {isNetworkProfileCreated &&
+                  networkProfileDoc?.state.global.logo && (
+                    <div className="bg-white rounded-lg shadow-md border border-gray-300 p-4 max-w-lg mx-auto text-sm">
+                      <div className="flex items-start justify-between gap-4">
+                        {networkProfileDoc?.state.global.logo ? (
+                          <img
+                            src={networkProfileDoc?.state.global.logo}
+                            alt="Network Profile Logo"
+                            className="mb-4 max-w-64 max-h-12 w-auto h-auto object-contain flex-shrink-0"
+                          />
+                        ) : (
+                          <div></div>
                         )}
+                        <div className="flex flex-wrap gap-2 justify-end flex-shrink-0">
+                          {networkProfileDoc?.state.global.category.map(
+                            (category) => (
+                              <span
+                                key={category}
+                                className={`inline-flex items-center justify-center rounded-md w-fit whitespace-nowrap shrink-0 border-2 px-2 py-0 text-sm font-extrabold ${
+                                  category.toLowerCase() === "oss"
+                                    ? "bg-purple-600/30 text-purple-600 border-purple-600/70"
+                                    : category.toLowerCase() === "defi"
+                                      ? "bg-blue-600/30 text-blue-600 border-blue-600/70"
+                                      : "bg-gray-500/30 text-gray-500 border-gray-500/70"
+                                }`}
+                              >
+                                {category}
+                              </span>
+                            )
+                          )}
+                        </div>
                       </div>
+                      <p className="mt-4">
+                        {networkProfileDoc?.state.global.description}
+                      </p>
                     </div>
-                    <p className="mt-4">
-                      {networkProfileDoc?.state.global.description}
-                    </p>
-                  </div>
-                )}
+                  )}
                 <div className="flex flex-wrap gap-3 justify-center">
                   <Button
                     color="dark" // Customize button appearance
@@ -620,6 +633,39 @@ export function DriveExplorer({ children }: EditorProps) {
     },
     [selectedDrive?.header.id, modalDocumentType]
   );
+
+  // Create builders document
+  const createBuildersDocument = useCallback(async () => {
+    try {
+      const isCreated = allDocuments?.some(
+        (doc) => doc.header.documentType === "powerhouse/builders"
+      );
+      if (isCreated) {
+        return;
+      } else {
+        console.log("Creating builders document");
+        const node = await addDocument(
+          selectedDrive?.header.id || "",
+          "Builders",
+          "powerhouse/builders",
+          undefined, // creating in root folder
+          undefined,
+          undefined,
+          "builders-editor"
+        );
+
+        if (!node?.id) {
+          console.error("Error creating builders document");
+          return;
+        }
+
+        return node;
+      }
+    } catch (error) {
+      console.error("Failed to create builders document:", error);
+      return null;
+    }
+  }, [selectedDrive?.header.id, allDocuments]);
   // === RENDER ===
   return (
     <SidebarProvider nodes={sidebarNodes}>
