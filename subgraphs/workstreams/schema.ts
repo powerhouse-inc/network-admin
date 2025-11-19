@@ -74,6 +74,8 @@ export const schema: DocumentNode = gql`
     networkId: PHID
     networkSlug: String
     networkName: String
+    networkNames: [String!]
+    workstreamTitle: String
     workstreamStatus: WorkstreamStatus
     workstreamStatuses: [WorkstreamStatus!]
   }
@@ -100,14 +102,41 @@ export const schema: DocumentNode = gql`
   type FullQueryWorkstream {
     code: String
     title: String
+    slug: String
     status: WorkstreamStatus
     client: ClientInfo
+    network: Network
     rfp: RFP
     initialProposal: FullProposal
     alternativeProposals: [FullProposal!]!
     sow: SOW_ScopeOfWorkState
     paymentTerms: PT_PaymentTermsState
     paymentRequests: [PHID!]!
+  }
+
+  type Network {
+    name: String!
+    slug: String
+    icon: String!
+    darkThemeIcon: String!
+    logo: String!
+    darkThemeLogo: String!
+    logoBig: String!
+    website: String
+    description: String!
+    category: [NetworkCategory!]!
+    x: String
+    github: String
+    discord: String
+    youtube: String
+  }
+
+  enum NetworkCategory {
+    DEFI
+    OSS
+    CRYPTO
+    NGO
+    CHARITY
   }
 
   type WorkstreamRfp {

@@ -4,6 +4,9 @@ import {
   type RequestForProposalsDocument,
 } from "../../document-models/request-for-proposals/index.js";
 import { type WorkstreamDocument } from "../../document-models/workstream/index.js";
+import type { NetworkProfileDocument } from "../../document-models/network-profile/index.js";
+import { sql, type ExpressionBuilder } from "kysely";
+import type { DB } from "../../processors/workstreams/schema.js";
 
 type WorkstreamFilterArgs = {
   workstreamId?: string | null;
@@ -19,6 +22,8 @@ type WorkstreamsFilterArgs = {
   networkId?: string | null;
   networkSlug?: string | null;
   networkName?: string | null;
+  networkNames?: (string | null)[] | null;
+  workstreamTitle?: string | null;
   workstreamStatus?: string | null;
   workstreamStatuses?: (string | null)[] | null;
 };
@@ -102,6 +107,39 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     }
   };
 
+  const loadNetworkProfile = async (
+    networkId?: string | null,
+  ) => {
+    if (!networkId) {
+      return null;
+    }
+
+    try {
+      const networkDoc =
+        await reactor.getDocument<NetworkProfileDocument>(networkId);
+      const state = networkDoc.state.global as any;
+
+      return {
+        name: state.name || "",
+        slug: state.name ? state.name.toLowerCase().trim().split(/\s+/).join("-") : null,
+        icon: state.icon || "",
+        darkThemeIcon: state.darkThemeIcon || "",
+        logo: state.logo || "",
+        darkThemeLogo: state.darkThemeLogo || "",
+        logoBig: state.logoBig || "",
+        website: state.website ?? null,
+        description: state.description || "",
+        category: state.category || [],
+        x: state.x ?? null,
+        github: state.github ?? null,
+        discord: state.discord ?? null,
+        youtube: state.youtube ?? null,
+      };
+    } catch {
+      return null;
+    }
+  };
+
   const hydrateWorkstreamRow = async (row: any) => {
     try {
       const doc = await reactor.getDocument<WorkstreamDocument>(
@@ -133,6 +171,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         altSowDocs,
         altPaymentDocs,
         rfpDetails,
+        networkInfo,
       ] = await Promise.all([
         loadLinkedDocument(state.sow || row.sow_phid || null),
         loadLinkedDocument(state.paymentTerms || null),
@@ -149,6 +188,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           ),
         ),
         loadRfpDetails(state.rfp || null),
+        loadNetworkProfile(state.client?.id || row.network_phid || null),
       ]);
 
       const client =
@@ -160,8 +200,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       return {
         code: state.code || null,
         title: state.title || row.workstream_title || null,
+        slug: state.title ? state.title.toLowerCase().trim().split(/\s+/).join("-") : null,
         status: state.status || row.workstream_status || null,
         client,
+        network: networkInfo || {},
         rfp: rfpDetails,
         initialProposal: initialProposalBase
           ? {
@@ -182,13 +224,17 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         paymentRequests: state.paymentRequests || [],
       };
     } catch {
+      const networkInfo = await loadNetworkProfile(row.network_phid || null);
+      
       return {
         code: row.workstream_title || null,
         title: row.workstream_title || null,
+        slug: row.workstream_slug || null,
         status: row.workstream_status || null,
         client: row.network_phid
           ? { id: row.network_phid, name: row.network_slug, icon: null }
           : null,
+        network: networkInfo || {},
         rfp: null,
         initialProposal: null,
         alternativeProposals: [],
@@ -201,13 +247,26 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
   const applyWorkstreamFilters = (
     qb: any,
-    filters: WorkstreamFilterArgs,
+    filters: WorkstreamFilterArgs | WorkstreamsFilterArgs,
     wantedSlug?: string,
   ) => {
-    if (filters.workstreamId) {
+    // Handle workstreamId and workstreamSlug (from WorkstreamFilter)
+    if ("workstreamId" in filters && filters.workstreamId) {
       qb = qb.where("workstream_phid", "=", filters.workstreamId);
-    } else if (filters.workstreamSlug) {
+    } else if ("workstreamSlug" in filters && filters.workstreamSlug) {
       qb = qb.where("workstream_slug", "=", filters.workstreamSlug);
+    }
+
+    // Handle workstreamTitle filter (from WorkstreamsFilter)
+    if ("workstreamTitle" in filters && filters.workstreamTitle) {
+      // Use case-insensitive partial match for workstream title
+      // Filter out NULL values and do case-insensitive search
+      const searchPattern = `%${filters.workstreamTitle.toLowerCase()}%`;
+      qb = qb
+        .where("workstream_title", "is not", null)
+        .where((eb: ExpressionBuilder<DB, "workstreams">) =>
+          eb(sql`LOWER(workstream_title)`, "like", searchPattern)
+        );
     }
 
     if (filters.networkId) {
@@ -216,6 +275,15 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       qb = qb.where("network_slug", "=", filters.networkSlug);
     } else if (filters.networkName && wantedSlug) {
       qb = qb.where("network_slug", "=", wantedSlug);
+    } else if ("networkNames" in filters && filters.networkNames) {
+      // Handle networkNames filter (from WorkstreamsFilter)
+      const networkSlugs = filters.networkNames
+        .filter((name): name is string => Boolean(name))
+        .map((name) => deriveSlug(name));
+      
+      if (networkSlugs.length > 0) {
+        qb = qb.where("network_slug", "in", networkSlugs as any);
+      }
     }
 
     const statuses = (filters.workstreamStatuses || []).filter(
@@ -331,6 +399,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           filters.networkId ||
           filters.networkSlug ||
           filters.networkName ||
+          (filters.networkNames && filters.networkNames.length > 0) ||
+          filters.workstreamTitle ||
           filters.workstreamStatus ||
           (filters.workstreamStatuses &&
             filters.workstreamStatuses.length > 0);
@@ -348,14 +418,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
           // Only apply filters if any are provided
           if (hasFilters) {
-            const filterArgs: WorkstreamFilterArgs = {
-              networkId: filters.networkId,
-              networkSlug: filters.networkSlug,
-              networkName: filters.networkName,
-              workstreamStatus: filters.workstreamStatus,
-              workstreamStatuses: filters.workstreamStatuses,
-            };
-            qb = applyWorkstreamFilters(qb, filterArgs, wantedSlug);
+            qb = applyWorkstreamFilters(qb, filters, wantedSlug);
           }
 
           const rows = await qb.execute();
