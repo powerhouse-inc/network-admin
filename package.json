@@ -1,7 +1,7 @@
 {
   "name": "@powerhousedao/network-admin",
   "description": "Network Admin package for Powerhouse",
-  "version": "0.0.47",
+  "version": "0.0.48",
   "license": "AGPL-3.0-only",
   "type": "module",
   "files": [
