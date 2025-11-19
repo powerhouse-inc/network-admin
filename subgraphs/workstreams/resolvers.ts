@@ -120,16 +120,16 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       const state = networkDoc.state.global as any;
 
       return {
-        name: state.name || "",
+        name: state.name ?? null,
         slug: state.name ? state.name.toLowerCase().trim().split(/\s+/).join("-") : null,
-        icon: state.icon || "",
-        darkThemeIcon: state.darkThemeIcon || "",
-        logo: state.logo || "",
-        darkThemeLogo: state.darkThemeLogo || "",
-        logoBig: state.logoBig || "",
+        icon: state.icon ?? null,
+        darkThemeIcon: state.darkThemeIcon ?? null,
+        logo: state.logo ?? null,
+        darkThemeLogo: state.darkThemeLogo ?? null,
+        logoBig: state.logoBig ?? null,
         website: state.website ?? null,
-        description: state.description || "",
-        category: state.category || [],
+        description: state.description ?? null,
+        category: Array.isArray(state.category) ? state.category : null,
         x: state.x ?? null,
         github: state.github ?? null,
         discord: state.discord ?? null,
@@ -203,7 +203,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         slug: state.title ? state.title.toLowerCase().trim().split(/\s+/).join("-") : null,
         status: state.status || row.workstream_status || null,
         client,
-        network: networkInfo || {},
+        network: networkInfo,
         rfp: rfpDetails,
         initialProposal: initialProposalBase
           ? {
@@ -234,7 +234,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         client: row.network_phid
           ? { id: row.network_phid, name: row.network_slug, icon: null }
           : null,
-        network: networkInfo || {},
+        network: networkInfo,
         rfp: null,
         initialProposal: null,
         alternativeProposals: [],

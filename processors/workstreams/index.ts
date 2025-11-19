@@ -85,8 +85,8 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
       await this.relationalDb
         .insertInto("workstreams")
         .values({
-          network_phid: strand.state.client.id,
-          network_slug: strand.state.client.name ? strand.state.client.name.toLowerCase().split(' ').join("-") : null,
+          network_phid: strand.state.client?.id ? strand.state.client.id : null,
+          network_slug: strand.state.client?.name ? strand.state.client.name.toLowerCase().split(' ').join("-") : null,
           workstream_phid: strand.documentId,
           workstream_slug: strand.state.title ? strand.state.title.toLowerCase().split(' ').join("-") : "",
           workstream_title: strand.state.title,
