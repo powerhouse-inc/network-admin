@@ -1,5 +1,5 @@
 import { RelationalDbProcessor } from "document-drive";
-import type { InternalTransmitterUpdate, InternalOperationUpdate, } from "document-drive";
+import type { InternalTransmitterUpdate, InternalOperationUpdate, DeleteNodeAction, } from "document-drive";
 import type { EditInitialProposalInput, EditClientInfoInput, EditWorkstreamInput } from "@powerhousedao/network-admin/document-models/workstream";
 import { up } from "./migrations.js";
 import type { DB } from "./schema.js";
@@ -9,6 +9,8 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
     // Default namespace: `${this.name}_${driveId.replaceAll("-", "_")}`
     return super.getNamespace(driveId);
   }
+
+  workstreams: string[] = []
 
   override async initAndUpgrade(): Promise<void> {
     await up(this.relationalDb);
@@ -29,13 +31,24 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
       if (strand.documentType === "powerhouse/workstream") {
         this.setWorkstream(strand)
       }
-      // console.log("strand", { documentType: strand.documentType, docId: strand.documentId, state: strand.state });
+
+      // console.log("strand", { documentType: strand.documentType, docId: strand.documentId });
 
       for (const operation of strand.operations) {
         if (strand.documentType === "powerhouse/workstream") {
           this.updateWorkstream(strand, operation)
           this.updateNetworkInWorkstream(strand, operation)
           this.updateInitialProposalInWorkstream(strand, operation)
+        }
+        if (strand.documentType === "powerhouse/document-drive") {
+          if(operation.action.type === "DELETE_NODE") {
+            const castAction = operation.action as DeleteNodeAction;
+            console.log("deleting workstream node", (castAction.input.id))
+            const foundWorkstream = this.workstreams.find(ws => ws === castAction.input.id);
+            if(foundWorkstream) {
+              await this.relationalDb.deleteFrom("workstreams").where("workstream_phid", "=", foundWorkstream).execute();
+            }
+          }
         }
       }
     }
@@ -67,21 +80,22 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
     console.log("existingWorkstreamPhids", existingWorkstreamPhids)
     if (existingWorkstreamPhids.length === 0) {
       console.log('No workstream id found, inserting new one', docId)
+      this.workstreams.push(docId)
       // insert network id
       await this.relationalDb
         .insertInto("workstreams")
         .values({
-          // network_phid: strand.state.client.id,
-          // network_slug: strand.state.client.name.toLowerCase().split(' ').join("-"),
+          network_phid: strand.state.client.id,
+          network_slug: strand.state.client.name.toLowerCase().split(' ').join("-"),
           workstream_phid: strand.documentId,
           workstream_slug: strand.state.title ? strand.state.title.toLowerCase().split(' ').join("-") : "",
           workstream_title: strand.state.title,
           workstream_status: strand.state.status,
-          // sow_phid: strand.state.sow,
+          sow_phid: strand.state.initialProposal ? strand.state.initialProposal.sow : null,
           // roadmap_oid: "which roadmmap Id ? there's many roadmaps in a sow doc",
           // final_milestone_target: new Date(),
-          // initial_proposal_status: strand.state.initialProposal.status,
-          // initial_proposal_author: strand.state.initialProposal.author.name
+          initial_proposal_status: strand.state.initialProposal ? strand.state.initialProposal.status : null,
+          initial_proposal_author: strand.state.initialProposal ? strand.state.initialProposal.author.name : null
         })
         .onConflict((oc) => oc.column("workstream_phid").doNothing())
         .execute();
@@ -111,9 +125,11 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
         const updateData: any = {};
         if (input.sowId) {
           updateData.sow_phid = input.sowId;
+          updateData.initial_proposal_status = "DRAFT";
         }
         if (input.proposalAuthor) {
           updateData.initial_proposal_author = input.proposalAuthor.name;
+          updateData.initial_proposal_status = "DRAFT";
         }
         if (input.status) {
           updateData.initial_proposal_status = input.status;
