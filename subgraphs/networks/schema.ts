@@ -6,9 +6,12 @@ export const schema: DocumentNode = gql`
   Subgraph definition
   """
   type Query {
-    allNetworks: [AllNetworks!]!
+    allNetworks(filter: networkFilter): [AllNetworks!]!
   }
 
+  input networkFilter {
+    networkSlug: String
+  }
 
   type AllNetworks {
     id: PHID
@@ -19,6 +22,7 @@ export const schema: DocumentNode = gql`
 
   type Network {
     name: String!
+    slug: String
     icon: String!
     darkThemeIcon: String!
     logo: String!

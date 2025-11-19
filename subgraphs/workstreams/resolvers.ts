@@ -297,7 +297,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           filters.networkSlug ||
           (filters.networkName ? deriveSlug(filters.networkName) : undefined);
 
-        let resolved: any = null;
+        let resolved: any[] = [];
         for (const driveId of candidateDrives) {
           let qb = WorkstreamsProcessor.query(driveId, db)
             .selectFrom("workstreams")
@@ -305,11 +305,15 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
           qb = applyWorkstreamFilters(qb, filters, wantedSlug);
 
-          const row = await qb.executeTakeFirst();
+          const rows = await qb.execute();
+          if (rows.length === 0) {
+            continue;
+          }
 
-          if (!row) continue;
-
-          resolved = await hydrateWorkstreamRow(row);
+          for (const row of rows) {
+            const hydrated = await hydrateWorkstreamRow(row);
+            resolved.push(hydrated);
+          }
           break;
         }
 
@@ -321,7 +325,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       ) => {
         const filters = args.filter || {};
         const candidateDrives = await getCandidateDrives();
-        
+
         // Check if any filters are provided
         const hasFilters =
           filters.networkId ||

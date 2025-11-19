@@ -8,7 +8,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
 
   return {
     Query: {
-      allNetworks: async () => {
+      allNetworks: async (_: unknown, args: { filter?: { networkSlug?: string } }) => {
         const drives = await reactor.getDrives();
 
         // Step 1: Collect all network profile documents and builders documents with their drive IDs
@@ -85,14 +85,14 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
           const state = (doc.state as any).global;
           return {
             id: doc.header.id,
-            name: state?.name || doc.header.id,
+            name: state?.name || doc.header.name,
             icon: state?.icon || "",
             description: state?.description || state?.slug || "",
           };
         };
 
         // Step 6: Map each network to its builders from the same drive
-        return networkDocsWithDriveId.map(({ doc, driveId }) => {
+        const allNetworks = networkDocsWithDriveId.map(({ doc, driveId }) => {
           const state = doc.state.global;
 
           // Get the BuildersDocument from the same drive as the network
@@ -110,6 +110,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             documentType: doc.header.documentType,
             network: {
               name: state.name,
+              slug: state.name ? state.name.toLowerCase().trim().split(/\s+/).join("-") : null,
               icon: state.icon,
               darkThemeIcon: state.darkThemeIcon ?? null,
               logo: state.logo,
@@ -126,6 +127,16 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             builders: builders,
           };
         });
+
+        // Step 7: Apply filter if provided
+        const networkSlug = args.filter?.networkSlug;
+        if (networkSlug) {
+          return allNetworks.filter(
+            (network) => network.network.slug === networkSlug,
+          );
+        }
+
+        return allNetworks;
       },
     },
   };
