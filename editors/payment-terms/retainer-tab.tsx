@@ -209,6 +209,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
         />
 
         <DatePicker
+          className="bg-white"
           value={formData.timesheetRequired ? new Date() : undefined}
           onChange={() => {
             setFormData({ ...formData, timesheetRequired: true });
@@ -219,6 +220,7 @@ export function RetainerTab({ state, dispatch, actions }: RetainerTabProps) {
         />
 
         <DatePicker
+          className="bg-white"
           value={formData.timesheetRequired ? new Date() : undefined}
           onChange={() => {
             setFormData({ ...formData, timesheetRequired: true });

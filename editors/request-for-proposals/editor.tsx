@@ -144,6 +144,7 @@ export default function Editor() {
               </label>
               <div className="w-[250px]">
                 <DatePicker
+                  className="bg-white"
                   value={state.deadline ? new Date(state.deadline) : undefined}
                   onChange={(e) => {
                     const date = e.target.value

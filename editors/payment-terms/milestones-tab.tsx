@@ -289,6 +289,7 @@ export function MilestonesTab({
               />
 
               <DatePicker
+                className="bg-white"
                 value={
                   newMilestone.expectedCompletionDate
                     ? new Date(newMilestone.expectedCompletionDate)
