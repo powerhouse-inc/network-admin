@@ -5,17 +5,15 @@ import type { NetworkProfileNetworkProfileManagementOperations } from "@powerhou
 export const networkProfileNetworkProfileManagementOperations: NetworkProfileNetworkProfileManagementOperations = {
     setIconOperation(state: NetworkProfileState, action: SetIconAction) {
         state.icon = action.input.icon || "";
-        state.darkThemeIcon = action.input.darkThemeIcon || "";
     },
     setLogoOperation(state, action) {
         state.logo = action.input.logo || "";
-        state.darkThemeLogo = action.input.darkThemeLogo || "";
     },
     setLogoBigOperation(state, action) {
         state.logoBig = action.input.logoBig || "";
     },
     setWebsiteOperation(state, action) {
-        state.website = action.input.website || "";
+        state.website = action.input.website || null;
     },
     setDescriptionOperation(state, action) {
         state.description = action.input.description || "";

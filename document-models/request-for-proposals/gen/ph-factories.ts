@@ -14,10 +14,10 @@ import { createDocument } from "./utils.js";
 export function defaultGlobalState(): RequestForProposalsGlobalState {
   return {
     issuer: "placeholder-id",
-    title: "",
-    briefing: "",
     code: "",
+    title: "",
     summary: "",
+    briefing: "",
     rfpCommenter: [],
     eligibilityCriteria: "",
     evaluationCriteria: "",
