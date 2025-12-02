@@ -14,7 +14,6 @@ export async function up(db: IRelationalDb<any>): Promise<void> {
       .addColumn('workstream_title', 'varchar(255)')
       .addColumn('workstream_status', 'varchar(255)')
       .addColumn('sow_phid', 'varchar(255)')
-      .addColumn('roadmap_oid', 'varchar(255)')
       .addColumn('final_milestone_target', 'timestamp')
       .addColumn('initial_proposal_status', 'varchar(255)')
       .addColumn('initial_proposal_author', 'varchar(255)')
