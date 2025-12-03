@@ -619,7 +619,7 @@ export default function Editor() {
             dispatch(
               actions.editAlternativeProposal({
                 id: context.row.id as string,
-                sowId: newValue as string,
+                sowId: newValue as string || null,
               })
             );
             return true;
@@ -641,7 +641,7 @@ export default function Editor() {
                   dispatch(
                     actions.editAlternativeProposal({
                       id: context.row.id as string,
-                      sowId: e.target.value as string,
+                      sowId: e.target.value as string || null,
                     })
                   );
                 }
@@ -693,7 +693,7 @@ export default function Editor() {
             dispatch(
               actions.editAlternativeProposal({
                 id: context.row.id as string,
-                paymentTermsId: newValue as string,
+                paymentTermsId: newValue as string || null,
               })
             );
             return true;
@@ -715,7 +715,7 @@ export default function Editor() {
                   dispatch(
                     actions.editAlternativeProposal({
                       id: context.row.id as string,
-                      paymentTermsId: e.target.value as string,
+                      paymentTermsId: e.target.value as string || null,
                     })
                   );
                 }
@@ -1177,7 +1177,7 @@ export default function Editor() {
                           dispatch(
                             actions.editInitialProposal({
                               id: state.initialProposal?.id || "",
-                              sowId: e.target.value,
+                              sowId: e.target.value || null,
                             })
                           );
                         }
@@ -1287,7 +1287,7 @@ export default function Editor() {
                           dispatch(
                             actions.editInitialProposal({
                               id: state.initialProposal?.id || "",
-                              paymentTermsId: e.target.value,
+                              paymentTermsId: e.target.value || null,
                             })
                           );
                         }

@@ -173,9 +173,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         rfpDetails,
         networkInfo,
       ] = await Promise.all([
-        loadLinkedDocument(state.sow || row.sow_phid || null),
+        // Use document state as source of truth - don't fallback to DB
+        loadLinkedDocument(state.sow || null),
         loadLinkedDocument(state.paymentTerms || null),
-        loadLinkedDocument(state.initialProposal?.sow || row.sow_phid || null),
+        loadLinkedDocument(state.initialProposal?.sow || null),
         loadLinkedDocument(state.initialProposal?.paymentTerms || null),
         Promise.all(
           (state.alternativeProposals || []).map((p: any) =>

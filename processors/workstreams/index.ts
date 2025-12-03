@@ -1,6 +1,6 @@
 import { RelationalDbProcessor } from "document-drive";
 import type { InternalTransmitterUpdate, InternalOperationUpdate, DeleteNodeAction, } from "document-drive";
-import type { EditInitialProposalInput, EditClientInfoInput, EditWorkstreamInput } from "@powerhousedao/network-admin/document-models/workstream";
+import type { EditInitialProposalInput, EditClientInfoInput, EditWorkstreamInput, EditAlternativeProposalInput, Proposal } from "@powerhousedao/network-admin/document-models/workstream";
 import { up } from "./migrations.js";
 import type { DB } from "./schema.js";
 
@@ -39,13 +39,14 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
           this.updateWorkstream(strand, operation)
           this.updateNetworkInWorkstream(strand, operation)
           this.updateInitialProposalInWorkstream(strand, operation)
+          this.updateSowFromAlternativeProposal(strand, operation)
         }
         if (strand.documentType === "powerhouse/document-drive") {
-          if(operation.action.type === "DELETE_NODE") {
+          if (operation.action.type === "DELETE_NODE") {
             const castAction = operation.action as DeleteNodeAction;
             console.log("deleting workstream node", (castAction.input.id))
             const foundWorkstream = this.workstreams.find(ws => ws === castAction.input.id);
-            if(foundWorkstream) {
+            if (foundWorkstream) {
               await this.relationalDb.deleteFrom("workstreams").where("workstream_phid", "=", foundWorkstream).execute();
             }
           }
@@ -77,7 +78,6 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
       .where("workstream_phid", "=", docId)
       .execute();
 
-    console.log("existingWorkstreamPhids", existingWorkstreamPhids)
     if (existingWorkstreamPhids.length === 0) {
       console.log('No workstream id found, inserting new one', docId)
       this.workstreams.push(docId)
@@ -92,7 +92,6 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
           workstream_title: strand.state.title,
           workstream_status: strand.state.status,
           sow_phid: strand.state.initialProposal ? strand.state.initialProposal.sow : null,
-          // roadmap_oid: "which roadmmap Id ? there's many roadmaps in a sow doc",
           // final_milestone_target: new Date(),
           initial_proposal_status: strand.state.initialProposal ? strand.state.initialProposal.status : null,
           initial_proposal_author: strand.state.initialProposal ? strand.state.initialProposal.author.name : null
@@ -123,18 +122,21 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
 
         // Build update object with only defined values
         const updateData: any = {};
-        if (input.sowId) {
-          updateData.sow_phid = input.sowId;
-          updateData.initial_proposal_status = "DRAFT";
+        // Check for undefined, not truthiness - allows null to pass through
+        if (input.sowId !== undefined) {
+          if (strand.state.initialProposal?.status === "ACCEPTED") {
+            updateData.sow_phid = strand.state.initialProposal?.sow || null;
+          }
         }
         if (input.proposalAuthor) {
           updateData.initial_proposal_author = input.proposalAuthor.name;
-          updateData.initial_proposal_status = "DRAFT";
         }
         if (input.status) {
           updateData.initial_proposal_status = input.status;
+          if (input.status === "ACCEPTED") {
+            updateData.sow_phid = strand.state.initialProposal?.sow || null;
+          }
         }
-
         // Only execute update if there are fields to update
         if (Object.keys(updateData).length > 0) {
           await this.relationalDb
@@ -145,7 +147,57 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
         }
 
       }
+    }
+  }
 
+  updateSowFromAlternativeProposal = async (strand: InternalTransmitterUpdate, operation: InternalOperationUpdate) => {
+    const docId = strand.documentId;
+    const existingWorkstreamPhids = await this.relationalDb
+      .selectFrom("workstreams")
+      .select("workstream_phid")
+      .where("workstream_phid", "=", docId)
+      .execute();
+
+    const [foundWorkstreamId] = existingWorkstreamPhids;
+
+    if (foundWorkstreamId) {
+      // update existing workstream row
+      if (operation.action.type === 'EDIT_ALTERNATIVE_PROPOSAL') {
+
+        const input = operation.action.input as EditAlternativeProposalInput;
+        if (!input) return;
+
+        console.log('updating sow from alternative proposal in workstream', operation.action.input)
+
+        // Build update object with only defined values
+        const updateData: any = {};
+
+        const selectedAlternativeProposal = strand.state.alternativeProposals.find((proposal: Proposal) => proposal.id === input.id);
+
+        if (selectedAlternativeProposal) {
+          // Check for undefined, not truthiness - allows null to pass through
+          if (input.sowId !== undefined) {
+            if (selectedAlternativeProposal.status === "ACCEPTED") {
+              updateData.sow_phid = selectedAlternativeProposal.sow || null;
+            }
+          }
+
+          if (input.status) {
+            if (input.status === "ACCEPTED") {
+              updateData.sow_phid = selectedAlternativeProposal.sow || null;
+            }
+          }
+        }
+        // Only execute update if there are fields to update
+        if (Object.keys(updateData).length > 0) {
+          await this.relationalDb
+            .updateTable('workstreams')
+            .set(updateData)
+            .where("workstream_phid", "=", docId)
+            .execute();
+        }
+
+      }
     }
   }
 
