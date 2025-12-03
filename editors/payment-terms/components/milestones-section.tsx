@@ -340,7 +340,6 @@ export function MilestonesSection({
                 { value: "REJECTED", label: "Rejected" },
               ]}
               onChange={(e) => {
-                console.log("onChange", e);
                 dispatch(
                   actions.updateMilestoneStatus({
                     id: context.row.id,

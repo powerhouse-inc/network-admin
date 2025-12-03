@@ -55,15 +55,17 @@ export function ClausesSection({
           }
           return false;
         },
-        renderCell: (value: string) => {
-          if (!value) {
+        renderCell: (value: string, context) => {
+          // Use context.row to get the latest state value
+          const condition = context.row.condition;
+          if (!condition) {
             return (
               <span className="text-slate-400 italic">
                 + Double-click to add bonus clause
               </span>
             );
           }
-          return <span>{value}</span>;
+          return <span>{condition}</span>;
         },
       },
       {
@@ -78,7 +80,8 @@ export function ClausesSection({
           if (!context.row.condition) {
             return null;
           }
-          const numValue = value?.value;
+          // Use context.row to get the latest state value
+          const numValue = context.row.bonusAmount?.value;
           if (numValue === undefined || numValue === null) {
             return <span className="text-slate-400">—</span>;
           }
@@ -88,34 +91,45 @@ export function ClausesSection({
                 +{numValue.toLocaleString()}
               </span>
               <span className="text-emerald-500 ml-1">
-                {value?.unit || currency}
+                {context.row.bonusAmount?.unit || currency}
               </span>
             </span>
           );
         },
-        getEditValue: (value: BonusClause["bonusAmount"]) => {
-          if (!value || value.value === undefined || value.value === null) {
-            return "";
-          }
-          return String(value.value);
+        renderCellEditor: (value, onChange, context) => {
+          // Extract numeric value from Amount object
+          const amountValue = context.row.bonusAmount?.value;
+          return (
+            <input
+              className="w-full bg-white border border-gray-300 rounded-md p-2"
+              name={`bonusAmount-${context.row.id}`}
+              defaultValue={amountValue}
+              step="0.01"
+              type="number"
+              onBlur={(e) => {
+                if (
+                  e.target.value !== undefined &&
+                  e.target.value !== String(context.row.bonusAmount?.value)
+                ) {
+                  const amount = parseFloat(e.target.value);
+                  if (!isNaN(amount)) {
+                    dispatch(
+                      actions.updateBonusClause({
+                        id: context.row.id,
+                        bonusAmount: {
+                          value: amount,
+                          unit: currency,
+                        },
+                      })
+                    );
+                    toast("Amount updated", { type: "success" });
+                  }
+                }
+              }}
+            />
+          );
         },
         onSave: (newValue, context) => {
-          const strValue = String(newValue || "").trim();
-          if (!strValue) {
-            return false;
-          }
-          const amount = parseFloat(strValue);
-          if (isNaN(amount)) {
-            toast("Please enter a valid amount", { type: "error" });
-            return false;
-          }
-          dispatch(
-            actions.updateBonusClause({
-              id: context.row.id,
-              bonusAmount: { value: amount, unit: currency },
-            }),
-          );
-          toast("Amount updated", { type: "success" });
           return true;
         },
       },
@@ -131,7 +145,9 @@ export function ClausesSection({
           if (!context.row.condition) {
             return null;
           }
-          return value || <span className="text-slate-400">—</span>;
+          // Use context.row to get the latest state value
+          const comment = context.row.comment;
+          return comment || <span className="text-slate-400">—</span>;
         },
         onSave: (newValue, context) => {
           dispatch(
@@ -170,15 +186,17 @@ export function ClausesSection({
           }
           return false;
         },
-        renderCell: (value: string) => {
-          if (!value) {
+        renderCell: (value: string, context) => {
+          // Use context.row to get the latest state value
+          const condition = context.row.condition;
+          if (!condition) {
             return (
               <span className="text-slate-400 italic">
                 + Double-click to add penalty clause
               </span>
             );
           }
-          return <span>{value}</span>;
+          return <span>{condition}</span>;
         },
       },
       {
@@ -193,7 +211,8 @@ export function ClausesSection({
           if (!context.row.condition) {
             return null;
           }
-          const numValue = value?.value;
+          // Use context.row to get the latest state value
+          const numValue = context.row.deductionAmount?.value;
           if (numValue === undefined || numValue === null) {
             return <span className="text-slate-400">—</span>;
           }
@@ -203,34 +222,45 @@ export function ClausesSection({
                 -{numValue.toLocaleString()}
               </span>
               <span className="text-rose-500 ml-1">
-                {value?.unit || currency}
+                {context.row.deductionAmount?.unit || currency}
               </span>
             </span>
           );
         },
-        getEditValue: (value: PenaltyClause["deductionAmount"]) => {
-          if (!value || value.value === undefined || value.value === null) {
-            return "";
-          }
-          return String(value.value);
+        renderCellEditor: (value, onChange, context) => {
+          // Extract numeric value from Amount object
+          const amountValue = context.row.deductionAmount?.value;
+          return (
+            <input
+              className="w-full bg-white border border-gray-300 rounded-md p-2"
+              name={`deductionAmount-${context.row.id}`}
+              defaultValue={amountValue}
+              step="0.01"
+              type="number"
+              onBlur={(e) => {
+                if (
+                  e.target.value !== undefined &&
+                  e.target.value !== String(context.row.deductionAmount?.value)
+                ) {
+                  const amount = parseFloat(e.target.value);
+                  if (!isNaN(amount)) {
+                    dispatch(
+                      actions.updatePenaltyClause({
+                        id: context.row.id,
+                        deductionAmount: {
+                          value: amount,
+                          unit: currency,
+                        },
+                      })
+                    );
+                    toast("Amount updated", { type: "success" });
+                  }
+                }
+              }}
+            />
+          );
         },
         onSave: (newValue, context) => {
-          const strValue = String(newValue || "").trim();
-          if (!strValue) {
-            return false;
-          }
-          const amount = parseFloat(strValue);
-          if (isNaN(amount)) {
-            toast("Please enter a valid amount", { type: "error" });
-            return false;
-          }
-          dispatch(
-            actions.updatePenaltyClause({
-              id: context.row.id,
-              deductionAmount: { value: amount, unit: currency },
-            }),
-          );
-          toast("Amount updated", { type: "success" });
           return true;
         },
       },
@@ -246,7 +276,9 @@ export function ClausesSection({
           if (!context.row.condition) {
             return null;
           }
-          return value || <span className="text-slate-400">—</span>;
+          // Use context.row to get the latest state value
+          const comment = context.row.comment;
+          return comment || <span className="text-slate-400">—</span>;
         },
         onSave: (newValue, context) => {
           dispatch(
