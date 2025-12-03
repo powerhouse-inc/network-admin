@@ -125,6 +125,7 @@ export const workstreamProposalsOperations: WorkstreamProposalsOperations = {
         }
       }
       if (input.status !== undefined) {
+        const wasAccepted = proposal.status === "ACCEPTED";
         proposal.status = input.status || "DRAFT";
         // If the alternative proposal is accepted, reject the initial proposal. 
         // There can only be one accepted proposal at a time.
@@ -144,6 +145,19 @@ export const workstreamProposalsOperations: WorkstreamProposalsOperations = {
           if (proposal) {
             state.paymentTerms = proposal.paymentTerms || null; // Normalize empty string to null
             state.sow = proposal.sow || null; // Normalize empty string to null
+          }
+        } else if (wasAccepted) {
+          // If this proposal was previously ACCEPTED and is now being changed to another status,
+          // clear the top-level state unless there's another accepted proposal
+          const hasAcceptedInitialProposal = state.initialProposal?.status === "ACCEPTED";
+          const hasAcceptedAlternativeProposal = state.alternativeProposals.some(
+            (p) => p.status === "ACCEPTED" && p.id !== input.id
+          );
+          
+          // Only clear if no other proposal is accepted
+          if (!hasAcceptedInitialProposal && !hasAcceptedAlternativeProposal) {
+            state.paymentTerms = null;
+            state.sow = null;
           }
         }
       }
@@ -168,7 +182,25 @@ export const workstreamProposalsOperations: WorkstreamProposalsOperations = {
     );
 
     if (proposalIndex > -1) {
+      const proposalToRemove = state.alternativeProposals[proposalIndex];
+      const wasAccepted = proposalToRemove.status === "ACCEPTED";
+      
+      // Remove the proposal
       state.alternativeProposals.splice(proposalIndex, 1);
+      
+      // If the deleted proposal was ACCEPTED, clear top-level state unless there's another accepted proposal
+      if (wasAccepted) {
+        const hasAcceptedInitialProposal = state.initialProposal?.status === "ACCEPTED";
+        const hasAcceptedAlternativeProposal = state.alternativeProposals.some(
+          (p) => p.status === "ACCEPTED"
+        );
+        
+        // Only clear if no other proposal is accepted
+        if (!hasAcceptedInitialProposal && !hasAcceptedAlternativeProposal) {
+          state.paymentTerms = null;
+          state.sow = null;
+        }
+      }
     }
   },
 };

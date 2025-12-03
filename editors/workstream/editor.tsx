@@ -216,15 +216,6 @@ export default function Editor() {
     }
   }, [isCreatingPaymentTerms, selectedDrive?.header.id, state.title, doc.header.id]);
 
-  const getDocumentNameById = useCallback(
-    (documentId: string) => {
-      const document = useDocumentById(documentId);
-      const [documentData] = document || [];
-      return documentData?.header.name || "";
-    },
-    [useDocumentById]
-  );
-
   // Local state to track manual input values
   const [manualAuthorInput, setManualAuthorInput] = useState<string>("");
 
@@ -250,6 +241,15 @@ export default function Editor() {
   }, [state.rfp?.id, newlyCreatedRfpId]);
 
   const allDocuments = useDocumentsInSelectedDrive();
+
+  const getDocumentNameById = useCallback(
+    (documentId: string) => {
+      // Use allDocuments array instead of hooks to avoid violating Rules of Hooks
+      const document = allDocuments?.find((doc: PHDocument) => doc.header.id === documentId);
+      return document?.header.name || "";
+    },
+    [allDocuments]
+  );
 
   let rfpDocumentNode: PHDocument | undefined = undefined;
   if (state.rfp?.id) {
@@ -629,21 +629,66 @@ export default function Editor() {
         renderCellEditor: (value, onChange, context) => {
           const currentValue = (value as string) || "";
           const initialOption = getSowOptionById(currentValue);
+          let latestValue = currentValue;
+
+          const handleSave = (valueToSave?: string) => {
+            // Use provided value or fallback to latest tracked value
+            const valueToUse = valueToSave !== undefined ? valueToSave : latestValue;
+            const normalizedValue = (valueToUse as string) || null;
+            const currentRowValue = (context.row.sow as string) || null;
+            
+            if (normalizedValue !== currentRowValue) {
+              onChange(normalizedValue);
+              dispatch(
+                actions.editAlternativeProposal({
+                  id: context.row.id as string,
+                  sowId: normalizedValue as string || null,
+                })
+              );
+            }
+          };
 
           return (
             <PHIDInput
               value={currentValue}
               onChange={(newValue) => {
+                latestValue = (newValue as string) || "";
                 onChange(newValue);
               }}
               onBlur={(e) => {
-                if (e.target.value !== context.row.sow) {
-                  dispatch(
-                    actions.editAlternativeProposal({
-                      id: context.row.id as string,
-                      sowId: e.target.value as string || null,
-                    })
-                  );
+                // Use a small delay to ensure value is set after dropdown closes
+                setTimeout(() => {
+                  const inputValue = (e.target as HTMLInputElement)?.value || latestValue;
+                  handleSave(inputValue);
+                }, 100);
+              }}
+              onKeyDown={async (e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const inputValue = (e.target as HTMLInputElement)?.value || latestValue;
+                  
+                  // Fetch the actual document value from search results instead of using raw input
+                  if (inputValue) {
+                    const searchResults = searchSowDocuments(inputValue) || [];
+                    const foundDoc = searchResults.find(
+                      (doc) => doc.value === inputValue || doc.title.toLowerCase().includes(inputValue.toLowerCase())
+                    ) || searchResults[0];
+                    
+                    if (foundDoc) {
+                      handleSave(foundDoc.value);
+                    } else {
+                      // If no match found, clear the value
+                      handleSave("");
+                    }
+                  } else {
+                    handleSave(""); // Clear if empty
+                  }
+                  
+                  // Blur the input to exit edit mode
+                  setTimeout(() => {
+                    (e.target as HTMLElement)?.blur();
+                  }, 0);
                 }
               }}
               placeholder="Search for SOW Document"
@@ -703,21 +748,66 @@ export default function Editor() {
         renderCellEditor: (value, onChange, context) => {
           const currentValue = (value as string) || "";
           const initialOption = getPaymentTermsOptionById(currentValue);
+          let latestValue = currentValue;
+
+          const handleSave = (valueToSave?: string) => {
+            // Use provided value or fallback to latest tracked value
+            const valueToUse = valueToSave !== undefined ? valueToSave : latestValue;
+            const normalizedValue = (valueToUse as string) || null;
+            const currentRowValue = (context.row.paymentTerms as string) || null;
+            
+            if (normalizedValue !== currentRowValue) {
+              onChange(normalizedValue);
+              dispatch(
+                actions.editAlternativeProposal({
+                  id: context.row.id as string,
+                  paymentTermsId: normalizedValue as string || null,
+                })
+              );
+            }
+          };
 
           return (
             <PHIDInput
               value={currentValue}
               onChange={(newValue) => {
+                latestValue = (newValue as string) || "";
                 onChange(newValue);
               }}
               onBlur={(e) => {
-                if (e.target.value !== context.row.paymentTerms) {
-                  dispatch(
-                    actions.editAlternativeProposal({
-                      id: context.row.id as string,
-                      paymentTermsId: e.target.value as string || null,
-                    })
-                  );
+                // Use a small delay to ensure value is set after dropdown closes
+                setTimeout(() => {
+                  const inputValue = (e.target as HTMLInputElement)?.value || latestValue;
+                  handleSave(inputValue);
+                }, 100);
+              }}
+              onKeyDown={async (e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const inputValue = (e.target as HTMLInputElement)?.value || latestValue;
+                  
+                  // Fetch the actual document value from search results instead of using raw input
+                  if (inputValue) {
+                    const searchResults = searchPaymentTermsDocuments(inputValue) || [];
+                    const foundDoc = searchResults.find(
+                      (doc) => doc.value === inputValue || doc.title.toLowerCase().includes(inputValue.toLowerCase())
+                    ) || searchResults[0];
+                    
+                    if (foundDoc) {
+                      handleSave(foundDoc.value);
+                    } else {
+                      // If no match found, clear the value
+                      handleSave("");
+                    }
+                  } else {
+                    handleSave(""); // Clear if empty
+                  }
+                  
+                  // Blur the input to exit edit mode
+                  setTimeout(() => {
+                    (e.target as HTMLElement)?.blur();
+                  }, 0);
                 }
               }}
               placeholder="Search for Payment Terms Document"
@@ -1387,13 +1477,14 @@ export default function Editor() {
                     allowRowSelection={true}
                     onDelete={(data: Proposal[]) => {
                       if (data.length > 0) {
-                        data.forEach((d: Proposal) => {
-                          dispatch(
+                        // Batch all deletion actions together
+                        dispatch(
+                          data.map((d: Proposal) =>
                             actions.removeAlternativeProposal({
                               id: d.id,
                             })
-                          );
-                        });
+                          )
+                        );
                       }
                     }}
                     onAdd={(data) => {
