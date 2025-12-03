@@ -4,20 +4,29 @@
 const args = process.argv.slice(2);
 
 if (args.length !== 6) {
-  console.error('Usage: bun mirror_sow_state.ts <remote-mcp-url> <remote-sow-id> <remote-drive-id> <local-mcp-url> <local-sow-id> <local-drive-id>');
-  console.error('');
-  console.error('Example:');
-  console.error('  bun mirror_sow_state.ts \\');
-  console.error('    https://switchboard-dev.powerhouse.xyz/mcp \\');
-  console.error('    65f3e7e8-500d-4c42-9e73-8cd5d7966cd8 \\');
-  console.error('    powerhouse-network-admin \\');
-  console.error('    http://localhost:4001/mcp \\');
-  console.error('    3471233d-c481-4214-afe3-c196b5a7778f \\');
-  console.error('    bai-network-admin');
+  console.error(
+    "Usage: bun mirror_sow_state.ts <remote-mcp-url> <remote-sow-id> <remote-drive-id> <local-mcp-url> <local-sow-id> <local-drive-id>",
+  );
+  console.error("");
+  console.error("Example:");
+  console.error("  bun mirror_sow_state.ts \\");
+  console.error("    https://switchboard-dev.powerhouse.xyz/mcp \\");
+  console.error("    65f3e7e8-500d-4c42-9e73-8cd5d7966cd8 \\");
+  console.error("    powerhouse-network-admin \\");
+  console.error("    http://localhost:4001/mcp \\");
+  console.error("    3471233d-c481-4214-afe3-c196b5a7778f \\");
+  console.error("    bai-network-admin");
   process.exit(1);
 }
 
-const [REMOTE_MCP_URL, REMOTE_DOC_ID, REMOTE_DRIVE_ID, LOCAL_MCP_URL, LOCAL_DOC_ID, LOCAL_DRIVE_ID] = args;
+const [
+  REMOTE_MCP_URL,
+  REMOTE_DOC_ID,
+  REMOTE_DRIVE_ID,
+  LOCAL_MCP_URL,
+  LOCAL_DOC_ID,
+  LOCAL_DRIVE_ID,
+] = args;
 
 // Types
 interface MCPRequest {
@@ -38,27 +47,30 @@ interface MCPResponse {
 }
 
 // Helper function to make MCP requests
-async function mcpRequest(url: string, payload: MCPRequest): Promise<MCPResponse> {
+async function mcpRequest(
+  url: string,
+  payload: MCPRequest,
+): Promise<MCPResponse> {
   const response = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json, text/event-stream'
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
 
   const text = await response.text();
 
   // Handle SSE format (event: message\ndata: {...})
-  if (text.includes('event: message')) {
-    const lines = text.split('\n');
-    const dataLine = lines.find(line => line.startsWith('data: '));
+  if (text.includes("event: message")) {
+    const lines = text.split("\n");
+    const dataLine = lines.find((line) => line.startsWith("data: "));
     if (dataLine) {
       const jsonData = dataLine.substring(6);
       return JSON.parse(jsonData);
     }
-    throw new Error('No data line found in SSE response');
+    throw new Error("No data line found in SSE response");
   }
 
   return JSON.parse(text);
@@ -66,15 +78,17 @@ async function mcpRequest(url: string, payload: MCPRequest): Promise<MCPResponse
 
 // Fetch remote document
 async function getRemoteDocument(): Promise<any> {
-  console.log(`Fetching remote document (${REMOTE_DOC_ID}) from drive "${REMOTE_DRIVE_ID}"...`);
+  console.log(
+    `Fetching remote document (${REMOTE_DOC_ID}) from drive "${REMOTE_DRIVE_ID}"...`,
+  );
   const payload: MCPRequest = {
-    jsonrpc: '2.0',
-    method: 'tools/call',
+    jsonrpc: "2.0",
+    method: "tools/call",
     params: {
-      name: 'getDocument',
-      arguments: { id: REMOTE_DOC_ID }
+      name: "getDocument",
+      arguments: { id: REMOTE_DOC_ID },
     },
-    id: 1
+    id: 1,
   };
 
   const response = await mcpRequest(REMOTE_MCP_URL, payload);
@@ -87,15 +101,17 @@ async function getRemoteDocument(): Promise<any> {
 
 // Get current local document state
 async function getLocalDocument(): Promise<any> {
-  console.log(`Fetching local document (${LOCAL_DOC_ID}) from drive "${LOCAL_DRIVE_ID}"...`);
+  console.log(
+    `Fetching local document (${LOCAL_DOC_ID}) from drive "${LOCAL_DRIVE_ID}"...`,
+  );
   const payload: MCPRequest = {
-    jsonrpc: '2.0',
-    method: 'tools/call',
+    jsonrpc: "2.0",
+    method: "tools/call",
     params: {
-      name: 'getDocument',
-      arguments: { id: LOCAL_DOC_ID }
+      name: "getDocument",
+      arguments: { id: LOCAL_DOC_ID },
     },
-    id: 2
+    id: 2,
   };
 
   const response = await mcpRequest(LOCAL_MCP_URL, payload);
@@ -111,56 +127,62 @@ function generateActions(remoteState: any, localState: any): any[] {
   const actions: any[] = [];
 
   // 1. Update basic scope of work details
-  if (remoteState.title !== localState.title ||
-      remoteState.description !== localState.description ||
-      remoteState.status !== localState.status) {
+  if (
+    remoteState.title !== localState.title ||
+    remoteState.description !== localState.description ||
+    remoteState.status !== localState.status
+  ) {
     actions.push({
-      type: 'EDIT_SCOPE_OF_WORK',
-      scope: 'global',
+      type: "EDIT_SCOPE_OF_WORK",
+      scope: "global",
       input: {
         title: remoteState.title,
         description: remoteState.description,
-        status: remoteState.status
-      }
+        status: remoteState.status,
+      },
     });
   }
 
   // 2. Add missing contributors
-  const localContributorIds = new Set(localState.contributors.map((c: any) => c.id));
+  const localContributorIds = new Set(
+    localState.contributors.map((c: any) => c.id),
+  );
   remoteState.contributors.forEach((contributor: any) => {
     if (!localContributorIds.has(contributor.id)) {
       const input: any = {
         id: contributor.id,
-        name: contributor.name
+        name: contributor.name,
       };
       if (contributor.icon) input.icon = contributor.icon;
       if (contributor.description) input.description = contributor.description;
 
       actions.push({
-        type: 'ADD_AGENT',
-        scope: 'global',
-        input
+        type: "ADD_AGENT",
+        scope: "global",
+        input,
       });
     }
   });
 
   // 3. Add missing deliverables with all their data
-  const localDeliverableIds = new Set(localState.deliverables.map((d: any) => d.id));
+  const localDeliverableIds = new Set(
+    localState.deliverables.map((d: any) => d.id),
+  );
 
   remoteState.deliverables.forEach((deliverable: any) => {
     if (!localDeliverableIds.has(deliverable.id)) {
       // Add deliverable
       actions.push({
-        type: 'ADD_DELIVERABLE',
-        scope: 'global',
+        type: "ADD_DELIVERABLE",
+        scope: "global",
         input: {
           id: deliverable.id,
           owner: deliverable.owner || undefined,
           title: deliverable.title,
           code: deliverable.code,
           description: deliverable.description,
-          status: deliverable.status
-        }
+          status: deliverable.status,
+        },
       });
 
       // Set work progress
@@ -172,7 +194,7 @@ function generateActions(remoteState: any, localState: any): any[] {
         } else if (deliverable.workProgress.total !== undefined) {
           progressInput.storyPoints = {
             total: deliverable.workProgress.total,
-            completed: deliverable.workProgress.completed
+            completed: deliverable.workProgress.completed,
           };
         } else if (deliverable.workProgress.done !== undefined) {
           progressInput.done = deliverable.workProgress.done;
@@ -180,12 +202,12 @@ function generateActions(remoteState: any, localState: any): any[] {
 
         if (Object.keys(progressInput).length > 0) {
           actions.push({
-            type: 'SET_DELIVERABLE_PROGRESS',
-            scope: 'global',
+            type: "SET_DELIVERABLE_PROGRESS",
+            scope: "global",
             input: {
               id: deliverable.id,
-              workProgress: progressInput
-            }
+              workProgress: progressInput,
+            },
           });
         }
       }
@@ -194,14 +216,14 @@ function generateActions(remoteState: any, localState: any): any[] {
       if (deliverable.keyResults && deliverable.keyResults.length > 0) {
         deliverable.keyResults.forEach((kr: any) => {
           actions.push({
-            type: 'ADD_KEY_RESULT',
-            scope: 'global',
+            type: "ADD_KEY_RESULT",
+            scope: "global",
             input: {
               id: kr.id,
               deliverableId: deliverable.id,
               title: kr.title,
-              link: kr.link
-            }
+              link: kr.link,
+            },
           });
         });
       }
@@ -209,16 +231,16 @@ function generateActions(remoteState: any, localState: any): any[] {
       // Set budget anchor if exists
       if (deliverable.budgetAnchor && deliverable.budgetAnchor.project) {
         actions.push({
-          type: 'SET_DELIVERABLE_BUDGET_ANCHOR_PROJECT',
-          scope: 'global',
+          type: "SET_DELIVERABLE_BUDGET_ANCHOR_PROJECT",
+          scope: "global",
           input: {
             deliverableId: deliverable.id,
             project: deliverable.budgetAnchor.project,
             unit: deliverable.budgetAnchor.unit,
             unitCost: deliverable.budgetAnchor.unitCost,
             quantity: deliverable.budgetAnchor.quantity,
-            margin: deliverable.budgetAnchor.margin
-          }
+            margin: deliverable.budgetAnchor.margin,
+          },
         });
       }
     }
@@ -226,7 +248,9 @@ function generateActions(remoteState: any, localState: any): any[] {
 
   // 4. Add projects if any
   if (remoteState.projects && remoteState.projects.length > 0) {
-    const localProjectsMap = new Map<string, any>(localState.projects.map((p: any) => [p.id, p]));
+    const localProjectsMap = new Map<string, any>(
+      localState.projects.map((p: any) => [p.id, p]),
+    );
 
     remoteState.projects.forEach((project: any) => {
       const localProject = localProjectsMap.get(project.id);
@@ -234,8 +258,8 @@ function generateActions(remoteState: any, localState: any): any[] {
       if (!localProject) {
         // Project doesn't exist, add it
         actions.push({
-          type: 'ADD_PROJECT',
-          scope: 'global',
+          type: "ADD_PROJECT",
+          scope: "global",
           input: {
             id: project.id,
             code: project.code,
@@ -245,28 +269,34 @@ function generateActions(remoteState: any, localState: any): any[] {
             imageUrl: project.imageUrl || undefined,
             budgetType: project.budgetType || undefined,
             currency: project.currency || undefined,
-            budget: project.budget || 0
-          }
+            budget: project.budget || 0,
+          },
         });
       }
 
       // Add missing deliverables to project scope
-      if (project.scope && project.scope.deliverables && project.scope.deliverables.length > 0) {
+      if (
+        project.scope &&
+        project.scope.deliverables &&
+        project.scope.deliverables.length > 0
+      ) {
         const localDeliverables = new Set(
-          ((localProject)?.scope?.deliverables) || []
+          localProject?.scope?.deliverables || [],
         );
 
         project.scope.deliverables.forEach((deliverableId: string) => {
           if (!localDeliverables.has(deliverableId)) {
-            const deliverable = remoteState.deliverables.find((d: any) => d.id === deliverableId);
+            const deliverable = remoteState.deliverables.find(
+              (d: any) => d.id === deliverableId,
+            );
             if (deliverable) {
               actions.push({
-                type: 'ADD_DELIVERABLE_IN_SET',
-                scope: 'global',
+                type: "ADD_DELIVERABLE_IN_SET",
+                scope: "global",
                 input: {
                   projectId: project.id,
-                  deliverableId: deliverableId
-                }
+                  deliverableId: deliverableId,
+                },
               });
             }
           }
@@ -275,13 +305,14 @@ function generateActions(remoteState: any, localState: any): any[] {
         // Set project scope metadata (status and deliverablesCompleted)
         if (project.scope.status || project.scope.deliverablesCompleted) {
           actions.push({
-            type: 'EDIT_DELIVERABLES_SET',
-            scope: 'global',
+            type: "EDIT_DELIVERABLES_SET",
+            scope: "global",
             input: {
               projectId: project.id,
               status: project.scope.status || undefined,
-              deliverablesCompleted: project.scope.deliverablesCompleted || undefined
-            }
+              deliverablesCompleted:
+                project.scope.deliverablesCompleted || undefined,
+            },
           });
         }
       }
@@ -291,28 +322,30 @@ function generateActions(remoteState: any, localState: any): any[] {
   // 5. Add roadmaps if any
   if (remoteState.roadmaps && remoteState.roadmaps.length > 0) {
     const localRoadmapIds = new Set(localState.roadmaps.map((r: any) => r.id));
-    const localRoadmapsMap = new Map<string, any>(localState.roadmaps.map((r: any) => [r.id, r]));
+    const localRoadmapsMap = new Map<string, any>(
+      localState.roadmaps.map((r: any) => [r.id, r]),
+    );
 
     remoteState.roadmaps.forEach((roadmap: any) => {
       const localRoadmap = localRoadmapsMap.get(roadmap.id);
 
       if (!localRoadmap) {
         actions.push({
-          type: 'ADD_ROADMAP',
-          scope: 'global',
+          type: "ADD_ROADMAP",
+          scope: "global",
           input: {
             id: roadmap.id,
             title: roadmap.title,
             slug: roadmap.slug || undefined,
-            description: roadmap.description || undefined
-          }
+            description: roadmap.description || undefined,
+          },
         });
       }
 
       // Add milestones for this roadmap
       if (roadmap.milestones && roadmap.milestones.length > 0) {
         const localMilestonesMap = new Map<string, any>(
-          ((localRoadmap)?.milestones || []).map((m: any) => [m.id, m])
+          (localRoadmap?.milestones || []).map((m: any) => [m.id, m]),
         );
 
         roadmap.milestones.forEach((milestone: any) => {
@@ -320,66 +353,76 @@ function generateActions(remoteState: any, localState: any): any[] {
 
           if (!localMilestone) {
             actions.push({
-              type: 'ADD_MILESTONE',
-              scope: 'global',
+              type: "ADD_MILESTONE",
+              scope: "global",
               input: {
                 id: milestone.id,
                 roadmapId: roadmap.id,
                 sequenceCode: milestone.sequenceCode || undefined,
                 title: milestone.title,
                 description: milestone.description || undefined,
-                deliveryTarget: milestone.deliveryTarget || undefined
-              }
+                deliveryTarget: milestone.deliveryTarget || undefined,
+              },
             });
           }
 
           // Add coordinators for milestone
           if (milestone.coordinators && milestone.coordinators.length > 0) {
-            const localCoordinators = new Set((localMilestone)?.coordinators || []);
+            const localCoordinators = new Set(
+              localMilestone?.coordinators || [],
+            );
 
             milestone.coordinators.forEach((coordinatorId: string) => {
               if (!localCoordinators.has(coordinatorId)) {
                 actions.push({
-                  type: 'ADD_COORDINATOR',
-                  scope: 'global',
+                  type: "ADD_COORDINATOR",
+                  scope: "global",
                   input: {
                     id: coordinatorId,
-                    milestoneId: milestone.id
-                  }
+                    milestoneId: milestone.id,
+                  },
                 });
               }
             });
           }
 
           // Add deliverables to milestone
-          if (milestone.scope && milestone.scope.deliverables && milestone.scope.deliverables.length > 0) {
+          if (
+            milestone.scope &&
+            milestone.scope.deliverables &&
+            milestone.scope.deliverables.length > 0
+          ) {
             const localMilestoneDeliverables = new Set(
-              ((localMilestone)?.scope?.deliverables) || []
+              localMilestone?.scope?.deliverables || [],
             );
 
             milestone.scope.deliverables.forEach((deliverableId: string) => {
               if (!localMilestoneDeliverables.has(deliverableId)) {
                 actions.push({
-                  type: 'ADD_DELIVERABLE_IN_SET',
-                  scope: 'global',
+                  type: "ADD_DELIVERABLE_IN_SET",
+                  scope: "global",
                   input: {
                     milestoneId: milestone.id,
-                    deliverableId: deliverableId
-                  }
+                    deliverableId: deliverableId,
+                  },
                 });
               }
             });
 
             // Set milestone scope metadata
-            if (milestone.scope.status || milestone.scope.deliverablesCompleted) {
+            if (
+              milestone.scope.status ||
+              milestone.scope.deliverablesCompleted
+            ) {
               actions.push({
-                type: 'EDIT_DELIVERABLES_SET',
-                scope: 'global',
+                type: "EDIT_DELIVERABLES_SET",
+                scope: "global",
                 input: {
                   milestoneId: milestone.id,
                   status: milestone.scope.status || undefined,
-                  deliverablesCompleted: milestone.scope.deliverablesCompleted || undefined
-                }
+                  deliverablesCompleted:
+                    milestone.scope.deliverablesCompleted || undefined,
+                },
               });
             }
           }
@@ -400,30 +443,37 @@ async function sendActions(actions: any[]): Promise<void> {
     batches.push(actions.slice(i, i + BATCH_SIZE));
   }
 
-  console.log(`\nSending ${actions.length} actions in ${batches.length} batches...`);
+  console.log(
+    `\nSending ${actions.length} actions in ${batches.length} batches...`,
+  );
 
   for (let i = 0; i < batches.length; i++) {
     const batch = batches[i];
-    console.log(`\nBatch ${i + 1}/${batches.length} (${batch.length} actions)...`);
+    console.log(
+      `\nBatch ${i + 1}/${batches.length} (${batch.length} actions)...`,
+    );
 
     const payload: MCPRequest = {
-      jsonrpc: '2.0',
-      method: 'tools/call',
+      jsonrpc: "2.0",
+      method: "tools/call",
       params: {
-        name: 'addActions',
+        name: "addActions",
         arguments: {
           documentId: LOCAL_DOC_ID,
-          actions: batch
-        }
+          actions: batch,
+        },
       },
-      id: 1000 + i
+      id: 1000 + i,
     };
 
     try {
       const response = await mcpRequest(LOCAL_MCP_URL, payload);
 
       if (response.error) {
-        console.error(`Error in batch ${i + 1}:`, JSON.stringify(response.error, null, 2));
+        console.error(
+          `Error in batch ${i + 1}:`,
+          JSON.stringify(response.error, null, 2),
+        );
         throw new Error(`Batch ${i + 1} failed`);
       }
 
@@ -438,17 +488,17 @@ async function sendActions(actions: any[]): Promise<void> {
 // Main function
 async function main() {
   try {
-    console.log('='.repeat(70));
-    console.log('Scope of Work State-Based Mirror Script');
-    console.log('='.repeat(70));
-    console.log('\nConfiguration:');
+    console.log("=".repeat(70));
+    console.log("Scope of Work State-Based Mirror Script");
+    console.log("=".repeat(70));
+    console.log("\nConfiguration:");
     console.log(`  Remote MCP: ${REMOTE_MCP_URL}`);
     console.log(`  Remote Drive: ${REMOTE_DRIVE_ID}`);
     console.log(`  Remote SoW ID: ${REMOTE_DOC_ID}`);
     console.log(`  Local MCP: ${LOCAL_MCP_URL}`);
     console.log(`  Local Drive: ${LOCAL_DRIVE_ID}`);
     console.log(`  Local SoW ID: ${LOCAL_DOC_ID}`);
-    console.log('');
+    console.log("");
 
     // Fetch remote document
     const remoteDoc = await getRemoteDocument();
@@ -471,21 +521,21 @@ async function main() {
     console.log(`  - Roadmaps: ${localState.roadmaps.length}`);
 
     // Generate actions
-    console.log('\nGenerating actions to mirror remote state...');
+    console.log("\nGenerating actions to mirror remote state...");
     const actions = generateActions(remoteState, localState);
     console.log(`✓ Generated ${actions.length} actions`);
 
     if (actions.length === 0) {
-      console.log('\n✓ Documents are already in sync!');
+      console.log("\n✓ Documents are already in sync!");
       return;
     }
 
     // Show action summary
     const actionTypes: Record<string, number> = {};
-    actions.forEach(action => {
+    actions.forEach((action) => {
       actionTypes[action.type] = (actionTypes[action.type] || 0) + 1;
     });
-    console.log('\nAction summary:');
+    console.log("\nAction summary:");
     Object.entries(actionTypes).forEach(([type, count]) => {
       console.log(`  - ${type}: ${count}`);
     });
@@ -494,7 +544,7 @@ async function main() {
     await sendActions(actions);
 
     // Verify final state
-    console.log('\nVerifying final state...');
+    console.log("\nVerifying final state...");
     const finalLocalDoc = await getLocalDocument();
     const finalLocalState = finalLocalDoc.state.global;
     console.log(`✓ Final local document state:`);
@@ -505,12 +555,11 @@ async function main() {
     console.log(`  - Projects: ${finalLocalState.projects.length}`);
     console.log(`  - Roadmaps: ${finalLocalState.roadmaps.length}`);
 
-    console.log('\n' + '='.repeat(70));
-    console.log('✓ Mirror complete!');
-    console.log('='.repeat(70));
-
+    console.log("\n" + "=".repeat(70));
+    console.log("✓ Mirror complete!");
+    console.log("=".repeat(70));
   } catch (error) {
-    console.error('\n✗ Error:', error);
+    console.error("\n✗ Error:", error);
     process.exit(1);
   }
 }

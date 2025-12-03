@@ -65,8 +65,8 @@ export type AddContextDocumentInput = {
 export type AddProposalInput = {
   budgetEstimate: Scalars["String"]["input"];
   id: Scalars["OID"]["input"];
-  paymentTerms: RfpPaymentTermInput | `${RfpPaymentTermInput}`;
-  proposalStatus: RfpProposalStatusInput | `${RfpProposalStatusInput}`;
+  paymentTerms: RfpPaymentTermInput;
+  proposalStatus: RfpProposalStatusInput;
   rfpId: Scalars["OID"]["input"];
   submittedby?: InputMaybe<Scalars["OID"]["input"]>;
   summary: Scalars["String"]["input"];
@@ -87,7 +87,7 @@ export type BudgetRangeInput = {
 
 export type ChangeProposalStatusInput = {
   proposalId: Scalars["OID"]["input"];
-  status: RfpProposalStatusInput | `${RfpProposalStatusInput}`;
+  status: RfpProposalStatusInput;
 };
 
 export type ContextDocument = {
@@ -102,7 +102,7 @@ export type EditRfpInput = {
   deadline?: InputMaybe<Scalars["DateTime"]["input"]>;
   eligibilityCriteria?: InputMaybe<Scalars["String"]["input"]>;
   evaluationCriteria?: InputMaybe<Scalars["String"]["input"]>;
-  status?: InputMaybe<RfpStatusInput | `${RfpStatusInput}`>;
+  status?: InputMaybe<RfpStatusInput>;
   summary?: InputMaybe<Scalars["String"]["input"]>;
   tags?: InputMaybe<Array<Scalars["String"]["input"]>>;
   title?: InputMaybe<Scalars["String"]["input"]>;
@@ -149,7 +149,7 @@ export type RequestForProposalsState = {
   issuer: Scalars["ID"]["output"];
   proposals: Array<RfpProposal>;
   rfpCommenter: Array<RfpCommenter>;
-  status: RfpStatus | `${RfpStatus}`;
+  status: RfpStatus;
   summary: Scalars["String"]["output"];
   tags: Maybe<Array<Scalars["String"]["output"]>>;
   title: Scalars["String"]["output"];
@@ -158,12 +158,12 @@ export type RequestForProposalsState = {
 export type RfpAgentType = "AI" | "GROUP" | "HUMAN";
 
 export type RfpCommenter = {
-  agentType: RfpAgentType | `${RfpAgentType}`;
+  agentType: RfpAgentType;
   code: Scalars["String"]["output"];
   id: Scalars["ID"]["output"];
   imageUrl: Maybe<Scalars["String"]["output"]>;
   name: Scalars["String"]["output"];
-  rfpCommentatorType: RfpCommentatorType | `${RfpCommentatorType}`;
+  rfpCommentatorType: RfpCommentatorType;
 };
 
 export type RfpPaymentTerm =
@@ -183,8 +183,8 @@ export type RfpPaymentTermInput =
 export type RfpProposal = {
   budgetEstimate: Scalars["String"]["output"];
   id: Scalars["OID"]["output"];
-  paymentTerms: RfpPaymentTerm | `${RfpPaymentTerm}`;
-  proposalStatus: RfpProposalStatus | `${RfpProposalStatus}`;
+  paymentTerms: RfpPaymentTerm;
+  proposalStatus: RfpProposalStatus;
   submittedby: Maybe<Scalars["OID"]["output"]>;
   summary: Scalars["String"]["output"];
   title: Scalars["String"]["output"];

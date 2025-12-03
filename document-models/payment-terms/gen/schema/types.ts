@@ -111,7 +111,7 @@ export type EvaluationFrequency = "MONTHLY" | "PER_MILESTONE" | "WEEKLY";
 export type EvaluationTerms = {
   commentsVisibleToClient: Scalars["Boolean"]["output"];
   criteria: Array<Scalars["String"]["output"]>;
-  evaluationFrequency: EvaluationFrequency | `${EvaluationFrequency}`;
+  evaluationFrequency: EvaluationFrequency;
   evaluatorTeam: Scalars["String"]["output"];
   impactsPayout: Scalars["Boolean"]["output"];
   impactsReputation: Scalars["Boolean"]["output"];
@@ -122,7 +122,7 @@ export type Milestone = {
   expectedCompletionDate: Maybe<Scalars["Date"]["output"]>;
   id: Scalars["OID"]["output"];
   name: Scalars["String"]["output"];
-  payoutStatus: MilestonePayoutStatus | `${MilestonePayoutStatus}`;
+  payoutStatus: MilestonePayoutStatus;
   requiresApproval: Scalars["Boolean"]["output"];
 };
 
@@ -139,15 +139,15 @@ export type PaymentModel = "MILESTONE" | "TIME_AND_MATERIALS";
 
 export type PaymentTermsState = {
   bonusClauses: Array<BonusClause>;
-  currency: PaymentCurrency | `${PaymentCurrency}`;
+  currency: PaymentCurrency;
   escrowDetails: Maybe<Escrow>;
   evaluation: Maybe<EvaluationTerms>;
   milestoneSchedule: Array<Milestone>;
   payer: Scalars["String"]["output"];
-  paymentModel: PaymentModel | `${PaymentModel}`;
+  paymentModel: PaymentModel;
   penaltyClauses: Array<PenaltyClause>;
   proposer: Scalars["String"]["output"];
-  status: PaymentTermsStatus | `${PaymentTermsStatus}`;
+  status: PaymentTermsStatus;
   timeAndMaterials: Maybe<TimeAndMaterials>;
   totalAmount: Maybe<Scalars["Amount"]["output"]>;
 };
@@ -170,9 +170,9 @@ export type ReorderMilestonesInput = {
 };
 
 export type SetBasicTermsInput = {
-  currency: PaymentCurrency | `${PaymentCurrency}`;
+  currency: PaymentCurrency;
   payer: Scalars["String"]["input"];
-  paymentModel: PaymentModel | `${PaymentModel}`;
+  paymentModel: PaymentModel;
   proposer: Scalars["String"]["input"];
   totalAmount?: InputMaybe<Scalars["Amount"]["input"]>;
 };
@@ -187,14 +187,14 @@ export type SetEscrowDetailsInput = {
 export type SetEvaluationTermsInput = {
   commentsVisibleToClient: Scalars["Boolean"]["input"];
   criteria: Array<Scalars["String"]["input"]>;
-  evaluationFrequency: EvaluationFrequency | `${EvaluationFrequency}`;
+  evaluationFrequency: EvaluationFrequency;
   evaluatorTeam: Scalars["String"]["input"];
   impactsPayout: Scalars["Boolean"]["input"];
   impactsReputation: Scalars["Boolean"]["input"];
 };
 
 export type SetTimeAndMaterialsInput = {
-  billingFrequency: BillingFrequency | `${BillingFrequency}`;
+  billingFrequency: BillingFrequency;
   hourlyRate?: InputMaybe<Scalars["Amount"]["input"]>;
   retainerAmount?: InputMaybe<Scalars["Amount"]["input"]>;
   timesheetRequired: Scalars["Boolean"]["input"];
@@ -202,7 +202,7 @@ export type SetTimeAndMaterialsInput = {
 };
 
 export type TimeAndMaterials = {
-  billingFrequency: BillingFrequency | `${BillingFrequency}`;
+  billingFrequency: BillingFrequency;
   hourlyRate: Maybe<Scalars["Amount"]["output"]>;
   retainerAmount: Maybe<Scalars["Amount"]["output"]>;
   timesheetRequired: Scalars["Boolean"]["output"];
@@ -226,7 +226,7 @@ export type UpdateMilestoneInput = {
 
 export type UpdateMilestoneStatusInput = {
   id: Scalars["OID"]["input"];
-  payoutStatus: MilestonePayoutStatus | `${MilestonePayoutStatus}`;
+  payoutStatus: MilestonePayoutStatus;
 };
 
 export type UpdatePenaltyClauseInput = {
@@ -237,5 +237,5 @@ export type UpdatePenaltyClauseInput = {
 };
 
 export type UpdateStatusInput = {
-  status: PaymentTermsStatus | `${PaymentTermsStatus}`;
+  status: PaymentTermsStatus;
 };

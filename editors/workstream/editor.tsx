@@ -81,13 +81,13 @@ export default function Editor() {
   ];
 
   // Try to get dispatch from context or props
-  const [state, setState] = useState(doc.state.global as WorkstreamState);
+  const [state, setState] = useState(doc.state.global);
   const [clientInputValue, setClientInputValue] = useState(
-    doc.state.global.client?.id || ""
+    doc.state.global.client?.id || "",
   );
 
   useEffect(() => {
-    setState(doc.state.global as WorkstreamState);
+    setState(doc.state.global);
   }, [doc.state.global]);
 
   useEffect(() => {
@@ -98,13 +98,13 @@ export default function Editor() {
 
   // Local state to track newly created document IDs
   const [newlyCreatedSowId, setNewlyCreatedSowId] = useState<string | null>(
-    null
+    null,
   );
   const [newlyCreatedPaymentTermsId, setNewlyCreatedPaymentTermsId] = useState<
     string | null
   >(null);
   const [newlyCreatedRfpId, setNewlyCreatedRfpId] = useState<string | null>(
-    null
+    null,
   );
 
   // Loading states to prevent double-clicks
@@ -125,7 +125,7 @@ export default function Editor() {
         undefined,
         undefined,
         undefined,
-        "request-for-proposals-editor"
+        "request-for-proposals-editor",
       );
       console.log("Created RFP document", createdNode);
       if (createdNode) {
@@ -133,7 +133,7 @@ export default function Editor() {
           rfpActions.editRfp({
             title: `RFP-${state.title || ""}`,
           }),
-          createdNode.id
+          createdNode.id,
         );
       }
       // Restore selection to current workstream document to prevent navigation
@@ -162,7 +162,7 @@ export default function Editor() {
         undefined,
         undefined,
         undefined,
-        "scope-of-work-editor"
+        "scope-of-work-editor",
       );
       console.log("Created SOW document", createdNode);
       if (createdNode) {
@@ -170,7 +170,7 @@ export default function Editor() {
           ScopeOfWork.actions.editScopeOfWork({
             title: `SOW-${state.title || ""}`,
           }),
-          createdNode.id
+          createdNode.id,
         );
       }
       // Restore selection to current workstream document to prevent navigation
@@ -199,7 +199,7 @@ export default function Editor() {
         undefined,
         undefined,
         undefined,
-        "payment-terms-editor"
+        "payment-terms-editor",
       );
       console.log("Created Payment Terms document", createdNode);
       // Note: Payment Terms might not have actions to initialize, so we just create it
@@ -214,7 +214,12 @@ export default function Editor() {
     } finally {
       setIsCreatingPaymentTerms(false);
     }
-  }, [isCreatingPaymentTerms, selectedDrive?.header.id, state.title, doc.header.id]);
+  }, [
+    isCreatingPaymentTerms,
+    selectedDrive?.header.id,
+    state.title,
+    doc.header.id,
+  ]);
 
   // Local state to track manual input values
   const [manualAuthorInput, setManualAuthorInput] = useState<string>("");
@@ -245,10 +250,12 @@ export default function Editor() {
   const getDocumentNameById = useCallback(
     (documentId: string) => {
       // Use allDocuments array instead of hooks to avoid violating Rules of Hooks
-      const document = allDocuments?.find((doc: PHDocument) => doc.header.id === documentId);
+      const document = allDocuments?.find(
+        (doc: PHDocument) => doc.header.id === documentId,
+      );
       return document?.header.name || "";
     },
-    [allDocuments]
+    [allDocuments],
   );
 
   let rfpDocumentNode: PHDocument | undefined = undefined;
@@ -346,7 +353,7 @@ export default function Editor() {
         node.header.documentType === "powerhouse/rfp" &&
         (!userInput ||
           node.header.name.toLowerCase().includes(userInput.toLowerCase()) ||
-          node.header.id.toLowerCase().includes(userInput.toLowerCase()))
+          node.header.id.toLowerCase().includes(userInput.toLowerCase())),
     );
     return results?.map((doc) => ({
       value: doc.header.id,
@@ -360,7 +367,7 @@ export default function Editor() {
         node.header.documentType === "powerhouse/network-profile" &&
         (!userInput ||
           node.header.name.toLowerCase().includes(userInput.toLowerCase()) ||
-          node.header.id.toLowerCase().includes(userInput.toLowerCase()))
+          node.header.id.toLowerCase().includes(userInput.toLowerCase())),
     );
     return results?.map((doc) => ({
       value: doc.header.id,
@@ -382,7 +389,7 @@ export default function Editor() {
           )?.global?.title
             ?.toLowerCase()
             .includes(userInput.toLowerCase()) ??
-            false))
+            false)),
     );
     return results?.map((doc) => ({
       value: doc.header.id,
@@ -399,7 +406,7 @@ export default function Editor() {
         node.header.documentType === "payment-terms" &&
         (!userInput ||
           node.header.name.toLowerCase().includes(userInput.toLowerCase()) ||
-          node.header.id.toLowerCase().includes(userInput.toLowerCase()))
+          node.header.id.toLowerCase().includes(userInput.toLowerCase())),
     );
     return results?.map((doc) => ({
       value: doc.header.id,
@@ -454,9 +461,10 @@ export default function Editor() {
 
     const clientId = state.client?.id || generateId();
 
-    let clientInfoUpdate: { clientId: string; name?: string; icon?: string } = {
-      clientId,
-    };
+    const clientInfoUpdate: { clientId: string; name?: string; icon?: string } =
+      {
+        clientId,
+      };
 
     if (field === "name") {
       clientInfoUpdate.name = value === "" ? "" : value || undefined;
@@ -526,7 +534,7 @@ export default function Editor() {
         description: "",
       };
     },
-    [allDocuments]
+    [allDocuments],
   );
   const getClientOptionById = useCallback(
     (documentId?: string) => {
@@ -547,7 +555,7 @@ export default function Editor() {
         description: "",
       };
     },
-    [allDocuments]
+    [allDocuments],
   );
   const getPaymentTermsOptionById = useCallback(
     (documentId?: string) => {
@@ -568,12 +576,12 @@ export default function Editor() {
         description: "",
       };
     },
-    [allDocuments]
+    [allDocuments],
   );
 
   const clientInitialOption = useMemo(
     () => getClientOptionById(state.client?.id),
-    [getClientOptionById, state.client?.id]
+    [getClientOptionById, state.client?.id],
   );
 
   const alternativeProposalsColumns = useMemo<Array<ColumnDef<Proposal>>>(
@@ -591,7 +599,7 @@ export default function Editor() {
                   id: context.row.author.id,
                   name: newValue as string,
                 },
-              })
+              }),
             );
             return true;
           }
@@ -618,9 +626,9 @@ export default function Editor() {
           if (newValue !== context.row.sow) {
             dispatch(
               actions.editAlternativeProposal({
-                id: context.row.id as string,
-                sowId: newValue as string || null,
-              })
+                id: context.row.id,
+                sowId: (newValue as string) || null,
+              }),
             );
             return true;
           }
@@ -633,17 +641,18 @@ export default function Editor() {
 
           const handleSave = (valueToSave?: string) => {
             // Use provided value or fallback to latest tracked value
-            const valueToUse = valueToSave !== undefined ? valueToSave : latestValue;
-            const normalizedValue = (valueToUse as string) || null;
-            const currentRowValue = (context.row.sow as string) || null;
-            
+            const valueToUse =
+              valueToSave !== undefined ? valueToSave : latestValue;
+            const normalizedValue = valueToUse || null;
+            const currentRowValue = context.row.sow || null;
+
             if (normalizedValue !== currentRowValue) {
               onChange(normalizedValue);
               dispatch(
                 actions.editAlternativeProposal({
-                  id: context.row.id as string,
-                  sowId: normalizedValue as string || null,
-                })
+                  id: context.row.id,
+                  sowId: (normalizedValue as string) || null,
+                }),
               );
             }
           };
@@ -652,13 +661,14 @@ export default function Editor() {
             <PHIDInput
               value={currentValue}
               onChange={(newValue) => {
-                latestValue = (newValue as string) || "";
+                latestValue = newValue || "";
                 onChange(newValue);
               }}
               onBlur={(e) => {
                 // Use a small delay to ensure value is set after dropdown closes
                 setTimeout(() => {
-                  const inputValue = (e.target as HTMLInputElement)?.value || latestValue;
+                  const inputValue =
+                    (e.target as HTMLInputElement)?.value || latestValue;
                   handleSave(inputValue);
                 }, 100);
               }}
@@ -666,15 +676,21 @@ export default function Editor() {
                 if (e.key === "Enter") {
                   e.preventDefault();
                   e.stopPropagation();
-                  const inputValue = (e.target as HTMLInputElement)?.value || latestValue;
-                  
+                  const inputValue =
+                    (e.target as HTMLInputElement)?.value || latestValue;
+
                   // Fetch the actual document value from search results instead of using raw input
                   if (inputValue) {
                     const searchResults = searchSowDocuments(inputValue) || [];
-                    const foundDoc = searchResults.find(
-                      (doc) => doc.value === inputValue || doc.title.toLowerCase().includes(inputValue.toLowerCase())
-                    ) || searchResults[0];
-                    
+                    const foundDoc =
+                      searchResults.find(
+                        (doc) =>
+                          doc.value === inputValue ||
+                          doc.title
+                            .toLowerCase()
+                            .includes(inputValue.toLowerCase()),
+                      ) || searchResults[0];
+
                     if (foundDoc) {
                       handleSave(foundDoc.value);
                     } else {
@@ -684,7 +700,7 @@ export default function Editor() {
                   } else {
                     handleSave(""); // Clear if empty
                   }
-                  
+
                   // Blur the input to exit edit mode
                   setTimeout(() => {
                     (e.target as HTMLElement)?.blur();
@@ -737,9 +753,9 @@ export default function Editor() {
           if (newValue !== context.row.paymentTerms) {
             dispatch(
               actions.editAlternativeProposal({
-                id: context.row.id as string,
-                paymentTermsId: newValue as string || null,
-              })
+                id: context.row.id,
+                paymentTermsId: (newValue as string) || null,
+              }),
             );
             return true;
           }
@@ -752,17 +768,18 @@ export default function Editor() {
 
           const handleSave = (valueToSave?: string) => {
             // Use provided value or fallback to latest tracked value
-            const valueToUse = valueToSave !== undefined ? valueToSave : latestValue;
-            const normalizedValue = (valueToUse as string) || null;
-            const currentRowValue = (context.row.paymentTerms as string) || null;
-            
+            const valueToUse =
+              valueToSave !== undefined ? valueToSave : latestValue;
+            const normalizedValue = valueToUse || null;
+            const currentRowValue = context.row.paymentTerms || null;
+
             if (normalizedValue !== currentRowValue) {
               onChange(normalizedValue);
               dispatch(
                 actions.editAlternativeProposal({
-                  id: context.row.id as string,
-                  paymentTermsId: normalizedValue as string || null,
-                })
+                  id: context.row.id,
+                  paymentTermsId: (normalizedValue as string) || null,
+                }),
               );
             }
           };
@@ -771,13 +788,14 @@ export default function Editor() {
             <PHIDInput
               value={currentValue}
               onChange={(newValue) => {
-                latestValue = (newValue as string) || "";
+                latestValue = newValue || "";
                 onChange(newValue);
               }}
               onBlur={(e) => {
                 // Use a small delay to ensure value is set after dropdown closes
                 setTimeout(() => {
-                  const inputValue = (e.target as HTMLInputElement)?.value || latestValue;
+                  const inputValue =
+                    (e.target as HTMLInputElement)?.value || latestValue;
                   handleSave(inputValue);
                 }, 100);
               }}
@@ -785,15 +803,22 @@ export default function Editor() {
                 if (e.key === "Enter") {
                   e.preventDefault();
                   e.stopPropagation();
-                  const inputValue = (e.target as HTMLInputElement)?.value || latestValue;
-                  
+                  const inputValue =
+                    (e.target as HTMLInputElement)?.value || latestValue;
+
                   // Fetch the actual document value from search results instead of using raw input
                   if (inputValue) {
-                    const searchResults = searchPaymentTermsDocuments(inputValue) || [];
-                    const foundDoc = searchResults.find(
-                      (doc) => doc.value === inputValue || doc.title.toLowerCase().includes(inputValue.toLowerCase())
-                    ) || searchResults[0];
-                    
+                    const searchResults =
+                      searchPaymentTermsDocuments(inputValue) || [];
+                    const foundDoc =
+                      searchResults.find(
+                        (doc) =>
+                          doc.value === inputValue ||
+                          doc.title
+                            .toLowerCase()
+                            .includes(inputValue.toLowerCase()),
+                      ) || searchResults[0];
+
                     if (foundDoc) {
                       handleSave(foundDoc.value);
                     } else {
@@ -803,7 +828,7 @@ export default function Editor() {
                   } else {
                     handleSave(""); // Clear if empty
                   }
-                  
+
                   // Blur the input to exit edit mode
                   setTimeout(() => {
                     (e.target as HTMLElement)?.blur();
@@ -819,7 +844,7 @@ export default function Editor() {
                   searchPaymentTermsDocuments(userInput || "") || [];
                 if (results.length === 0) {
                   return Promise.reject(
-                    new Error("No Payment Terms documents found")
+                    new Error("No Payment Terms documents found"),
                   );
                 }
                 return results.map((doc) => ({
@@ -833,7 +858,7 @@ export default function Editor() {
                 const doc = searchPaymentTermsDocuments(documentId)?.[0];
                 if (!doc) {
                   return Promise.reject(
-                    new Error("Payment Terms document not found")
+                    new Error("Payment Terms document not found"),
                   );
                 }
                 return {
@@ -862,9 +887,9 @@ export default function Editor() {
           if (newValue !== context.row.status) {
             dispatch(
               actions.editAlternativeProposal({
-                id: context.row.id as string,
+                id: context.row.id,
                 status: newValue as ProposalStatusInput,
-              })
+              }),
             );
             return true;
           }
@@ -897,7 +922,7 @@ export default function Editor() {
       getSowOptionById,
       searchPaymentTermsDocuments,
       searchSowDocuments,
-    ]
+    ],
   );
 
   // Get the parent folder node for the currently selected node
@@ -985,7 +1010,7 @@ export default function Editor() {
               <PHIDInput
                 value={clientInputValue}
                 onChange={(newValue) => {
-                  setClientInputValue((newValue as string) || "");
+                  setClientInputValue(newValue || "");
                 }}
                 onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                   if (e.target.value !== (state.client?.id || "")) {
@@ -1002,7 +1027,7 @@ export default function Editor() {
                   const results = searchClientDocuments(userInput || "") || [];
                   if (results.length === 0) {
                     return Promise.reject(
-                      new Error("No client profiles found")
+                      new Error("No client profiles found"),
                     );
                   }
                   return results.map((doc) => ({
@@ -1016,7 +1041,7 @@ export default function Editor() {
                   const option = getClientOptionById(documentId);
                   if (!option) {
                     return Promise.reject(
-                      new Error("Client profile not found")
+                      new Error("Client profile not found"),
                     );
                   }
                   return option;
@@ -1102,7 +1127,7 @@ export default function Editor() {
                       actions.setRequestForProposal({
                         rfpId: e.target.value,
                         title: rfpDocument?.document.title || "",
-                      })
+                      }),
                     );
                   }
                 }}
@@ -1173,7 +1198,7 @@ export default function Editor() {
                           actions.setRequestForProposal({
                             rfpId: createdNode.id,
                             title: createdNode.name,
-                          })
+                          }),
                         );
                       }
                     } catch (error) {
@@ -1222,7 +1247,7 @@ export default function Editor() {
                                 id: generateId(),
                                 name: e.target.value,
                               },
-                            })
+                            }),
                           );
                         }
                       }}
@@ -1245,7 +1270,7 @@ export default function Editor() {
                             actions.editInitialProposal({
                               id: state.initialProposal?.id || "",
                               status: value as ProposalStatusInput,
-                            })
+                            }),
                           );
                         }
                       }}
@@ -1268,7 +1293,7 @@ export default function Editor() {
                             actions.editInitialProposal({
                               id: state.initialProposal?.id || "",
                               sowId: e.target.value || null,
-                            })
+                            }),
                           );
                         }
                       }}
@@ -1278,7 +1303,7 @@ export default function Editor() {
                           searchSowDocuments(userInput || "") || [];
                         if (results?.length === 0) {
                           return Promise.reject(
-                            new Error("No SOW documents found")
+                            new Error("No SOW documents found"),
                           );
                         }
                         return results?.map((doc) => ({
@@ -1294,7 +1319,7 @@ export default function Editor() {
                         const doc = searchSowDocuments(documentId)?.[0];
                         if (!doc) {
                           return Promise.reject(
-                            new Error("SOW document not found")
+                            new Error("SOW document not found"),
                           );
                         }
                         return {
@@ -1346,11 +1371,14 @@ export default function Editor() {
                                 actions.editInitialProposal({
                                   id: state.initialProposal?.id || "",
                                   sowId: createdNode.id,
-                                })
+                                }),
                               );
                             }
                           } catch (error) {
-                            console.error("Error creating SOW document:", error);
+                            console.error(
+                              "Error creating SOW document:",
+                              error,
+                            );
                           }
                         })();
                         return false;
@@ -1378,7 +1406,7 @@ export default function Editor() {
                             actions.editInitialProposal({
                               id: state.initialProposal?.id || "",
                               paymentTermsId: e.target.value || null,
-                            })
+                            }),
                           );
                         }
                       }}
@@ -1388,7 +1416,7 @@ export default function Editor() {
                           searchPaymentTermsDocuments(userInput || "") || [];
                         if (results?.length === 0) {
                           return Promise.reject(
-                            new Error("No Payment Terms documents found")
+                            new Error("No Payment Terms documents found"),
                           );
                         }
                         return results?.map((doc) => ({
@@ -1405,7 +1433,7 @@ export default function Editor() {
                           searchPaymentTermsDocuments(documentId)?.[0];
                         if (!doc) {
                           return Promise.reject(
-                            new Error("Payment Terms document not found")
+                            new Error("Payment Terms document not found"),
                           );
                         }
                         return {
@@ -1442,7 +1470,8 @@ export default function Editor() {
                         (async () => {
                           try {
                             console.log("Creating payment terms");
-                            const createdNode = await createPaymentTermsDocument();
+                            const createdNode =
+                              await createPaymentTermsDocument();
                             if (createdNode) {
                               // Set local state to immediately show the new Payment Terms ID
                               setNewlyCreatedPaymentTermsId(createdNode.id);
@@ -1451,11 +1480,14 @@ export default function Editor() {
                                 actions.editInitialProposal({
                                   id: state.initialProposal?.id || "",
                                   paymentTermsId: createdNode.id,
-                                })
+                                }),
                               );
                             }
                           } catch (error) {
-                            console.error("Error creating Payment Terms document:", error);
+                            console.error(
+                              "Error creating Payment Terms document:",
+                              error,
+                            );
                           }
                         })();
                         return false;
@@ -1482,8 +1514,8 @@ export default function Editor() {
                           data.map((d: Proposal) =>
                             actions.removeAlternativeProposal({
                               id: d.id,
-                            })
-                          )
+                            }),
+                          ),
                         );
                       }
                     }}
@@ -1496,7 +1528,7 @@ export default function Editor() {
                               id: generateId(),
                               name: data.authorName as string,
                             },
-                          })
+                          }),
                         );
                       }
                     }}
@@ -1520,7 +1552,7 @@ export default function Editor() {
                       dispatch(
                         actions.editInitialProposal({
                           id: generateId(),
-                        })
+                        }),
                       );
                     }}
                   >

@@ -59,7 +59,7 @@ export type Scalars = {
 export type NetworkCategory = "CHARITY" | "CRYPTO" | "DEFI" | "NGO" | "OSS";
 
 export type NetworkProfileState = {
-  category: Array<NetworkCategory | `${NetworkCategory}`>;
+  category: Array<NetworkCategory>;
   darkThemeIcon: Scalars["String"]["output"];
   darkThemeLogo: Scalars["String"]["output"];
   description: Scalars["String"]["output"];
@@ -75,7 +75,7 @@ export type NetworkProfileState = {
 };
 
 export type SetCategoryInput = {
-  category: Array<NetworkCategory | `${NetworkCategory}`>;
+  category: Array<NetworkCategory>;
 };
 
 export type SetDescriptionInput = {

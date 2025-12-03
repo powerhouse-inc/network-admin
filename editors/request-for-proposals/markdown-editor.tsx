@@ -40,7 +40,7 @@ export function MarkdownEditor({
 
   const [viewMarkdownMode, setViewMarkdownMode] =
     useLocalStorage<MarkdownEditorMode>("markdown-editor-view-mode", "live");
-  
+
   // Ensure we have a valid mode for the editor
   const editorMode = viewMarkdownMode || "live";
 
@@ -55,7 +55,9 @@ export function MarkdownEditor({
         setLoadError(null);
       } catch (error) {
         console.error("Failed to load MDEditor:", error);
-        setLoadError(error instanceof Error ? error.message : "Failed to load editor");
+        setLoadError(
+          error instanceof Error ? error.message : "Failed to load editor",
+        );
         setIsLoaded(true);
       }
     };
@@ -68,7 +70,7 @@ export function MarkdownEditor({
   // Update contentValue when value prop changes
   useEffect(() => {
     if (isLoaded) {
-      const stringValue = typeof value === 'string' ? value : '';
+      const stringValue = typeof value === "string" ? value : "";
       const safeValue = stringValue.trim() || " ";
       setContentValue(safeValue);
     }
@@ -108,9 +110,9 @@ export function MarkdownEditor({
   // Handle content changes
   const handleContentChange = (newValue: string | undefined) => {
     if (newValue !== undefined) {
-      const stringValue = typeof newValue === 'string' ? newValue : '';
+      const stringValue = typeof newValue === "string" ? newValue : "";
       // Only replace completely empty strings with a space, preserve all other content
-      const safeValue = stringValue === '' ? " " : stringValue;
+      const safeValue = stringValue === "" ? " " : stringValue;
       setContentValue(safeValue);
       onChange(newValue); // Keep the original value for the parent component
     }
@@ -169,7 +171,7 @@ export function MarkdownEditor({
 
       {label && <p className={labelClassName}>{label}</p>}
       {!isLoaded && (
-        <div 
+        <div
           className="w-full border border-gray-300 rounded-md p-3 bg-white"
           style={{ height: `${height}px` }}
         >
@@ -179,12 +181,14 @@ export function MarkdownEditor({
         </div>
       )}
       {isLoaded && loadError && (
-        <div 
+        <div
           className="w-full border border-red-300 rounded-md p-3 bg-red-50"
           style={{ height: `${height}px` }}
         >
           <div className="w-full h-full flex flex-col items-center justify-center text-red-600">
-            <p className="text-sm font-medium mb-2">Failed to load markdown editor</p>
+            <p className="text-sm font-medium mb-2">
+              Failed to load markdown editor
+            </p>
             <p className="text-xs text-red-500">{loadError}</p>
             <textarea
               className="w-full h-full mt-2 p-2 border border-gray-300 rounded text-sm"

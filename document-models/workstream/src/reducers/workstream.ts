@@ -3,7 +3,7 @@ import type { WorkstreamWorkstreamOperations } from "@powerhousedao/network-admi
 export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
   editWorkstreamOperation(state, action) {
     const input = action.input;
-    
+
     // Update workstream fields if provided
     if (input.code !== undefined) {
       state.code = input.code || null;
@@ -24,7 +24,7 @@ export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
 
   editClientInfoOperation(state, action) {
     const input = action.input;
-    
+
     // Create or update client info
     if (!state.client) {
       state.client = {
@@ -33,10 +33,10 @@ export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
         icon: null,
       };
     }
-    
+
     // Update client ID (required field)
     state.client.id = input.clientId;
-    
+
     // Update optional fields if provided
     if (input.name !== undefined) {
       state.client.name = input.name || null;
@@ -48,7 +48,7 @@ export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
 
   setRequestForProposalOperation(state, action) {
     const input = action.input;
-    
+
     // Create or update RFP
     state.rfp = {
       id: input.rfpId,
@@ -58,7 +58,7 @@ export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
 
   addPaymentRequestOperation(state, action) {
     const input = action.input;
-    
+
     // Add payment request ID if not already present
     if (!state.paymentRequests.includes(input.id)) {
       state.paymentRequests.push(input.id);
@@ -67,7 +67,7 @@ export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
 
   removePaymentRequestOperation(state, action) {
     const input = action.input;
-    
+
     // Remove payment request ID from the array
     const index = state.paymentRequests.indexOf(input.id);
     if (index > -1) {

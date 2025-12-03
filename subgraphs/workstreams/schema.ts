@@ -10,7 +10,9 @@ export const schema: DocumentNode = gql`
     workstream(filter: WorkstreamFilter!): [FullQueryWorkstream!]!
     workstreams(filter: WorkstreamsFilter): [FullQueryWorkstream!]!
     rfpByWorkstream(filter: WorkstreamFilter!): [WorkstreamRfp!]!
-    scopeOfWorkByNetworkOrStatus(filter: scopeOfWorkByNetworkOrStatusFilter!): [SOW_ScopeOfWorkState!]!
+    scopeOfWorkByNetworkOrStatus(
+      filter: scopeOfWorkByNetworkOrStatusFilter!
+    ): [SOW_ScopeOfWorkState!]!
   }
 
   type ProcessorWorkstream {
@@ -67,7 +69,6 @@ export const schema: DocumentNode = gql`
     networkName: String
     workstreamStatus: WorkstreamStatus
     workstreamStatuses: [WorkstreamStatus!]
-
   }
 
   input WorkstreamsFilter {
@@ -91,8 +92,8 @@ export const schema: DocumentNode = gql`
   }
 
   enum ProposalRole {
-    INITIAL,
-    ALTERNATIVE,
+    INITIAL
+    ALTERNATIVE
     AWARDED
   }
 
@@ -256,11 +257,22 @@ export const schema: DocumentNode = gql`
 
   union SOW_Progress = SOW_StoryPoint | SOW_Percentage | SOW_Binary
 
-  type SOW_Percentage { value: Float! }
-  type SOW_Binary { done: Boolean }
-  type SOW_StoryPoint { total: Int!, completed: Int! }
+  type SOW_Percentage {
+    value: Float!
+  }
+  type SOW_Binary {
+    done: Boolean
+  }
+  type SOW_StoryPoint {
+    total: Int!
+    completed: Int!
+  }
 
-  type SOW_KeyResult { id: OID!, title: String!, link: String! }
+  type SOW_KeyResult {
+    id: OID!
+    title: String!
+    link: String!
+  }
 
   type SOW_Project {
     id: OID!
@@ -276,10 +288,24 @@ export const schema: DocumentNode = gql`
     expenditure: SOW_BudgetExpenditure
   }
 
-  enum SOW_PMCurrency { DAI USDS EUR USD }
-  enum SOW_BudgetType { CONTINGENCY OPEX CAPEX OVERHEAD }
+  enum SOW_PMCurrency {
+    DAI
+    USDS
+    EUR
+    USD
+  }
+  enum SOW_BudgetType {
+    CONTINGENCY
+    OPEX
+    CAPEX
+    OVERHEAD
+  }
 
-  type SOW_BudgetExpenditure { percentage: Float!, actuals: Float!, cap: Float! }
+  type SOW_BudgetExpenditure {
+    percentage: Float!
+    actuals: Float!
+    cap: Float!
+  }
 
   type SOW_Roadmap {
     id: OID!
@@ -307,26 +333,103 @@ export const schema: DocumentNode = gql`
     deliverablesCompleted: SOW_DeliverablesCompleted!
   }
 
-  type SOW_DeliverablesCompleted { total: Int!, completed: Int! }
-  enum SOW_DeliverableSetStatus { DRAFT TODO IN_PROGRESS FINISHED CANCELED }
+  type SOW_DeliverablesCompleted {
+    total: Int!
+    completed: Int!
+  }
+  enum SOW_DeliverableSetStatus {
+    DRAFT
+    TODO
+    IN_PROGRESS
+    FINISHED
+    CANCELED
+  }
 
   # ==========================
   # Payment Terms (typed)
   # ==========================
-  enum PT_PaymentTermsStatus { DRAFT SUBMITTED ACCEPTED CANCELLED }
-  enum PT_PaymentCurrency { USD EUR GBP }
-  enum PT_PaymentModel { MILESTONE COST_AND_MATERIALS RETAINER }
-  enum PT_MilestonePayoutStatus { PENDING READY_FOR_REVIEW APPROVED PAID REJECTED }
-  enum PT_BillingFrequency { WEEKLY BIWEEKLY MONTHLY }
-  enum PT_EvaluationFrequency { WEEKLY MONTHLY PER_MILESTONE }
+  enum PT_PaymentTermsStatus {
+    DRAFT
+    SUBMITTED
+    ACCEPTED
+    CANCELLED
+  }
+  enum PT_PaymentCurrency {
+    USD
+    EUR
+    GBP
+  }
+  enum PT_PaymentModel {
+    MILESTONE
+    COST_AND_MATERIALS
+    RETAINER
+  }
+  enum PT_MilestonePayoutStatus {
+    PENDING
+    READY_FOR_REVIEW
+    APPROVED
+    PAID
+    REJECTED
+  }
+  enum PT_BillingFrequency {
+    WEEKLY
+    BIWEEKLY
+    MONTHLY
+  }
+  enum PT_EvaluationFrequency {
+    WEEKLY
+    MONTHLY
+    PER_MILESTONE
+  }
 
-  type PT_Milestone { id: OID! name: String! amount: Amount! expectedCompletionDate: Date requiresApproval: Boolean! payoutStatus: PT_MilestonePayoutStatus! }
-  type PT_CostAndMaterials { hourlyRate: Amount variableCap: Amount billingFrequency: PT_BillingFrequency! timesheetRequired: Boolean! }
-  type PT_Retainer { retainerAmount: Amount! billingFrequency: PT_BillingFrequency! startDate: Date! endDate: Date autoRenew: Boolean! servicesIncluded: String! }
-  type PT_Escrow { amountHeld: Amount! proofOfFundsDocumentId: String releaseConditions: String! escrowProvider: String }
-  type PT_EvaluationTerms { evaluationFrequency: PT_EvaluationFrequency! evaluatorTeam: String! criteria: [String!]! impactsPayout: Boolean! impactsReputation: Boolean! commentsVisibleToClient: Boolean! }
-  type PT_BonusClause { id: OID! condition: String! bonusAmount: Amount! comment: String }
-  type PT_PenaltyClause { id: OID! condition: String! deductionAmount: Amount! comment: String }
+  type PT_Milestone {
+    id: OID!
+    name: String!
+    amount: Amount!
+    expectedCompletionDate: Date
+    requiresApproval: Boolean!
+    payoutStatus: PT_MilestonePayoutStatus!
+  }
+  type PT_CostAndMaterials {
+    hourlyRate: Amount
+    variableCap: Amount
+    billingFrequency: PT_BillingFrequency!
+    timesheetRequired: Boolean!
+  }
+  type PT_Retainer {
+    retainerAmount: Amount!
+    billingFrequency: PT_BillingFrequency!
+    startDate: Date!
+    endDate: Date
+    autoRenew: Boolean!
+    servicesIncluded: String!
+  }
+  type PT_Escrow {
+    amountHeld: Amount!
+    proofOfFundsDocumentId: String
+    releaseConditions: String!
+    escrowProvider: String
+  }
+  type PT_EvaluationTerms {
+    evaluationFrequency: PT_EvaluationFrequency!
+    evaluatorTeam: String!
+    criteria: [String!]!
+    impactsPayout: Boolean!
+    impactsReputation: Boolean!
+    commentsVisibleToClient: Boolean!
+  }
+  type PT_BonusClause {
+    id: OID!
+    condition: String!
+    bonusAmount: Amount!
+    comment: String
+  }
+  type PT_PenaltyClause {
+    id: OID!
+    condition: String!
+    deductionAmount: Amount!
+    comment: String
+  }
 
   type PT_PaymentTermsState {
     status: PT_PaymentTermsStatus!

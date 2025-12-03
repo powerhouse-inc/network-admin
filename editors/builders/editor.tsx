@@ -48,7 +48,7 @@ export default function Editor() {
         (node): node is FileNode =>
           node.kind === "file" &&
           "documentType" in node &&
-          node.documentType === "powerhouse/builder-profile"
+          node.documentType === "powerhouse/builder-profile",
       );
       return builderProfileNodes.map((node) => ({
         node,
@@ -81,7 +81,7 @@ export default function Editor() {
   const getBuilderProfiles = useCallback(() => {
     return builderProfileNodesWithDriveId.map(({ node }) => {
       const doc = builderProfileMap.get(node.id);
-      const name = (doc?.state as any)?.global?.name || node.name || node.id;
+      const name = doc?.state?.global?.name || node.name || node.id;
       return {
         id: node.id,
         label: name,
@@ -97,9 +97,9 @@ export default function Editor() {
     if (!doc) return null;
 
     return {
-      name: (doc.state as any).global?.name || doc.header.id,
-      slug: (doc.state as any).global?.slug || doc.header.id,
-      icon: (doc.state as any).global?.icon || null,
+      name: doc.state.global?.name || doc.header.id,
+      slug: doc.state.global?.slug || doc.header.id,
+      icon: doc.state.global?.icon || null,
     };
   };
 
@@ -129,7 +129,7 @@ export default function Editor() {
             dispatch(
               buildersActions.addBuilder({
                 builderPhid: newValue as string,
-              })
+              }),
             );
             return true;
           }
@@ -149,7 +149,7 @@ export default function Editor() {
               if (newValue && newValue !== currentValue) {
                 const builderProfile = getBuilderProfileByPhid(newValue);
                 const existingBuilder = builders?.find(
-                  (builder) => builder?.phid === newValue
+                  (builder) => builder?.phid === newValue,
                 );
 
                 if (!existingBuilder) {
@@ -158,7 +158,7 @@ export default function Editor() {
                     dispatch(
                       buildersActions.removeBuilder({
                         builderPhid: context.row.phid,
-                      })
+                      }),
                     );
                   }
 
@@ -167,14 +167,14 @@ export default function Editor() {
                     dispatch(
                       buildersActions.addBuilder({
                         builderPhid: newValue,
-                      })
+                      }),
                     );
                   } else {
                     // Manual PHID entry - create agent with empty data that user can fill
                     dispatch(
                       buildersActions.addBuilder({
                         builderPhid: newValue,
-                      })
+                      }),
                     );
                   }
                 }
@@ -197,7 +197,7 @@ export default function Editor() {
                   profile.label
                     .toLowerCase()
                     .includes(userInput.toLowerCase()) ||
-                  profile.id.toLowerCase().includes(userInput.toLowerCase())
+                  profile.id.toLowerCase().includes(userInput.toLowerCase()),
               );
 
               return filteredProfiles;
@@ -255,7 +255,7 @@ export default function Editor() {
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
                   e.currentTarget.nextElementSibling?.classList.remove(
-                    "hidden"
+                    "hidden",
                   );
                 }}
               />
@@ -264,7 +264,7 @@ export default function Editor() {
         },
       },
     ],
-    [builders, builderProfileMap, getBuilderProfiles]
+    [builders, builderProfileMap, getBuilderProfiles],
   );
 
   return (
@@ -283,7 +283,7 @@ export default function Editor() {
               if (data.length > 0) {
                 data.forEach((d) => {
                   dispatch(
-                    buildersActions.removeBuilder({ builderPhid: d.phid })
+                    buildersActions.removeBuilder({ builderPhid: d.phid }),
                   );
                 });
               }
@@ -296,7 +296,7 @@ export default function Editor() {
                 dispatch(
                   buildersActions.addBuilder({
                     builderPhid: tempId,
-                  })
+                  }),
                 );
               }
             }}

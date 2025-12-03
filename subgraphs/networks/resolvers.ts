@@ -3,12 +3,17 @@ import type { NetworkProfileDocument } from "../../document-models/network-profi
 import type { BuildersDocument } from "../../document-models/builders/index.js";
 import type { PHDocument } from "document-model";
 
-export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> => {
+export const getResolvers = (
+  subgraph: BaseSubgraph,
+): Record<string, unknown> => {
   const reactor = subgraph.reactor;
 
   return {
     Query: {
-      allNetworks: async (_: unknown, args: { filter?: { networkSlug?: string } }) => {
+      allNetworks: async (
+        _: unknown,
+        args: { filter?: { networkSlug?: string } },
+      ) => {
         const drives = await reactor.getDrives();
 
         // Step 1: Collect all network profile documents and builders documents with their drive IDs
@@ -69,10 +74,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
         // Step 4: Create a map of PHID to builder profile document
         const builderProfileMap = new Map<string, PHDocument>();
         builderProfileDocs.forEach((doc) => {
-          if (
-            doc &&
-            doc.header.documentType === "powerhouse/builder-profile"
-          ) {
+          if (doc && doc.header.documentType === "powerhouse/builder-profile") {
             builderProfileMap.set(doc.header.id, doc);
           }
         });
@@ -97,7 +99,7 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
 
           // Get the BuildersDocument from the same drive as the network
           const buildersDoc = driveIdToBuildersDoc.get(driveId);
-          
+
           // Get builders list from the BuildersDocument and map to builder profiles
           const builders = buildersDoc
             ? (buildersDoc.state.global.builders || [])
@@ -110,7 +112,9 @@ export const getResolvers = (subgraph: BaseSubgraph): Record<string, unknown> =>
             documentType: doc.header.documentType,
             network: {
               name: state.name,
-              slug: state.name ? state.name.toLowerCase().trim().split(/\s+/).join("-") : null,
+              slug: state.name
+                ? state.name.toLowerCase().trim().split(/\s+/).join("-")
+                : null,
               icon: state.icon,
               darkThemeIcon: state.darkThemeIcon ?? null,
               logo: state.logo,

@@ -115,7 +115,7 @@ export default function Editor() {
                   value={state.status}
                   onChange={(value) =>
                     dispatch(
-                      actions.editRfp({ status: value as RfpStatusInput })
+                      actions.editRfp({ status: value as RfpStatusInput }),
                     )
                   }
                 />
@@ -151,7 +151,7 @@ export default function Editor() {
                       ? new Date(e.target.value)
                       : null;
                     dispatch(
-                      actions.editRfp({ deadline: date?.toISOString() })
+                      actions.editRfp({ deadline: date?.toISOString() }),
                     );
                   }}
                   name="submission-deadline"
@@ -174,13 +174,13 @@ export default function Editor() {
                       if (
                         validateBudgetRange(
                           newMin,
-                          state.budgetRange?.max || null
+                          state.budgetRange?.max || null,
                         )
                       ) {
                         dispatch(
                           actions.editRfp({
                             budgetRange: { min: newMin },
-                          })
+                          }),
                         );
                       }
                     }
@@ -199,13 +199,13 @@ export default function Editor() {
                       if (
                         validateBudgetRange(
                           state.budgetRange?.min || null,
-                          newMax
+                          newMax,
                         )
                       ) {
                         dispatch(
                           actions.editRfp({
                             budgetRange: { max: newMax },
-                          })
+                          }),
                         );
                       }
                     }
@@ -233,7 +233,7 @@ export default function Editor() {
                       dispatch(
                         actions.editRfp({
                           budgetRange: { currency: value as string },
-                        })
+                        }),
                       );
                     }
                   }}

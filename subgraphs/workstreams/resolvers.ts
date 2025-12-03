@@ -1,8 +1,6 @@
 import { type ISubgraph } from "@powerhousedao/reactor-api";
 import { WorkstreamsProcessor } from "../../processors/workstreams/index.js";
-import {
-  type RequestForProposalsDocument,
-} from "../../document-models/request-for-proposals/index.js";
+import { type RequestForProposalsDocument } from "../../document-models/request-for-proposals/index.js";
 import { type WorkstreamDocument } from "../../document-models/workstream/index.js";
 import type { NetworkProfileDocument } from "../../document-models/network-profile/index.js";
 import { sql, type ExpressionBuilder } from "kysely";
@@ -40,7 +38,7 @@ type ScopeOfWorkFilterArgs = {
 
 export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
   const reactor = subgraph.reactor;
-  const db = subgraph.relationalDb
+  const db = subgraph.relationalDb;
 
   const deriveSlug = (name: string) =>
     name.toLowerCase().trim().split(/\s+/).join("-");
@@ -49,7 +47,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     try {
       const drives = await (reactor as any).getDrives?.();
       if (Array.isArray(drives) && drives.length > 0) return drives as string[];
-    } catch { }
+    } catch {}
     return [] as string[];
   };
 
@@ -71,8 +69,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     }
 
     try {
-      const rfpDoc =
-        await reactor.getDocument<RequestForProposalsDocument>(rfpRef.id);
+      const rfpDoc = await reactor.getDocument<RequestForProposalsDocument>(
+        rfpRef.id,
+      );
       const rfpState = rfpDoc.state.global as any;
 
       return {
@@ -107,9 +106,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     }
   };
 
-  const loadNetworkProfile = async (
-    networkId?: string | null,
-  ) => {
+  const loadNetworkProfile = async (networkId?: string | null) => {
     if (!networkId) {
       return null;
     }
@@ -121,7 +118,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
       return {
         name: state.name ?? null,
-        slug: state.name ? state.name.toLowerCase().trim().split(/\s+/).join("-") : null,
+        slug: state.name
+          ? state.name.toLowerCase().trim().split(/\s+/).join("-")
+          : null,
         icon: state.icon ?? null,
         darkThemeIcon: state.darkThemeIcon ?? null,
         logo: state.logo ?? null,
@@ -149,10 +148,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
       const initialProposalBase = state.initialProposal
         ? {
-          id: state.initialProposal.id,
-          status: state.initialProposal.status,
-          author: state.initialProposal.author,
-        }
+            id: state.initialProposal.id,
+            status: state.initialProposal.status,
+            author: state.initialProposal.author,
+          }
         : null;
 
       const alternativeProposalsBase = (state.alternativeProposals || []).map(
@@ -201,17 +200,19 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       return {
         code: state.code || null,
         title: state.title || row.workstream_title || null,
-        slug: state.title ? state.title.toLowerCase().trim().split(/\s+/).join("-") : null,
+        slug: state.title
+          ? state.title.toLowerCase().trim().split(/\s+/).join("-")
+          : null,
         status: state.status || row.workstream_status || null,
         client,
         network: networkInfo,
         rfp: rfpDetails,
         initialProposal: initialProposalBase
           ? {
-            ...initialProposalBase,
-            sow: initialSowDoc?.stateJSON || null,
-            paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
-          }
+              ...initialProposalBase,
+              sow: initialSowDoc?.stateJSON || null,
+              paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
+            }
           : null,
         alternativeProposals: alternativeProposalsBase.map(
           (proposal: any, index: number) => ({
@@ -226,7 +227,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       };
     } catch {
       const networkInfo = await loadNetworkProfile(row.network_phid || null);
-      
+
       return {
         code: row.workstream_title || null,
         title: row.workstream_title || null,
@@ -266,7 +267,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       qb = qb
         .where("workstream_title", "is not", null)
         .where((eb: ExpressionBuilder<DB, "workstreams">) =>
-          eb(sql`LOWER(workstream_title)`, "like", searchPattern)
+          eb(sql`LOWER(workstream_title)`, "like", searchPattern),
         );
     }
 
@@ -281,7 +282,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       const networkSlugs = filters.networkNames
         .filter((name): name is string => Boolean(name))
         .map((name) => deriveSlug(name));
-      
+
       if (networkSlugs.length > 0) {
         qb = qb.where("network_slug", "in", networkSlugs as any);
       }
@@ -366,7 +367,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           filters.networkSlug ||
           (filters.networkName ? deriveSlug(filters.networkName) : undefined);
 
-        let resolved: any[] = [];
+        const resolved: any[] = [];
         for (const driveId of candidateDrives) {
           let qb = WorkstreamsProcessor.query(driveId, db)
             .selectFrom("workstreams")
@@ -403,8 +404,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           (filters.networkNames && filters.networkNames.length > 0) ||
           filters.workstreamTitle ||
           filters.workstreamStatus ||
-          (filters.workstreamStatuses &&
-            filters.workstreamStatuses.length > 0);
+          (filters.workstreamStatuses && filters.workstreamStatuses.length > 0);
 
         const wantedSlug =
           filters.networkSlug ||
@@ -532,7 +532,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             } else if (filters.proposalRole === "AWARDED") {
               // For AWARDED, we check if the workstream status is AWARDED
               // and return the initial proposal's SOW (as it's typically the awarded one)
-              if (hydrated.status === "AWARDED" && hydrated.initialProposal?.sow) {
+              if (
+                hydrated.status === "AWARDED" &&
+                hydrated.initialProposal?.sow
+              ) {
                 sowDocs.push(hydrated.initialProposal.sow);
               }
             }
@@ -556,7 +559,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     SOW_Progress: {
       __resolveType(obj: any) {
         if (obj && typeof obj === "object") {
-          if (Object.prototype.hasOwnProperty.call(obj, "total") && Object.prototype.hasOwnProperty.call(obj, "completed")) {
+          if (
+            Object.prototype.hasOwnProperty.call(obj, "total") &&
+            Object.prototype.hasOwnProperty.call(obj, "completed")
+          ) {
             return "SOW_StoryPoint";
           }
           if (Object.prototype.hasOwnProperty.call(obj, "value")) {
@@ -567,7 +573,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           }
         }
         return null;
-      }
-    }
+      },
+    },
   };
 };

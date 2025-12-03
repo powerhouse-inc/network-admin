@@ -61,11 +61,11 @@ function ImageModal({
 
     const maxWidth = Math.min(
       imageDimensions.width + 100,
-      window.innerWidth * 0.8
+      window.innerWidth * 0.8,
     );
     const maxHeight = Math.min(
       imageDimensions.height + 100,
-      window.innerHeight * 0.8
+      window.innerHeight * 0.8,
     );
 
     return {
@@ -386,7 +386,7 @@ export default function Editor() {
 
       dispatch(action);
     },
-    [dispatch, state]
+    [dispatch, state],
   );
 
   // Get the parent folder node for the currently selected node
@@ -434,7 +434,9 @@ export default function Editor() {
               lightValue={state?.icon || ""}
               darkValue={state?.darkThemeIcon || ""}
               onLightChange={(value) => handleFieldChange("icon", value)}
-              onDarkChange={(value) => handleFieldChange("darkThemeIcon", value)}
+              onDarkChange={(value) =>
+                handleFieldChange("darkThemeIcon", value)
+              }
               lightPlaceholder="PowerhouseIcon.jpg"
               darkPlaceholder="PowerhouseIconDark.jpg"
               fileSize="200KB"
@@ -446,7 +448,9 @@ export default function Editor() {
               lightValue={state?.logo || ""}
               darkValue={state?.darkThemeLogo || ""}
               onLightChange={(value) => handleFieldChange("logo", value)}
-              onDarkChange={(value) => handleFieldChange("darkThemeLogo", value)}
+              onDarkChange={(value) =>
+                handleFieldChange("darkThemeLogo", value)
+              }
               lightPlaceholder="PowerhouseLogo.jpg"
               darkPlaceholder="PowerhouseLogoDark.jpg"
               fileSize="2MB"

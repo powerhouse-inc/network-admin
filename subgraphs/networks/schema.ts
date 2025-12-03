@@ -51,6 +51,4 @@ export const schema: DocumentNode = gql`
     icon: String!
     description: String!
   }
-
 `;
-

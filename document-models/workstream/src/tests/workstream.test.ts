@@ -44,8 +44,8 @@ describe("Workstream Operations", () => {
     const input = generateMock(EditClientInfoInputSchema());
 
     const updatedDocument = reducer(document, editClientInfo(input));
-    console.log("input.icon", input.icon)
-    assertIsWorkstreamDocument(updatedDocument)
+    console.log("input.icon", input.icon);
+    assertIsWorkstreamDocument(updatedDocument);
     expect(isWorkstreamDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(

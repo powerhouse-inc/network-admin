@@ -61,7 +61,7 @@ export type AddAlternativeProposalInput = {
   paymentTermsId?: InputMaybe<Scalars["PHID"]["input"]>;
   proposalAuthor?: InputMaybe<ProposalAuthorInput>;
   sowId?: InputMaybe<Scalars["PHID"]["input"]>;
-  status?: InputMaybe<ProposalStatusInput | `${ProposalStatusInput}`>;
+  status?: InputMaybe<ProposalStatusInput>;
 };
 
 export type AddPaymentRequestInput = {
@@ -79,7 +79,7 @@ export type EditAlternativeProposalInput = {
   paymentTermsId?: InputMaybe<Scalars["PHID"]["input"]>;
   proposalAuthor?: InputMaybe<ProposalAuthorInput>;
   sowId?: InputMaybe<Scalars["PHID"]["input"]>;
-  status?: InputMaybe<ProposalStatusInput | `${ProposalStatusInput}`>;
+  status?: InputMaybe<ProposalStatusInput>;
 };
 
 export type EditClientInfoInput = {
@@ -93,14 +93,14 @@ export type EditInitialProposalInput = {
   paymentTermsId?: InputMaybe<Scalars["PHID"]["input"]>;
   proposalAuthor?: InputMaybe<ProposalAuthorInput>;
   sowId?: InputMaybe<Scalars["PHID"]["input"]>;
-  status?: InputMaybe<ProposalStatusInput | `${ProposalStatusInput}`>;
+  status?: InputMaybe<ProposalStatusInput>;
 };
 
 export type EditWorkstreamInput = {
   code?: InputMaybe<Scalars["String"]["input"]>;
   paymentTerms?: InputMaybe<Scalars["PHID"]["input"]>;
   sowId?: InputMaybe<Scalars["PHID"]["input"]>;
-  status?: InputMaybe<WorkstreamStatusInput | `${WorkstreamStatusInput}`>;
+  status?: InputMaybe<WorkstreamStatusInput>;
   title?: InputMaybe<Scalars["String"]["input"]>;
 };
 
@@ -109,7 +109,7 @@ export type Proposal = {
   id: Scalars["ID"]["output"];
   paymentTerms: Scalars["PHID"]["output"];
   sow: Scalars["PHID"]["output"];
-  status: ProposalStatus | `${ProposalStatus}`;
+  status: ProposalStatus;
 };
 
 export type ProposalAuthor = {
@@ -159,7 +159,7 @@ export type WorkstreamState = {
   paymentTerms: Maybe<Scalars["PHID"]["output"]>;
   rfp: Maybe<Rfp>;
   sow: Maybe<Scalars["PHID"]["output"]>;
-  status: WorkstreamStatus | `${WorkstreamStatus}`;
+  status: WorkstreamStatus;
   title: Maybe<Scalars["String"]["output"]>;
 };
 

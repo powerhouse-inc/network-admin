@@ -65,7 +65,7 @@ export function DriveExplorer({ children }: EditorProps) {
   const [selectedRootNode, setSelectedRootNode] =
     useState<string>("workstreams");
   const [modalDocumentType, setModalDocumentType] = useState<string>(
-    "powerhouse/workstream"
+    "powerhouse/workstream",
   );
   const selectedDocumentModel = useRef<DocumentModelModule | null>(null);
 
@@ -87,14 +87,14 @@ export function DriveExplorer({ children }: EditorProps) {
       doc.header.documentType === "powerhouse/scopeofwork" ||
       doc.header.documentType === "powerhouse/rfp" ||
       doc.header.documentType === "payment-terms" ||
-      doc.header.documentType === "powerhouse/builders"
+      doc.header.documentType === "powerhouse/builders",
   );
 
   //check if network profile doc is created, set isNetworkProfileCreated to true
   const isNetworkProfileCreated =
     networkAdminDocuments?.some(
       (doc: PHDocument) =>
-        doc.header.documentType === "powerhouse/network-profile"
+        doc.header.documentType === "powerhouse/network-profile",
     ) || false;
 
   // Sync global selected document with local activeDocumentId
@@ -113,13 +113,13 @@ export function DriveExplorer({ children }: EditorProps) {
   const sidebarNodes = useMemo((): SidebarNode[] => {
     // Group documents by type
     const workstreamDocs = (networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/workstream"
+      (doc) => doc.header.documentType === "powerhouse/workstream",
     ) ?? []) as WorkstreamDocument[];
     const networkProfileDocs = (networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/network-profile"
+      (doc) => doc.header.documentType === "powerhouse/network-profile",
     ) ?? []) as NetworkProfileDocument[];
     const [buildersDoc] = (networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/builders"
+      (doc) => doc.header.documentType === "powerhouse/builders",
     ) ?? []) as BuildersDocument[];
 
     const workstreamsNode: SidebarNode = {
@@ -137,7 +137,7 @@ export function DriveExplorer({ children }: EditorProps) {
             title:
               statusTitle +
               (workstreamDocs.filter(
-                (doc) => doc.state.global.status === status
+                (doc) => doc.state.global.status === status,
               ).length > 0
                 ? ` (${workstreamDocs.filter((doc) => doc.state.global.status === status).length})`
                 : ""),
@@ -157,13 +157,13 @@ export function DriveExplorer({ children }: EditorProps) {
                 }
 
                 const sowDoc = allDocuments?.find(
-                  (doc) => doc.header.id === sow
-                ) as PHDocument | undefined;
+                  (doc) => doc.header.id === sow,
+                );
                 const rfpDoc = allDocuments?.find(
-                  (doc) => doc.header.id === rfp
+                  (doc) => doc.header.id === rfp,
                 ) as RequestForProposalsDocument | undefined;
                 const pmtDoc = allDocuments?.find(
-                  (doc) => doc.header.id === paymentTerms
+                  (doc) => doc.header.id === paymentTerms,
                 ) as PaymentTermsDocument | undefined;
 
                 // get alternative proposals
@@ -221,10 +221,10 @@ export function DriveExplorer({ children }: EditorProps) {
                       children: alternativeProposals.map((proposal) => {
                         // Find documents for this specific proposal
                         const proposalSowDoc = allDocuments?.find(
-                          (doc) => doc.header.id === proposal.sow
-                        ) as PHDocument | undefined;
+                          (doc) => doc.header.id === proposal.sow,
+                        );
                         const proposalPaymentTermsDoc = allDocuments?.find(
-                          (doc) => doc.header.id === proposal.paymentTerms
+                          (doc) => doc.header.id === proposal.paymentTerms,
                         ) as PaymentTermsDocument | undefined;
 
                         // Filter to only include documents that exist
@@ -300,7 +300,7 @@ export function DriveExplorer({ children }: EditorProps) {
       // Find the node by ID
       const findNodeById = (
         nodes: SidebarNode[],
-        id: string
+        id: string,
       ): SidebarNode | null => {
         for (const node of nodes) {
           if (node.id === id) {
@@ -334,7 +334,7 @@ export function DriveExplorer({ children }: EditorProps) {
         setSelectedNode(fileId);
       }
     },
-    [setSelectedNode, sidebarNodes]
+    [setSelectedNode, sidebarNodes],
   );
 
   // === EVENT HANDLERS ===
@@ -355,7 +355,7 @@ export function DriveExplorer({ children }: EditorProps) {
     }
 
     const networkProfileDoc = networkAdminDocuments?.find(
-      (doc) => doc.header.documentType === "powerhouse/network-profile"
+      (doc) => doc.header.documentType === "powerhouse/network-profile",
     ) as NetworkProfileDocument | undefined;
     switch (nodeType) {
       case "workstreams":
@@ -395,7 +395,7 @@ export function DriveExplorer({ children }: EditorProps) {
                               >
                                 {category}
                               </span>
-                            )
+                            ),
                           )}
                         </div>
                       </div>
@@ -468,7 +468,7 @@ export function DriveExplorer({ children }: EditorProps) {
                         {networkAdminDocuments.map((document) => {
                           // Find the corresponding file node for actions
                           const fileNode = fileChildren?.find(
-                            (file) => file.id === document.header.id
+                            (file) => file.id === document.header.id,
                           );
 
                           return (
@@ -512,7 +512,7 @@ export function DriveExplorer({ children }: EditorProps) {
                                         fileNode.name || document.header.name;
                                       const newName = prompt(
                                         "Enter new name:",
-                                        currentName
+                                        currentName,
                                       );
                                       if (
                                         newName &&
@@ -522,12 +522,12 @@ export function DriveExplorer({ children }: EditorProps) {
                                         try {
                                           await onRenameNode(
                                             newName.trim(),
-                                            fileNode as FileNode
+                                            fileNode,
                                           );
                                         } catch (error) {
                                           console.error(
                                             "Failed to rename document",
-                                            error
+                                            error,
                                           );
                                         }
                                       }
@@ -588,7 +588,7 @@ export function DriveExplorer({ children }: EditorProps) {
           undefined, // creating in root folder
           undefined,
           undefined,
-          editorType
+          editorType,
         );
 
         if (!node?.id) {
@@ -598,7 +598,7 @@ export function DriveExplorer({ children }: EditorProps) {
 
         if (documentType === "powerhouse/workstream") {
           const networkProfileDoc = networkAdminDocuments?.find(
-            (doc) => doc.header.documentType === "powerhouse/network-profile"
+            (doc) => doc.header.documentType === "powerhouse/network-profile",
           ) as NetworkProfileDocument | undefined;
           const actionsToDispatch = [
             editWorkstream({ title: fileName }),
@@ -631,14 +631,14 @@ export function DriveExplorer({ children }: EditorProps) {
         console.error("Failed to create document:", error);
       }
     },
-    [selectedDrive?.header.id, modalDocumentType]
+    [selectedDrive?.header.id, modalDocumentType],
   );
 
   // Create builders document
   const createBuildersDocument = useCallback(async () => {
     try {
       const isCreated = allDocuments?.some(
-        (doc) => doc.header.documentType === "powerhouse/builders"
+        (doc) => doc.header.documentType === "powerhouse/builders",
       );
       if (isCreated) {
         return;
@@ -651,7 +651,7 @@ export function DriveExplorer({ children }: EditorProps) {
           undefined, // creating in root folder
           undefined,
           undefined,
-          "builders-editor"
+          "builders-editor",
         );
 
         if (!node?.id) {
