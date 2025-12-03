@@ -120,7 +120,7 @@ export function ClausesSection({
                           value: amount,
                           unit: currency,
                         },
-                      })
+                      }),
                     );
                     toast("Amount updated", { type: "success" });
                   }
@@ -251,7 +251,7 @@ export function ClausesSection({
                           value: amount,
                           unit: currency,
                         },
-                      })
+                      }),
                     );
                     toast("Amount updated", { type: "success" });
                   }

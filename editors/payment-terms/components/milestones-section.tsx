@@ -90,7 +90,7 @@ export function MilestonesSection({
               actions.updateMilestone({
                 id: context.row.id,
                 name: newValue as string,
-              })
+              }),
             );
             return true;
           }
@@ -153,7 +153,7 @@ export function MilestonesSection({
                         value: parseFloat(e.target.value),
                         unit: currency,
                       },
-                    })
+                    }),
                   );
                   toast("Amount updated", { type: "success" });
                 }
@@ -241,7 +241,7 @@ export function MilestonesSection({
                   actions.updateMilestone({
                     id: context.row.id,
                     expectedCompletionDate: date?.toISOString() || null,
-                  })
+                  }),
                 );
               }}
             />
@@ -293,7 +293,7 @@ export function MilestonesSection({
                   actions.updateMilestone({
                     id: context.row.id,
                     requiresApproval: checked,
-                  })
+                  }),
                 );
                 toast("Approval requirement updated", { type: "success" });
               }}
@@ -314,12 +314,12 @@ export function MilestonesSection({
         },
         renderCell: (value: Milestone["payoutStatus"], context) => {
           const status = {
-            "APPROVED": "Approved",
-            "PAID": "Paid",
-            "PENDING": "Pending",
-            "READY_FOR_REVIEW": "Ready for Review",
-            "REJECTED": "Rejected",
-          }
+            APPROVED: "Approved",
+            PAID: "Paid",
+            PENDING: "Pending",
+            READY_FOR_REVIEW: "Ready for Review",
+            REJECTED: "Rejected",
+          };
           return (
             <div className="flex items-center justify-center w-full h-full text-center">
               <span className="text-slate-500">{status[value]}</span>
@@ -344,7 +344,7 @@ export function MilestonesSection({
                   actions.updateMilestoneStatus({
                     id: context.row.id,
                     payoutStatus: e as MilestonePayoutStatus,
-                  })
+                  }),
                 );
               }}
             />
@@ -352,7 +352,7 @@ export function MilestonesSection({
         },
       },
     ],
-    [actions, currency, dispatch]
+    [actions, currency, dispatch],
   );
 
   return (
@@ -401,7 +401,7 @@ export function MilestonesSection({
                 });
                 toast(
                   `${rows.length} milestone${rows.length > 1 ? "s" : ""} deleted`,
-                  { type: "success" }
+                  { type: "success" },
                 );
               }
             }}
