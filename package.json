@@ -1,7 +1,7 @@
 {
   "name": "@powerhousedao/network-admin",
   "description": "Network Admin package for Powerhouse",
-  "version": "0.0.50",
+  "version": "0.0.51",
   "license": "AGPL-3.0-only",
   "type": "module",
   "files": [
@@ -66,7 +66,7 @@
     "@powerhousedao/common": "^5.0.12",
     "@powerhousedao/design-system": "^5.0.12",
     "@powerhousedao/document-engineering": "^1.39.0",
-    "@powerhousedao/project-management": "0.0.64",
+    "@powerhousedao/project-management": "0.0.65",
     "@uiw/react-md-editor": "^4.0.8",
     "document-model": "^5.0.12",
     "error": "^10.4.0",

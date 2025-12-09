@@ -143,6 +143,90 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     }
   };
 
+  // Helper function to collect SOWs from hydrated workstreams
+  const collectSowsFromWorkstreams = (workstreams: any[]): any[] => {
+    const sowDocs: any[] = [];
+    for (const workstream of workstreams) {
+      if (workstream.sow) {
+        sowDocs.push(workstream.sow);
+      }
+      if (workstream.initialProposal?.sow) {
+        sowDocs.push(workstream.initialProposal.sow);
+      }
+      for (const altProposal of workstream.alternativeProposals || []) {
+        if (altProposal.sow) {
+          sowDocs.push(altProposal.sow);
+        }
+      }
+    }
+    return sowDocs;
+  };
+
+  // Helper function to fetch builder profiles for contributors
+  const fetchBuilderProfilesForContributors = async (
+    contributorPhids: Set<string>,
+  ) => {
+    const builderProfileMap = new Map<string, PHDocument>();
+    if (contributorPhids.size > 0) {
+      const builderProfileDocs = await Promise.all(
+        Array.from(contributorPhids).map(async (phid) => {
+          try {
+            return await reactor.getDocument<PHDocument>(phid);
+          } catch (error) {
+            console.warn(`Failed to fetch builder profile ${phid}:`, error);
+            return null;
+          }
+        }),
+      );
+
+      builderProfileDocs.forEach((doc) => {
+        if (doc && doc.header.documentType === "powerhouse/builder-profile") {
+          builderProfileMap.set(doc.header.id, doc);
+          // Also collect contributor PHIDs from these builder profiles
+          const state = (doc.state as any).global;
+          if (state?.contributors && Array.isArray(state.contributors)) {
+            state.contributors.forEach((phid: string) => {
+              if (phid && !builderProfileMap.has(phid)) {
+                contributorPhids.add(phid);
+              }
+            });
+          }
+        }
+      });
+
+      // Fetch nested contributors if any were found
+      const nestedContributorPhids = Array.from(contributorPhids).filter(
+        (phid) => !builderProfileMap.has(phid),
+      );
+      if (nestedContributorPhids.length > 0) {
+        const nestedContributorDocs = await Promise.all(
+          nestedContributorPhids.map(async (phid) => {
+            try {
+              return await reactor.getDocument<PHDocument>(phid);
+            } catch (error) {
+              console.warn(
+                `Failed to fetch contributor builder profile ${phid}:`,
+                error,
+              );
+              return null;
+            }
+          }),
+        );
+
+        nestedContributorDocs.forEach((doc) => {
+          if (
+            doc &&
+            doc.header.documentType === "powerhouse/builder-profile"
+          ) {
+            builderProfileMap.set(doc.header.id, doc);
+          }
+        });
+      }
+    }
+
+    return builderProfileMap;
+  };
+
   const hydrateWorkstreamRow = async (row: any) => {
     try {
       const doc = await reactor.getDocument<WorkstreamDocument>(
@@ -372,6 +456,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           (filters.networkName ? deriveSlug(filters.networkName) : undefined);
 
         const resolved: any[] = [];
+        const contributorPhids = new Set<string>();
+
         for (const driveId of candidateDrives) {
           let qb = WorkstreamsProcessor.query(driveId, db)
             .selectFrom("workstreams")
@@ -390,6 +476,54 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           }
           break;
         }
+
+        // Collect SOWs and their contributors
+        const sowDocs = collectSowsFromWorkstreams(resolved);
+        for (const sow of sowDocs) {
+          if (sow && sow.contributors && Array.isArray(sow.contributors)) {
+            sow.contributors.forEach(
+              (contributor: string | { id?: string }) => {
+                // Handle both string PHIDs and objects with id property
+                const phid =
+                  typeof contributor === "string"
+                    ? contributor
+                    : contributor?.id;
+                if (phid && typeof phid === "string") {
+                  contributorPhids.add(phid);
+                }
+              },
+            );
+          }
+        }
+
+        // Fetch all builder profile documents for contributors
+        const builderProfileMap =
+          await fetchBuilderProfilesForContributors(contributorPhids);
+
+        // Create helper function to get builder profile data by PHID
+        getBuilderProfileByPhid = (phid: string) => {
+          const doc = builderProfileMap.get(phid);
+          if (!doc) return null;
+
+          const state = (doc.state as any).global;
+          // Store contributor PHIDs separately - they'll be resolved by the field resolver
+          const contributorPhids = state?.contributors || [];
+          return {
+            id: doc.header.id,
+            code: state?.code || null,
+            slug: state?.slug || null,
+            name: state?.name || doc.header.name,
+            icon: state?.icon || "",
+            description: state?.description || state?.slug || "",
+            lastModified: state?.lastModified || null,
+            type: state?.type || "INDIVIDUAL",
+            _contributorPhids: contributorPhids, // Internal field for resolver
+            status: state?.status || null,
+            skilss: state?.skilss || state?.skills || [],
+            scopes: state?.scopes || [],
+            links: state?.links || [],
+          };
+        };
 
         return resolved;
       },
@@ -415,6 +549,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           (filters.networkName ? deriveSlug(filters.networkName) : undefined);
 
         const results: any[] = [];
+        const contributorPhids = new Set<string>();
 
         for (const driveId of candidateDrives) {
           let qb = WorkstreamsProcessor.query(driveId, db)
@@ -436,6 +571,54 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             results.push(hydrated);
           }
         }
+
+        // Collect SOWs and their contributors
+        const sowDocs = collectSowsFromWorkstreams(results);
+        for (const sow of sowDocs) {
+          if (sow && sow.contributors && Array.isArray(sow.contributors)) {
+            sow.contributors.forEach(
+              (contributor: string | { id?: string }) => {
+                // Handle both string PHIDs and objects with id property
+                const phid =
+                  typeof contributor === "string"
+                    ? contributor
+                    : contributor?.id;
+                if (phid && typeof phid === "string") {
+                  contributorPhids.add(phid);
+                }
+              },
+            );
+          }
+        }
+
+        // Fetch all builder profile documents for contributors
+        const builderProfileMap =
+          await fetchBuilderProfilesForContributors(contributorPhids);
+
+        // Create helper function to get builder profile data by PHID
+        getBuilderProfileByPhid = (phid: string) => {
+          const doc = builderProfileMap.get(phid);
+          if (!doc) return null;
+
+          const state = (doc.state as any).global;
+          // Store contributor PHIDs separately - they'll be resolved by the field resolver
+          const contributorPhids = state?.contributors || [];
+          return {
+            id: doc.header.id,
+            code: state?.code || null,
+            slug: state?.slug || null,
+            name: state?.name || doc.header.name,
+            icon: state?.icon || "",
+            description: state?.description || state?.slug || "",
+            lastModified: state?.lastModified || null,
+            type: state?.type || "INDIVIDUAL",
+            _contributorPhids: contributorPhids, // Internal field for resolver
+            status: state?.status || null,
+            skilss: state?.skilss || state?.skills || [],
+            scopes: state?.scopes || [],
+            links: state?.links || [],
+          };
+        };
 
         return results;
       },
@@ -572,63 +755,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         }
 
         // Fetch all builder profile documents for contributors
-        const builderProfileMap = new Map<string, PHDocument>();
-        if (contributorPhids.size > 0) {
-          const builderProfileDocs = await Promise.all(
-            Array.from(contributorPhids).map(async (phid) => {
-              try {
-                return await reactor.getDocument<PHDocument>(phid);
-              } catch (error) {
-                console.warn(`Failed to fetch builder profile ${phid}:`, error);
-                return null;
-              }
-            }),
-          );
-
-          builderProfileDocs.forEach((doc) => {
-            if (doc && doc.header.documentType === "powerhouse/builder-profile") {
-              builderProfileMap.set(doc.header.id, doc);
-              // Also collect contributor PHIDs from these builder profiles
-              const state = (doc.state as any).global;
-              if (state?.contributors && Array.isArray(state.contributors)) {
-                state.contributors.forEach((phid: string) => {
-                  if (phid && !builderProfileMap.has(phid)) {
-                    contributorPhids.add(phid);
-                  }
-                });
-              }
-            }
-          });
-
-          // Fetch nested contributors if any were found
-          const nestedContributorPhids = Array.from(contributorPhids).filter(
-            (phid) => !builderProfileMap.has(phid),
-          );
-          if (nestedContributorPhids.length > 0) {
-            const nestedContributorDocs = await Promise.all(
-              nestedContributorPhids.map(async (phid) => {
-                try {
-                  return await reactor.getDocument<PHDocument>(phid);
-                } catch (error) {
-                  console.warn(
-                    `Failed to fetch contributor builder profile ${phid}:`,
-                    error,
-                  );
-                  return null;
-                }
-              }),
-            );
-
-            nestedContributorDocs.forEach((doc) => {
-              if (
-                doc &&
-                doc.header.documentType === "powerhouse/builder-profile"
-              ) {
-                builderProfileMap.set(doc.header.id, doc);
-              }
-            });
-          }
-        }
+        const builderProfileMap =
+          await fetchBuilderProfilesForContributors(contributorPhids);
 
         // Create helper function to get builder profile data by PHID
         getBuilderProfileByPhid = (phid: string) => {

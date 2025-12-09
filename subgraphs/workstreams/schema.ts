@@ -278,6 +278,7 @@ export const schema: DocumentNode = gql`
     id: OID!
     code: String!
     title: String!
+    slug: String!
     projectOwner: ID
     abstract: String
     imageUrl: URL
