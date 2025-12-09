@@ -47,8 +47,59 @@ export const schema: DocumentNode = gql`
 
   type Builder {
     id: PHID
+    code: String
+    slug: String
     name: String!
     icon: String!
     description: String!
+    lastModified: DateTime
+    type: teamType!
+    contributors: [Builder!]!
+    status: BuilderStatus
+    skilss: [BuilderSkill!]!
+    scopes: [BuilderScope!]!
+    links: [BuilderLink!]!
+  }
+
+  enum teamType {
+    INDIVIDUAL
+    TEAM
+  }
+
+  enum BuilderStatus {
+    ACTIVE
+    INACTIVE
+    ON_HOLD
+    COMPLETED
+    ARCHIVED
+  }
+
+  enum BuilderSkill {
+    FRONTEND_DEVELOPMENT
+    BACKEND_DEVELOPMENT
+    FULL_STACK_DEVELOPMENT
+    DEVOPS_ENGINEERING
+    SMART_CONTRACT_DEVELOPMENT
+    UI_UX_DESIGN
+    TECHNICAL_WRITING
+    QA_TESTING
+    DATA_ENGINEERING
+    SECURITY_ENGINEERING
+  }
+
+  enum BuilderScope {
+    ACC
+    STA
+    SUP
+    STABILITY_SCOPE
+    SUPPORT_SCOPE
+    PROTOCOL_SCOPE
+    GOVERNANCE_SCOPE
+  }
+
+  type BuilderLink {
+    id: OID!
+    url: URL!
+    label: String
   }
 `;
