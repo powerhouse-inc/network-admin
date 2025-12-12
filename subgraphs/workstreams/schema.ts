@@ -474,7 +474,7 @@ export const schema: DocumentNode = gql`
     type: teamType!
     contributors: [Builder!]!
     status: BuilderStatus
-    skilss: [BuilderSkill!]!
+    skils: [BuilderSkill!]!
     scopes: [BuilderScope!]!
     links: [BuilderLink!]!
   }

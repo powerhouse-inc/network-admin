@@ -133,7 +133,7 @@ export const getResolvers = (
             type: state?.type || "INDIVIDUAL",
             _contributorPhids: contributorPhids, // Internal field for resolver
             status: state?.status || null,
-            skilss: state?.skilss || state?.skills || [],
+            skils: state?.skils || [],
             scopes: state?.scopes || [],
             links: state?.links || [],
           };
@@ -149,8 +149,8 @@ export const getResolvers = (
           // Get builders list from the BuildersDocument and map to builder profiles
           const builders = buildersDoc && getBuilderProfileByPhid
             ? (buildersDoc.state.global.builders || [])
-                .map((phid: string) => getBuilderProfileByPhid!(phid))
-                .filter((builder) => builder !== null)
+              .map((phid: string) => getBuilderProfileByPhid!(phid))
+              .filter((builder) => builder !== null)
             : [];
 
           return {
