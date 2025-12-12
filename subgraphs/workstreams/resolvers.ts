@@ -47,6 +47,19 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
   const deriveSlug = (name: string) =>
     name.toLowerCase().trim().split(/\s+/).join("-");
 
+  const extractPhid = (value: unknown): string | null => {
+    if (typeof value === "string") return value;
+    if (
+      value &&
+      typeof value === "object" &&
+      "id" in value &&
+      typeof (value as any).id === "string"
+    ) {
+      return (value as any).id;
+    }
+    return null;
+  };
+
   const getCandidateDrives = async (): Promise<string[]> => {
     try {
       const drives = await (reactor as any).getDrives?.();
@@ -480,19 +493,31 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         // Collect SOWs and their contributors
         const sowDocs = collectSowsFromWorkstreams(resolved);
         for (const sow of sowDocs) {
-          if (sow && sow.contributors && Array.isArray(sow.contributors)) {
-            sow.contributors.forEach(
-              (contributor: string | { id?: string }) => {
-                // Handle both string PHIDs and objects with id property
-                const phid =
-                  typeof contributor === "string"
-                    ? contributor
-                    : contributor?.id;
-                if (phid && typeof phid === "string") {
-                  contributorPhids.add(phid);
-                }
-              },
-            );
+          if (!sow || typeof sow !== "object") continue;
+
+          if (Array.isArray((sow as any).contributors)) {
+            (sow as any).contributors.forEach((contributor: unknown) => {
+              const phid = extractPhid(contributor);
+              if (phid) contributorPhids.add(phid);
+            });
+          }
+
+          // Collect deliverable owners too so `SOW_Deliverable.owner` can resolve
+          if (Array.isArray((sow as any).deliverables)) {
+            (sow as any).deliverables.forEach((deliverable: unknown) => {
+              if (!deliverable || typeof deliverable !== "object") return;
+              const phid = extractPhid((deliverable as any).owner);
+              if (phid) contributorPhids.add(phid);
+            });
+          }
+
+          // Collect project owners too so `SOW_Project.projectOwner` can resolve
+          if (Array.isArray((sow as any).projects)) {
+            (sow as any).projects.forEach((project: unknown) => {
+              if (!project || typeof project !== "object") return;
+              const phid = extractPhid((project as any).projectOwner);
+              if (phid) contributorPhids.add(phid);
+            });
           }
         }
 
@@ -507,21 +532,38 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
           const state = (doc.state as any).global;
           // Store contributor PHIDs separately - they'll be resolved by the field resolver
-          const contributorPhids = state?.contributors || [];
+          const contributorPhids = state?.contributors ?? [];
+          
+          // Ensure all non-nullable Builder fields are properly handled
+          // name: String! - non-nullable
+          const name = String(state?.name ?? doc.header?.name ?? "");
+          // icon: String! - non-nullable
+          const icon = String(state?.icon ?? "");
+          // description: String! - non-nullable
+          const description = String(state?.description ?? state?.slug ?? "");
+          // type: teamType! - non-nullable, default to "INDIVIDUAL"
+          const type = state?.type ?? "INDIVIDUAL";
+          // skils: [BuilderSkill!]! - non-nullable array
+          const skils = Array.isArray(state?.skils) ? state.skils : [];
+          // scopes: [BuilderScope!]! - non-nullable array
+          const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
+          // links: [BuilderLink!]! - non-nullable array
+          const links = Array.isArray(state?.links) ? state.links : [];
+          
           return {
             id: doc.header.id,
-            code: state?.code || null,
-            slug: state?.slug || null,
-            name: state?.name || doc.header.name,
-            icon: state?.icon || "",
-            description: state?.description || state?.slug || "",
-            lastModified: state?.lastModified || null,
-            type: state?.type || "INDIVIDUAL",
+            code: state?.code ?? null,
+            slug: state?.slug ?? null,
+            name,
+            icon,
+            description,
+            lastModified: state?.lastModified ?? null,
+            type,
             _contributorPhids: contributorPhids, // Internal field for resolver
-            status: state?.status || null,
-            skils: state?.skils || [],
-            scopes: state?.scopes || [],
-            links: state?.links || [],
+            status: state?.status ?? null,
+            skils,
+            scopes,
+            links,
           };
         };
 
@@ -575,19 +617,31 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         // Collect SOWs and their contributors
         const sowDocs = collectSowsFromWorkstreams(results);
         for (const sow of sowDocs) {
-          if (sow && sow.contributors && Array.isArray(sow.contributors)) {
-            sow.contributors.forEach(
-              (contributor: string | { id?: string }) => {
-                // Handle both string PHIDs and objects with id property
-                const phid =
-                  typeof contributor === "string"
-                    ? contributor
-                    : contributor?.id;
-                if (phid && typeof phid === "string") {
-                  contributorPhids.add(phid);
-                }
-              },
-            );
+          if (!sow || typeof sow !== "object") continue;
+
+          if (Array.isArray((sow as any).contributors)) {
+            (sow as any).contributors.forEach((contributor: unknown) => {
+              const phid = extractPhid(contributor);
+              if (phid) contributorPhids.add(phid);
+            });
+          }
+
+          // Collect deliverable owners too so `SOW_Deliverable.owner` can resolve
+          if (Array.isArray((sow as any).deliverables)) {
+            (sow as any).deliverables.forEach((deliverable: unknown) => {
+              if (!deliverable || typeof deliverable !== "object") return;
+              const phid = extractPhid((deliverable as any).owner);
+              if (phid) contributorPhids.add(phid);
+            });
+          }
+
+          // Collect project owners too so `SOW_Project.projectOwner` can resolve
+          if (Array.isArray((sow as any).projects)) {
+            (sow as any).projects.forEach((project: unknown) => {
+              if (!project || typeof project !== "object") return;
+              const phid = extractPhid((project as any).projectOwner);
+              if (phid) contributorPhids.add(phid);
+            });
           }
         }
 
@@ -602,21 +656,38 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
           const state = (doc.state as any).global;
           // Store contributor PHIDs separately - they'll be resolved by the field resolver
-          const contributorPhids = state?.contributors || [];
+          const contributorPhids = state?.contributors ?? [];
+          
+          // Ensure all non-nullable Builder fields are properly handled
+          // name: String! - non-nullable
+          const name = String(state?.name ?? doc.header?.name ?? "");
+          // icon: String! - non-nullable
+          const icon = String(state?.icon ?? "");
+          // description: String! - non-nullable
+          const description = String(state?.description ?? state?.slug ?? "");
+          // type: teamType! - non-nullable, default to "INDIVIDUAL"
+          const type = state?.type ?? "INDIVIDUAL";
+          // skils: [BuilderSkill!]! - non-nullable array
+          const skils = Array.isArray(state?.skils) ? state.skils : [];
+          // scopes: [BuilderScope!]! - non-nullable array
+          const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
+          // links: [BuilderLink!]! - non-nullable array
+          const links = Array.isArray(state?.links) ? state.links : [];
+          
           return {
             id: doc.header.id,
-            code: state?.code || null,
-            slug: state?.slug || null,
-            name: state?.name || doc.header.name,
-            icon: state?.icon || "",
-            description: state?.description || state?.slug || "",
-            lastModified: state?.lastModified || null,
-            type: state?.type || "INDIVIDUAL",
+            code: state?.code ?? null,
+            slug: state?.slug ?? null,
+            name,
+            icon,
+            description,
+            lastModified: state?.lastModified ?? null,
+            type,
             _contributorPhids: contributorPhids, // Internal field for resolver
-            status: state?.status || null,
-            skils: state?.skils || [],
-            scopes: state?.scopes || [],
-            links: state?.links || [],
+            status: state?.status ?? null,
+            skils,
+            scopes,
+            links,
           };
         };
 
@@ -730,13 +801,30 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
             // Collect contributor PHIDs from all SOWs
             for (const sow of sowDocs) {
-              if (sow && sow.contributors && Array.isArray(sow.contributors)) {
-                sow.contributors.forEach((contributor: string | { id?: string }) => {
-                  // Handle both string PHIDs and objects with id property
-                  const phid = typeof contributor === "string" ? contributor : contributor?.id;
-                  if (phid && typeof phid === "string") {
-                    contributorPhids.add(phid);
-                  }
+              if (!sow || typeof sow !== "object") continue;
+
+              if (Array.isArray((sow as any).contributors)) {
+                (sow as any).contributors.forEach((contributor: unknown) => {
+                  const phid = extractPhid(contributor);
+                  if (phid) contributorPhids.add(phid);
+                });
+              }
+
+              // Collect deliverable owners too so `SOW_Deliverable.owner` can resolve
+              if (Array.isArray((sow as any).deliverables)) {
+                (sow as any).deliverables.forEach((deliverable: unknown) => {
+                  if (!deliverable || typeof deliverable !== "object") return;
+                  const phid = extractPhid((deliverable as any).owner);
+                  if (phid) contributorPhids.add(phid);
+                });
+              }
+
+              // Collect project owners too so `SOW_Project.projectOwner` can resolve
+              if (Array.isArray((sow as any).projects)) {
+                (sow as any).projects.forEach((project: unknown) => {
+                  if (!project || typeof project !== "object") return;
+                  const phid = extractPhid((project as any).projectOwner);
+                  if (phid) contributorPhids.add(phid);
                 });
               }
             }
@@ -765,21 +853,38 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
           const state = (doc.state as any).global;
           // Store contributor PHIDs separately - they'll be resolved by the field resolver
-          const contributorPhids = state?.contributors || [];
+          const contributorPhids = state?.contributors ?? [];
+          
+          // Ensure all non-nullable Builder fields are properly handled
+          // name: String! - non-nullable
+          const name = String(state?.name ?? doc.header?.name ?? "");
+          // icon: String! - non-nullable
+          const icon = String(state?.icon ?? "");
+          // description: String! - non-nullable
+          const description = String(state?.description ?? state?.slug ?? "");
+          // type: teamType! - non-nullable, default to "INDIVIDUAL"
+          const type = state?.type ?? "INDIVIDUAL";
+          // skils: [BuilderSkill!]! - non-nullable array
+          const skils = Array.isArray(state?.skils) ? state.skils : [];
+          // scopes: [BuilderScope!]! - non-nullable array
+          const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
+          // links: [BuilderLink!]! - non-nullable array
+          const links = Array.isArray(state?.links) ? state.links : [];
+          
           return {
             id: doc.header.id,
-            code: state?.code || null,
-            slug: state?.slug || null,
-            name: state?.name || doc.header.name,
-            icon: state?.icon || "",
-            description: state?.description || state?.slug || "",
-            lastModified: state?.lastModified || null,
-            type: state?.type || "INDIVIDUAL",
+            code: state?.code ?? null,
+            slug: state?.slug ?? null,
+            name,
+            icon,
+            description,
+            lastModified: state?.lastModified ?? null,
+            type,
             _contributorPhids: contributorPhids, // Internal field for resolver
-            status: state?.status || null,
-            skils: state?.skils || [],
-            scopes: state?.scopes || [],
-            links: state?.links || [],
+            status: state?.status ?? null,
+            skils,
+            scopes,
+            links,
           };
         };
 
@@ -824,6 +929,24 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             return getBuilderProfileByPhid!(phid);
           })
           .filter((builder) => builder !== null);
+      },
+    },
+    SOW_Deliverable: {
+      owner: (parent: { owner?: unknown }) => {
+        if (!parent?.owner) return null;
+        if (!getBuilderProfileByPhid) return null;
+        const phid = extractPhid(parent.owner);
+        if (!phid) return null;
+        return getBuilderProfileByPhid(phid);
+      },
+    },
+    SOW_Project: {
+      projectOwner: (parent: { projectOwner?: unknown }) => {
+        if (!parent?.projectOwner) return null;
+        if (!getBuilderProfileByPhid) return null;
+        const phid = extractPhid(parent.projectOwner);
+        if (!phid) return null;
+        return getBuilderProfileByPhid(phid);
       },
     },
     Builder: {

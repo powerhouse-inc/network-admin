@@ -222,7 +222,7 @@ export const schema: DocumentNode = gql`
 
   type SOW_Deliverable {
     id: OID!
-    owner: ID
+    owner: Builder
     title: String!
     code: String!
     description: String!
@@ -279,7 +279,7 @@ export const schema: DocumentNode = gql`
     code: String!
     title: String!
     slug: String!
-    projectOwner: ID
+    projectOwner: Builder
     abstract: String
     imageUrl: URL
     scope: SOW_DeliverablesSet
