@@ -223,6 +223,7 @@ export const schema: DocumentNode = gql`
   type SOW_Deliverable {
     id: OID!
     owner: Builder
+    icon: String
     title: String!
     code: String!
     description: String!

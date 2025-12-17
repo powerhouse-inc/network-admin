@@ -48,14 +48,19 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     name.toLowerCase().trim().split(/\s+/).join("-");
 
   const extractPhid = (value: unknown): string | null => {
-    if (typeof value === "string") return value;
+    if (typeof value === "string") {
+      // Return null for empty strings, otherwise return the string
+      return value.trim() || null;
+    }
     if (
       value &&
       typeof value === "object" &&
       "id" in value &&
       typeof (value as any).id === "string"
     ) {
-      return (value as any).id;
+      const id = (value as any).id;
+      // Return null for empty strings
+      return id.trim() || null;
     }
     return null;
   };
@@ -64,7 +69,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     try {
       const drives = await (reactor as any).getDrives?.();
       if (Array.isArray(drives) && drives.length > 0) return drives as string[];
-    } catch {}
+    } catch { }
     return [] as string[];
   };
 
@@ -249,10 +254,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
       const initialProposalBase = state.initialProposal
         ? {
-            id: state.initialProposal.id,
-            status: state.initialProposal.status,
-            author: state.initialProposal.author,
-          }
+          id: state.initialProposal.id,
+          status: state.initialProposal.status,
+          author: state.initialProposal.author,
+        }
         : null;
 
       const alternativeProposalsBase = (state.alternativeProposals || []).map(
@@ -310,10 +315,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         rfp: rfpDetails,
         initialProposal: initialProposalBase
           ? {
-              ...initialProposalBase,
-              sow: initialSowDoc?.stateJSON || null,
-              paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
-            }
+            ...initialProposalBase,
+            sow: initialSowDoc?.stateJSON || null,
+            paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
+          }
           : null,
         alternativeProposals: alternativeProposalsBase.map(
           (proposal: any, index: number) => ({
@@ -533,7 +538,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const state = (doc.state as any).global;
           // Store contributor PHIDs separately - they'll be resolved by the field resolver
           const contributorPhids = state?.contributors ?? [];
-          
+
           // Ensure all non-nullable Builder fields are properly handled
           // name: String! - non-nullable
           const name = String(state?.name ?? doc.header?.name ?? "");
@@ -549,7 +554,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
           // links: [BuilderLink!]! - non-nullable array
           const links = Array.isArray(state?.links) ? state.links : [];
-          
+
           return {
             id: doc.header.id,
             code: state?.code ?? null,
@@ -657,7 +662,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const state = (doc.state as any).global;
           // Store contributor PHIDs separately - they'll be resolved by the field resolver
           const contributorPhids = state?.contributors ?? [];
-          
+
           // Ensure all non-nullable Builder fields are properly handled
           // name: String! - non-nullable
           const name = String(state?.name ?? doc.header?.name ?? "");
@@ -673,7 +678,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
           // links: [BuilderLink!]! - non-nullable array
           const links = Array.isArray(state?.links) ? state.links : [];
-          
+
           return {
             id: doc.header.id,
             code: state?.code ?? null,
@@ -854,7 +859,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const state = (doc.state as any).global;
           // Store contributor PHIDs separately - they'll be resolved by the field resolver
           const contributorPhids = state?.contributors ?? [];
-          
+
           // Ensure all non-nullable Builder fields are properly handled
           // name: String! - non-nullable
           const name = String(state?.name ?? doc.header?.name ?? "");
@@ -870,7 +875,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
           // links: [BuilderLink!]! - non-nullable array
           const links = Array.isArray(state?.links) ? state.links : [];
-          
+
           return {
             id: doc.header.id,
             code: state?.code ?? null,
@@ -933,7 +938,14 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     },
     SOW_Deliverable: {
       owner: (parent: { owner?: unknown }) => {
-        if (!parent?.owner) return null;
+        // Handle null, undefined, or empty string cases
+        if (parent?.owner === null || parent?.owner === undefined) {
+          return null;
+        }
+        // Check if it's an empty string
+        if (typeof parent.owner === "string" && parent.owner.trim() === "") {
+          return null;
+        }
         if (!getBuilderProfileByPhid) return null;
         const phid = extractPhid(parent.owner);
         if (!phid) return null;
@@ -942,7 +954,14 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     },
     SOW_Project: {
       projectOwner: (parent: { projectOwner?: unknown }) => {
-        if (!parent?.projectOwner) return null;
+        // Handle null, undefined, or empty string cases
+        if (parent?.projectOwner === null || parent?.projectOwner === undefined) {
+          return null;
+        }
+        // Check if it's an empty string
+        if (typeof parent.projectOwner === "string" && parent.projectOwner.trim() === "") {
+          return null;
+        }
         if (!getBuilderProfileByPhid) return null;
         const phid = extractPhid(parent.projectOwner);
         if (!phid) return null;

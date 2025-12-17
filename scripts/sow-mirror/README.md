@@ -18,12 +18,12 @@ bun scripts/sow-mirror/mirror_sow_state.ts \
 
 ```bash
 bun scripts/sow-mirror/mirror_sow_state.ts \
-  https://switchboard-dev.powerhouse.xyz/mcp \
-  65f3e7e8-500d-4c42-9e73-8cd5d7966cd8 \
-  powerhouse-network-admin \
+  https://switchboard-staging.powerhouse.xyz/mcp \
+  939d0d95-88e3-4159-ba7a-3e80e1716286 \
+  builders \
   http://localhost:4001/mcp \
-  c16bec62-9a68-45aa-8d3f-510bb0c57044 \
-  bai-network-admin
+  e2b93368-c7de-4528-88c7-052e3f902dc0 \
+  liber-network-admin
 ```
 
 ## What It Does
