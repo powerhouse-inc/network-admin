@@ -46,24 +46,53 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     if (!filter) return true;
 
     if (filter.id && builder.id !== filter.id) return false;
-    if (filter.code && builder.code !== filter.code) return false;
-    if (filter.name && builder.name !== filter.name) return false;
-    if (filter.slug && builder.slug !== filter.slug) return false;
-    if (filter.type && builder.type !== filter.type) return false;
-    if (filter.status && builder.status !== filter.status) return false;
+    if (
+      filter.code &&
+      String(builder.code || "").toLowerCase() !==
+        String(filter.code || "").toLowerCase()
+    )
+      return false;
+    if (
+      filter.name &&
+      String(builder.name || "").toLowerCase() !==
+        String(filter.name || "").toLowerCase()
+    )
+      return false;
+    if (
+      filter.slug &&
+      String(builder.slug || "").toLowerCase() !==
+        String(filter.slug || "").toLowerCase()
+    )
+      return false;
+    if (
+      filter.type &&
+      String(builder.type || "").toLowerCase() !==
+        String(filter.type || "").toLowerCase()
+    )
+      return false;
+    if (
+      filter.status &&
+      String(builder.status || "").toLowerCase() !==
+        String(filter.status || "").toLowerCase()
+    )
+      return false;
 
     if (filter.skills && filter.skills.length > 0) {
-      const builderSkills = builder.skils || [];
+      const builderSkills = (builder.skils || []).map((s: string) =>
+        String(s).toLowerCase(),
+      );
       const hasAllSkills = filter.skills.every((skill) =>
-        builderSkills.includes(skill),
+        builderSkills.includes(String(skill).toLowerCase()),
       );
       if (!hasAllSkills) return false;
     }
 
     if (filter.scopes && filter.scopes.length > 0) {
-      const builderScopes = builder.scopes || [];
+      const builderScopes = (builder.scopes || []).map((s: string) =>
+        String(s).toLowerCase(),
+      );
       const hasAllScopes = filter.scopes.every((scope) =>
-        builderScopes.includes(scope),
+        builderScopes.includes(String(scope).toLowerCase()),
       );
       if (!hasAllScopes) return false;
     }
@@ -113,12 +142,38 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           }
         }
 
-        // Step 2: Extract projects from SOW documents and group by projectOwner
+        // Step 2: Build a map of deliverable OID -> deliverable object for each SOW
+        const sowDeliverablesMap = new Map<string, Map<string, any>>();
+
+        for (const sowDoc of sowDocs) {
+          const sowState = (sowDoc.state as any).global;
+          if (!sowState || typeof sowState !== "object") continue;
+
+          const deliverablesMap = new Map<string, any>();
+          const deliverables = Array.isArray(sowState.deliverables)
+            ? sowState.deliverables
+            : [];
+
+          for (const deliverable of deliverables) {
+            if (!deliverable || typeof deliverable !== "object") continue;
+            const deliverableId = deliverable.id;
+            if (deliverableId && typeof deliverableId === "string") {
+              deliverablesMap.set(deliverableId, deliverable);
+            }
+          }
+
+          sowDeliverablesMap.set(sowDoc.header.id, deliverablesMap);
+        }
+
+        // Step 3: Extract projects from SOW documents and group by projectOwner
         const projectsByOwner = new Map<string, any[]>();
 
         for (const sowDoc of sowDocs) {
           const sowState = (sowDoc.state as any).global;
-          if (!sowState || !Array.isArray(sowState.projects)) continue;
+          if (!sowState || typeof sowState !== "object") continue;
+          if (!Array.isArray(sowState.projects)) continue;
+
+          const deliverablesMap = sowDeliverablesMap.get(sowDoc.header.id) || new Map();
 
           for (const project of sowState.projects) {
             if (!project || typeof project !== "object") continue;
@@ -126,29 +181,109 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             const ownerPhid = extractPhid(project.projectOwner);
             if (!ownerPhid) continue;
 
-            // Transform project to BuilderProject format
-            const builderProject = {
-              id: project.id || null,
-              code: project.code || "",
-              title: project.title || "",
-              slug: project.slug || "",
-              abstract: project.abstract || null,
-              imageUrl: project.imageUrl || null,
-              scope: project.scope || null,
-              budgetType: project.budgetType || null,
-              currency: project.currency || null,
-              budget: project.budget || null,
-              expenditure: project.expenditure || null,
-            };
+            // Resolve scope deliverables from OIDs to actual deliverable objects
+            let resolvedScope = null;
+            if (project.scope && typeof project.scope === "object") {
+              try {
+                const scopeDeliverableOids = Array.isArray(project.scope.deliverables)
+                  ? project.scope.deliverables
+                  : [];
 
-            if (!projectsByOwner.has(ownerPhid)) {
-              projectsByOwner.set(ownerPhid, []);
+                const resolvedDeliverables = scopeDeliverableOids
+                  .map((oid: unknown) => {
+                    if (!oid || typeof oid !== "string") return null;
+                    const deliverable = deliverablesMap.get(oid);
+                    if (!deliverable || typeof deliverable !== "object") return null;
+
+                    // Transform to SOW_Deliverable format with error handling
+                    try {
+                      return {
+                        id: deliverable.id || "",
+                        icon: deliverable.icon ?? null,
+                        title: String(deliverable.title || ""),
+                        code: String(deliverable.code || ""),
+                        description: String(deliverable.description || ""),
+                        status: deliverable.status || "DRAFT",
+                        workProgress: deliverable.workProgress ?? null,
+                        keyResults: Array.isArray(deliverable.keyResults)
+                          ? deliverable.keyResults.map((kr: any) => ({
+                              id: kr?.id || "",
+                              title: String(kr?.title || ""),
+                              link: String(kr?.link || ""),
+                            }))
+                          : [],
+                        budgetAnchor: deliverable.budgetAnchor ?? null,
+                      };
+                    } catch (error) {
+                      console.warn(
+                        `Failed to transform deliverable ${oid}:`,
+                        error,
+                      );
+                      return null;
+                    }
+                  })
+                  .filter((d: any) => d !== null);
+
+                // Build resolved scope with error handling
+                resolvedScope = {
+                  deliverables: resolvedDeliverables,
+                  status:
+                    project.scope.status ||
+                    project.scope.deliverableSetStatus ||
+                    "DRAFT",
+                  progress: project.scope.progress ?? null,
+                  deliverablesCompleted: project.scope.deliverablesCompleted ?? {
+                    total: 0,
+                    completed: 0,
+                  },
+                };
+              } catch (error) {
+                console.warn(
+                  `Failed to resolve scope for project ${project.id}:`,
+                  error,
+                );
+                // Fallback to empty scope
+                resolvedScope = {
+                  deliverables: [],
+                  status: "DRAFT",
+                  progress: null,
+                  deliverablesCompleted: { total: 0, completed: 0 },
+                };
+              }
             }
-            projectsByOwner.get(ownerPhid)!.push(builderProject);
+
+            // Transform project to BuilderProject format with error handling
+            try {
+              const builderProject = {
+                id: project.id || "",
+                code: String(project.code || ""),
+                title: String(project.title || ""),
+                slug: String(project.slug || ""),
+                abstract: project.abstract ?? null,
+                imageUrl: project.imageUrl ?? null,
+                scope: resolvedScope,
+                budgetType: project.budgetType ?? null,
+                currency: project.currency ?? null,
+                budget: project.budget ?? null,
+                expenditure: project.expenditure ?? null,
+              };
+
+              if (!projectsByOwner.has(ownerPhid)) {
+                projectsByOwner.set(ownerPhid, []);
+              }
+              projectsByOwner.get(ownerPhid)!.push(builderProject);
+            } catch (error) {
+              console.warn(
+                `Failed to transform project ${project.id}:`,
+                error,
+              );
+              // Skip this project if transformation fails
+              continue;
+            }
           }
         }
 
-        // Step 3: Transform builder documents to BuilderProfileState format
+        // Step 4: Transform builder documents to BuilderProfileState format
         const builders = builderDocs
           .map((doc) => {
             const state = (doc.state as any).global;

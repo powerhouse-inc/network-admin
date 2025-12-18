@@ -108,18 +108,59 @@ export const schema: DocumentNode = gql`
     slug: String!
     abstract: String
     imageUrl: URL
-    scope: SOW_DeliverablesSet
+    scope: Builder_SOW_DeliverablesSet
     budgetType: SOW_BudgetType
     currency: SOW_PMCurrency
     budget: Float
     expenditure: SOW_BudgetExpenditure
   }
 
-  type SOW_DeliverablesSet {
-    deliverables: [OID!]!
+  type Builder_SOW_DeliverablesSet {
+    deliverables: [BuilderSOW_Deliverable!]!
     status: SOW_DeliverableSetStatus!
     progress: SOW_Progress!
     deliverablesCompleted: SOW_DeliverablesCompleted!
+  }
+
+  type BuilderSOW_Deliverable {
+    id: OID!
+    icon: String
+    title: String!
+    code: String!
+    description: String!
+    status: SOW_DeliverableStatus!
+    workProgress: SOW_Progress
+    keyResults: [SOW_KeyResult!]!
+    budgetAnchor: SOW_BudgetAnchorProject
+  }
+
+  enum SOW_DeliverableStatus {
+    WONT_DO
+    DRAFT
+    TODO
+    BLOCKED
+    IN_PROGRESS
+    DELIVERED
+    CANCELED
+  }
+
+  type SOW_KeyResult {
+    id: OID!
+    title: String!
+    link: String!
+  }
+
+  type SOW_BudgetAnchorProject {
+    project: OID
+    unit: SOW_Unit
+    unitCost: Float!
+    quantity: Float!
+    margin: Float!
+  }
+
+  enum SOW_Unit {
+    StoryPoints
+    Hours
   }
 
   enum SOW_BudgetType {
