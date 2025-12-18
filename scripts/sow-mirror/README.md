@@ -19,11 +19,11 @@ bun scripts/sow-mirror/mirror_sow_state.ts \
 ```bash
 bun scripts/sow-mirror/mirror_sow_state.ts \
   https://switchboard-staging.powerhouse.xyz/mcp \
-  939d0d95-88e3-4159-ba7a-3e80e1716286 \
-  builders \
-  http://localhost:4001/mcp \
-  e2b93368-c7de-4528-88c7-052e3f902dc0 \
-  liber-network-admin
+  76906dea-521f-4967-b003-7608569f63c0 \
+  powerhouse-network-admin \
+  https://switchboard-staging.powerhouse.xyz/mcp \
+  382ed5f7-4e1e-4c33-826c-02621c6d9186 \
+  builders
 ```
 
 ## What It Does
