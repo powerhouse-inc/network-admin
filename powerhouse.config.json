@@ -11,13 +11,13 @@
   },
   "packages": [
     {
-      "packageName": "@powerhousedao/builder-profile",
-      "version": "0.0.5",
+      "packageName": "@powerhousedao/project-management",
+      "version": "0.0.66",
       "provider": "npm"
     },
     {
-      "packageName": "@powerhousedao/project-management",
-      "version": "0.0.66",
+      "packageName": "@powerhousedao/builder-profile",
+      "version": "0.0.6",
       "provider": "npm"
     }
   ]
