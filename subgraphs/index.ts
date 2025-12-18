@@ -5,3 +5,4 @@ export * as WorkstreamSubgraph from "./workstream/index.js";
 export * as WorkstreamsSubgraph from "./workstreams/index.js";
 export * as NetworksSubgraph from "./networks/index.js";
 export * as BuildersSubgraph from "./builders/index.js";
+export * as BuildersAddonSubgraph from "./builders-addon/index.js";
