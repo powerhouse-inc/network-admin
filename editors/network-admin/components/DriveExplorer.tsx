@@ -21,7 +21,6 @@ import {
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { CreateDocumentModal } from "@powerhousedao/design-system/connect";
-import { type FileNode } from "document-drive";
 import { type DocumentModelModule, type PHDocument } from "document-model";
 import { PaymentIcon } from "./icons/PaymentIcon.js";
 import { RfpIcon } from "./icons/RfpIcon.js";
@@ -36,7 +35,6 @@ import {
   editClientInfo,
   editWorkstream,
 } from "../../../document-models/workstream/gen/creators.js";
-import Builders from "./builders.js";
 import type { BuildersDocument } from "../../../document-models/builders/index.js";
 
 const WorkstreamStatusEnums = [

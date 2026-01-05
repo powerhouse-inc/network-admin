@@ -23,7 +23,6 @@ export const schema: DocumentNode = gql`
     workstream_title: String
     workstream_status: WorkstreamStatus
     sow_phid: PHID
-    roadmap_oid: PHID
     final_milestone_target: DateTime
     initial_proposal_status: ProposalStatus
     initial_proposal_author: PHID
