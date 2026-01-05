@@ -177,6 +177,7 @@ function generateActions(remoteState: any, localState: any): any[] {
         scope: "global",
         input: {
           id: deliverable.id,
+          icon: deliverable.icon || undefined,
           owner: deliverable.owner || undefined,
           title: deliverable.title,
           code: deliverable.code,

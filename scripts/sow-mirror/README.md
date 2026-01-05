@@ -29,6 +29,7 @@ bun scripts/sow-mirror/mirror_sow_state.ts \
 ## What It Does
 
 The script:
+
 1. Fetches the complete state of the remote ScopeOfWork document
 2. Fetches the current state of the local ScopeOfWork document
 3. Compares both states and identifies what's missing locally
