@@ -5,10 +5,20 @@ import type { NetworkProfileNetworkProfileManagementOperations } from "@powerhou
 export const networkProfileNetworkProfileManagementOperations: NetworkProfileNetworkProfileManagementOperations =
   {
     setIconOperation(state: NetworkProfileState, action: SetIconAction) {
-      state.icon = action.input.icon || "";
+      if (action.input.icon !== undefined) {
+        state.icon = action.input.icon || "";
+      }
+      if (action.input.darkThemeIcon !== undefined) {
+        state.darkThemeIcon = action.input.darkThemeIcon || "";
+      }
     },
     setLogoOperation(state, action) {
-      state.logo = action.input.logo || "";
+      if (action.input.logo !== undefined) {
+        state.logo = action.input.logo || "";
+      }
+      if (action.input.darkThemeLogo !== undefined) {
+        state.darkThemeLogo = action.input.darkThemeLogo || "";
+      }
     },
     setLogoBigOperation(state, action) {
       state.logoBig = action.input.logoBig || "";

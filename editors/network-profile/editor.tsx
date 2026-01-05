@@ -111,20 +111,27 @@ function ImageUrlInput({
   value,
   onChange,
   placeholder,
-  fileSize = "200KB",
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  fileSize?: string;
 }) {
   const [imageError, setImageError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // Initialize with the current value prop to ensure it's set correctly on mount
+  const [inputValue, setInputValue] = useState(() => value || "");
 
-  // Reset image error when value changes
+  // Sync input value with prop value when it changes externally
+  // This is important when toggling between light/dark modes or when state updates
+  useEffect(() => {
+    setInputValue(value || "");
+  }, [value]);
+
+  // Reset image error when value changes (important for dark mode toggle and new URLs)
   useEffect(() => {
     setImageError(false);
+    // Force image reload by clearing any cached error state
   }, [value]);
 
   const handleImageClick = () => {
@@ -163,6 +170,7 @@ function ImageUrlInput({
                 (value.startsWith("http://") ||
                   value.startsWith("https://")) ? (
                   <img
+                    key={value}
                     src={value}
                     alt={`${label} preview`}
                     className="w-full h-full object-cover"
@@ -178,7 +186,6 @@ function ImageUrlInput({
                   {value || placeholder || `${label.replace(":", "")}.jpg`}
                 </div>
                 <div className="text-xs text-gray-500">
-                  File Type: jpg | File Size: {value ? fileSize : "0KB"}
                   {imageError && value && (
                     <div className="text-red-500 mt-1">
                       ⚠ Failed to load image
@@ -202,9 +209,13 @@ function ImageUrlInput({
             </div>
           </div>
           <div className="mt-3">
-            <TextInput
-              className="w-full"
-              defaultValue={value || ""}
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={inputValue}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setInputValue(e.target.value);
+              }}
               onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                 if (e.target.value !== value) {
                   onChange(e.target.value);
@@ -284,23 +295,13 @@ function ToggleableImageInput({
           </span>
         </div>
       </div>
-      {!isDarkMode ? (
-        <ImageUrlInput
-          label=""
-          value={lightValue}
-          onChange={onLightChange}
-          placeholder={lightPlaceholder}
-          fileSize={fileSize}
-        />
-      ) : (
-        <ImageUrlInput
-          label=""
-          value={darkValue}
-          onChange={onDarkChange}
-          placeholder={darkPlaceholder}
-          fileSize={fileSize}
-        />
-      )}
+      <ImageUrlInput
+        key={isDarkMode ? "dark" : "light"}
+        label=""
+        value={isDarkMode ? darkValue : lightValue}
+        onChange={isDarkMode ? onDarkChange : onLightChange}
+        placeholder={isDarkMode ? darkPlaceholder : lightPlaceholder}
+      />
     </div>
   );
 }
@@ -332,24 +333,20 @@ export default function Editor() {
         case "icon":
           action = actions.setIcon({
             icon: value as string,
-            darkThemeIcon: state?.darkThemeIcon || "",
           });
           break;
         case "darkThemeIcon":
           action = actions.setIcon({
-            icon: state?.icon || "",
             darkThemeIcon: value as string,
           });
           break;
         case "logo":
           action = actions.setLogo({
             logo: value as string,
-            darkThemeLogo: state?.darkThemeLogo || "",
           });
           break;
         case "darkThemeLogo":
           action = actions.setLogo({
-            logo: state?.logo || "",
             darkThemeLogo: value as string,
           });
           break;
@@ -437,8 +434,8 @@ export default function Editor() {
               onDarkChange={(value) =>
                 handleFieldChange("darkThemeIcon", value)
               }
-              lightPlaceholder="PowerhouseIcon.jpg"
-              darkPlaceholder="PowerhouseIconDark.jpg"
+              lightPlaceholder="icon.jpg"
+              darkPlaceholder="icon-dark.jpg"
               fileSize="200KB"
             />
 
@@ -451,8 +448,8 @@ export default function Editor() {
               onDarkChange={(value) =>
                 handleFieldChange("darkThemeLogo", value)
               }
-              lightPlaceholder="PowerhouseLogo.jpg"
-              darkPlaceholder="PowerhouseLogoDark.jpg"
+              lightPlaceholder="logo.jpg"
+              darkPlaceholder="logo-dark.jpg"
               fileSize="2MB"
             />
 
@@ -462,7 +459,6 @@ export default function Editor() {
               value={state?.logoBig || ""}
               onChange={(value) => handleFieldChange("logoBig", value)}
               placeholder="LargeLogo.jpg"
-              fileSize="10MB"
             />
 
             {/* Website */}
