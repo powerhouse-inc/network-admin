@@ -10,6 +10,7 @@ type BuildersFilter = {
   status?: string;
   skills?: string[];
   scopes?: string[];
+  networkSlug?: string;
 };
 
 export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
@@ -35,7 +36,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     try {
       const drives = await (reactor as any).getDrives?.();
       if (Array.isArray(drives) && drives.length > 0) return drives as string[];
-    } catch {}
+    } catch { }
     return [] as string[];
   };
 
@@ -49,31 +50,31 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     if (
       filter.code &&
       String(builder.code || "").toLowerCase() !==
-        String(filter.code || "").toLowerCase()
+      String(filter.code || "").toLowerCase()
     )
       return false;
     if (
       filter.name &&
       String(builder.name || "").toLowerCase() !==
-        String(filter.name || "").toLowerCase()
+      String(filter.name || "").toLowerCase()
     )
       return false;
     if (
       filter.slug &&
       String(builder.slug || "").toLowerCase() !==
-        String(filter.slug || "").toLowerCase()
+      String(filter.slug || "").toLowerCase()
     )
       return false;
     if (
       filter.type &&
       String(builder.type || "").toLowerCase() !==
-        String(filter.type || "").toLowerCase()
+      String(filter.type || "").toLowerCase()
     )
       return false;
     if (
       filter.status &&
       String(builder.status || "").toLowerCase() !==
-        String(filter.status || "").toLowerCase()
+      String(filter.status || "").toLowerCase()
     )
       return false;
 
@@ -106,39 +107,122 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         parent: unknown,
         args: { filter?: BuildersFilter },
       ) => {
-        const filter = args.filter;
         const drives = await getCandidateDrives();
+        const filter = args.filter;
 
-        // Step 1: Collect all builder profile documents
-        const builderDocs: PHDocument[] = [];
-        const sowDocs: PHDocument[] = [];
+        let builderDocs: PHDocument[] = [];
+        let sowDocs: PHDocument[] = [];
+        let allowedDriveIds = new Set<string>(drives);
 
-        for (const driveId of drives) {
-          try {
-            const docIds = await reactor.getDocuments(driveId);
-            const docs = await Promise.all(
-              docIds.map(async (docId) => {
-                try {
-                  return await reactor.getDocument<PHDocument>(docId);
-                } catch {
-                  return null;
+        // Step 1: If networkSlug is provided, identify the network drive and valid builder PHIDs
+        if (filter?.networkSlug) {
+          allowedDriveIds.clear();
+          const targetNetworkSlug = filter.networkSlug.toLowerCase().trim();
+          let targetDriveId: string | null = null;
+          let builderPhids: string[] = [];
+
+          // Find the network drive matching the slug
+          for (const driveId of drives) {
+            try {
+              const docIds = await reactor.getDocuments(driveId);
+              const docs = await Promise.all(
+                docIds.map(async (docId) => {
+                  try {
+                    return await reactor.getDocument<PHDocument>(docId);
+                  } catch {
+                    return null;
+                  }
+                }),
+              );
+
+              const networkDoc = docs.find((doc) => {
+                if (!doc || doc.header.documentType !== "powerhouse/network-profile") return false;
+                const state = (doc.state as any).global;
+                if (!state?.name) return false;
+                const slug = state.name.toLowerCase().trim().split(/\s+/).join("-");
+                return slug === targetNetworkSlug;
+              });
+
+              if (networkDoc) {
+                targetDriveId = driveId;
+
+                // Get the builders list from this drive
+                const buildersDoc = docs.find(
+                  (doc) => doc && doc.header.documentType === "powerhouse/builders"
+                );
+
+                if (buildersDoc) {
+                  const state = (buildersDoc.state as any).global;
+                  if (Array.isArray(state.builders)) {
+                    builderPhids = state.builders.filter((id: any) => typeof id === "string");
+                  }
                 }
-              }),
-            );
-
-            for (const doc of docs) {
-              if (!doc) continue;
-
-              if (doc.header.documentType === "powerhouse/builder-profile") {
-                builderDocs.push(doc);
-              } else if (
-                doc.header.documentType === "powerhouse/scopeofwork"
-              ) {
-                sowDocs.push(doc);
+                break;
               }
+            } catch (error) {
+              console.warn(`Failed to inspect drive ${driveId}:`, error);
             }
-          } catch (error) {
-            console.warn(`Failed to process drive ${driveId}:`, error);
+          }
+
+          if (targetDriveId) {
+            allowedDriveIds.add(targetDriveId);
+
+            // Fetch SOWs from the network drive
+            try {
+              const docIds = await reactor.getDocuments(targetDriveId);
+              for (const docId of docIds) {
+                try {
+                  const doc = await reactor.getDocument<PHDocument>(docId);
+                  if (doc.header.documentType === "powerhouse/scopeofwork") {
+                    sowDocs.push(doc);
+                  }
+                } catch { }
+              }
+            } catch (e) {
+              console.warn(`Failed to fetch SOWs from drive ${targetDriveId}`, e);
+            }
+
+            // Fetch specific builder profiles
+            builderDocs = (
+              await Promise.all(
+                builderPhids.map(async (phid) => {
+                  try {
+                    const doc = await reactor.getDocument<PHDocument>(phid);
+                    return doc.header.documentType === "powerhouse/builder-profile" ? doc : null;
+                  } catch {
+                    return null;
+                  }
+                })
+              )
+            ).filter((doc): doc is PHDocument => doc !== null);
+          }
+        } else {
+          // Default behavior: Scan all drives
+          for (const driveId of drives) {
+            try {
+              const docIds = await reactor.getDocuments(driveId);
+              const docs = await Promise.all(
+                docIds.map(async (docId) => {
+                  try {
+                    return await reactor.getDocument<PHDocument>(docId);
+                  } catch {
+                    return null;
+                  }
+                }),
+              );
+
+              for (const doc of docs) {
+                if (!doc) continue;
+
+                if (doc.header.documentType === "powerhouse/builder-profile") {
+                  builderDocs.push(doc);
+                } else if (doc.header.documentType === "powerhouse/scopeofwork") {
+                  sowDocs.push(doc);
+                }
+              }
+            } catch (error) {
+              console.warn(`Failed to process drive ${driveId}:`, error);
+            }
           }
         }
 
@@ -207,10 +291,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                         workProgress: deliverable.workProgress ?? null,
                         keyResults: Array.isArray(deliverable.keyResults)
                           ? deliverable.keyResults.map((kr: any) => ({
-                              id: kr?.id || "",
-                              title: String(kr?.title || ""),
-                              link: String(kr?.link || ""),
-                            }))
+                            id: kr?.id || "",
+                            title: String(kr?.title || ""),
+                            link: String(kr?.link || ""),
+                          }))
                           : [],
                         budgetAnchor: deliverable.budgetAnchor ?? null,
                       };
@@ -319,7 +403,14 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
             return builder;
           })
-          .filter((builder) => applyFilters(builder, filter));
+          .filter((builder) => {
+            // Apply standard filters
+            if (!applyFilters(builder, filter)) {
+              return false;
+            }
+
+            return true;
+          });
 
         return builders;
       },

@@ -20,6 +20,7 @@ export const schema: DocumentNode = gql`
     status: BuilderStatus
     skills: [BuilderSkill!]
     scopes: [BuilderScope!]
+    networkSlug: String
   }
 
 
