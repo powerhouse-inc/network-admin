@@ -38,7 +38,7 @@ export const schema: DocumentNode = gql`
     type: teamType!
     contributors: [PHID!]!
     status: BuilderStatus
-    skils: [BuilderSkill!]!
+    skills: [BuilderSkill!]!
     scopes: [BuilderScope!]!
     links: [BuilderLink!]!
     projects: [BuilderProject!]!
@@ -97,7 +97,7 @@ export const schema: DocumentNode = gql`
     type: teamType!
     contributors: [Builder!]!
     status: BuilderStatus
-    skils: [BuilderSkill!]!
+    skills: [BuilderSkill!]!
     scopes: [BuilderScope!]!
     links: [BuilderLink!]!
   }

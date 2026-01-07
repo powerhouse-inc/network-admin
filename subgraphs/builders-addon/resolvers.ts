@@ -79,7 +79,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       return false;
 
     if (filter.skills && filter.skills.length > 0) {
-      const builderSkills = (builder.skils || []).map((s: string) =>
+      const builderSkills = (builder.skills || []).map((s: string) =>
         String(s).toLowerCase(),
       );
       const hasAllSkills = filter.skills.every((skill) =>
@@ -377,7 +377,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             const icon = String(state?.icon ?? "");
             const description = String(state?.description ?? state?.slug ?? "");
             const type = state?.type ?? "INDIVIDUAL";
-            const skils = Array.isArray(state?.skils) ? state.skils : [];
+            const skills = Array.isArray(state?.skills) ? state.skills : [];
             const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
             const links = Array.isArray(state?.links) ? state.links : [];
             const contributors = Array.isArray(state?.contributors)
@@ -395,7 +395,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               type,
               contributors,
               status: state?.status ?? null,
-              skils,
+              skills,
               scopes,
               links,
               projects: projectsByOwner.get(doc.header.id) || [],
