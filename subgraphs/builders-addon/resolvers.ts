@@ -36,45 +36,42 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     try {
       const drives = await (reactor as any).getDrives?.();
       if (Array.isArray(drives) && drives.length > 0) return drives as string[];
-    } catch { }
+    } catch {}
     return [] as string[];
   };
 
-  const applyFilters = (
-    builder: any,
-    filter?: BuildersFilter,
-  ): boolean => {
+  const applyFilters = (builder: any, filter?: BuildersFilter): boolean => {
     if (!filter) return true;
 
     if (filter.id && builder.id !== filter.id) return false;
     if (
       filter.code &&
       String(builder.code || "").toLowerCase() !==
-      String(filter.code || "").toLowerCase()
+        String(filter.code || "").toLowerCase()
     )
       return false;
     if (
       filter.name &&
       String(builder.name || "").toLowerCase() !==
-      String(filter.name || "").toLowerCase()
+        String(filter.name || "").toLowerCase()
     )
       return false;
     if (
       filter.slug &&
       String(builder.slug || "").toLowerCase() !==
-      String(filter.slug || "").toLowerCase()
+        String(filter.slug || "").toLowerCase()
     )
       return false;
     if (
       filter.type &&
       String(builder.type || "").toLowerCase() !==
-      String(filter.type || "").toLowerCase()
+        String(filter.type || "").toLowerCase()
     )
       return false;
     if (
       filter.status &&
       String(builder.status || "").toLowerCase() !==
-      String(filter.status || "").toLowerCase()
+        String(filter.status || "").toLowerCase()
     )
       return false;
 
@@ -103,16 +100,13 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
   return {
     Query: {
-      builders: async (
-        parent: unknown,
-        args: { filter?: BuildersFilter },
-      ) => {
+      builders: async (parent: unknown, args: { filter?: BuildersFilter }) => {
         const drives = await getCandidateDrives();
         const filter = args.filter;
 
         let builderDocs: PHDocument[] = [];
-        let sowDocs: PHDocument[] = [];
-        let allowedDriveIds = new Set<string>(drives);
+        const sowDocs: PHDocument[] = [];
+        const allowedDriveIds = new Set<string>(drives);
 
         // Step 1: If networkSlug is provided, identify the network drive and valid builder PHIDs
         if (filter?.networkSlug) {
@@ -136,10 +130,18 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               );
 
               const networkDoc = docs.find((doc) => {
-                if (!doc || doc.header.documentType !== "powerhouse/network-profile") return false;
+                if (
+                  !doc ||
+                  doc.header.documentType !== "powerhouse/network-profile"
+                )
+                  return false;
                 const state = (doc.state as any).global;
                 if (!state?.name) return false;
-                const slug = state.name.toLowerCase().trim().split(/\s+/).join("-");
+                const slug = state.name
+                  .toLowerCase()
+                  .trim()
+                  .split(/\s+/)
+                  .join("-");
                 return slug === targetNetworkSlug;
               });
 
@@ -148,13 +150,16 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
                 // Get the builders list from this drive
                 const buildersDoc = docs.find(
-                  (doc) => doc && doc.header.documentType === "powerhouse/builders"
+                  (doc) =>
+                    doc && doc.header.documentType === "powerhouse/builders",
                 );
 
                 if (buildersDoc) {
                   const state = (buildersDoc.state as any).global;
                   if (Array.isArray(state.builders)) {
-                    builderPhids = state.builders.filter((id: any) => typeof id === "string");
+                    builderPhids = state.builders.filter(
+                      (id: any) => typeof id === "string",
+                    );
                   }
                 }
                 break;
@@ -176,10 +181,13 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                   if (doc.header.documentType === "powerhouse/scopeofwork") {
                     sowDocs.push(doc);
                   }
-                } catch { }
+                } catch {}
               }
             } catch (e) {
-              console.warn(`Failed to fetch SOWs from drive ${targetDriveId}`, e);
+              console.warn(
+                `Failed to fetch SOWs from drive ${targetDriveId}`,
+                e,
+              );
             }
 
             // Fetch specific builder profiles
@@ -188,11 +196,14 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                 builderPhids.map(async (phid) => {
                   try {
                     const doc = await reactor.getDocument<PHDocument>(phid);
-                    return doc.header.documentType === "powerhouse/builder-profile" ? doc : null;
+                    return doc.header.documentType ===
+                      "powerhouse/builder-profile"
+                      ? doc
+                      : null;
                   } catch {
                     return null;
                   }
-                })
+                }),
               )
             ).filter((doc): doc is PHDocument => doc !== null);
           }
@@ -216,7 +227,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
                 if (doc.header.documentType === "powerhouse/builder-profile") {
                   builderDocs.push(doc);
-                } else if (doc.header.documentType === "powerhouse/scopeofwork") {
+                } else if (
+                  doc.header.documentType === "powerhouse/scopeofwork"
+                ) {
                   sowDocs.push(doc);
                 }
               }
@@ -257,7 +270,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           if (!sowState || typeof sowState !== "object") continue;
           if (!Array.isArray(sowState.projects)) continue;
 
-          const deliverablesMap = sowDeliverablesMap.get(sowDoc.header.id) || new Map();
+          const deliverablesMap =
+            sowDeliverablesMap.get(sowDoc.header.id) || new Map();
 
           for (const project of sowState.projects) {
             if (!project || typeof project !== "object") continue;
@@ -269,7 +283,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             let resolvedScope = null;
             if (project.scope && typeof project.scope === "object") {
               try {
-                const scopeDeliverableOids = Array.isArray(project.scope.deliverables)
+                const scopeDeliverableOids = Array.isArray(
+                  project.scope.deliverables,
+                )
                   ? project.scope.deliverables
                   : [];
 
@@ -277,7 +293,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                   .map((oid: unknown) => {
                     if (!oid || typeof oid !== "string") return null;
                     const deliverable = deliverablesMap.get(oid);
-                    if (!deliverable || typeof deliverable !== "object") return null;
+                    if (!deliverable || typeof deliverable !== "object")
+                      return null;
 
                     // Transform to SOW_Deliverable format with error handling
                     try {
@@ -291,10 +308,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                         workProgress: deliverable.workProgress ?? null,
                         keyResults: Array.isArray(deliverable.keyResults)
                           ? deliverable.keyResults.map((kr: any) => ({
-                            id: kr?.id || "",
-                            title: String(kr?.title || ""),
-                            link: String(kr?.link || ""),
-                          }))
+                              id: kr?.id || "",
+                              title: String(kr?.title || ""),
+                              link: String(kr?.link || ""),
+                            }))
                           : [],
                         budgetAnchor: deliverable.budgetAnchor ?? null,
                       };
@@ -316,7 +333,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                     project.scope.deliverableSetStatus ||
                     "DRAFT",
                   progress: project.scope.progress ?? null,
-                  deliverablesCompleted: project.scope.deliverablesCompleted ?? {
+                  deliverablesCompleted: project.scope
+                    .deliverablesCompleted ?? {
                     total: 0,
                     completed: 0,
                   },
@@ -357,10 +375,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               }
               projectsByOwner.get(ownerPhid)!.push(builderProject);
             } catch (error) {
-              console.warn(
-                `Failed to transform project ${project.id}:`,
-                error,
-              );
+              console.warn(`Failed to transform project ${project.id}:`, error);
               // Skip this project if transformation fails
               continue;
             }

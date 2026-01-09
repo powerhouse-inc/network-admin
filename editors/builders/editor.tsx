@@ -6,11 +6,10 @@ import { actions as buildersActions } from "../../document-models/builders/actio
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
-  useDocumentsInSelectedDrive,
   useDrives,
   useGetDocuments,
 } from "@powerhousedao/reactor-browser";
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import type { FileNode } from "document-drive";
 import {
   ObjectSetTable,
@@ -18,13 +17,130 @@ import {
   type ColumnAlignment,
   PHIDInput,
 } from "@powerhousedao/document-engineering";
+import type { BuilderProfileDocument } from "@powerhousedao/builder-profile/document-models/builder-profile";
+import { useRemoteBuilderProfiles } from "./hooks/useRemoteBuilderProfiles.js";
 
 type Builder = {
   phid: string;
   name: string;
   slug: string;
-  icon: string;
+  icon: string | null;
 };
+
+type ProfileOption = {
+  id: string;
+  label: string;
+  value: string;
+  title: string;
+};
+
+/**
+ * Wrapper component for PHIDInput that properly tracks selected PHID
+ * and handles saving on blur/enter with the correct PHID value.
+ */
+function BuilderPHIDInput({
+  initialPhid,
+  options,
+  onSave,
+  fetchOptionsCallback,
+}: {
+  initialPhid: string;
+  options: ProfileOption[];
+  onSave: (phid: string) => void;
+  fetchOptionsCallback: (input: string) => Promise<ProfileOption[]>;
+}) {
+  const [inputText, setInputText] = useState("");
+  const [hasSaved, setHasSaved] = useState(false);
+
+  useEffect(() => {
+    setInputText("");
+    setHasSaved(false);
+  }, [initialPhid]);
+
+  const findPhidByInput = useCallback(
+    (input: string): string | null => {
+      const trimmed = input.trim();
+      if (!trimmed) return null;
+
+      const lowerInput = trimmed.toLowerCase();
+
+      const exactMatchByName = options.find(
+        (opt) => opt.label.toLowerCase() === lowerInput,
+      );
+      if (exactMatchByName) return exactMatchByName.id;
+
+      const partialMatchByName = options.find((opt) =>
+        opt.label.toLowerCase().startsWith(lowerInput),
+      );
+      if (partialMatchByName) return partialMatchByName.id;
+
+      const containsMatches = options.filter((opt) =>
+        opt.label.toLowerCase().includes(lowerInput),
+      );
+      if (containsMatches.length === 1) return containsMatches[0].id;
+
+      const matchById = options.find(
+        (opt) => opt.id.toLowerCase() === lowerInput,
+      );
+      if (matchById) return matchById.id;
+
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (uuidRegex.test(trimmed)) return trimmed;
+
+      return null;
+    },
+    [options],
+  );
+
+  const isKnownPhid = useCallback(
+    (value: string): boolean => {
+      return options.some((opt) => opt.id === value);
+    },
+    [options],
+  );
+
+  const savePhid = useCallback(
+    (phid: string) => {
+      if (!hasSaved && phid && phid !== initialPhid) {
+        setHasSaved(true);
+        onSave(phid);
+      }
+    },
+    [hasSaved, initialPhid, onSave],
+  );
+
+  const handleBlur = useCallback(() => {
+    if (hasSaved) return;
+    if (inputText) {
+      const foundPhid = findPhidByInput(inputText);
+      if (foundPhid) {
+        savePhid(foundPhid);
+      }
+    }
+  }, [hasSaved, inputText, findPhidByInput, savePhid]);
+
+  return (
+    <PHIDInput
+      value={initialPhid}
+      onChange={(newValue) => {
+        if (isKnownPhid(newValue)) {
+          savePhid(newValue);
+        }
+      }}
+      onInput={(e) => {
+        const target = e.target as HTMLInputElement;
+        setInputText(target.value);
+      }}
+      onBlur={handleBlur}
+      placeholder="Enter PHID or search by name"
+      className="w-full"
+      variant="withValueAndTitle"
+      initialOptions={options}
+      fetchOptionsCallback={fetchOptionsCallback}
+    />
+  );
+}
 
 /** Implement your editor behavior here */
 export default function Editor() {
@@ -65,52 +181,96 @@ export default function Editor() {
   // Fetch all builder profile documents from all drives
   const builderProfileDocuments = useGetDocuments(builderPhids);
 
-  // Create a map of PHID to document for quick lookup
-  const builderProfileMap = useMemo(() => {
-    if (!builderProfileDocuments) return new Map();
-    const map = new Map();
+  // Create a map of PHID to document for quick lookup (local drives)
+  const localBuilderProfileMap = useMemo(() => {
+    const map = new Map<string, BuilderProfileDocument>();
+    if (!builderProfileDocuments) return map;
     builderProfileDocuments.forEach((doc) => {
       if (doc.header.documentType === "powerhouse/builder-profile") {
-        map.set(doc.header.id, doc);
+        map.set(doc.header.id, doc as BuilderProfileDocument);
       }
     });
     return map;
   }, [builderProfileDocuments]);
 
-  // Helper function to get builder profile documents from all drives
-  const getBuilderProfiles = useCallback(() => {
-    return builderProfileNodesWithDriveId.map(({ node }) => {
-      const doc = builderProfileMap.get(node.id);
-      const name = doc?.state?.global?.name || node.name || node.id;
-      return {
-        id: node.id,
-        label: name,
-        value: node.id,
-        title: name,
-      };
-    });
-  }, [builderProfileNodesWithDriveId, builderProfileMap]);
+  // Fetch remote profiles as fallback for builders not found locally
+  const { profileMap: remoteProfileMap, allProfiles: remoteProfiles } =
+    useRemoteBuilderProfiles(localBuilderProfileMap);
 
-  // Helper function to get builder profile data by PHID from all drives
-  const getBuilderProfileByPhid = (phid: string) => {
-    const doc = builderProfileMap.get(phid);
-    if (!doc) return null;
+  // Helper function to get builder profile documents from all drives (local + remote)
+  const getBuilderProfiles = useCallback((): ProfileOption[] => {
+    // Start with local profiles
+    const profileOptions: ProfileOption[] = builderProfileNodesWithDriveId.map(
+      ({ node }) => {
+        const doc = localBuilderProfileMap.get(node.id);
+        const name = doc?.state?.global?.name || node.name || node.id;
+        return {
+          id: node.id,
+          label: name,
+          value: node.id,
+          title: name,
+        };
+      },
+    );
 
-    return {
-      name: doc.state.global?.name || doc.header.id,
-      slug: doc.state.global?.slug || doc.header.id,
-      icon: doc.state.global?.icon || null,
-    };
-  };
+    // Add remote profiles that aren't already in local
+    const localIds = new Set(profileOptions.map((p) => p.id));
+    for (const remoteProfile of remoteProfiles) {
+      if (!localIds.has(remoteProfile.id)) {
+        const name = remoteProfile.state?.name || remoteProfile.id;
+        profileOptions.push({
+          id: remoteProfile.id,
+          label: name,
+          value: remoteProfile.id,
+          title: name,
+        });
+      }
+    }
 
-  const builders = useMemo(() => {
-    return doc?.state.global.builders.map((phid) => ({
-      phid: phid,
-      name: getBuilderProfileByPhid(phid)?.name || "",
-      slug: getBuilderProfileByPhid(phid)?.slug || "",
-      icon: getBuilderProfileByPhid(phid)?.icon || null,
-    }));
-  }, [doc, builderProfileMap]);
+    return profileOptions;
+  }, [builderProfileNodesWithDriveId, localBuilderProfileMap, remoteProfiles]);
+
+  // Helper function to get builder profile data by PHID (local first, then remote fallback)
+  const getBuilderProfileByPhid = useCallback(
+    (phid: string) => {
+      // Try local first
+      const localDoc = localBuilderProfileMap.get(phid);
+      if (localDoc) {
+        return {
+          name: localDoc.state.global?.name || localDoc.header.id,
+          slug: localDoc.state.global?.slug || localDoc.header.id,
+          icon: localDoc.state.global?.icon || null,
+        };
+      }
+
+      // Fall back to remote
+      const remoteProfile = remoteProfileMap.get(phid);
+      if (remoteProfile) {
+        return {
+          name: remoteProfile.state?.name || remoteProfile.id,
+          slug: remoteProfile.state?.slug || remoteProfile.id,
+          icon: remoteProfile.state?.icon || null,
+        };
+      }
+
+      return null;
+    },
+    [localBuilderProfileMap, remoteProfileMap],
+  );
+
+  const builders = useMemo<Builder[]>(() => {
+    return (
+      doc?.state.global.builders.map((phid) => {
+        const profile = getBuilderProfileByPhid(phid);
+        return {
+          phid: phid,
+          name: profile?.name || "",
+          slug: profile?.slug || "",
+          icon: profile?.icon || null,
+        };
+      }) || []
+    );
+  }, [doc, getBuilderProfileByPhid]);
 
   const columns = useMemo<Array<ColumnDef<Builder>>>(
     () => [
@@ -123,9 +283,9 @@ export default function Editor() {
         onSave: (newValue, context) => {
           const currentId = context.row.phid || "";
           if (newValue !== currentId && newValue && currentId) {
-            // First remove the old agent
+            // First remove the old builder
             dispatch(buildersActions.removeBuilder({ builderPhid: currentId }));
-            // Then add the new agent with the new PHID
+            // Then add the new builder with the new PHID
             dispatch(
               buildersActions.addBuilder({
                 builderPhid: newValue as string,
@@ -135,75 +295,63 @@ export default function Editor() {
           }
           return false;
         },
-        renderCellEditor: (value, onChange, context) => (
-          <PHIDInput
-            value={(value as string) || ""}
-            onChange={(newValue) => {
-              onChange(newValue);
-            }}
-            onBlur={(e) => {
-              const newValue = e.target.value;
-              const currentValue = (value as string) || "";
+        renderCellEditor: (_value, _onChange, context) => {
+          const currentPhid = context.row.phid || "";
 
-              // If a PHID is entered and it's different from current value
-              if (newValue && newValue !== currentValue) {
-                const builderProfile = getBuilderProfileByPhid(newValue);
-                const existingBuilder = builders?.find(
-                  (builder) => builder?.phid === newValue,
-                );
-
-                if (!existingBuilder) {
-                  // If we're editing an existing row (has an ID), remove the old one first
-                  if (context.row.phid && context.row.phid !== newValue) {
-                    dispatch(
-                      buildersActions.removeBuilder({
-                        builderPhid: context.row.phid,
-                      }),
-                    );
-                  }
-
-                  if (builderProfile) {
-                    // Create new agent with data from builder profile
-                    dispatch(
-                      buildersActions.addBuilder({
-                        builderPhid: newValue,
-                      }),
-                    );
-                  } else {
-                    // Manual PHID entry - create agent with empty data that user can fill
-                    dispatch(
-                      buildersActions.addBuilder({
-                        builderPhid: newValue,
-                      }),
-                    );
-                  }
-                }
-              }
-            }}
-            placeholder="Enter PHID"
-            className="w-full"
-            variant="withValueAndTitle"
-            initialOptions={getBuilderProfiles()}
-            fetchOptionsCallback={async (userInput: string) => {
-              const builderProfiles = getBuilderProfiles();
-
-              // Filter profiles based on user input
-              if (!userInput.trim()) {
-                return builderProfiles;
-              }
-
-              const filteredProfiles = builderProfiles.filter(
-                (profile) =>
-                  profile.label
-                    .toLowerCase()
-                    .includes(userInput.toLowerCase()) ||
-                  profile.id.toLowerCase().includes(userInput.toLowerCase()),
+          const handleSave = (phidValue: string) => {
+            // If a PHID is entered and it's different from current value
+            if (phidValue && phidValue !== currentPhid) {
+              const existingBuilder = builders.find(
+                (builder) => builder.phid === phidValue,
               );
 
-              return filteredProfiles;
-            }}
-          />
-        ),
+              if (!existingBuilder) {
+                // If we're editing an existing row (has an ID), remove the old one first
+                if (currentPhid && currentPhid !== phidValue) {
+                  dispatch(
+                    buildersActions.removeBuilder({
+                      builderPhid: currentPhid,
+                    }),
+                  );
+                }
+
+                // Add the new builder
+                dispatch(
+                  buildersActions.addBuilder({
+                    builderPhid: phidValue,
+                  }),
+                );
+              }
+            }
+          };
+
+          const fetchOptions = (userInput: string) => {
+            const builderProfiles = getBuilderProfiles();
+
+            // Filter profiles based on user input
+            if (!userInput.trim()) {
+              return Promise.resolve(builderProfiles);
+            }
+
+            const filteredProfiles = builderProfiles.filter(
+              (profile) =>
+                profile.label.toLowerCase().includes(userInput.toLowerCase()) ||
+                profile.id.toLowerCase().includes(userInput.toLowerCase()),
+            );
+
+            return Promise.resolve(filteredProfiles);
+          };
+
+          return (
+            <BuilderPHIDInput
+              key={`phid-input-${currentPhid || Date.now()}`}
+              initialPhid={currentPhid}
+              options={getBuilderProfiles()}
+              onSave={handleSave}
+              fetchOptionsCallback={fetchOptions}
+            />
+          );
+        },
         renderCell: (value) => {
           if (value === "" || !value) {
             return (
@@ -242,7 +390,7 @@ export default function Editor() {
         editable: false,
         align: "center" as ColumnAlignment,
         width: 150,
-        renderCell: (value, context) => {
+        renderCell: (_value, context) => {
           if (!context.row.icon) {
             return null;
           }
@@ -250,13 +398,10 @@ export default function Editor() {
             <div className="text-center">
               <img
                 src={context.row.icon}
-                alt="Agent icon"
+                alt="Builder icon"
                 className="w-10 h-10 rounded-sm mx-auto object-cover"
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
-                  e.currentTarget.nextElementSibling?.classList.remove(
-                    "hidden",
-                  );
                 }}
               />
             </div>
@@ -264,7 +409,7 @@ export default function Editor() {
         },
       },
     ],
-    [builders, builderProfileMap, getBuilderProfiles],
+    [builders, getBuilderProfiles, dispatch],
   );
 
   return (
@@ -277,7 +422,7 @@ export default function Editor() {
         <div className="mt-4 bg-white">
           <ObjectSetTable
             columns={columns}
-            data={builders || []}
+            data={builders}
             allowRowSelection={true}
             onDelete={(data) => {
               if (data.length > 0) {
@@ -289,13 +434,12 @@ export default function Editor() {
               }
             }}
             onAdd={(data) => {
-              // Only add if we have a title (name) - PHID will be handled by the PHIDInput onChange
-              if (data.title) {
-                // Generate a temporary ID if no PHID is provided
-                const tempId = (data as any).id || `temp-${Date.now()}`;
+              // Only add if we have a PHID
+              const phid = (data as { id?: string }).id;
+              if (phid) {
                 dispatch(
                   buildersActions.addBuilder({
-                    builderPhid: tempId,
+                    builderPhid: phid,
                   }),
                 );
               }

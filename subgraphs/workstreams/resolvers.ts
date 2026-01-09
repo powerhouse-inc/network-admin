@@ -69,7 +69,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     try {
       const drives = await (reactor as any).getDrives?.();
       if (Array.isArray(drives) && drives.length > 0) return drives as string[];
-    } catch { }
+    } catch {}
     return [] as string[];
   };
 
@@ -232,10 +232,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         );
 
         nestedContributorDocs.forEach((doc) => {
-          if (
-            doc &&
-            doc.header.documentType === "powerhouse/builder-profile"
-          ) {
+          if (doc && doc.header.documentType === "powerhouse/builder-profile") {
             builderProfileMap.set(doc.header.id, doc);
           }
         });
@@ -254,10 +251,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
       const initialProposalBase = state.initialProposal
         ? {
-          id: state.initialProposal.id,
-          status: state.initialProposal.status,
-          author: state.initialProposal.author,
-        }
+            id: state.initialProposal.id,
+            status: state.initialProposal.status,
+            author: state.initialProposal.author,
+          }
         : null;
 
       const alternativeProposalsBase = (state.alternativeProposals || []).map(
@@ -315,10 +312,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         rfp: rfpDetails,
         initialProposal: initialProposalBase
           ? {
-            ...initialProposalBase,
-            sow: initialSowDoc?.stateJSON || null,
-            paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
-          }
+              ...initialProposalBase,
+              sow: initialSowDoc?.stateJSON || null,
+              paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
+            }
           : null,
         alternativeProposals: alternativeProposalsBase.map(
           (proposal: any, index: number) => ({
@@ -500,16 +497,16 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         for (const sow of sowDocs) {
           if (!sow || typeof sow !== "object") continue;
 
-          if (Array.isArray((sow as any).contributors)) {
-            (sow as any).contributors.forEach((contributor: unknown) => {
+          if (Array.isArray(sow.contributors)) {
+            sow.contributors.forEach((contributor: unknown) => {
               const phid = extractPhid(contributor);
               if (phid) contributorPhids.add(phid);
             });
           }
 
           // Collect deliverable owners too so `SOW_Deliverable.owner` can resolve
-          if (Array.isArray((sow as any).deliverables)) {
-            (sow as any).deliverables.forEach((deliverable: unknown) => {
+          if (Array.isArray(sow.deliverables)) {
+            sow.deliverables.forEach((deliverable: unknown) => {
               if (!deliverable || typeof deliverable !== "object") return;
               const phid = extractPhid((deliverable as any).owner);
               if (phid) contributorPhids.add(phid);
@@ -517,8 +514,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           }
 
           // Collect project owners too so `SOW_Project.projectOwner` can resolve
-          if (Array.isArray((sow as any).projects)) {
-            (sow as any).projects.forEach((project: unknown) => {
+          if (Array.isArray(sow.projects)) {
+            sow.projects.forEach((project: unknown) => {
               if (!project || typeof project !== "object") return;
               const phid = extractPhid((project as any).projectOwner);
               if (phid) contributorPhids.add(phid);
@@ -624,16 +621,16 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         for (const sow of sowDocs) {
           if (!sow || typeof sow !== "object") continue;
 
-          if (Array.isArray((sow as any).contributors)) {
-            (sow as any).contributors.forEach((contributor: unknown) => {
+          if (Array.isArray(sow.contributors)) {
+            sow.contributors.forEach((contributor: unknown) => {
               const phid = extractPhid(contributor);
               if (phid) contributorPhids.add(phid);
             });
           }
 
           // Collect deliverable owners too so `SOW_Deliverable.owner` can resolve
-          if (Array.isArray((sow as any).deliverables)) {
-            (sow as any).deliverables.forEach((deliverable: unknown) => {
+          if (Array.isArray(sow.deliverables)) {
+            sow.deliverables.forEach((deliverable: unknown) => {
               if (!deliverable || typeof deliverable !== "object") return;
               const phid = extractPhid((deliverable as any).owner);
               if (phid) contributorPhids.add(phid);
@@ -641,8 +638,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           }
 
           // Collect project owners too so `SOW_Project.projectOwner` can resolve
-          if (Array.isArray((sow as any).projects)) {
-            (sow as any).projects.forEach((project: unknown) => {
+          if (Array.isArray(sow.projects)) {
+            sow.projects.forEach((project: unknown) => {
               if (!project || typeof project !== "object") return;
               const phid = extractPhid((project as any).projectOwner);
               if (phid) contributorPhids.add(phid);
@@ -808,16 +805,16 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             for (const sow of sowDocs) {
               if (!sow || typeof sow !== "object") continue;
 
-              if (Array.isArray((sow as any).contributors)) {
-                (sow as any).contributors.forEach((contributor: unknown) => {
+              if (Array.isArray(sow.contributors)) {
+                sow.contributors.forEach((contributor: unknown) => {
                   const phid = extractPhid(contributor);
                   if (phid) contributorPhids.add(phid);
                 });
               }
 
               // Collect deliverable owners too so `SOW_Deliverable.owner` can resolve
-              if (Array.isArray((sow as any).deliverables)) {
-                (sow as any).deliverables.forEach((deliverable: unknown) => {
+              if (Array.isArray(sow.deliverables)) {
+                sow.deliverables.forEach((deliverable: unknown) => {
                   if (!deliverable || typeof deliverable !== "object") return;
                   const phid = extractPhid((deliverable as any).owner);
                   if (phid) contributorPhids.add(phid);
@@ -825,8 +822,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               }
 
               // Collect project owners too so `SOW_Project.projectOwner` can resolve
-              if (Array.isArray((sow as any).projects)) {
-                (sow as any).projects.forEach((project: unknown) => {
+              if (Array.isArray(sow.projects)) {
+                sow.projects.forEach((project: unknown) => {
                   if (!project || typeof project !== "object") return;
                   const phid = extractPhid((project as any).projectOwner);
                   if (phid) contributorPhids.add(phid);
@@ -916,7 +913,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       },
     },
     SOW_ScopeOfWorkState: {
-      contributors: (parent: { contributors?: (string | { id?: string })[] }) => {
+      contributors: (parent: {
+        contributors?: (string | { id?: string })[];
+      }) => {
         // Resolve contributor PHIDs to Builder objects
         if (!parent.contributors || parent.contributors.length === 0) {
           return [];
@@ -927,7 +926,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         return parent.contributors
           .map((contributor: string | { id?: string }) => {
             // Handle both string PHIDs and objects with id property
-            const phid = typeof contributor === "string" ? contributor : contributor?.id;
+            const phid =
+              typeof contributor === "string" ? contributor : contributor?.id;
             if (!phid || typeof phid !== "string") {
               return null;
             }
@@ -955,11 +955,17 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     SOW_Project: {
       projectOwner: (parent: { projectOwner?: unknown }) => {
         // Handle null, undefined, or empty string cases
-        if (parent?.projectOwner === null || parent?.projectOwner === undefined) {
+        if (
+          parent?.projectOwner === null ||
+          parent?.projectOwner === undefined
+        ) {
           return null;
         }
         // Check if it's an empty string
-        if (typeof parent.projectOwner === "string" && parent.projectOwner.trim() === "") {
+        if (
+          typeof parent.projectOwner === "string" &&
+          parent.projectOwner.trim() === ""
+        ) {
           return null;
         }
         if (!getBuilderProfileByPhid) return null;
@@ -971,7 +977,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     Builder: {
       contributors: (parent: { _contributorPhids?: string[] }) => {
         // Resolve contributor PHIDs to Builder objects
-        if (!parent._contributorPhids || parent._contributorPhids.length === 0) {
+        if (
+          !parent._contributorPhids ||
+          parent._contributorPhids.length === 0
+        ) {
           return [];
         }
         if (!getBuilderProfileByPhid) {

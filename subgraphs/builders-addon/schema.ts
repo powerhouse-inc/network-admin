@@ -23,9 +23,6 @@ export const schema: DocumentNode = gql`
     networkSlug: String
   }
 
-
-
-
   ## Builder Profile Schema
   type BuilderProfileState {
     id: PHID
@@ -86,7 +83,7 @@ export const schema: DocumentNode = gql`
     label: String
   }
 
-  type Builder {
+  type Builder @key(fields: "id") {
     id: PHID
     code: String
     slug: String

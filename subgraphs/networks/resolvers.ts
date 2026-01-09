@@ -101,14 +101,20 @@ export const getResolvers = (
               try {
                 return await reactor.getDocument<PHDocument>(phid);
               } catch (error) {
-                console.warn(`Failed to fetch contributor builder profile ${phid}:`, error);
+                console.warn(
+                  `Failed to fetch contributor builder profile ${phid}:`,
+                  error,
+                );
                 return null;
               }
             }),
           );
 
           contributorDocs.forEach((doc) => {
-            if (doc && doc.header.documentType === "powerhouse/builder-profile") {
+            if (
+              doc &&
+              doc.header.documentType === "powerhouse/builder-profile"
+            ) {
               builderProfileMap.set(doc.header.id, doc);
             }
           });
@@ -147,11 +153,12 @@ export const getResolvers = (
           const buildersDoc = driveIdToBuildersDoc.get(driveId);
 
           // Get builders list from the BuildersDocument and map to builder profiles
-          const builders = buildersDoc && getBuilderProfileByPhid
-            ? (buildersDoc.state.global.builders || [])
-              .map((phid: string) => getBuilderProfileByPhid!(phid))
-              .filter((builder) => builder !== null)
-            : [];
+          const builders =
+            buildersDoc && getBuilderProfileByPhid
+              ? (buildersDoc.state.global.builders || [])
+                  .map((phid: string) => getBuilderProfileByPhid!(phid))
+                  .filter((builder) => builder !== null)
+              : [];
 
           return {
             id: doc.header.id,
@@ -192,7 +199,10 @@ export const getResolvers = (
     Builder: {
       contributors: (parent: { _contributorPhids?: string[] }) => {
         // Resolve contributor PHIDs to Builder objects
-        if (!parent._contributorPhids || parent._contributorPhids.length === 0) {
+        if (
+          !parent._contributorPhids ||
+          parent._contributorPhids.length === 0
+        ) {
           return [];
         }
         if (!getBuilderProfileByPhid) {

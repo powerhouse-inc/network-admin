@@ -459,7 +459,6 @@ export const schema: DocumentNode = gql`
     paymentTerms: PT_PaymentTermsState
   }
 
-
   # ==========================
   # Builder (typed)
   # ==========================
@@ -474,7 +473,7 @@ export const schema: DocumentNode = gql`
     type: teamType!
     contributors: [Builder!]!
     status: BuilderStatus
-    skils: [BuilderSkill!]!
+    skills: [BuilderSkill!]!
     scopes: [BuilderScope!]!
     links: [BuilderLink!]!
   }
