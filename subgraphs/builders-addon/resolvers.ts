@@ -392,7 +392,12 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             const icon = String(state?.icon ?? "");
             const description = String(state?.description ?? state?.slug ?? "");
             const type = state?.type ?? "INDIVIDUAL";
-            const skills = Array.isArray(state?.skills) ? state.skills : [];
+            // Document model uses 'skils' (typo), but GraphQL schema uses 'skills'
+            const skills = Array.isArray(state?.skils) 
+              ? state.skils 
+              : Array.isArray(state?.skills) 
+              ? state.skills 
+              : [];
             const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
             const links = Array.isArray(state?.links) ? state.links : [];
             const contributors = Array.isArray(state?.contributors)
