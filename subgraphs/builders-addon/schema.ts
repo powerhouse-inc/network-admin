@@ -31,6 +31,7 @@ export const schema: DocumentNode = gql`
     name: String
     icon: URL
     description: String
+    about: String
     lastModified: DateTime
     type: teamType!
     contributors: [PHID!]!

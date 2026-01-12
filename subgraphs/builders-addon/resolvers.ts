@@ -391,6 +391,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             const name = String(state?.name ?? doc.header?.name ?? "");
             const icon = String(state?.icon ?? "");
             const description = String(state?.description ?? state?.slug ?? "");
+            const about = String(state?.about ?? "");
             const type = state?.type ?? "INDIVIDUAL";
             // Document model uses 'skils' (typo), but GraphQL schema uses 'skills'
             const skills = Array.isArray(state?.skils) 
@@ -411,6 +412,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               name,
               icon,
               description,
+              about,
               lastModified: state?.lastModified ?? null,
               type,
               contributors,
