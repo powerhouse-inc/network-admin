@@ -52,8 +52,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       return false;
     if (
       filter.name &&
-      String(builder.name || "").toLowerCase() !==
+      !String(builder.name || "").toLowerCase().includes(
         String(filter.name || "").toLowerCase()
+      )
     )
       return false;
     if (
