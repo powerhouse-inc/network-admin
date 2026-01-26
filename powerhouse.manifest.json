@@ -6,7 +6,28 @@
         "name": "Powerhouse",
         "url": "https://powerhouse.inc/"
     },
-    "documentModels": [],
+    "documentModels": [
+        {
+            "id": "payment-terms",
+            "name": "PaymentTerms"
+        },
+        {
+            "id": "powerhouse/builders",
+            "name": "Builders"
+        },
+        {
+            "id": "powerhouse/rfp",
+            "name": "RequestForProposals"
+        },
+        {
+            "id": "powerhouse/network-profile",
+            "name": "NetworkProfile"
+        },
+        {
+            "id": "powerhouse/workstream",
+            "name": "Workstream"
+        }
+    ],
     "editors": [],
     "apps": [],
     "subgraphs": [],

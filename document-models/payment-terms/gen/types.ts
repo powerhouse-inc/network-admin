@@ -3,6 +3,7 @@ import type { PaymentTermsAction } from "./actions.js";
 import type { PaymentTermsState as PaymentTermsGlobalState } from "./schema/types.js";
 
 type PaymentTermsLocalState = Record<PropertyKey, never>;
+
 type PaymentTermsPHState = PHBaseState & {
   global: PaymentTermsGlobalState;
   local: PaymentTermsLocalState;

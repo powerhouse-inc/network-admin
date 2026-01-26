@@ -15,9 +15,6 @@ import {
   AddPaymentRequestInputSchema,
   RemovePaymentRequestInputSchema,
   EditInitialProposalInputSchema,
-  AddAlternativeProposalInputSchema,
-  EditAlternativeProposalInputSchema,
-  RemoveAlternativeProposalInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<WorkstreamPHState> = (
@@ -28,88 +25,78 @@ const stateReducer: StateReducer<WorkstreamPHState> = (
   if (isDocumentAction(action)) {
     return state;
   }
-
   switch (action.type) {
-    case "EDIT_WORKSTREAM":
+    case "EDIT_WORKSTREAM": {
       EditWorkstreamInputSchema().parse(action.input);
+
       workstreamWorkstreamOperations.editWorkstreamOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "EDIT_CLIENT_INFO":
+      break;
+    }
+
+    case "EDIT_CLIENT_INFO": {
       EditClientInfoInputSchema().parse(action.input);
+
       workstreamWorkstreamOperations.editClientInfoOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_REQUEST_FOR_PROPOSAL":
+      break;
+    }
+
+    case "SET_REQUEST_FOR_PROPOSAL": {
       SetRequestForProposalInputSchema().parse(action.input);
+
       workstreamWorkstreamOperations.setRequestForProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_PAYMENT_REQUEST":
+      break;
+    }
+
+    case "ADD_PAYMENT_REQUEST": {
       AddPaymentRequestInputSchema().parse(action.input);
+
       workstreamWorkstreamOperations.addPaymentRequestOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_PAYMENT_REQUEST":
+      break;
+    }
+
+    case "REMOVE_PAYMENT_REQUEST": {
       RemovePaymentRequestInputSchema().parse(action.input);
+
       workstreamWorkstreamOperations.removePaymentRequestOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "EDIT_INITIAL_PROPOSAL":
+      break;
+    }
+
+    case "EDIT_INITIAL_PROPOSAL": {
       EditInitialProposalInputSchema().parse(action.input);
+
       workstreamProposalsOperations.editInitialProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_ALTERNATIVE_PROPOSAL":
-      AddAlternativeProposalInputSchema().parse(action.input);
-      workstreamProposalsOperations.addAlternativeProposalOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
       break;
-
-    case "EDIT_ALTERNATIVE_PROPOSAL":
-      EditAlternativeProposalInputSchema().parse(action.input);
-      workstreamProposalsOperations.editAlternativeProposalOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-      break;
-
-    case "REMOVE_ALTERNATIVE_PROPOSAL":
-      RemoveAlternativeProposalInputSchema().parse(action.input);
-      workstreamProposalsOperations.removeAlternativeProposalOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-      break;
+    }
 
     default:
       return state;

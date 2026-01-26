@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   NetworkCategory,
   NetworkProfileState,
@@ -16,7 +16,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -45,15 +45,15 @@ export function NetworkProfileStateSchema(): z.ZodObject<
     darkThemeIcon: z.string(),
     darkThemeLogo: z.string(),
     description: z.string(),
-    discord: z.string().nullable(),
-    github: z.string().nullable(),
+    discord: z.string().nullish(),
+    github: z.string().nullish(),
     icon: z.string(),
     logo: z.string(),
     logoBig: z.string(),
     name: z.string(),
-    website: z.string().nullable(),
-    x: z.string().nullable(),
-    youtube: z.string().nullable(),
+    website: z.string().nullish(),
+    x: z.string().nullish(),
+    youtube: z.string().nullish(),
   });
 }
 

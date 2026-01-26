@@ -1,6 +1,6 @@
 import { type SignalDispatch } from "document-model";
-import { type AddBuilderAction, type RemoveBuilderAction } from "./actions.js";
-import { type BuildersState } from "../types.js";
+import type { AddBuilderAction, RemoveBuilderAction } from "./actions.js";
+import type { BuildersState } from "../types.js";
 
 export interface BuildersBuildersOperations {
   addBuilderOperation: (

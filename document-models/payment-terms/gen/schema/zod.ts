@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   AddBonusClauseInput,
   AddMilestoneInput,
@@ -32,7 +32,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -121,7 +121,7 @@ export function BonusClauseSchema(): z.ZodObject<Properties<BonusClause>> {
       unit: z.string().optional(),
       value: z.number().finite(),
     }),
-    comment: z.string().nullable(),
+    comment: z.string().nullish(),
     condition: z.string(),
     id: z.string(),
   });
@@ -158,8 +158,8 @@ export function EscrowSchema(): z.ZodObject<Properties<Escrow>> {
       unit: z.string().optional(),
       value: z.number().finite(),
     }),
-    escrowProvider: z.string().nullable(),
-    proofOfFundsDocumentId: z.string().nullable(),
+    escrowProvider: z.string().nullish(),
+    proofOfFundsDocumentId: z.string().nullish(),
     releaseConditions: z.string(),
   });
 }
@@ -185,7 +185,7 @@ export function MilestoneSchema(): z.ZodObject<Properties<Milestone>> {
       unit: z.string().optional(),
       value: z.number().finite(),
     }),
-    expectedCompletionDate: z.string().datetime().nullable(),
+    expectedCompletionDate: z.string().datetime().nullish(),
     id: z.string(),
     name: z.string(),
     payoutStatus: MilestonePayoutStatusSchema,
@@ -198,27 +198,27 @@ export function PaymentTermsStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("PaymentTermsState").optional(),
-    bonusClauses: z.array(BonusClauseSchema()),
+    bonusClauses: z.array(z.lazy(() => BonusClauseSchema())),
     currency: PaymentCurrencySchema,
-    escrowDetails: EscrowSchema().nullable(),
-    evaluation: EvaluationTermsSchema().nullable(),
-    milestoneSchedule: z.array(MilestoneSchema()),
+    escrowDetails: z.lazy(() => EscrowSchema().nullish()),
+    evaluation: z.lazy(() => EvaluationTermsSchema().nullish()),
+    milestoneSchedule: z.array(z.lazy(() => MilestoneSchema())),
     payer: z.string(),
     paymentModel: PaymentModelSchema,
-    penaltyClauses: z.array(PenaltyClauseSchema()),
+    penaltyClauses: z.array(z.lazy(() => PenaltyClauseSchema())),
     proposer: z.string(),
     status: PaymentTermsStatusSchema,
-    timeAndMaterials: TimeAndMaterialsSchema().nullable(),
+    timeAndMaterials: z.lazy(() => TimeAndMaterialsSchema().nullish()),
     totalAmount: z
       .object({ unit: z.string().optional(), value: z.number().finite() })
-      .nullable(),
+      .nullish(),
   });
 }
 
 export function PenaltyClauseSchema(): z.ZodObject<Properties<PenaltyClause>> {
   return z.object({
     __typename: z.literal("PenaltyClause").optional(),
-    comment: z.string().nullable(),
+    comment: z.string().nullish(),
     condition: z.string(),
     deductionAmount: z.object({
       unit: z.string().optional(),
@@ -303,14 +303,14 @@ export function TimeAndMaterialsSchema(): z.ZodObject<
     billingFrequency: BillingFrequencySchema,
     hourlyRate: z
       .object({ unit: z.string().optional(), value: z.number().finite() })
-      .nullable(),
+      .nullish(),
     retainerAmount: z
       .object({ unit: z.string().optional(), value: z.number().finite() })
-      .nullable(),
+      .nullish(),
     timesheetRequired: z.boolean(),
     variableCap: z
       .object({ unit: z.string().optional(), value: z.number().finite() })
-      .nullable(),
+      .nullish(),
   });
 }
 

@@ -129,7 +129,7 @@ export function ClausesSection({
             />
           );
         },
-        onSave: (newValue, context) => {
+        onSave: () => {
           return true;
         },
       },
@@ -260,7 +260,7 @@ export function ClausesSection({
             />
           );
         },
-        onSave: (newValue, context) => {
+        onSave: () => {
           return true;
         },
       },

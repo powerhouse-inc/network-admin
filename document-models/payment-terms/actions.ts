@@ -6,6 +6,7 @@ import {
 } from "./gen/creators.js";
 
 /** Actions for the PaymentTerms document model */
+
 export const actions = {
   ...baseActions,
   ...termsActions,

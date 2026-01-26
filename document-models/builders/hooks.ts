@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  BuildersDocument,
   BuildersAction,
+  BuildersDocument,
 } from "@powerhousedao/network-admin/document-models/builders";
-import { isBuildersDocument } from "./gen/document-schema.js";
+import {
+  assertIsBuildersDocument,
+  isBuildersDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a Builders document by its id */
 export function useBuildersDocumentById(
@@ -23,12 +26,14 @@ export function useBuildersDocumentById(
 }
 
 /** Hook to get the selected Builders document */
-export function useSelectedBuildersDocument():
-  | [BuildersDocument, DocumentDispatch<BuildersAction>]
-  | [undefined, undefined] {
+export function useSelectedBuildersDocument(): [
+  BuildersDocument,
+  DocumentDispatch<BuildersAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isBuildersDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsBuildersDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all Builders documents in the selected drive */

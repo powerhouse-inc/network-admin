@@ -2,12 +2,6 @@ import { useMemo } from "react";
 import {
   Milestone as MilestoneIcon,
   Plus,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  CircleDollarSign,
-  XCircle,
 } from "lucide-react";
 import {
   ObjectSetTable,
@@ -33,41 +27,6 @@ interface MilestonesSectionProps {
   currency: string;
 }
 
-const STATUS_CONFIG: Record<
-  MilestonePayoutStatus,
-  { label: string; icon: typeof Clock; tagClass: string; dotClass: string }
-> = {
-  PENDING: {
-    label: "Pending",
-    icon: Clock,
-    tagClass: "bg-stone-100 text-slate-500",
-    dotClass: "bg-slate-400",
-  },
-  READY_FOR_REVIEW: {
-    label: "Ready for Review",
-    icon: AlertCircle,
-    tagClass: "bg-amber-100 text-amber-600",
-    dotClass: "bg-amber-500",
-  },
-  APPROVED: {
-    label: "Approved",
-    icon: CheckCircle2,
-    tagClass: "bg-blue-100 text-blue-600",
-    dotClass: "bg-blue-500",
-  },
-  PAID: {
-    label: "Paid",
-    icon: CircleDollarSign,
-    tagClass: "bg-emerald-100 text-emerald-600",
-    dotClass: "bg-emerald-500",
-  },
-  REJECTED: {
-    label: "Rejected",
-    icon: XCircle,
-    tagClass: "bg-rose-100 text-rose-600",
-    dotClass: "bg-rose-500",
-  },
-};
 
 export function MilestonesSection({
   milestones,
@@ -161,7 +120,7 @@ export function MilestonesSection({
             />
           );
         },
-        onSave: (newValue, context) => {
+        onSave: () => {
           return true;
         },
       },
@@ -247,7 +206,7 @@ export function MilestonesSection({
             />
           );
         },
-        onSave: (newValue, context) => {
+        onSave: () => {
           return true;
         },
       },
@@ -258,7 +217,7 @@ export function MilestonesSection({
         editable: true,
         align: "center" as ColumnAlignment,
         width: 90,
-        onSave: (newValue, context) => {
+        onSave: () => {
           return true;
         },
         renderCell: (value: Milestone["requiresApproval"], context) => {
@@ -309,10 +268,10 @@ export function MilestonesSection({
         editable: true,
         align: "center" as ColumnAlignment,
         width: 140,
-        onSave: (newValue, context) => {
+        onSave: () => {
           return true;
         },
-        renderCell: (value: Milestone["payoutStatus"], context) => {
+        renderCell: (value: Milestone["payoutStatus"]) => {
           const status = {
             APPROVED: "Approved",
             PAID: "Paid",

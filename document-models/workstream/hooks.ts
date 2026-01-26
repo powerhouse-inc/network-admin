@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  WorkstreamDocument,
   WorkstreamAction,
+  WorkstreamDocument,
 } from "@powerhousedao/network-admin/document-models/workstream";
-import { isWorkstreamDocument } from "./gen/document-schema.js";
+import {
+  assertIsWorkstreamDocument,
+  isWorkstreamDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a Workstream document by its id */
 export function useWorkstreamDocumentById(
@@ -23,12 +26,14 @@ export function useWorkstreamDocumentById(
 }
 
 /** Hook to get the selected Workstream document */
-export function useSelectedWorkstreamDocument():
-  | [WorkstreamDocument, DocumentDispatch<WorkstreamAction>]
-  | [undefined, undefined] {
+export function useSelectedWorkstreamDocument(): [
+  WorkstreamDocument,
+  DocumentDispatch<WorkstreamAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isWorkstreamDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsWorkstreamDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all Workstream documents in the selected drive */

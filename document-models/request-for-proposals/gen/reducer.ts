@@ -26,61 +26,78 @@ const stateReducer: StateReducer<RequestForProposalsPHState> = (
   if (isDocumentAction(action)) {
     return state;
   }
-
   switch (action.type) {
-    case "EDIT_RFP":
+    case "EDIT_RFP": {
       EditRfpInputSchema().parse(action.input);
+
       requestForProposalsRfpStateOperations.editRfpOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_CONTEXT_DOCUMENT":
+      break;
+    }
+
+    case "ADD_CONTEXT_DOCUMENT": {
       AddContextDocumentInputSchema().parse(action.input);
+
       requestForProposalsContexDocumentOperations.addContextDocumentOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_CONTEXT_DOCUMENT":
+      break;
+    }
+
+    case "REMOVE_CONTEXT_DOCUMENT": {
       RemoveContextDocumentInputSchema().parse(action.input);
+
       requestForProposalsContexDocumentOperations.removeContextDocumentOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_PROPOSAL":
+      break;
+    }
+
+    case "ADD_PROPOSAL": {
       AddProposalInputSchema().parse(action.input);
+
       requestForProposalsProposalsOperations.addProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "CHANGE_PROPOSAL_STATUS":
+      break;
+    }
+
+    case "CHANGE_PROPOSAL_STATUS": {
       ChangeProposalStatusInputSchema().parse(action.input);
+
       requestForProposalsProposalsOperations.changeProposalStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_PROPOSAL":
+      break;
+    }
+
+    case "REMOVE_PROPOSAL": {
       RemoveProposalInputSchema().parse(action.input);
+
       requestForProposalsProposalsOperations.removeProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
+
       break;
+    }
 
     default:
       return state;

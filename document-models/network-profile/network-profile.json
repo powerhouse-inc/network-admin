@@ -1,158 +1,158 @@
 {
-    "id": "powerhouse/network-profile",
-    "name": "Network Profile",
-    "extension": "",
-    "description": "Document model for managing network profile information including social media links and branding and logos.",
-    "author": {
-        "name": "Powerhouse",
-        "website": "https://www.powerhouse.inc/"
-    },
-    "specifications": [
+  "author": {
+    "name": "Powerhouse",
+    "website": "https://www.powerhouse.inc/"
+  },
+  "description": "Document model for managing network profile information including social media links and branding and logos.",
+  "extension": "",
+  "id": "powerhouse/network-profile",
+  "name": "NetworkProfile",
+  "specifications": [
+    {
+      "changeLog": [],
+      "modules": [
         {
-            "version": 1,
-            "changeLog": [],
-            "state": {
-                "global": {
-                    "schema": "enum NetworkCategory {\n  DEFI\n  OSS\n  CRYPTO\n  NGO\n  CHARITY\n}\n\ntype NetworkProfileState {\n  name: String!\n  icon: String!\n  darkThemeIcon: String!\n  logo: String!\n  darkThemeLogo: String!\n  logoBig: String!\n  website: String\n  description: String!\n  category: [NetworkCategory!]!\n  x: String\n  github: String\n  discord: String\n  youtube: String\n}",
-                    "initialValue": "{\n  \"name\": \"\",\n  \"icon\": \"\",\n  \"darkThemeIcon\": \"\",\n  \"logo\": \"\",\n  \"darkThemeLogo\": \"\",\n  \"logoBig\": \"\",\n  \"website\": null,\n  \"description\": \"\",\n  \"category\": [],\n  \"x\": null,\n  \"github\": null,\n  \"discord\": null,\n  \"youtube\": null\n}",
-                    "examples": []
-                },
-                "local": {
-                    "schema": "",
-                    "initialValue": "",
-                    "examples": []
-                }
+          "description": "",
+          "id": "9e5eea0d-c990-4a79-bc0f-f5ad33b4dadc",
+          "name": "network_profile_management",
+          "operations": [
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "1d485f96-25cb-406c-82fc-2da82ddfec8a",
+              "name": "SET_ICON",
+              "reducer": "",
+              "schema": "input SetIconInput {\n  icon: String\n  darkThemeIcon: String\n}",
+              "scope": "global",
+              "template": ""
             },
-            "modules": [
-                {
-                    "id": "network-profile-management",
-                    "name": "network-profile-management",
-                    "description": "Operations for managing network profile information including basic details and social media links",
-                    "operations": [
-                        {
-                            "id": "SET_ICON",
-                            "name": "SET_ICON",
-                            "description": "Sets the icon for the network profile",
-                            "schema": "input SetIconInput {\n  icon: String\n  darkThemeIcon: String\n}",
-                            "template": "Sets the icon for the network profile",
-                            "reducer": "state.icon = action.input.icon || null;",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "SET_LOGO",
-                            "name": "SET_LOGO",
-                            "description": "Sets the logo for the network profile",
-                            "schema": "input SetLogoInput {\n  logo: String\n  darkThemeLogo: String\n}",
-                            "template": "Sets the logo for the network profile",
-                            "reducer": "state.logo = action.input.logo || null;",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "SET_LOGO_BIG",
-                            "name": "SET_LOGO_BIG",
-                            "description": "Sets the big logo for the network profile",
-                            "schema": "input SetLogoBigInput {\n  logoBig: String!\n}",
-                            "template": "Sets the big logo for the network profile",
-                            "reducer": "state.logoBig = action.input.logoBig || null;",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "SET_WEBSITE",
-                            "name": "SET_WEBSITE",
-                            "description": "Sets the website URL for the network profile",
-                            "schema": "input SetWebsiteInput {\n  website: String\n}",
-                            "template": "Sets the website URL for the network profile",
-                            "reducer": "state.website = action.input.website || null;",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "SET_DESCRIPTION",
-                            "name": "SET_DESCRIPTION",
-                            "description": "Sets the description for the network profile",
-                            "schema": "input SetDescriptionInput {\n  description: String!\n}",
-                            "template": "Sets the description for the network profile",
-                            "reducer": "state.description = action.input.description || null;",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "SET_CATEGORY",
-                            "name": "SET_CATEGORY",
-                            "description": "Sets the category for the network profile",
-                            "schema": "input SetCategoryInput {\n  category: [NetworkCategory!]!\n}",
-                            "template": "Sets the category for the network profile",
-                            "reducer": "state.category = action.input.category || null;",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "SET_X",
-                            "name": "SET_X",
-                            "description": "Sets the X (Twitter) handle for the network profile",
-                            "schema": "input SetXInput {\n  x: String\n}",
-                            "template": "Sets the X (Twitter) handle for the network profile",
-                            "reducer": "state.x = action.input.x || null;",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "SET_GITHUB",
-                            "name": "SET_GITHUB",
-                            "description": "Sets the GitHub username for the network profile",
-                            "schema": "input SetGithubInput {\n  github: String\n}",
-                            "template": "Sets the GitHub username for the network profile",
-                            "reducer": "state.github = action.input.github || null;",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "SET_DISCORD",
-                            "name": "SET_DISCORD",
-                            "description": "Sets the Discord invite or username for the network profile",
-                            "schema": "input SetDiscordInput {\n  discord: String\n}",
-                            "template": "Sets the Discord invite or username for the network profile",
-                            "reducer": "state.discord = action.input.discord || null;",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "SET_YOUTUBE",
-                            "name": "SET_YOUTUBE",
-                            "description": "Sets the YouTube channel for the network profile",
-                            "schema": "input SetYoutubeInput {\n  youtube: String\n}",
-                            "template": "Sets the YouTube channel for the network profile",
-                            "reducer": "state.youtube = action.input.youtube || null;",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        },
-                        {
-                            "id": "SET_PROFILE_NAME",
-                            "name": "SET_PROFILE_NAME",
-                            "description": "Sets the name of the network profile",
-                            "schema": "input SetProfileNameInput {\n  name: String!\n}",
-                            "template": "Sets the name of the network profile",
-                            "reducer": "state.name = action.input.name || null;",
-                            "errors": [],
-                            "examples": [],
-                            "scope": "global"
-                        }
-                    ]
-                }
-            ]
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "b3055f32-7e14-424c-90dc-22b6b75c1a2d",
+              "name": "SET_LOGO",
+              "reducer": "",
+              "schema": "input SetLogoInput {\n  logo: String\n  darkThemeLogo: String\n}",
+              "scope": "global",
+              "template": ""
+            },
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "3c3fd53d-94bd-4ee2-8030-28f203357cf2",
+              "name": "SET_LOGO_BIG",
+              "reducer": "",
+              "schema": "input SetLogoBigInput {\n  logoBig: String!\n}",
+              "scope": "global",
+              "template": ""
+            },
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "8cbdc5c0-d0a8-47ae-96eb-329930d33caa",
+              "name": "SET_WEBSITE",
+              "reducer": "",
+              "schema": "input SetWebsiteInput {\n  website: String\n}",
+              "scope": "global",
+              "template": ""
+            },
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "bf7703ae-5388-44ce-a505-59eeca01df3f",
+              "name": "SET_DESCRIPTION",
+              "reducer": "",
+              "schema": "input SetDescriptionInput {\n  description: String!\n}",
+              "scope": "global",
+              "template": ""
+            },
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "589090a7-4719-4efe-9674-a265a4eba676",
+              "name": "SET_CATEGORY",
+              "reducer": "",
+              "schema": "input SetCategoryInput {\n  category: [NetworkCategory!]!\n}",
+              "scope": "global",
+              "template": ""
+            },
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "e17ab600-a677-4a0e-aece-f9c4a17d79eb",
+              "name": "SET_X",
+              "reducer": "",
+              "schema": "input SetXInput {\n  x: String\n}",
+              "scope": "global",
+              "template": ""
+            },
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "0f41b040-c60c-4ef5-8798-4b8d74a4d900",
+              "name": "SET_GITHUB",
+              "reducer": "",
+              "schema": "input SetGithubInput {\n  github: String\n}",
+              "scope": "global",
+              "template": ""
+            },
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "eef5e682-acd8-4fee-a376-870bb3fcc129",
+              "name": "SET_DISCORD",
+              "reducer": "",
+              "schema": "input SetDiscordInput {\n  discord: String\n}",
+              "scope": "global",
+              "template": ""
+            },
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "8f850ff2-5eb7-4881-84d6-8fce7a265454",
+              "name": "SET_YOUTUBE",
+              "reducer": "",
+              "schema": "input SetYoutubeInput {\n  youtube: String\n}",
+              "scope": "global",
+              "template": ""
+            },
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "946acb04-4404-4079-a41a-186d86e8d5dd",
+              "name": "SET_PROFILE_NAME",
+              "reducer": "",
+              "schema": "input SetProfileNameInput {\n  name: String!\n}",
+              "scope": "global",
+              "template": ""
+            }
+          ]
         }
-    ]
+      ],
+      "state": {
+        "global": {
+          "examples": [],
+          "initialValue": "{\n  \"name\": \"\",\n  \"icon\": \"\",\n  \"darkThemeIcon\": \"\",\n  \"logo\": \"\",\n  \"darkThemeLogo\": \"\",\n  \"logoBig\": \"\",\n  \"website\": null,\n  \"description\": \"\",\n  \"category\": [],\n  \"x\": null,\n  \"github\": null,\n  \"discord\": null,\n  \"youtube\": null\n}",
+          "schema": "type NetworkProfileState {\n  name: String!\n  icon: String!\n  darkThemeIcon: String!\n  logo: String!\n  darkThemeLogo: String!\n  logoBig: String!\n  website: String\n  description: String!\n  category: [NetworkCategory!]!\n  x: String\n  github: String\n  discord: String\n  youtube: String\n}\nenum NetworkCategory {\n  DEFI\n  OSS\n  CRYPTO\n  NGO\n  CHARITY\n}"
+        },
+        "local": {
+          "examples": [],
+          "initialValue": "",
+          "schema": ""
+        }
+      },
+      "version": 1
+    }
+  ]
 }

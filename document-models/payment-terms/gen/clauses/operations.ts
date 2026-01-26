@@ -1,13 +1,13 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddBonusClauseAction,
-  type UpdateBonusClauseAction,
-  type DeleteBonusClauseAction,
-  type AddPenaltyClauseAction,
-  type UpdatePenaltyClauseAction,
-  type DeletePenaltyClauseAction,
+import type {
+  AddBonusClauseAction,
+  UpdateBonusClauseAction,
+  DeleteBonusClauseAction,
+  AddPenaltyClauseAction,
+  UpdatePenaltyClauseAction,
+  DeletePenaltyClauseAction,
 } from "./actions.js";
-import { type PaymentTermsState } from "../types.js";
+import type { PaymentTermsState } from "../types.js";
 
 export interface PaymentTermsClausesOperations {
   addBonusClauseOperation: (

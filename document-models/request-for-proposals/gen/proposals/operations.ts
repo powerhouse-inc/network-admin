@@ -1,10 +1,10 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddProposalAction,
-  type ChangeProposalStatusAction,
-  type RemoveProposalAction,
+import type {
+  AddProposalAction,
+  ChangeProposalStatusAction,
+  RemoveProposalAction,
 } from "./actions.js";
-import { type RequestForProposalsState } from "../types.js";
+import type { RequestForProposalsState } from "../types.js";
 
 export interface RequestForProposalsProposalsOperations {
   addProposalOperation: (

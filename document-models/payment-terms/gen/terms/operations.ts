@@ -1,12 +1,12 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type SetBasicTermsAction,
-  type UpdateStatusAction,
-  type SetTimeAndMaterialsAction,
-  type SetEscrowDetailsAction,
-  type SetEvaluationTermsAction,
+import type {
+  SetBasicTermsAction,
+  UpdateStatusAction,
+  SetTimeAndMaterialsAction,
+  SetEscrowDetailsAction,
+  SetEvaluationTermsAction,
 } from "./actions.js";
-import { type PaymentTermsState } from "../types.js";
+import type { PaymentTermsState } from "../types.js";
 
 export interface PaymentTermsTermsOperations {
   setBasicTermsOperation: (

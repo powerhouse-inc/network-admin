@@ -1,9 +1,9 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddContextDocumentAction,
-  type RemoveContextDocumentAction,
+import type {
+  AddContextDocumentAction,
+  RemoveContextDocumentAction,
 } from "./actions.js";
-import { type RequestForProposalsState } from "../types.js";
+import type { RequestForProposalsState } from "../types.js";
 
 export interface RequestForProposalsContexDocumentOperations {
   addContextDocumentOperation: (

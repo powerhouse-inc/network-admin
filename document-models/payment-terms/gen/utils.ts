@@ -37,7 +37,7 @@ export const initialGlobalState: PaymentTermsGlobalState = {
 export const initialLocalState: PaymentTermsLocalState = {};
 
 export const utils: DocumentModelUtils<PaymentTermsPHState> = {
-  fileExtension: "pterms",
+  fileExtension: "",
   createState(state) {
     return {
       ...defaultBaseState(),

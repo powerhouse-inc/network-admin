@@ -182,11 +182,9 @@ export const schema: DocumentNode = gql`
     author: ProposalAuthor!
   }
 
-  scalar JSON
-
   type LinkedDocument {
     id: PHID!
-    stateJSON: JSON
+    stateJSON: JSONObject
   }
 
   # ==========================

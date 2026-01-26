@@ -3,6 +3,7 @@ import type { RequestForProposalsAction } from "./actions.js";
 import type { RequestForProposalsState as RequestForProposalsGlobalState } from "./schema/types.js";
 
 type RequestForProposalsLocalState = Record<PropertyKey, never>;
+
 type RequestForProposalsPHState = PHBaseState & {
   global: RequestForProposalsGlobalState;
   local: RequestForProposalsLocalState;

@@ -49,7 +49,6 @@ import {
 } from "@powerhousedao/reactor-browser";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSelectedWorkstreamDocument } from "../../document-models/workstream/hooks.js";
-import type { WorkstreamState } from "../../document-models/workstream/gen/schema/types.js";
 import type { Proposal } from "../../document-models/workstream/gen/schema/types.js";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 export type IProps = EditorProps;

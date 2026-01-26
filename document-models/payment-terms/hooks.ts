@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  PaymentTermsDocument,
   PaymentTermsAction,
+  PaymentTermsDocument,
 } from "@powerhousedao/network-admin/document-models/payment-terms";
-import { isPaymentTermsDocument } from "./gen/document-schema.js";
+import {
+  assertIsPaymentTermsDocument,
+  isPaymentTermsDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a PaymentTerms document by its id */
 export function usePaymentTermsDocumentById(
@@ -23,12 +26,14 @@ export function usePaymentTermsDocumentById(
 }
 
 /** Hook to get the selected PaymentTerms document */
-export function useSelectedPaymentTermsDocument():
-  | [PaymentTermsDocument, DocumentDispatch<PaymentTermsAction>]
-  | [undefined, undefined] {
+export function useSelectedPaymentTermsDocument(): [
+  PaymentTermsDocument,
+  DocumentDispatch<PaymentTermsAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isPaymentTermsDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsPaymentTermsDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all PaymentTerms documents in the selected drive */

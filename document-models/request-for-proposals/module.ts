@@ -12,6 +12,7 @@ import {
 /** Document model module for the Todo List document type */
 export const RequestForProposals: DocumentModelModule<RequestForProposalsPHState> =
   {
+    version: 1,
     reducer,
     actions,
     utils,

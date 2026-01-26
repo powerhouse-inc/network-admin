@@ -3,6 +3,7 @@ import type { BuildersAction } from "./actions.js";
 import type { BuildersState as BuildersGlobalState } from "./schema/types.js";
 
 type BuildersLocalState = Record<PropertyKey, never>;
+
 type BuildersPHState = PHBaseState & {
   global: BuildersGlobalState;
   local: BuildersLocalState;

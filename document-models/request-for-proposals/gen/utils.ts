@@ -21,8 +21,8 @@ import {
 } from "./document-schema.js";
 
 export const initialGlobalState: RequestForProposalsGlobalState = {
-  issuer: "placeholder-id",
-  code: "",
+  issuer: "",
+  code: null,
   title: "",
   summary: "",
   briefing: "",

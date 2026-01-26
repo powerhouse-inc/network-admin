@@ -246,7 +246,6 @@ function ToggleableImageInput({
   onDarkChange,
   lightPlaceholder,
   darkPlaceholder,
-  fileSize = "200KB",
 }: {
   label: string;
   lightValue: string;

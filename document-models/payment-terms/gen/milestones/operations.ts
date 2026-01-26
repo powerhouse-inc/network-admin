@@ -1,12 +1,12 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddMilestoneAction,
-  type UpdateMilestoneAction,
-  type UpdateMilestoneStatusAction,
-  type DeleteMilestoneAction,
-  type ReorderMilestonesAction,
+import type {
+  AddMilestoneAction,
+  UpdateMilestoneAction,
+  UpdateMilestoneStatusAction,
+  DeleteMilestoneAction,
+  ReorderMilestonesAction,
 } from "./actions.js";
-import { type PaymentTermsState } from "../types.js";
+import type { PaymentTermsState } from "../types.js";
 
 export interface PaymentTermsMilestonesOperations {
   addMilestoneOperation: (

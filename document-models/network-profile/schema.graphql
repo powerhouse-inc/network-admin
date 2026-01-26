@@ -1,9 +1,12 @@
+scalar Unknown
+scalar DateTime
+scalar Attachment
+scalar Address
 scalar Amount_Tokens
 scalar EthereumAddress
-scalar Amount_Percentage
 scalar EmailAddress
+scalar Amount_Percentage
 scalar Date
-scalar DateTime
 scalar URL
 scalar Amount_Money
 scalar OLabel
@@ -15,13 +18,6 @@ scalar Amount_Currency
 scalar Amount_Crypto
 scalar Amount
 scalar Upload
-enum NetworkCategory {
-  DEFI
-  OSS
-  CRYPTO
-  NGO
-  CHARITY
-}
 
 type NetworkProfileState {
   name: String!
@@ -38,10 +34,15 @@ type NetworkProfileState {
   discord: String
   youtube: String
 }
+enum NetworkCategory {
+  DEFI
+  OSS
+  CRYPTO
+  NGO
+  CHARITY
+}
 
-
-
-# network-profile-management
+# network_profile_management
 
 input SetIconInput {
   icon: String

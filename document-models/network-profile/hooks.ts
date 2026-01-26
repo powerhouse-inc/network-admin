@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  NetworkProfileDocument,
   NetworkProfileAction,
+  NetworkProfileDocument,
 } from "@powerhousedao/network-admin/document-models/network-profile";
-import { isNetworkProfileDocument } from "./gen/document-schema.js";
+import {
+  assertIsNetworkProfileDocument,
+  isNetworkProfileDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a NetworkProfile document by its id */
 export function useNetworkProfileDocumentById(
@@ -23,12 +26,14 @@ export function useNetworkProfileDocumentById(
 }
 
 /** Hook to get the selected NetworkProfile document */
-export function useSelectedNetworkProfileDocument():
-  | [NetworkProfileDocument, DocumentDispatch<NetworkProfileAction>]
-  | [undefined, undefined] {
+export function useSelectedNetworkProfileDocument(): [
+  NetworkProfileDocument,
+  DocumentDispatch<NetworkProfileAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isNetworkProfileDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsNetworkProfileDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all NetworkProfile documents in the selected drive */

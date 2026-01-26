@@ -1,12 +1,12 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type EditWorkstreamAction,
-  type EditClientInfoAction,
-  type SetRequestForProposalAction,
-  type AddPaymentRequestAction,
-  type RemovePaymentRequestAction,
+import type {
+  EditWorkstreamAction,
+  EditClientInfoAction,
+  SetRequestForProposalAction,
+  AddPaymentRequestAction,
+  RemovePaymentRequestAction,
 } from "./actions.js";
-import { type WorkstreamState } from "../types.js";
+import type { WorkstreamState } from "../types.js";
 
 export interface WorkstreamWorkstreamOperations {
   editWorkstreamOperation: (

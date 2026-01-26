@@ -11,13 +11,18 @@
   },
   "packages": [
     {
-      "packageName": "@powerhousedao/project-management",
-      "version": "0.0.66",
+      "packageName": "@powerhousedao/builder-profile",
+      "version": "0.0.15",
       "provider": "npm"
     },
     {
-      "packageName": "@powerhousedao/builder-profile",
-      "version": "0.0.9",
+      "packageName": "@powerhousedao/project-management",
+      "version": "0.0.67",
+      "provider": "npm"
+    },
+    {
+      "packageName": "@powerhousedao/vetra",
+      "version": "staging",
       "provider": "npm"
     }
   ]

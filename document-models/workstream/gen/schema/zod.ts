@@ -1,9 +1,8 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   AddAlternativeProposalInput,
   AddPaymentRequestInput,
   ClientInfo,
-  EditAlternativeProposalInput,
   EditClientInfoInput,
   EditInitialProposalInput,
   EditWorkstreamInput,
@@ -13,7 +12,6 @@ import type {
   ProposalStatus,
   ProposalStatusInput,
   Rfp,
-  RemoveAlternativeProposalInput,
   RemovePaymentRequestInput,
   SetRequestForProposalInput,
   WorkstreamState,
@@ -22,7 +20,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -80,7 +78,7 @@ export function AddAlternativeProposalInputSchema(): z.ZodObject<
     paymentTermsId: z.string().nullish(),
     proposalAuthor: z.lazy(() => ProposalAuthorInputSchema().nullish()),
     sowId: z.string().nullish(),
-    status: z.lazy(() => ProposalStatusInputSchema.nullish()),
+    status: ProposalStatusInputSchema.nullish(),
   });
 }
 
@@ -95,21 +93,9 @@ export function AddPaymentRequestInputSchema(): z.ZodObject<
 export function ClientInfoSchema(): z.ZodObject<Properties<ClientInfo>> {
   return z.object({
     __typename: z.literal("ClientInfo").optional(),
-    icon: z.string().url().nullable(),
+    icon: z.string().url().nullish(),
     id: z.string(),
-    name: z.string().nullable(),
-  });
-}
-
-export function EditAlternativeProposalInputSchema(): z.ZodObject<
-  Properties<EditAlternativeProposalInput>
-> {
-  return z.object({
-    id: z.string(),
-    paymentTermsId: z.string().nullish(),
-    proposalAuthor: z.lazy(() => ProposalAuthorInputSchema().nullish()),
-    sowId: z.string().nullish(),
-    status: z.lazy(() => ProposalStatusInputSchema.nullish()),
+    name: z.string().nullish(),
   });
 }
 
@@ -131,7 +117,7 @@ export function EditInitialProposalInputSchema(): z.ZodObject<
     paymentTermsId: z.string().nullish(),
     proposalAuthor: z.lazy(() => ProposalAuthorInputSchema().nullish()),
     sowId: z.string().nullish(),
-    status: z.lazy(() => ProposalStatusInputSchema.nullish()),
+    status: ProposalStatusInputSchema.nullish(),
   });
 }
 
@@ -142,7 +128,7 @@ export function EditWorkstreamInputSchema(): z.ZodObject<
     code: z.string().nullish(),
     paymentTerms: z.string().nullish(),
     sowId: z.string().nullish(),
-    status: z.lazy(() => WorkstreamStatusInputSchema.nullish()),
+    status: WorkstreamStatusInputSchema.nullish(),
     title: z.string().nullish(),
   });
 }
@@ -150,7 +136,7 @@ export function EditWorkstreamInputSchema(): z.ZodObject<
 export function ProposalSchema(): z.ZodObject<Properties<Proposal>> {
   return z.object({
     __typename: z.literal("Proposal").optional(),
-    author: ProposalAuthorSchema(),
+    author: z.lazy(() => ProposalAuthorSchema()),
     id: z.string(),
     paymentTerms: z.string(),
     sow: z.string(),
@@ -163,9 +149,9 @@ export function ProposalAuthorSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ProposalAuthor").optional(),
-    icon: z.string().url().nullable(),
+    icon: z.string().url().nullish(),
     id: z.string(),
-    name: z.string().nullable(),
+    name: z.string().nullish(),
   });
 }
 
@@ -184,14 +170,6 @@ export function RfpSchema(): z.ZodObject<Properties<Rfp>> {
     __typename: z.literal("RFP").optional(),
     id: z.string(),
     title: z.string(),
-  });
-}
-
-export function RemoveAlternativeProposalInputSchema(): z.ZodObject<
-  Properties<RemoveAlternativeProposalInput>
-> {
-  return z.object({
-    id: z.string(),
   });
 }
 
@@ -217,15 +195,15 @@ export function WorkstreamStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("WorkstreamState").optional(),
-    alternativeProposals: z.array(ProposalSchema()),
-    client: ClientInfoSchema().nullable(),
-    code: z.string().nullable(),
-    initialProposal: ProposalSchema().nullable(),
+    alternativeProposals: z.array(z.lazy(() => ProposalSchema())),
+    client: z.lazy(() => ClientInfoSchema().nullish()),
+    code: z.string().nullish(),
+    initialProposal: z.lazy(() => ProposalSchema().nullish()),
     paymentRequests: z.array(z.string()),
-    paymentTerms: z.string().nullable(),
-    rfp: RfpSchema().nullable(),
-    sow: z.string().nullable(),
+    paymentTerms: z.string().nullish(),
+    rfp: z.lazy(() => RfpSchema().nullish()),
+    sow: z.string().nullish(),
     status: WorkstreamStatusSchema,
-    title: z.string().nullable(),
+    title: z.string().nullish(),
   });
 }

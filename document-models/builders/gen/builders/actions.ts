@@ -1,4 +1,4 @@
-import { type Action } from "document-model";
+import type { Action } from "document-model";
 import type { AddBuilderInput, RemoveBuilderInput } from "../types.js";
 
 export type AddBuilderAction = Action & {

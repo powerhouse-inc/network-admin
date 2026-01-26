@@ -1,18 +1,18 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type SetIconAction,
-  type SetLogoAction,
-  type SetLogoBigAction,
-  type SetWebsiteAction,
-  type SetDescriptionAction,
-  type SetCategoryAction,
-  type SetXAction,
-  type SetGithubAction,
-  type SetDiscordAction,
-  type SetYoutubeAction,
-  type SetProfileNameAction,
+import type {
+  SetIconAction,
+  SetLogoAction,
+  SetLogoBigAction,
+  SetWebsiteAction,
+  SetDescriptionAction,
+  SetCategoryAction,
+  SetXAction,
+  SetGithubAction,
+  SetDiscordAction,
+  SetYoutubeAction,
+  SetProfileNameAction,
 } from "./actions.js";
-import { type NetworkProfileState } from "../types.js";
+import type { NetworkProfileState } from "../types.js";
 
 export interface NetworkProfileNetworkProfileManagementOperations {
   setIconOperation: (

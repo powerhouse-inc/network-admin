@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  RequestForProposalsDocument,
   RequestForProposalsAction,
+  RequestForProposalsDocument,
 } from "@powerhousedao/network-admin/document-models/request-for-proposals";
-import { isRequestForProposalsDocument } from "./gen/document-schema.js";
+import {
+  assertIsRequestForProposalsDocument,
+  isRequestForProposalsDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a RequestForProposals document by its id */
 export function useRequestForProposalsDocumentById(
@@ -23,12 +26,14 @@ export function useRequestForProposalsDocumentById(
 }
 
 /** Hook to get the selected RequestForProposals document */
-export function useSelectedRequestForProposalsDocument():
-  | [RequestForProposalsDocument, DocumentDispatch<RequestForProposalsAction>]
-  | [undefined, undefined] {
+export function useSelectedRequestForProposalsDocument(): [
+  RequestForProposalsDocument,
+  DocumentDispatch<RequestForProposalsAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isRequestForProposalsDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsRequestForProposalsDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all RequestForProposals documents in the selected drive */

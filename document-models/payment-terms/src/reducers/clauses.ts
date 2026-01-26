@@ -1,9 +1,3 @@
-import {
-  DuplicateBonusClauseIdError,
-  BonusClauseNotFoundError,
-  DuplicatePenaltyClauseIdError,
-  PenaltyClauseNotFoundError,
-} from "../../gen/clauses/error.js";
 import type { PaymentTermsClausesOperations } from "@powerhousedao/network-admin/document-models/payment-terms";
 
 export const paymentTermsClausesOperations: PaymentTermsClausesOperations = {
@@ -12,9 +6,7 @@ export const paymentTermsClausesOperations: PaymentTermsClausesOperations = {
       (c) => c.id === action.input.id,
     );
     if (existingIndex !== -1) {
-      throw new DuplicateBonusClauseIdError(
-        `Bonus clause with ID ${action.input.id} already exists`,
-      );
+      throw new Error(`Bonus clause with ID ${action.input.id} already exists`);
     }
 
     const newClause = {
@@ -31,9 +23,7 @@ export const paymentTermsClausesOperations: PaymentTermsClausesOperations = {
       (c) => c.id === action.input.id,
     );
     if (clauseIndex === -1) {
-      throw new BonusClauseNotFoundError(
-        `Bonus clause with ID ${action.input.id} not found`,
-      );
+      throw new Error(`Bonus clause with ID ${action.input.id} not found`);
     }
 
     const clause = state.bonusClauses[clauseIndex];
@@ -47,9 +37,7 @@ export const paymentTermsClausesOperations: PaymentTermsClausesOperations = {
       (c) => c.id === action.input.id,
     );
     if (clauseIndex === -1) {
-      throw new BonusClauseNotFoundError(
-        `Bonus clause with ID ${action.input.id} not found`,
-      );
+      throw new Error(`Bonus clause with ID ${action.input.id} not found`);
     }
 
     state.bonusClauses.splice(clauseIndex, 1);
@@ -59,7 +47,7 @@ export const paymentTermsClausesOperations: PaymentTermsClausesOperations = {
       (c) => c.id === action.input.id,
     );
     if (existingIndex !== -1) {
-      throw new DuplicatePenaltyClauseIdError(
+      throw new Error(
         `Penalty clause with ID ${action.input.id} already exists`,
       );
     }
@@ -78,9 +66,7 @@ export const paymentTermsClausesOperations: PaymentTermsClausesOperations = {
       (c) => c.id === action.input.id,
     );
     if (clauseIndex === -1) {
-      throw new PenaltyClauseNotFoundError(
-        `Penalty clause with ID ${action.input.id} not found`,
-      );
+      throw new Error(`Penalty clause with ID ${action.input.id} not found`);
     }
 
     const clause = state.penaltyClauses[clauseIndex];
@@ -95,9 +81,7 @@ export const paymentTermsClausesOperations: PaymentTermsClausesOperations = {
       (c) => c.id === action.input.id,
     );
     if (clauseIndex === -1) {
-      throw new PenaltyClauseNotFoundError(
-        `Penalty clause with ID ${action.input.id} not found`,
-      );
+      throw new Error(`Penalty clause with ID ${action.input.id} not found`);
     }
 
     state.penaltyClauses.splice(clauseIndex, 1);

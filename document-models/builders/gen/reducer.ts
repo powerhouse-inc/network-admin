@@ -20,25 +20,30 @@ const stateReducer: StateReducer<BuildersPHState> = (
   if (isDocumentAction(action)) {
     return state;
   }
-
   switch (action.type) {
-    case "ADD_BUILDER":
+    case "ADD_BUILDER": {
       AddBuilderInputSchema().parse(action.input);
+
       buildersBuildersOperations.addBuilderOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_BUILDER":
+      break;
+    }
+
+    case "REMOVE_BUILDER": {
       RemoveBuilderInputSchema().parse(action.input);
+
       buildersBuildersOperations.removeBuilderOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
+
       break;
+    }
 
     default:
       return state;

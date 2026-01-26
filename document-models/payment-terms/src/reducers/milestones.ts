@@ -1,7 +1,3 @@
-import {
-  DuplicateMilestoneIdError,
-  MilestoneNotFoundError,
-} from "../../gen/milestones/error.js";
 import type { PaymentTermsMilestonesOperations } from "@powerhousedao/network-admin/document-models/payment-terms";
 
 export const paymentTermsMilestonesOperations: PaymentTermsMilestonesOperations =
@@ -11,9 +7,7 @@ export const paymentTermsMilestonesOperations: PaymentTermsMilestonesOperations 
         (m) => m.id === action.input.id,
       );
       if (existingIndex !== -1) {
-        throw new DuplicateMilestoneIdError(
-          `Milestone with ID ${action.input.id} already exists`,
-        );
+        throw new Error(`Milestone with ID ${action.input.id} already exists`);
       }
 
       const newMilestone = {
@@ -32,9 +26,7 @@ export const paymentTermsMilestonesOperations: PaymentTermsMilestonesOperations 
         (m) => m.id === action.input.id,
       );
       if (milestoneIndex === -1) {
-        throw new MilestoneNotFoundError(
-          `Milestone with ID ${action.input.id} not found`,
-        );
+        throw new Error(`Milestone with ID ${action.input.id} not found`);
       }
 
       const milestone = state.milestoneSchedule[milestoneIndex];
@@ -54,9 +46,7 @@ export const paymentTermsMilestonesOperations: PaymentTermsMilestonesOperations 
         (m) => m.id === action.input.id,
       );
       if (milestoneIndex === -1) {
-        throw new MilestoneNotFoundError(
-          `Milestone with ID ${action.input.id} not found`,
-        );
+        throw new Error(`Milestone with ID ${action.input.id} not found`);
       }
 
       state.milestoneSchedule[milestoneIndex].payoutStatus =
@@ -67,9 +57,7 @@ export const paymentTermsMilestonesOperations: PaymentTermsMilestonesOperations 
         (m) => m.id === action.input.id,
       );
       if (milestoneIndex === -1) {
-        throw new MilestoneNotFoundError(
-          `Milestone with ID ${action.input.id} not found`,
-        );
+        throw new Error(`Milestone with ID ${action.input.id} not found`);
       }
 
       state.milestoneSchedule.splice(milestoneIndex, 1);
