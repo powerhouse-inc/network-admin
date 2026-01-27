@@ -1,9 +1,11 @@
 import { type ISubgraph } from "@powerhousedao/reactor-api";
+import { WorkstreamsProcessor } from "../../processors/workstreams/index.js";
 import { type RequestForProposalsDocument } from "../../document-models/request-for-proposals/index.js";
 import { type WorkstreamDocument } from "../../document-models/workstream/index.js";
 import type { NetworkProfileDocument } from "../../document-models/network-profile/index.js";
 import type { PHDocument } from "document-model";
-import { type IAnalyticsStore, AnalyticsPath } from "@powerhousedao/analytics-engine-core";
+import { sql, type ExpressionBuilder } from "kysely";
+import type { DB } from "../../processors/workstreams/schema.js";
 
 type WorkstreamFilterArgs = {
   workstreamId?: string | null;
@@ -63,11 +65,21 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     return null;
   };
 
+  // Normalize drive IDs to match the format used by the processor factory
+  // reactor.getDrives() returns base64-like IDs (with + and =)
+  // but driveHeader.id in the factory uses - instead of +
+  // TODO: Report this inconsistency to @powerhousedao packages
+  const normalizeDriveId = (driveId: string): string => {
+    return driveId.replace(/\+/g, "-").replace(/=+$/, "");
+  };
+
   const getCandidateDrives = async (): Promise<string[]> => {
     try {
       const drives = await (reactor as any).getDrives?.();
-      if (Array.isArray(drives) && drives.length > 0) return drives as string[];
-    } catch { }
+      if (Array.isArray(drives) && drives.length > 0) {
+        return (drives as string[]).map(normalizeDriveId);
+      }
+    } catch {}
     return [] as string[];
   };
 
@@ -249,10 +261,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
       const initialProposalBase = state.initialProposal
         ? {
-          id: state.initialProposal.id,
-          status: state.initialProposal.status,
-          author: state.initialProposal.author,
-        }
+            id: state.initialProposal.id,
+            status: state.initialProposal.status,
+            author: state.initialProposal.author,
+          }
         : null;
 
       const alternativeProposalsBase = (state.alternativeProposals || []).map(
@@ -310,10 +322,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         rfp: rfpDetails,
         initialProposal: initialProposalBase
           ? {
-            ...initialProposalBase,
-            sow: initialSowDoc?.stateJSON || null,
-            paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
-          }
+              ...initialProposalBase,
+              sow: initialSowDoc?.stateJSON || null,
+              paymentTerms: initialPaymentTermsDoc?.stateJSON || null,
+            }
           : null,
         alternativeProposals: alternativeProposalsBase.map(
           (proposal: any, index: number) => ({
@@ -348,192 +360,158 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     }
   };
 
-  const getWorkstreamRowsFromAnalytics = async (
-    analyticsStore: IAnalyticsStore,
-    filters?: WorkstreamFilterArgs | WorkstreamsFilterArgs,
+  const applyWorkstreamFilters = (
+    qb: any,
+    filters: WorkstreamFilterArgs | WorkstreamsFilterArgs,
     wantedSlug?: string,
   ) => {
-    const select: Record<string, AnalyticsPath[]> = {
-      network: [],
-      network_slug: [],
-      workstream_slug: [],
-      workstream_title: [],
-      status: [],
-      initial_proposal_status: [],
-      initial_proposal_author: [],
-      sow_phid: [],
-      workstream_phid: [],
-      operation_index: [],
-    };
+    // Handle workstreamId and workstreamSlug (from WorkstreamFilter)
+    if ("workstreamId" in filters && filters.workstreamId) {
+      qb = qb.where("workstream_phid", "=", filters.workstreamId);
+    } else if ("workstreamSlug" in filters && filters.workstreamSlug) {
+      qb = qb.where("workstream_slug", "=", filters.workstreamSlug);
+    }
 
-    if (filters) {
-      if ("workstreamId" in filters && filters.workstreamId) {
-        select.workstream_phid = [
-          AnalyticsPath.fromString(`/${filters.workstreamId}`),
-        ];
-      }
-      if ("workstreamSlug" in filters && filters.workstreamSlug) {
-        select.workstream_slug = [
-          AnalyticsPath.fromString(`/${filters.workstreamSlug}`),
-        ];
-      }
-      if (filters.networkId) {
-        select.network = [AnalyticsPath.fromString(`/${filters.networkId}`)];
-      }
-      if (filters.networkSlug) {
-        select.network_slug = [
-          AnalyticsPath.fromString(`/${filters.networkSlug}`),
-        ];
-      } else if (
-        "networkName" in filters &&
-        filters.networkName &&
-        wantedSlug
-      ) {
-        select.network_slug = [AnalyticsPath.fromString(`/${wantedSlug}`)];
-      }
-
-      if ("networkNames" in filters && filters.networkNames) {
-        const networkSlugs = filters.networkNames
-          .filter((name): name is string => Boolean(name))
-          .map((name) => deriveSlug(name));
-
-        if (networkSlugs.length > 0) {
-          select.network_slug = networkSlugs.map((slug) =>
-            AnalyticsPath.fromString(`/${slug}`),
-          );
-        }
-      }
-
-      const statuses = (filters.workstreamStatuses || []).filter(
-        (status): status is string => Boolean(status),
-      );
-      if (statuses.length > 0) {
-        select.status = statuses.map((s) =>
-          AnalyticsPath.fromString(`/${s}`),
+    // Handle workstreamTitle filter (from WorkstreamsFilter)
+    if ("workstreamTitle" in filters && filters.workstreamTitle) {
+      // Use case-insensitive partial match for workstream title
+      // Filter out NULL values and do case-insensitive search
+      const searchPattern = `%${filters.workstreamTitle.toLowerCase()}%`;
+      qb = qb
+        .where("workstream_title", "is not", null)
+        .where((eb: ExpressionBuilder<DB, "workstreams">) =>
+          eb(sql`LOWER(workstream_title)`, "like", searchPattern),
         );
-      } else if (filters.workstreamStatus) {
-        select.status = [
-          AnalyticsPath.fromString(`/${filters.workstreamStatus}`),
-        ];
+    }
+
+    if (filters.networkId) {
+      qb = qb.where("network_phid", "=", filters.networkId);
+    } else if (filters.networkSlug) {
+      qb = qb.where("network_slug", "=", filters.networkSlug);
+    } else if (filters.networkName && wantedSlug) {
+      qb = qb.where("network_slug", "=", wantedSlug);
+    } else if ("networkNames" in filters && filters.networkNames) {
+      // Handle networkNames filter (from WorkstreamsFilter)
+      const networkSlugs = filters.networkNames
+        .filter((name): name is string => Boolean(name))
+        .map((name) => deriveSlug(name));
+
+      if (networkSlugs.length > 0) {
+        qb = qb.where("network_slug", "in", networkSlugs as any);
       }
     }
 
-    const series = await analyticsStore.getMatchingSeries({
-      start: null,
-      end: null,
-      metrics: ["Workstream"],
-      select,
-    });
+    const statuses = (filters.workstreamStatuses || []).filter(
+      (status): status is string => Boolean(status),
+    );
 
-    const latestByWorkstream: Record<string, any> = {};
-
-    for (const s of series) {
-      const dims = s.dimensions;
-      const getPathString = (dim: any) => {
-        if (!dim) return null;
-        const path = dim.path?.toString() || dim.toString();
-        if (path === "?" || path === "none" || path === "/none" || path === "")
-          return null;
-        return path.startsWith("/") ? path.substring(1) : path;
-      };
-
-      const workstreamPhid = getPathString(dims.workstream_phid) || s.source.toString().split("/")[3];
-      if (!workstreamPhid || workstreamPhid === "?") continue;
-
-      const opIndex = parseInt(getPathString(dims.operation_index) || "0");
-
-      const existing = latestByWorkstream[workstreamPhid];
-      // Priority 1: Higher operation index
-      // Priority 2: Higher database record ID (if opIndex/timestamp are same)
-      if (
-        !existing ||
-        opIndex > existing.opIndex ||
-        (opIndex === existing.opIndex && s.start.toMillis() >= existing.start.toMillis())
-      ) {
-        latestByWorkstream[workstreamPhid] = {
-          network_phid: getPathString(dims.network),
-          network_slug: getPathString(dims.network_slug),
-          workstream_phid: workstreamPhid,
-          workstream_slug: getPathString(dims.workstream_slug),
-          workstream_title: getPathString(dims.workstream_title)?.replace(
-            /-/g,
-            "/",
-          ),
-          workstream_status: getPathString(dims.status),
-          sow_phid: getPathString(dims.sow_phid),
-          initial_proposal_status: getPathString(dims.initial_proposal_status),
-          initial_proposal_author: getPathString(dims.initial_proposal_author),
-          start: s.start,
-          opIndex,
-        };
-      }
+    if (statuses.length > 0) {
+      qb = qb.where("workstream_status", "in", statuses as any);
+    } else if (filters.workstreamStatus) {
+      qb = qb.where("workstream_status", "=", filters.workstreamStatus);
     }
 
-    let rows = Object.values(latestByWorkstream);
+    return qb;
+  };
 
-    // Manual filtering for workstreamTitle (was partial match in SQL)
-    if (filters && "workstreamTitle" in filters && filters.workstreamTitle) {
-      const search = filters.workstreamTitle.toLowerCase();
-      rows = rows.filter((r) =>
-        r.workstream_title?.toLowerCase().includes(search),
-      );
+  const applyScopeOfWorkFilters = (
+    qb: any,
+    filters: ScopeOfWorkFilterArgs,
+    wantedSlug?: string,
+  ) => {
+    if (filters.workstreamId) {
+      qb = qb.where("workstream_phid", "=", filters.workstreamId);
+    } else if (filters.workstreamSlug) {
+      qb = qb.where("workstream_slug", "=", filters.workstreamSlug);
     }
 
-    return rows;
+    if (filters.networkId) {
+      qb = qb.where("network_phid", "=", filters.networkId);
+    } else if (filters.networkSlug) {
+      qb = qb.where("network_slug", "=", filters.networkSlug);
+    } else if (filters.networkName && wantedSlug) {
+      qb = qb.where("network_slug", "=", wantedSlug);
+    }
+
+    if (filters.workstreamStatus) {
+      qb = qb.where("workstream_status", "=", filters.workstreamStatus);
+    }
+
+    return qb;
   };
 
   return {
     Query: {
       processorWorkstreams: async () => {
-        const analyticsStore = (subgraph as any).analyticsStore;
-        if (!analyticsStore) {
-          console.error("analyticsStore not found in subgraph");
-          return [];
-        }
+        const drives = await getCandidateDrives();
+        const allProcessorWorkstreams = await Promise.all(
+          drives.map(async (driveId) => {
+            const namespace = WorkstreamsProcessor.getNamespace(driveId);
+            console.log(
+              `[WorkstreamsProcessor] Resolver querying drive: ${driveId}, namespace: ${namespace}`,
+            );
+            try {
+              return await WorkstreamsProcessor.query(driveId, db)
+                .selectFrom("workstreams")
+                .selectAll()
+                .execute();
+            } catch (error) {
+              console.warn(
+                `[WorkstreamsProcessor] Failed to query namespace ${namespace}:`,
+                error,
+              );
+              return []; // Return empty array if table doesn't exist for this drive
+            }
+          }),
+        );
 
-        try {
-          const rows = await getWorkstreamRowsFromAnalytics(analyticsStore);
-          return rows.map((row) => ({
-            network_phid: row.network_phid,
-            network_slug: row.network_slug,
-            workstream_phid: row.workstream_phid,
-            workstream_slug: row.workstream_slug,
-            workstream_title: row.workstream_title,
-            workstream_status: row.workstream_status,
-            sow_phid: row.sow_phid,
-            roadmap_oid: null,
-            final_milestone_target: null,
-            initial_proposal_status: row.initial_proposal_status,
-            initial_proposal_author: row.initial_proposal_author,
-          }));
-        } catch (error) {
-          console.error("Error in processorWorkstreams resolver:", error);
-          throw error;
-        }
+        // Flatten the array of arrays into a single array
+        const flattenedWorkstreams = allProcessorWorkstreams.flat();
+
+        return flattenedWorkstreams.map((workstream: any) => ({
+          network_phid: workstream.network_phid,
+          network_slug: workstream.network_slug,
+          workstream_phid: workstream.workstream_phid,
+          workstream_slug: workstream.workstream_slug,
+          workstream_title: workstream.workstream_title,
+          workstream_status: workstream.workstream_status,
+          sow_phid: workstream.sow_phid,
+          roadmap_oid: workstream.roadmap_oid,
+          final_milestone_target: workstream.final_milestone_target,
+          initial_proposal_status: workstream.initial_proposal_status,
+          initial_proposal_author: workstream.initial_proposal_author,
+        }));
       },
       workstream: async (
         parent: unknown,
         args: { filter: WorkstreamFilterArgs },
       ) => {
         const filters = args.filter || {};
-        const analyticsStore = (subgraph as any).analyticsStore;
-        if (!analyticsStore) return [];
-
+        const candidateDrives = await getCandidateDrives();
         const wantedSlug =
           filters.networkSlug ||
           (filters.networkName ? deriveSlug(filters.networkName) : undefined);
 
-        const rows = await getWorkstreamRowsFromAnalytics(
-          analyticsStore,
-          filters,
-          wantedSlug,
-        );
-
         const resolved: any[] = [];
         const contributorPhids = new Set<string>();
-        for (const row of rows) {
-          const hydrated = await hydrateWorkstreamRow(row);
-          resolved.push(hydrated);
+
+        for (const driveId of candidateDrives) {
+          let qb = WorkstreamsProcessor.query(driveId, db)
+            .selectFrom("workstreams")
+            .selectAll();
+
+          qb = applyWorkstreamFilters(qb, filters, wantedSlug);
+
+          const rows = await qb.execute();
+          if (rows.length === 0) {
+            continue;
+          }
+
+          for (const row of rows) {
+            const hydrated = await hydrateWorkstreamRow(row);
+            resolved.push(hydrated);
+          }
+          break;
         }
 
         // Collect SOWs and their contributors
@@ -620,24 +598,44 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         args: { filter?: WorkstreamsFilterArgs },
       ) => {
         const filters = args.filter || {};
-        const analyticsStore = (subgraph as any).analyticsStore;
-        if (!analyticsStore) return [];
+        const candidateDrives = await getCandidateDrives();
+
+        // Check if any filters are provided
+        const hasFilters =
+          filters.networkId ||
+          filters.networkSlug ||
+          filters.networkName ||
+          (filters.networkNames && filters.networkNames.length > 0) ||
+          filters.workstreamTitle ||
+          filters.workstreamStatus ||
+          (filters.workstreamStatuses && filters.workstreamStatuses.length > 0);
 
         const wantedSlug =
           filters.networkSlug ||
           (filters.networkName ? deriveSlug(filters.networkName) : undefined);
 
-        const rows = await getWorkstreamRowsFromAnalytics(
-          analyticsStore,
-          filters,
-          wantedSlug,
-        );
-
         const results: any[] = [];
         const contributorPhids = new Set<string>();
-        for (const row of rows) {
-          const hydrated = await hydrateWorkstreamRow(row);
-          results.push(hydrated);
+
+        for (const driveId of candidateDrives) {
+          let qb = WorkstreamsProcessor.query(driveId, db)
+            .selectFrom("workstreams")
+            .selectAll();
+
+          // Only apply filters if any are provided
+          if (hasFilters) {
+            qb = applyWorkstreamFilters(qb, filters, wantedSlug);
+          }
+
+          const rows = await qb.execute();
+          if (rows.length === 0) {
+            continue;
+          }
+
+          for (const row of rows) {
+            const hydrated = await hydrateWorkstreamRow(row);
+            results.push(hydrated);
+          }
         }
 
         // Collect SOWs and their contributors
@@ -724,28 +722,38 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         args: { filter: WorkstreamFilterArgs },
       ) => {
         const filters = args.filter || {};
-        const analyticsStore = (subgraph as any).analyticsStore;
-        if (!analyticsStore) return [];
-
+        const candidateDrives = await getCandidateDrives();
         const wantedSlug =
           filters.networkSlug ||
           (filters.networkName ? deriveSlug(filters.networkName) : undefined);
 
-        const rows = await getWorkstreamRowsFromAnalytics(
-          analyticsStore,
-          filters,
-          wantedSlug,
-        );
-
         const results: any[] = [];
-        for (const row of rows) {
-          const hydrated = await hydrateWorkstreamRow(row);
-          results.push({
-            code: hydrated.code,
-            title: hydrated.title,
-            status: hydrated.status,
-            rfp: hydrated.rfp,
-          });
+
+        for (const driveId of candidateDrives) {
+          let qb = WorkstreamsProcessor.query(driveId, db)
+            .selectFrom("workstreams")
+            .selectAll();
+
+          qb = applyWorkstreamFilters(qb, filters, wantedSlug);
+
+          const rows = await qb.execute();
+          if (rows.length === 0) {
+            continue;
+          }
+
+          for (const row of rows) {
+            const hydrated = await hydrateWorkstreamRow(row);
+            results.push({
+              code: hydrated.code,
+              title: hydrated.title,
+              status: hydrated.status,
+              rfp: hydrated.rfp,
+            });
+          }
+
+          if (filters.workstreamId || filters.workstreamSlug) {
+            break;
+          }
         }
 
         return results;
@@ -755,97 +763,106 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         args: { filter: ScopeOfWorkFilterArgs },
       ) => {
         const filters = args.filter || {};
-        const analyticsStore = (subgraph as any).analyticsStore;
-        if (!analyticsStore) return [];
-
+        const candidateDrives = await getCandidateDrives();
         const wantedSlug =
           filters.networkSlug ||
           (filters.networkName ? deriveSlug(filters.networkName) : undefined);
 
-        const rows = await getWorkstreamRowsFromAnalytics(
-          analyticsStore,
-          filters as any,
-          wantedSlug,
-        );
-
         const results: any[] = [];
         const contributorPhids = new Set<string>();
 
-        for (const row of rows) {
-          const hydrated = await hydrateWorkstreamRow(row);
+        for (const driveId of candidateDrives) {
+          let qb = WorkstreamsProcessor.query(driveId, db)
+            .selectFrom("workstreams")
+            .selectAll();
 
-          // Collect SOWs based on proposalRole filter
-          const sowDocs: any[] = [];
+          qb = applyScopeOfWorkFilters(qb, filters, wantedSlug);
 
-          if (!filters.proposalRole) {
-            // If no proposalRole specified, include all SOWs
-            if (hydrated.sow) {
-              sowDocs.push(hydrated.sow);
-            }
-            if (hydrated.initialProposal?.sow) {
-              sowDocs.push(hydrated.initialProposal.sow);
-            }
-            for (const altProposal of hydrated.alternativeProposals || []) {
-              if (altProposal.sow) {
-                sowDocs.push(altProposal.sow);
+          const rows = await qb.execute();
+          if (rows.length === 0) {
+            continue;
+          }
+
+          for (const row of rows) {
+            const hydrated = await hydrateWorkstreamRow(row);
+
+            // Collect SOWs based on proposalRole filter
+            const sowDocs: any[] = [];
+
+            if (!filters.proposalRole) {
+              // If no proposalRole specified, include all SOWs
+              if (hydrated.sow) {
+                sowDocs.push(hydrated.sow);
+              }
+              if (hydrated.initialProposal?.sow) {
+                sowDocs.push(hydrated.initialProposal.sow);
+              }
+              for (const altProposal of hydrated.alternativeProposals || []) {
+                if (altProposal.sow) {
+                  sowDocs.push(altProposal.sow);
+                }
+              }
+            } else if (filters.proposalRole === "INITIAL") {
+              if (hydrated.initialProposal?.sow) {
+                sowDocs.push(hydrated.initialProposal.sow);
+              }
+            } else if (filters.proposalRole === "ALTERNATIVE") {
+              for (const altProposal of hydrated.alternativeProposals || []) {
+                if (altProposal.sow) {
+                  sowDocs.push(altProposal.sow);
+                }
+              }
+            } else if (filters.proposalRole === "AWARDED") {
+              // For AWARDED, we check if the workstream status is AWARDED
+              // and return the initial proposal's SOW (as it's typically the awarded one)
+              if (
+                hydrated.status === "AWARDED" &&
+                hydrated.initialProposal?.sow
+              ) {
+                sowDocs.push(hydrated.initialProposal.sow);
               }
             }
-          } else if (filters.proposalRole === "INITIAL") {
-            if (hydrated.initialProposal?.sow) {
-              sowDocs.push(hydrated.initialProposal.sow);
-            }
-          } else if (filters.proposalRole === "ALTERNATIVE") {
-            for (const altProposal of hydrated.alternativeProposals || []) {
-              if (altProposal.sow) {
-                sowDocs.push(altProposal.sow);
+
+            // Collect contributor PHIDs from all SOWs
+            for (const sow of sowDocs) {
+              if (!sow || typeof sow !== "object") continue;
+
+              if (Array.isArray(sow.contributors)) {
+                sow.contributors.forEach((contributor: unknown) => {
+                  const phid = extractPhid(contributor);
+                  if (phid) contributorPhids.add(phid);
+                });
+              }
+
+              // Collect deliverable owners too so `SOW_Deliverable.owner` can resolve
+              if (Array.isArray(sow.deliverables)) {
+                sow.deliverables.forEach((deliverable: unknown) => {
+                  if (!deliverable || typeof deliverable !== "object") return;
+                  const phid = extractPhid((deliverable as any).owner);
+                  if (phid) contributorPhids.add(phid);
+                });
+              }
+
+              // Collect project owners too so `SOW_Project.projectOwner` can resolve
+              if (Array.isArray(sow.projects)) {
+                sow.projects.forEach((project: unknown) => {
+                  if (!project || typeof project !== "object") return;
+                  const phid = extractPhid((project as any).projectOwner);
+                  if (phid) contributorPhids.add(phid);
+                });
               }
             }
-          } else if (filters.proposalRole === "AWARDED") {
-            // For AWARDED, we check if the workstream status is AWARDED
-            // and return the initial proposal's SOW (as it's typically the awarded one)
-            if (
-              hydrated.status === "AWARDED" &&
-              hydrated.initialProposal?.sow
-            ) {
-              sowDocs.push(hydrated.initialProposal.sow);
+
+            // Filter out null/undefined SOWs and add to results
+            for (const sow of sowDocs) {
+              if (sow) {
+                results.push(sow);
+              }
             }
           }
 
-          // Collect contributor PHIDs from all SOWs
-          for (const sow of sowDocs) {
-            if (!sow || typeof sow !== "object") continue;
-
-            if (Array.isArray(sow.contributors)) {
-              sow.contributors.forEach((contributor: unknown) => {
-                const phid = extractPhid(contributor);
-                if (phid) contributorPhids.add(phid);
-              });
-            }
-
-            // Collect deliverable owners too so `SOW_Deliverable.owner` can resolve
-            if (Array.isArray(sow.deliverables)) {
-              sow.deliverables.forEach((deliverable: unknown) => {
-                if (!deliverable || typeof deliverable !== "object") return;
-                const phid = extractPhid((deliverable as any).owner);
-                if (phid) contributorPhids.add(phid);
-              });
-            }
-
-            // Collect project owners too so `SOW_Project.projectOwner` can resolve
-            if (Array.isArray(sow.projects)) {
-              sow.projects.forEach((project: unknown) => {
-                if (!project || typeof project !== "object") return;
-                const phid = extractPhid((project as any).projectOwner);
-                if (phid) contributorPhids.add(phid);
-              });
-            }
-          }
-
-          // Filter out null/undefined SOWs and add to results
-          for (const sow of sowDocs) {
-            if (sow) {
-              results.push(sow);
-            }
+          if (filters.workstreamId || filters.workstreamSlug) {
+            break;
           }
         }
 
