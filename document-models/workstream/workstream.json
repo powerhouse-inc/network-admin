@@ -85,7 +85,7 @@
               "id": "8a59df49-18e4-422f-babe-9b52f860cadc",
               "name": "EDIT_INITIAL_PROPOSAL",
               "reducer": "",
-              "schema": "input EditInitialProposalInput {\n  id: ID!\n  sowId: PHID\n  paymentTermsId: PHID\n  status: ProposalStatusInput\n  proposalAuthor: ProposalAuthorInput\n}\n\nenum ProposalStatusInput {\n  DRAFT\n  SUBMITTED\n  ACCEPTED\n  REJECTED\n}\n\ninput ProposalAuthorInput {\n  id: PHID!\n  name: String\n  icon: URL\n}",
+              "schema": "input EditInitialProposalInput {\n  id: ID!\n  sowId: PHID\n  paymentTermsId: PHID\n  status: ProposalStatusInput\n  proposalAuthor: ProposalAuthorInput\n}\nenum ProposalStatusInput {\n  DRAFT\n  SUBMITTED\n  ACCEPTED\n  REJECTED\n}\n\ninput ProposalAuthorInput {\n  id: PHID!\n  name: String\n  icon: URL\n}",
               "scope": "global",
               "template": ""
             },
@@ -93,10 +93,32 @@
               "description": "",
               "errors": [],
               "examples": [],
-              "id": "39a6f629-8976-4232-9a0f-f8c7a249cfa8",
+              "id": "9f31f696-e17d-4ace-a869-57c197aba6e3",
               "name": "ADD_ALTERNATIVE_PROPOSAL",
               "reducer": "",
               "schema": "input AddAlternativeProposalInput {\n  id: ID!\n  sowId: PHID\n  paymentTermsId: PHID\n  status: ProposalStatusInput\n  proposalAuthor: ProposalAuthorInput\n}",
+              "scope": "global",
+              "template": ""
+            },
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "306bb85b-6cf8-406d-a6a2-f63e9e7345ac",
+              "name": "EDIT_ALTERNATIVE_PROPOSAL",
+              "reducer": "",
+              "schema": "input EditAlternativeProposalInput {\n  id: ID!\n  sowId: PHID\n  paymentTermsId: PHID\n  status: ProposalStatusInput\n  proposalAuthor: ProposalAuthorInput\n}",
+              "scope": "global",
+              "template": ""
+            },
+            {
+              "description": "",
+              "errors": [],
+              "examples": [],
+              "id": "a4632137-cee8-46db-bfcb-ce1704bf1c66",
+              "name": "REMOVE_ALTERNATIVE_PROPOSAL",
+              "reducer": "",
+              "schema": "input RemoveAlternativeProposalInput {\n  id: ID!\n}",
               "scope": "global",
               "template": ""
             }

@@ -127,15 +127,15 @@
               "template": ""
             },
             {
-              "description": "",
-              "errors": [],
-              "examples": [],
               "id": "946acb04-4404-4079-a41a-186d86e8d5dd",
               "name": "SET_PROFILE_NAME",
-              "reducer": "",
+              "description": "",
               "schema": "input SetProfileNameInput {\n  name: String!\n}",
-              "scope": "global",
-              "template": ""
+              "template": "",
+              "reducer": "",
+              "errors": [],
+              "examples": [],
+              "scope": "global"
             }
           ]
         }

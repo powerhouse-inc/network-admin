@@ -15,6 +15,9 @@ import {
   AddPaymentRequestInputSchema,
   RemovePaymentRequestInputSchema,
   EditInitialProposalInputSchema,
+  AddAlternativeProposalInputSchema,
+  EditAlternativeProposalInputSchema,
+  RemoveAlternativeProposalInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<WorkstreamPHState> = (
@@ -90,6 +93,42 @@ const stateReducer: StateReducer<WorkstreamPHState> = (
       EditInitialProposalInputSchema().parse(action.input);
 
       workstreamProposalsOperations.editInitialProposalOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "ADD_ALTERNATIVE_PROPOSAL": {
+      AddAlternativeProposalInputSchema().parse(action.input);
+
+      workstreamProposalsOperations.addAlternativeProposalOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "EDIT_ALTERNATIVE_PROPOSAL": {
+      EditAlternativeProposalInputSchema().parse(action.input);
+
+      workstreamProposalsOperations.editAlternativeProposalOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "REMOVE_ALTERNATIVE_PROPOSAL": {
+      RemoveAlternativeProposalInputSchema().parse(action.input);
+
+      workstreamProposalsOperations.removeAlternativeProposalOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

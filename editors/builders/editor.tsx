@@ -7,7 +7,7 @@ import {
   setSelectedNode,
   useParentFolderForSelectedNode,
   useDrives,
-  useGetDocuments,
+  useDocuments,
 } from "@powerhousedao/reactor-browser";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import type { FileNode } from "document-drive";
@@ -179,7 +179,7 @@ export default function Editor() {
   }, [builderProfileNodesWithDriveId]);
 
   // Fetch all builder profile documents from all drives
-  const builderProfileDocuments = useGetDocuments(builderPhids);
+  const builderProfileDocuments = useDocuments(builderPhids);
 
   // Create a map of PHID to document for quick lookup (local drives)
   const localBuilderProfileMap = useMemo(() => {

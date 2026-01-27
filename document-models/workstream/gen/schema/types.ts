@@ -77,6 +77,14 @@ export type ClientInfo = {
   name: Maybe<Scalars["String"]["output"]>;
 };
 
+export type EditAlternativeProposalInput = {
+  id: Scalars["ID"]["input"];
+  paymentTermsId?: InputMaybe<Scalars["PHID"]["input"]>;
+  proposalAuthor?: InputMaybe<ProposalAuthorInput>;
+  sowId?: InputMaybe<Scalars["PHID"]["input"]>;
+  status?: InputMaybe<ProposalStatusInput>;
+};
+
 export type EditClientInfoInput = {
   clientId: Scalars["PHID"]["input"];
   icon?: InputMaybe<Scalars["String"]["input"]>;
@@ -130,6 +138,10 @@ export type ProposalStatusInput =
 export type Rfp = {
   id: Scalars["PHID"]["output"];
   title: Scalars["String"]["output"];
+};
+
+export type RemoveAlternativeProposalInput = {
+  id: Scalars["ID"]["input"];
 };
 
 export type RemovePaymentRequestInput = {

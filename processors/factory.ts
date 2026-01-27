@@ -11,14 +11,14 @@ import {
 import { type PHDocumentHeader } from "document-model";
 
 // Import processor factories here as they are generated
-import { workstreamsProcessorFactory } from "./workstreams/factory.js";
+import { MyProcessorProcessorFactory } from "./my-processor/factory.js";
 
 export const processorFactory = (module: IProcessorHostModule) => {
   // Initialize all processor factories once with the module
   const factories: Array<ProcessorFactory> = [];
 
   // Add processors here as they are generated
-  factories.push(workstreamsProcessorFactory(module));
+  factories.push(MyProcessorProcessorFactory(module));
 
   // Return the inner function that will be called for each drive
   return async (driveHeader: PHDocumentHeader): Promise<ProcessorRecord[]> => {

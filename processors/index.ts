@@ -1,4 +1,3 @@
-export {};
-export * as WorkstreamsProcessor from "./workstreams/index.js";
+export { };
 export { processorFactory } from "./factory.js";
-export { workstreamsProcessorFactory } from "./workstreams/factory.js";
+export { MyProcessorProcessor } from "./my-processor/index.js";

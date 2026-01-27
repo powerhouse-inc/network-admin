@@ -1,11 +1,31 @@
 import { type SignalDispatch } from "document-model";
-import type { EditInitialProposalAction } from "./actions.js";
+import type {
+  EditInitialProposalAction,
+  AddAlternativeProposalAction,
+  EditAlternativeProposalAction,
+  RemoveAlternativeProposalAction,
+} from "./actions.js";
 import type { WorkstreamState } from "../types.js";
 
 export interface WorkstreamProposalsOperations {
   editInitialProposalOperation: (
     state: WorkstreamState,
     action: EditInitialProposalAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  addAlternativeProposalOperation: (
+    state: WorkstreamState,
+    action: AddAlternativeProposalAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  editAlternativeProposalOperation: (
+    state: WorkstreamState,
+    action: EditAlternativeProposalAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  removeAlternativeProposalOperation: (
+    state: WorkstreamState,
+    action: RemoveAlternativeProposalAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

@@ -185,26 +185,26 @@
               "template": ""
             },
             {
-              "description": "",
-              "errors": [],
-              "examples": [],
               "id": "5d913b40-c532-4299-a8de-510e3042f20b",
               "name": "UPDATE_PENALTY_CLAUSE",
-              "reducer": "",
-              "schema": "input UpdatePenaltyClauseInput {\n  id: OID!\n  condition: String\n  deductionAmount: Amount\n  comment: String\n}",
-              "scope": "global",
-              "template": ""
-            },
-            {
               "description": "",
+              "schema": "input UpdatePenaltyClauseInput {\n  id: OID!\n  condition: String\n  deductionAmount: Amount\n  comment: String\n}",
+              "template": "",
+              "reducer": "",
               "errors": [],
               "examples": [],
+              "scope": "global"
+            },
+            {
               "id": "878a78ab-1b00-479a-ba56-6de431a102d1",
               "name": "DELETE_PENALTY_CLAUSE",
-              "reducer": "",
+              "description": "",
               "schema": "input DeletePenaltyClauseInput {\n  id: OID!\n}",
-              "scope": "global",
-              "template": ""
+              "template": "",
+              "reducer": "",
+              "errors": [],
+              "examples": [],
+              "scope": "global"
             }
           ]
         }

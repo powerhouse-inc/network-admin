@@ -128,7 +128,6 @@ input EditInitialProposalInput {
   status: ProposalStatusInput
   proposalAuthor: ProposalAuthorInput
 }
-
 enum ProposalStatusInput {
   DRAFT
   SUBMITTED
@@ -148,4 +147,16 @@ input AddAlternativeProposalInput {
   paymentTermsId: PHID
   status: ProposalStatusInput
   proposalAuthor: ProposalAuthorInput
+}
+
+input EditAlternativeProposalInput {
+  id: ID!
+  sowId: PHID
+  paymentTermsId: PHID
+  status: ProposalStatusInput
+  proposalAuthor: ProposalAuthorInput
+}
+
+input RemoveAlternativeProposalInput {
+  id: ID!
 }

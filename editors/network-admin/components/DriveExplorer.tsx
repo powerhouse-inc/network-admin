@@ -1,53 +1,28 @@
 import type { EditorProps } from "document-model";
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import {
-  Sidebar,
-  SidebarProvider,
-  Button,
-  type SidebarNode,
-} from "@powerhousedao/document-engineering";
-
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   setSelectedNode,
-  useSelectedDrive,
+  useSelectedDriveSafe,
   useSelectedFolder,
   useUserPermissions,
   useDocumentsInSelectedDrive,
   useFileNodesInSelectedDrive,
   useNodeActions,
-  useSelectedDocument,
+  useSelectedDocumentSafe,
   showDeleteNodeModal,
   addDocument,
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
+import { Button } from "@powerhousedao/document-engineering";
 import { CreateDocumentModal } from "@powerhousedao/design-system/connect";
 import { type DocumentModelModule, type PHDocument } from "document-model";
-import { PaymentIcon } from "./icons/PaymentIcon.js";
-import { RfpIcon } from "./icons/RfpIcon.js";
-import { SowIcon } from "./icons/SowIcon.js";
 import { WorkstreamIcon } from "./icons/WorkstreamIcon.js";
-import { Earth } from "lucide-react";
-import type { WorkstreamDocument } from "../../../document-models/workstream/index.js";
 import type { NetworkProfileDocument } from "../../../document-models/network-profile/index.js";
-import type { RequestForProposalsDocument } from "../../../document-models/request-for-proposals/index.js";
-import type { PaymentTermsDocument } from "../../../document-models/payment-terms/index.js";
 import {
   editClientInfo,
   editWorkstream,
 } from "../../../document-models/workstream/gen/creators.js";
-import type { BuildersDocument } from "../../../document-models/builders/index.js";
-
-const WorkstreamStatusEnums = [
-  "RFP_DRAFT",
-  "PREWORK_RFC",
-  "RFP_CANCELLED",
-  "OPEN_FOR_PROPOSALS",
-  "PROPOSAL_SUBMITTED",
-  "NOT_AWARDED",
-  "AWARDED",
-  "IN_PROGRESS",
-  "FINISHED",
-];
+import { FolderTree } from "./FolderTree.js";
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -69,14 +44,14 @@ export function DriveExplorer({ children }: EditorProps) {
 
   // === STATE MANAGEMENT HOOKS ===
   // Core state hooks for drive navigation
-  const [selectedDrive] = useSelectedDrive(); // Currently selected drive
+  const [selectedDrive] = useSelectedDriveSafe(); // Currently selected drive
   const selectedFolder = useSelectedFolder(); // Currently selected folder
   const allDocuments = useDocumentsInSelectedDrive();
   const fileChildren = useFileNodesInSelectedDrive();
   const { onRenameNode } = useNodeActions();
 
   // Listen to global selected document state (for external editors like Scope of Work)
-  const [globalSelectedDocument] = useSelectedDocument();
+  const [globalSelectedDocument] = useSelectedDocumentSafe();
 
   const networkAdminDocuments = allDocuments?.filter(
     (doc: PHDocument) =>
@@ -107,241 +82,12 @@ export function DriveExplorer({ children }: EditorProps) {
   const isScopeOfWorkFullView =
     globalSelectedDocument?.header.documentType === "powerhouse/scopeofwork";
 
-  // Convert network admin documents to SidebarNode format
-  const sidebarNodes = useMemo((): SidebarNode[] => {
-    // Group documents by type
-    const workstreamDocs = (networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/workstream",
-    ) ?? []) as WorkstreamDocument[];
-    const networkProfileDocs = (networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/network-profile",
-    ) ?? []) as NetworkProfileDocument[];
-    const [buildersDoc] = (networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/builders",
-    ) ?? []) as BuildersDocument[];
-
-    const workstreamsNode: SidebarNode = {
-      id: "workstreams",
-      title: "Workstreams",
-      children: [
-        ...WorkstreamStatusEnums.map((status) => {
-          const statusTitle = status
-            .toLowerCase()
-            .split("_")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
-          return {
-            id: `workstream-status-${status}`,
-            title:
-              statusTitle +
-              (workstreamDocs.filter(
-                (doc) => doc.state.global.status === status,
-              ).length > 0
-                ? ` (${workstreamDocs.filter((doc) => doc.state.global.status === status).length})`
-                : ""),
-            children: workstreamDocs
-              .filter((doc) => doc.state.global.status === status)
-              .map((doc) => {
-                let sow = null;
-                let paymentTerms = null;
-                let rfp = null;
-                if (doc.state.global.initialProposal) {
-                  sow = doc.state.global.initialProposal.sow;
-                  paymentTerms = doc.state.global.initialProposal.paymentTerms;
-                }
-
-                if (doc.state.global.rfp) {
-                  rfp = doc.state.global.rfp.id;
-                }
-
-                const sowDoc = allDocuments?.find(
-                  (doc) => doc.header.id === sow,
-                );
-                const rfpDoc = allDocuments?.find(
-                  (doc) => doc.header.id === rfp,
-                ) as RequestForProposalsDocument | undefined;
-                const pmtDoc = allDocuments?.find(
-                  (doc) => doc.header.id === paymentTerms,
-                ) as PaymentTermsDocument | undefined;
-
-                // get alternative proposals
-                const alternativeProposals =
-                  doc.state.global.alternativeProposals;
-
-                const returnableChildren: SidebarNode = {
-                  id: `editor-${doc.header.id}`,
-                  title: `${doc.state.global.code ? doc.state.global.code + " - " : ""}${doc.state.global.title || doc.header.name}`,
-                  icon: <WorkstreamIcon className="w-5 h-5" />,
-                  children: rfpDoc
-                    ? [
-                        {
-                          id: `editor-${rfpDoc.header.id}`,
-                          title: "Request For Proposal",
-                          icon: <RfpIcon className="w-5 h-5" />,
-                        },
-                      ]
-                    : [],
-                };
-
-                // if sowDoc or pmtDoc is included in the wstrChildDocs, then add a child with the title "Initial Proposal"
-                const children: SidebarNode[] = [];
-                if (sowDoc) {
-                  children.push({
-                    id: `editor-${sowDoc.header.id}`,
-                    title: "Scope of Work",
-                    icon: <SowIcon className="w-5 h-5" />,
-                  });
-                }
-                if (pmtDoc) {
-                  children.push({
-                    id: `editor-${pmtDoc.header.id}`,
-                    title: "Payment Terms",
-                    icon: <PaymentIcon className="w-5 h-5" />,
-                  });
-                }
-                if (children.length) {
-                  returnableChildren.children = [
-                    ...(returnableChildren.children ?? []),
-                    {
-                      id: "initial-proposal",
-                      title: "Initial Proposal",
-                      children: children,
-                    },
-                  ];
-                }
-
-                if (alternativeProposals.length > 0) {
-                  returnableChildren.children = [
-                    ...(returnableChildren.children ?? []),
-                    {
-                      id: "alternative-proposals",
-                      title: `Alternative Proposals (${alternativeProposals.length})`,
-                      children: alternativeProposals.map((proposal) => {
-                        // Find documents for this specific proposal
-                        const proposalSowDoc = allDocuments?.find(
-                          (doc) => doc.header.id === proposal.sow,
-                        );
-                        const proposalPaymentTermsDoc = allDocuments?.find(
-                          (doc) => doc.header.id === proposal.paymentTerms,
-                        ) as PaymentTermsDocument | undefined;
-
-                        // Filter to only include documents that exist
-                        const proposalChildDocs = [
-                          proposalSowDoc,
-                          proposalPaymentTermsDoc,
-                        ].filter((doc) => doc !== undefined && doc !== null);
-
-                        return {
-                          id: `alternative-proposal-${proposal.id}`,
-                          title: `${proposal.author.name}`,
-                          children: proposalChildDocs.map((childDoc) => {
-                            const dynamicTitle =
-                              childDoc.header.documentType ===
-                              "powerhouse/scopeofwork"
-                                ? "Scope of Work"
-                                : childDoc.header.documentType ===
-                                    "payment-terms"
-                                  ? "Payment Terms"
-                                  : "";
-                            return {
-                              id: `editor-${childDoc.header.id}`,
-                              title: dynamicTitle,
-                              icon:
-                                childDoc.header.documentType ===
-                                "powerhouse/scopeofwork" ? (
-                                  <SowIcon className="w-5 h-5" />
-                                ) : (
-                                  <PaymentIcon className="w-5 h-5" />
-                                ),
-                            };
-                          }),
-                        };
-                      }),
-                    },
-                  ];
-                }
-
-                return returnableChildren;
-              }),
-          };
-        }),
-      ],
-    };
-
-    const networkInfoNode: SidebarNode = {
-      id: "network-information",
-      title: "Network Information",
-      children: [
-        // Add network profile documents
-        ...networkProfileDocs.map((doc) => ({
-          id: `editor-${doc.header.id}`,
-          title: "Network Profile",
-          icon: <Earth className="w-5 h-5" />,
-        })),
-      ],
-    };
-
-    const buildersNode: SidebarNode = {
-      id: `editor-${buildersDoc?.header.id}`,
-      title: "Builders",
-      children: [],
-    };
-
-    return [workstreamsNode, networkInfoNode, buildersNode];
-  }, [networkAdminDocuments]);
-
-  // Handle sidebar node selection
-  const handleActiveNodeChange = useCallback(
-    (nodeId: string) => {
-      console.log("nodeId", nodeId);
-
-      // Find the node by ID
-      const findNodeById = (
-        nodes: SidebarNode[],
-        id: string,
-      ): SidebarNode | null => {
-        for (const node of nodes) {
-          if (node.id === id) {
-            return node;
-          }
-          if (node.children) {
-            const found = findNodeById(node.children, id);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
-
-      const newNode = findNodeById(sidebarNodes, nodeId);
-      if (!newNode) return;
-
-      // Always update the active sidebar node ID
-      setActiveSidebarNodeId(newNode.id);
-
-      if (newNode.id === "workstreams") {
-        setSelectedNode(undefined);
-        setSelectedRootNode("workstreams");
-      } else if (newNode.id === "network-information") {
-        setSelectedNode(undefined);
-        setSelectedRootNode("network-information");
-        // Handle network information display
-      } else if (newNode.id.startsWith("editor-")) {
-        createBuildersDocument();
-        // Extract file ID from editor-{file.id} format
-        const fileId = newNode.id.replace("editor-", "");
-        setSelectedNode(fileId);
-      }
-    },
-    [setSelectedNode, sidebarNodes],
-  );
-
   // === EVENT HANDLERS ===
 
   // Display function that switches views based on active node ID
   const displayActiveNode = (activeNodeId: string) => {
     // Determine the type of node and extract the actual ID
     let nodeType = "unknown";
-    let actualId = activeNodeId;
 
     if (activeNodeId === "workstreams") {
       nodeType = "workstreams";
@@ -349,7 +95,6 @@ export function DriveExplorer({ children }: EditorProps) {
       nodeType = "workstreams";
     } else if (activeNodeId.startsWith("editor-")) {
       nodeType = "file";
-      actualId = activeNodeId.replace("editor-", "");
     }
 
     const networkProfileDoc = networkAdminDocuments?.find(
@@ -614,9 +359,6 @@ export function DriveExplorer({ children }: EditorProps) {
         console.log("Created document node", node);
 
         if (node) {
-          // Customize: Auto-open created document by uncommenting below
-          // setActiveDocumentId(node.id);
-
           // Refresh the sidebar by triggering a re-render
           // Set the root node based on the document type that was created
           if (documentType === "powerhouse/network-profile") {
@@ -629,7 +371,7 @@ export function DriveExplorer({ children }: EditorProps) {
         console.error("Failed to create document:", error);
       }
     },
-    [selectedDrive?.header.id, modalDocumentType],
+    [selectedDrive?.header.id, modalDocumentType, networkAdminDocuments],
   );
 
   // Create builders document
@@ -664,31 +406,21 @@ export function DriveExplorer({ children }: EditorProps) {
       return null;
     }
   }, [selectedDrive?.header.id, allDocuments]);
+
   // === RENDER ===
   return (
-    <SidebarProvider nodes={sidebarNodes}>
+    <div className="h-full">
       {/* === FULL VIEW MODE (for Scope of Work) === */}
       {isScopeOfWorkFullView && children ? (
         <div className="h-full w-full">{children}</div>
       ) : (
         /* === NORMAL VIEW WITH SIDEBAR === */
         <div className="flex h-full">
-          <Sidebar
-            nodes={sidebarNodes}
-            activeNodeId={activeSidebarNodeId}
-            onActiveNodeChange={(node) => handleActiveNodeChange(node.id)}
-            sidebarTitle="Network Admin"
-            showSearchBar={true}
-            allowPinning={true}
-            resizable={true}
-            initialWidth={300}
-            maxWidth={500}
-            enableMacros={4}
-            handleOnTitleClick={() => {
-              setSelectedNode(undefined);
-              setActiveSidebarNodeId("workstreams");
-              setSelectedRootNode("workstreams");
-            }}
+          <FolderTree
+            activeSidebarNodeId={activeSidebarNodeId}
+            setActiveSidebarNodeId={setActiveSidebarNodeId}
+            setSelectedRootNode={setSelectedRootNode}
+            createBuildersDocument={createBuildersDocument}
           />
 
           {/* === MAIN CONTENT AREA === */}
@@ -700,8 +432,6 @@ export function DriveExplorer({ children }: EditorProps) {
           </div>
 
           {/* === DOCUMENT CREATION MODAL === */}
-          {/* Modal for entering document name after selecting type */}
-          {/* Note: Modal title is fixed, but document type is determined by selectedRootNode */}
           <CreateDocumentModal
             onContinue={onCreateDocument}
             onOpenChange={(open) => setOpenModal(open)}
@@ -709,6 +439,6 @@ export function DriveExplorer({ children }: EditorProps) {
           />
         </div>
       )}
-    </SidebarProvider>
+    </div>
   );
 }

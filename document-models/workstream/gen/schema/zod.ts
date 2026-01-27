@@ -3,6 +3,7 @@ import type {
   AddAlternativeProposalInput,
   AddPaymentRequestInput,
   ClientInfo,
+  EditAlternativeProposalInput,
   EditClientInfoInput,
   EditInitialProposalInput,
   EditWorkstreamInput,
@@ -12,6 +13,7 @@ import type {
   ProposalStatus,
   ProposalStatusInput,
   Rfp,
+  RemoveAlternativeProposalInput,
   RemovePaymentRequestInput,
   SetRequestForProposalInput,
   WorkstreamState,
@@ -99,6 +101,18 @@ export function ClientInfoSchema(): z.ZodObject<Properties<ClientInfo>> {
   });
 }
 
+export function EditAlternativeProposalInputSchema(): z.ZodObject<
+  Properties<EditAlternativeProposalInput>
+> {
+  return z.object({
+    id: z.string(),
+    paymentTermsId: z.string().nullish(),
+    proposalAuthor: z.lazy(() => ProposalAuthorInputSchema().nullish()),
+    sowId: z.string().nullish(),
+    status: ProposalStatusInputSchema.nullish(),
+  });
+}
+
 export function EditClientInfoInputSchema(): z.ZodObject<
   Properties<EditClientInfoInput>
 > {
@@ -170,6 +184,14 @@ export function RfpSchema(): z.ZodObject<Properties<Rfp>> {
     __typename: z.literal("RFP").optional(),
     id: z.string(),
     title: z.string(),
+  });
+}
+
+export function RemoveAlternativeProposalInputSchema(): z.ZodObject<
+  Properties<RemoveAlternativeProposalInput>
+> {
+  return z.object({
+    id: z.string(),
   });
 }
 

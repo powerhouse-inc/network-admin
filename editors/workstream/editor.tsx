@@ -40,7 +40,7 @@ type ScopeOfWorkState = {
 
 import {
   useDocumentById,
-  useSelectedDrive,
+  useSelectedDriveSafe,
   addDocument,
   useDocumentsInSelectedDrive,
   useParentFolderForSelectedNode,
@@ -93,7 +93,7 @@ export default function Editor() {
     setClientInputValue(state.client?.id || "");
   }, [state.client?.id]);
 
-  const [selectedDrive] = useSelectedDrive();
+  const [selectedDrive] = useSelectedDriveSafe();
 
   // Local state to track newly created document IDs
   const [newlyCreatedSowId, setNewlyCreatedSowId] = useState<string | null>(

@@ -14,9 +14,9 @@ export const documentModel: DocumentModelGlobalState = {
       changeLog: [],
       modules: [
         {
-          description: "",
           id: "6a2edfaa-812d-486f-86ee-9f9282e9a26c",
           name: "builders",
+          description: "",
           operations: [
             {
               id: "804e9500-fe85-489d-aae3-2a0e8a6c1cb8",

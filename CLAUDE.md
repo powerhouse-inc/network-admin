@@ -57,7 +57,7 @@ If the `reactor-mcp` server is unavailable, ask the user to run `ph vetra` on a 
 
 After doing changes to the code, or after creating a new document model or a new editor, _YOU MUST RUN_ the following commands to check for errors in your implementation:
 
-- **TypeScript Check**: Run `npm run typecheck` to validate type safety
+- **TypeScript Check**: Run `npm run tsc` to validate type safety
 - **ESLint Check**: Run `npm run lint:fix` to check for errors with ESLint
 
 ## Document editor creation flow
@@ -220,7 +220,6 @@ Errors referenced in the reducer code will be imported automatically.
 #### Error Definition Requirements
 
 1. **Add error definitions** to operations using `ADD_OPERATION_ERROR`:
-
    - `code`: Uppercase snake_case (e.g., `"MISSING_ID"`, `"ENTRY_NOT_FOUND"`)
    - `name`: PascalCase ending with "Error" (e.g., `"MissingIdError"`, `"EntryNotFoundError"`)
    - `description`: Human-readable description of the error condition
@@ -305,6 +304,43 @@ throw new MissingIdError("message");
 - Use required fields `!` only when absolutely necessary
 - Defaults handled by operations, not schema
 
+### ⚠️ CRITICAL: State Type Naming Convention
+
+**MANDATORY**: The global state type name MUST follow this exact pattern:
+
+```graphql
+type <DocumentModelName>State {
+    # your fields here
+}
+```
+
+**DO NOT** append "Global" to the state type name, even when defining global state:
+
+```graphql
+// ❌ WRONG - Do not use "GlobalState" suffix
+type TodoListGlobalState {
+    todos: [Todo!]!
+}
+
+// ✅ CORRECT - Use only "State" suffix
+type TodoListState {
+    todos: [Todo!]!
+}
+
+// ✅ CORRECT - Use "LocalState" suffix for Local scope
+type TodoListLocalState {
+    localTodos: [Todo!]!
+}
+```
+
+**Why this matters:**
+
+- The code generator expects the type to be named `<DocumentModelName>State`
+- Using `GlobalState` or `LocalState` suffix will cause TypeScript compilation errors
+- This applies when using `SET_STATE_SCHEMA` with `scope: "global"`
+
+**Rule**: For global state, the type should be `<DocumentModelName>State`. For local state (if needed), the type name should be `<DocumentModelName>LocalState`.
+
 ### Available Scalar Types
 
 | Standard  | Custom Identity        | Custom Amounts      | Custom Specialized |
@@ -328,3 +364,41 @@ throw new MissingIdError("message");
 - Reflect user intent with descriptive names
 - Simple, specific fields over complex nested types
 - System auto-generates `OID` for new objects (users don't provide manually)
+
+## Working with Drives
+
+**MANDATORY**: Check the document-drive schema before performing drive operations.
+
+### Drive Types
+
+There might be two drives available with a special use case:
+
+1. **Vetra Drive** (`vetra-{hash}`):
+   - Contains **source documents**: document models and document editors
+   - Used for development
+   - Add document model and editor definitions here
+
+2. **Preview Drive** (`preview-{hash}`, named "Vetra Preview"):
+   - Contains **demo and preview documents** (document instances)
+   - Used for showcasing and testing document models
+   - Add actual document instances here
+
+### Drive Operations
+
+When working with drives (adding/removing documents, creating folders, etc.):
+
+1. **Always get the drive schema first**:
+
+   ```typescript
+   mcp__reactor -
+     mcp__getDocumentModelSchema({ type: "powerhouse/document-drive" });
+   ```
+
+2. **Review available operations** in the schema, such as:
+   - `ADD_FILE` - Add a document to the drive
+   - `ADD_FOLDER` - Create a new folder
+   - `DELETE_NODE` - Remove a file or folder (use this, NOT "DELETE_FILE")
+   - `UPDATE_NODE` - Update node properties
+   - `MOVE_NODE` - Move a node to different location
+
+3. **Check input schemas** for each operation to ensure you're passing correct parameters
