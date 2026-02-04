@@ -468,7 +468,8 @@ export const schema: DocumentNode = gql`
     icon: String!
     description: String!
     lastModified: DateTime
-    type: teamType!
+    isOperator: Boolean!
+    operationalHubMember: OpHubMember!
     contributors: [Builder!]!
     status: BuilderStatus
     skills: [BuilderSkill!]!
@@ -476,9 +477,9 @@ export const schema: DocumentNode = gql`
     links: [BuilderLink!]!
   }
 
-  enum teamType {
-    INDIVIDUAL
-    TEAM
+  type OpHubMember {
+    name: String
+    phid: PHID
   }
 
   enum BuilderStatus {

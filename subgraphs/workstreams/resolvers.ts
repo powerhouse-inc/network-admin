@@ -565,10 +565,12 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const icon = String(state?.icon ?? "");
           // description: String! - non-nullable
           const description = String(state?.description ?? state?.slug ?? "");
-          // type: teamType! - non-nullable, default to "INDIVIDUAL"
-          const type = state?.type ?? "INDIVIDUAL";
-          // skils: [BuilderSkill!]! - non-nullable array
-          const skils = Array.isArray(state?.skils) ? state.skils : [];
+          // isOperator: Boolean! - non-nullable, default to false
+          const isOperator = state?.isOperator ?? false;
+          // operationalHubMember: OpHubMember! - non-nullable
+          const operationalHubMember = state?.operationalHubMember ?? { name: null, phid: null };
+          // skills: [BuilderSkill!]! - non-nullable array (document model uses 'skils' typo)
+          const skills = Array.isArray(state?.skils) ? state.skils : Array.isArray(state?.skills) ? state.skills : [];
           // scopes: [BuilderScope!]! - non-nullable array
           const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
           // links: [BuilderLink!]! - non-nullable array
@@ -582,10 +584,11 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             icon,
             description,
             lastModified: state?.lastModified ?? null,
-            type,
+            isOperator,
+            operationalHubMember,
             _contributorPhids: contributorPhids, // Internal field for resolver
             status: state?.status ?? null,
-            skils,
+            skills,
             scopes,
             links,
           };
@@ -689,10 +692,12 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const icon = String(state?.icon ?? "");
           // description: String! - non-nullable
           const description = String(state?.description ?? state?.slug ?? "");
-          // type: teamType! - non-nullable, default to "INDIVIDUAL"
-          const type = state?.type ?? "INDIVIDUAL";
-          // skils: [BuilderSkill!]! - non-nullable array
-          const skils = Array.isArray(state?.skils) ? state.skils : [];
+          // isOperator: Boolean! - non-nullable, default to false
+          const isOperator = state?.isOperator ?? false;
+          // operationalHubMember: OpHubMember! - non-nullable
+          const operationalHubMember = state?.operationalHubMember ?? { name: null, phid: null };
+          // skills: [BuilderSkill!]! - non-nullable array (document model uses 'skils' typo)
+          const skills = Array.isArray(state?.skils) ? state.skils : Array.isArray(state?.skills) ? state.skills : [];
           // scopes: [BuilderScope!]! - non-nullable array
           const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
           // links: [BuilderLink!]! - non-nullable array
@@ -706,10 +711,11 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             icon,
             description,
             lastModified: state?.lastModified ?? null,
-            type,
+            isOperator,
+            operationalHubMember,
             _contributorPhids: contributorPhids, // Internal field for resolver
             status: state?.status ?? null,
-            skils,
+            skills,
             scopes,
             links,
           };
@@ -886,10 +892,12 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const icon = String(state?.icon ?? "");
           // description: String! - non-nullable
           const description = String(state?.description ?? state?.slug ?? "");
-          // type: teamType! - non-nullable, default to "INDIVIDUAL"
-          const type = state?.type ?? "INDIVIDUAL";
-          // skils: [BuilderSkill!]! - non-nullable array
-          const skils = Array.isArray(state?.skils) ? state.skils : [];
+          // isOperator: Boolean! - non-nullable, default to false
+          const isOperator = state?.isOperator ?? false;
+          // operationalHubMember: OpHubMember! - non-nullable
+          const operationalHubMember = state?.operationalHubMember ?? { name: null, phid: null };
+          // skills: [BuilderSkill!]! - non-nullable array (document model uses 'skils' typo)
+          const skills = Array.isArray(state?.skils) ? state.skils : Array.isArray(state?.skills) ? state.skills : [];
           // scopes: [BuilderScope!]! - non-nullable array
           const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
           // links: [BuilderLink!]! - non-nullable array
@@ -903,10 +911,11 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             icon,
             description,
             lastModified: state?.lastModified ?? null,
-            type,
+            isOperator,
+            operationalHubMember,
             _contributorPhids: contributorPhids, // Internal field for resolver
             status: state?.status ?? null,
-            skils,
+            skills,
             scopes,
             links,
           };

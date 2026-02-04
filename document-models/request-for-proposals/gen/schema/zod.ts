@@ -7,19 +7,11 @@ import type {
   ChangeProposalStatusInput,
   ContextDocument,
   EditRfpInput,
-  RfpCommentatorType,
-  RfpStatus,
-  RfpStatusInput,
   RemoveContextDocumentInput,
   RemoveProposalInput,
   RequestForProposalsState,
-  RfpAgentType,
   RfpCommenter,
-  RfpPaymentTerm,
-  RfpPaymentTermInput,
   RfpProposal,
-  RfpProposalStatus,
-  RfpProposalStatusInput,
 } from "./types.js";
 
 type Properties<T> = Required<{
@@ -105,7 +97,7 @@ export function AddContextDocumentInputSchema(): z.ZodObject<
   return z.object({
     name: z.string(),
     rfpId: z.string(),
-    url: z.string().url(),
+    url: z.url(),
   });
 }
 
@@ -158,7 +150,7 @@ export function ContextDocumentSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("ContextDocument").optional(),
     name: z.string(),
-    url: z.string().url(),
+    url: z.url(),
   });
 }
 
@@ -167,7 +159,7 @@ export function EditRfpInputSchema(): z.ZodObject<Properties<EditRfpInput>> {
     briefing: z.string().nullish(),
     budgetRange: z.lazy(() => BudgetRangeInputSchema().nullish()),
     code: z.string().nullish(),
-    deadline: z.string().datetime().nullish(),
+    deadline: z.iso.datetime().nullish(),
     eligibilityCriteria: z.string().nullish(),
     evaluationCriteria: z.string().nullish(),
     status: RfpStatusInputSchema.nullish(),
@@ -204,7 +196,7 @@ export function RequestForProposalsStateSchema(): z.ZodObject<
     budgetRange: z.lazy(() => BudgetRangeSchema()),
     code: z.string().nullish(),
     contextDocuments: z.array(z.lazy(() => ContextDocumentSchema())),
-    deadline: z.string().datetime().nullish(),
+    deadline: z.iso.datetime().nullish(),
     eligibilityCriteria: z.string(),
     evaluationCriteria: z.string(),
     issuer: z.string(),

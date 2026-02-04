@@ -1,6 +1,5 @@
 import * as z from "zod";
 import type {
-  NetworkCategory,
   NetworkProfileState,
   SetCategoryInput,
   SetDescriptionInput,

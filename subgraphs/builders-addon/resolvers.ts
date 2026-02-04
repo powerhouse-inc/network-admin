@@ -6,7 +6,6 @@ type BuildersFilter = {
   code?: string;
   name?: string;
   slug?: string;
-  type?: string;
   status?: string;
   skills?: string[];
   scopes?: string[];
@@ -61,12 +60,6 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       filter.slug &&
       String(builder.slug || "").toLowerCase() !==
         String(filter.slug || "").toLowerCase()
-    )
-      return false;
-    if (
-      filter.type &&
-      String(builder.type || "").toLowerCase() !==
-        String(filter.type || "").toLowerCase()
     )
       return false;
     if (
@@ -393,7 +386,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             const icon = String(state?.icon ?? "");
             const description = String(state?.description ?? state?.slug ?? "");
             const about = String(state?.about ?? "");
-            const type = state?.type ?? "INDIVIDUAL";
+            const isOperator = state?.isOperator ?? false;
+            const operationalHubMember = state?.operationalHubMember ?? { name: null, phid: null };
             // Document model uses 'skils' (typo), but GraphQL schema uses 'skills'
             const skills = Array.isArray(state?.skils) 
               ? state.skils 
@@ -415,7 +409,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               description,
               about,
               lastModified: state?.lastModified ?? null,
-              type,
+              isOperator,
+              operationalHubMember,
               contributors,
               status: state?.status ?? null,
               skills,

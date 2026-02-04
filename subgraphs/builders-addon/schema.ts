@@ -16,7 +16,6 @@ export const schema: DocumentNode = gql`
     code: String
     name: String
     slug: String
-    type: teamType
     status: BuilderStatus
     skills: [BuilderSkill!]
     scopes: [BuilderScope!]
@@ -33,7 +32,8 @@ export const schema: DocumentNode = gql`
     description: String
     about: String
     lastModified: DateTime
-    type: teamType!
+    isOperator: Boolean!
+    operationalHubMember: OpHubMember!
     contributors: [PHID!]!
     status: BuilderStatus
     skills: [BuilderSkill!]!
@@ -42,9 +42,9 @@ export const schema: DocumentNode = gql`
     projects: [BuilderProject!]!
   }
 
-  enum teamType {
-    INDIVIDUAL
-    TEAM
+  type OpHubMember {
+    name: String
+    phid: PHID
   }
 
   enum BuilderStatus {
@@ -92,7 +92,8 @@ export const schema: DocumentNode = gql`
     icon: String!
     description: String!
     lastModified: DateTime
-    type: teamType!
+    isOperator: Boolean!
+    operationalHubMember: OpHubMember!
     contributors: [Builder!]!
     status: BuilderStatus
     skills: [BuilderSkill!]!
