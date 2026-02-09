@@ -10,6 +10,7 @@ type BuildersFilter = {
   skills?: string[];
   scopes?: string[];
   networkSlug?: string;
+  isOperator?: boolean;
 };
 
 export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
@@ -89,6 +90,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       if (!hasAllScopes) return false;
     }
 
+    if (filter.isOperator !== undefined && filter.isOperator !== null) {
+      if (builder.isOperator !== filter.isOperator) return false;
+    }
+
     return true;
   };
 
@@ -100,6 +105,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
         let builderDocs: PHDocument[] = [];
         const sowDocs: PHDocument[] = [];
+        const resourceTemplateDocs: PHDocument[] = [];
         const allowedDriveIds = new Set<string>(drives);
 
         // Step 1: If networkSlug is provided, identify the network drive and valid builder PHIDs
@@ -174,6 +180,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                   const doc = await reactor.getDocument<PHDocument>(docId);
                   if (doc.header.documentType === "powerhouse/scopeofwork") {
                     sowDocs.push(doc);
+                  } else if (doc.header.documentType === "powerhouse/resource-template") {
+                    resourceTemplateDocs.push(doc);
                   }
                 } catch {}
               }
@@ -225,6 +233,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                   doc.header.documentType === "powerhouse/scopeofwork"
                 ) {
                   sowDocs.push(doc);
+                } else if (
+                  doc.header.documentType === "powerhouse/resource-template"
+                ) {
+                  resourceTemplateDocs.push(doc);
                 }
               }
             } catch (error) {
@@ -376,6 +388,62 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           }
         }
 
+        // Step 3b: Extract products from resource-template documents and group by operatorId
+        const productsByOperator = new Map<string, any[]>();
+
+        for (const rtDoc of resourceTemplateDocs) {
+          const rtState = (rtDoc.state as any).global;
+          if (!rtState || typeof rtState !== "object") continue;
+
+          const operatorId = rtState.operatorId;
+          if (!operatorId || typeof operatorId !== "string") continue;
+
+          try {
+            const product = {
+              id: rtState.id || rtDoc.header.id,
+              operatorId,
+              title: String(rtState.title || ""),
+              summary: String(rtState.summary || ""),
+              description: rtState.description ?? null,
+              thumbnailUrl: rtState.thumbnailUrl ?? null,
+              infoLink: rtState.infoLink ?? null,
+              status: rtState.status || "DRAFT",
+              lastModified: rtState.lastModified ?? null,
+              targetAudiences: Array.isArray(rtState.targetAudiences)
+                ? rtState.targetAudiences
+                : [],
+              setupServices: Array.isArray(rtState.setupServices)
+                ? rtState.setupServices
+                : [],
+              recurringServices: Array.isArray(rtState.recurringServices)
+                ? rtState.recurringServices
+                : [],
+              facetTargets: Array.isArray(rtState.facetTargets)
+                ? rtState.facetTargets
+                : [],
+              services: Array.isArray(rtState.services)
+                ? rtState.services
+                : [],
+              optionGroups: Array.isArray(rtState.optionGroups)
+                ? rtState.optionGroups
+                : [],
+              faqFields: Array.isArray(rtState.faqFields)
+                ? rtState.faqFields
+                : [],
+              contentSections: Array.isArray(rtState.contentSections)
+                ? rtState.contentSections
+                : [],
+            };
+
+            if (!productsByOperator.has(operatorId)) {
+              productsByOperator.set(operatorId, []);
+            }
+            productsByOperator.get(operatorId)!.push(product);
+          } catch (error) {
+            console.warn(`Failed to transform resource-template ${rtDoc.header.id}:`, error);
+          }
+        }
+
         // Step 4: Transform builder documents to BuilderProfileState format
         const builders = builderDocs
           .map((doc) => {
@@ -417,6 +485,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               scopes,
               links,
               projects: projectsByOwner.get(doc.header.id) || [],
+              products: productsByOperator.get(doc.header.id) || [],
             };
 
             return builder;

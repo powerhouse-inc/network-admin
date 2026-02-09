@@ -20,6 +20,7 @@ export const schema: DocumentNode = gql`
     skills: [BuilderSkill!]
     scopes: [BuilderScope!]
     networkSlug: String
+    isOperator: Boolean
   }
 
   ## Builder Profile Schema
@@ -40,6 +41,7 @@ export const schema: DocumentNode = gql`
     scopes: [BuilderScope!]!
     links: [BuilderLink!]!
     projects: [BuilderProject!]!
+    products: [BuilderProduct!]!
   }
 
   type OpHubMember {
@@ -208,4 +210,87 @@ export const schema: DocumentNode = gql`
     total: Int!
     completed: Int!
   }
+
+# PRODUCTS #
+
+  type BuilderProduct {
+    id: PHID!
+    operatorId: PHID!
+    title: String!
+    summary: String!
+    description: String
+    thumbnailUrl: URL
+    infoLink: URL
+    status: BTemplateStatus!
+    lastModified: DateTime!
+    targetAudiences: [BTargetAudience!]!
+    setupServices: [String!]!
+    recurringServices: [String!]!
+    facetTargets: [BFacetTarget!]!
+    services: [BService!]!
+    optionGroups: [BOptionGroup!]!
+    faqFields: [BFaqField!]
+    contentSections: [BContentSection!]!
+  }
+
+  enum BTemplateStatus {
+    DRAFT
+    COMING_SOON
+    ACTIVE
+    DEPRECATED
+  }
+
+  type BTargetAudience {
+    id: OID!
+    label: String!
+    color: String
+  }
+
+  type BFacetTarget {
+    id: OID!
+    categoryKey: String!
+    categoryLabel: String!
+    selectedOptions: [String!]!
+  }
+
+  type BService {
+    id: OID!
+    title: String!
+    description: String
+    displayOrder: Int
+    parentServiceId: OID
+    isSetupFormation: Boolean!
+    optionGroupId: OID
+    facetBindings: [BResourceFacetBinding!]!
+  }
+
+  type BResourceFacetBinding {
+    id: OID!
+    facetName: String!
+    facetType: PHID!
+    supportedOptions: [OID!]!
+  }
+
+  type BOptionGroup {
+    id: OID!
+    name: String!
+    description: String
+    isAddOn: Boolean!
+    defaultSelected: Boolean!
+  }
+
+  type BFaqField {
+    id: OID!
+    question: String
+    answer: String
+    displayOrder: Int!
+  }
+
+  type BContentSection {
+    id: OID!
+    title: String!
+    content: String!
+    displayOrder: Int!
+  }
+
 `;
