@@ -1,3 +1,11 @@
+# [1.0.0-staging.4](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-staging.3...v1.0.0-staging.4) (2026-02-16)
+
+
+### Bug Fixes
+
+* **ci:** check npm before publishing to avoid duplicate version errors ([de3c784](https://github.com/powerhouse-inc/network-admin/commit/de3c784593d21c620537547a79d1db5aae1f6ec8))
+* release on all commit types via semantic-release releaseRules ([5cd7fc3](https://github.com/powerhouse-inc/network-admin/commit/5cd7fc3c6e96d3b249be502a4efaf4cbfb38f342))
+
 # [1.0.0-staging.3](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-staging.2...v1.0.0-staging.3) (2026-02-16)
 
 
