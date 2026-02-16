@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0...v1.0.1) (2026-02-16)
+
+
+### Bug Fixes
+
+* **ci:** switch to npm trusted publishing (remove NPM_TOKEN) ([d9824c3](https://github.com/powerhouse-inc/network-admin/commit/d9824c35cb564233c6e86d8691b3afec5c899b23))
+* correct semantic-release plugin order ([f17f92d](https://github.com/powerhouse-inc/network-admin/commit/f17f92d6b4c45ede02d4f40a3a733aa5553be672))
+
 # 1.0.0 (2026-02-16)
 
 
