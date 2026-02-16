@@ -211,7 +211,7 @@ export const schema: DocumentNode = gql`
     completed: Int!
   }
 
-# PRODUCTS #
+  # PRODUCTS #
 
   type BuilderProduct {
     id: PHID!
@@ -292,5 +292,4 @@ export const schema: DocumentNode = gql`
     content: String!
     displayOrder: Int!
   }
-
 `;

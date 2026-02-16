@@ -1,8 +1,5 @@
 import { useMemo } from "react";
-import {
-  Milestone as MilestoneIcon,
-  Plus,
-} from "lucide-react";
+import { Milestone as MilestoneIcon, Plus } from "lucide-react";
 import {
   ObjectSetTable,
   type ColumnDef,
@@ -26,7 +23,6 @@ interface MilestonesSectionProps {
   actions: typeof paymentTermsActions;
   currency: string;
 }
-
 
 export function MilestonesSection({
   milestones,

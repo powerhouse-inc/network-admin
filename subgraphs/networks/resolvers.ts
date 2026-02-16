@@ -137,7 +137,10 @@ export const getResolvers = (
             description: state?.description || state?.slug || "",
             lastModified: state.lastModified || null,
             isOperator: state?.isOperator ?? false,
-            operationalHubMember: state?.operationalHubMember ?? { name: null, phid: null },
+            operationalHubMember: state?.operationalHubMember ?? {
+              name: null,
+              phid: null,
+            },
             _contributorPhids: contributorPhids, // Internal field for resolver
             status: state?.status || null,
             skills: state?.skils || state?.skills || [],

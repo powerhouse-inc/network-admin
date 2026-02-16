@@ -17,6 +17,6 @@ export class WorkstreamsSubgraph extends BaseSubgraph {
     this.analyticsStore = args.analyticsStore;
   }
 
-  async onSetup() { }
-  async onDisconnect() { }
+  async onSetup() {}
+  async onDisconnect() {}
 }

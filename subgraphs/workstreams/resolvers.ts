@@ -568,9 +568,16 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           // isOperator: Boolean! - non-nullable, default to false
           const isOperator = state?.isOperator ?? false;
           // operationalHubMember: OpHubMember! - non-nullable
-          const operationalHubMember = state?.operationalHubMember ?? { name: null, phid: null };
+          const operationalHubMember = state?.operationalHubMember ?? {
+            name: null,
+            phid: null,
+          };
           // skills: [BuilderSkill!]! - non-nullable array (document model uses 'skils' typo)
-          const skills = Array.isArray(state?.skils) ? state.skils : Array.isArray(state?.skills) ? state.skills : [];
+          const skills = Array.isArray(state?.skils)
+            ? state.skils
+            : Array.isArray(state?.skills)
+              ? state.skills
+              : [];
           // scopes: [BuilderScope!]! - non-nullable array
           const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
           // links: [BuilderLink!]! - non-nullable array
@@ -695,9 +702,16 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           // isOperator: Boolean! - non-nullable, default to false
           const isOperator = state?.isOperator ?? false;
           // operationalHubMember: OpHubMember! - non-nullable
-          const operationalHubMember = state?.operationalHubMember ?? { name: null, phid: null };
+          const operationalHubMember = state?.operationalHubMember ?? {
+            name: null,
+            phid: null,
+          };
           // skills: [BuilderSkill!]! - non-nullable array (document model uses 'skils' typo)
-          const skills = Array.isArray(state?.skils) ? state.skils : Array.isArray(state?.skills) ? state.skills : [];
+          const skills = Array.isArray(state?.skils)
+            ? state.skils
+            : Array.isArray(state?.skills)
+              ? state.skills
+              : [];
           // scopes: [BuilderScope!]! - non-nullable array
           const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
           // links: [BuilderLink!]! - non-nullable array
@@ -895,9 +909,16 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           // isOperator: Boolean! - non-nullable, default to false
           const isOperator = state?.isOperator ?? false;
           // operationalHubMember: OpHubMember! - non-nullable
-          const operationalHubMember = state?.operationalHubMember ?? { name: null, phid: null };
+          const operationalHubMember = state?.operationalHubMember ?? {
+            name: null,
+            phid: null,
+          };
           // skills: [BuilderSkill!]! - non-nullable array (document model uses 'skils' typo)
-          const skills = Array.isArray(state?.skils) ? state.skils : Array.isArray(state?.skills) ? state.skills : [];
+          const skills = Array.isArray(state?.skils)
+            ? state.skils
+            : Array.isArray(state?.skills)
+              ? state.skills
+              : [];
           // scopes: [BuilderScope!]! - non-nullable array
           const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
           // links: [BuilderLink!]! - non-nullable array

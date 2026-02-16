@@ -52,9 +52,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       return false;
     if (
       filter.name &&
-      !String(builder.name || "").toLowerCase().includes(
-        String(filter.name || "").toLowerCase()
-      )
+      !String(builder.name || "")
+        .toLowerCase()
+        .includes(String(filter.name || "").toLowerCase())
     )
       return false;
     if (
@@ -180,7 +180,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                   const doc = await reactor.getDocument<PHDocument>(docId);
                   if (doc.header.documentType === "powerhouse/scopeofwork") {
                     sowDocs.push(doc);
-                  } else if (doc.header.documentType === "powerhouse/resource-template") {
+                  } else if (
+                    doc.header.documentType === "powerhouse/resource-template"
+                  ) {
                     resourceTemplateDocs.push(doc);
                   }
                 } catch {}
@@ -421,9 +423,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               facetTargets: Array.isArray(rtState.facetTargets)
                 ? rtState.facetTargets
                 : [],
-              services: Array.isArray(rtState.services)
-                ? rtState.services
-                : [],
+              services: Array.isArray(rtState.services) ? rtState.services : [],
               optionGroups: Array.isArray(rtState.optionGroups)
                 ? rtState.optionGroups
                 : [],
@@ -440,7 +440,10 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             }
             productsByOperator.get(operatorId)!.push(product);
           } catch (error) {
-            console.warn(`Failed to transform resource-template ${rtDoc.header.id}:`, error);
+            console.warn(
+              `Failed to transform resource-template ${rtDoc.header.id}:`,
+              error,
+            );
           }
         }
 
@@ -455,13 +458,16 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             const description = String(state?.description ?? state?.slug ?? "");
             const about = String(state?.about ?? "");
             const isOperator = state?.isOperator ?? false;
-            const operationalHubMember = state?.operationalHubMember ?? { name: null, phid: null };
+            const operationalHubMember = state?.operationalHubMember ?? {
+              name: null,
+              phid: null,
+            };
             // Document model uses 'skils' (typo), but GraphQL schema uses 'skills'
-            const skills = Array.isArray(state?.skils) 
-              ? state.skils 
-              : Array.isArray(state?.skills) 
-              ? state.skills 
-              : [];
+            const skills = Array.isArray(state?.skils)
+              ? state.skils
+              : Array.isArray(state?.skills)
+                ? state.skills
+                : [];
             const scopes = Array.isArray(state?.scopes) ? state.scopes : [];
             const links = Array.isArray(state?.links) ? state.links : [];
             const contributors = Array.isArray(state?.contributors)

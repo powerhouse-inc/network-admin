@@ -18,9 +18,14 @@ export async function up(db: IRelationalDb<any>): Promise<void> {
       .addPrimaryKeyConstraint("workstreams_pkey", ["workstream_phid"])
       .ifNotExists()
       .execute();
-    console.log("[WorkstreamsProcessor] Table 'workstreams' created or already exists");
+    console.log(
+      "[WorkstreamsProcessor] Table 'workstreams' created or already exists",
+    );
   } catch (error) {
-    console.error("[WorkstreamsProcessor] Failed to create 'workstreams' table:", error);
+    console.error(
+      "[WorkstreamsProcessor] Failed to create 'workstreams' table:",
+      error,
+    );
     throw error;
   }
 }
