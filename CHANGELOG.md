@@ -1,3 +1,11 @@
+## [1.0.3](https://github.com/powerhouse-inc/network-admin/compare/v1.0.2...v1.0.3) (2026-02-16)
+
+
+### Bug Fixes
+
+* **ci:** check npm before publishing to avoid duplicate version errors ([6ecedda](https://github.com/powerhouse-inc/network-admin/commit/6eceddaab70e1ef80884712565ed6f01917379b1))
+* release on all commit types via semantic-release releaseRules ([eb76ba9](https://github.com/powerhouse-inc/network-admin/commit/eb76ba9f69b1901eb5ddaad0cedf651a68fd57fe))
+
 ## [1.0.2](https://github.com/powerhouse-inc/network-admin/compare/v1.0.1...v1.0.2) (2026-02-16)
 
 
