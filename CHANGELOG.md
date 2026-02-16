@@ -1,3 +1,10 @@
+# [1.0.0-staging.3](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-staging.2...v1.0.0-staging.3) (2026-02-16)
+
+
+### Bug Fixes
+
+* add repository url for npm trusted publishing ([fb2dc04](https://github.com/powerhouse-inc/network-admin/commit/fb2dc041f7ca9009999b527591d79eb2cfd59f6c))
+
 # [1.0.0-staging.2](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-staging.1...v1.0.0-staging.2) (2026-02-16)
 
 
