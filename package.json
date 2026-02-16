@@ -69,12 +69,12 @@
     "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh"
   },
   "dependencies": {
-    "@powerhousedao/builder-profile": "1.0.2",
+    "@powerhousedao/builder-profile": "1.0.3",
     "@powerhousedao/builder-tools": "5.3.3",
     "@powerhousedao/common": "5.3.3",
     "@powerhousedao/design-system": "5.3.3",
     "@powerhousedao/document-engineering": "^1.40.1",
-    "@powerhousedao/project-management": "1.0.2",
+    "@powerhousedao/project-management": "1.0.3",
     "@powerhousedao/vetra": "^5.3.3",
     "@uiw/react-md-editor": "^4.0.8",
     "document-model": "5.3.3",
