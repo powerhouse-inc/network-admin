@@ -22,6 +22,7 @@ import {
   editClientInfo,
   editWorkstream,
 } from "../../../document-models/workstream/gen/creators.js";
+import { setProfileName } from "../../../document-models/network-profile/gen/creators.js";
 import { FolderTree } from "./FolderTree.js";
 
 /**
@@ -40,6 +41,8 @@ export function DriveExplorer({ children }: EditorProps) {
   const [modalDocumentType, setModalDocumentType] = useState<string>(
     "powerhouse/workstream",
   );
+  const [profileNameInput, setProfileNameInput] = useState("");
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const selectedDocumentModel = useRef<DocumentModelModule | null>(null);
 
   // === STATE MANAGEMENT HOOKS ===
@@ -110,46 +113,45 @@ export function DriveExplorer({ children }: EditorProps) {
                   Welcome to the Network Admin
                 </h1>
                 {/* Card to display the network profile */}
-                {isNetworkProfileCreated &&
-                  networkProfileDoc?.state.global.logo && (
-                    <div className="bg-white rounded-lg shadow-md border border-gray-300 p-4 max-w-lg mx-auto text-sm">
-                      <div className="flex items-start justify-between gap-4">
-                        {networkProfileDoc?.state.global.logo ? (
-                          <img
-                            src={networkProfileDoc?.state.global.logo}
-                            alt="Network Profile Logo"
-                            className="mb-4 max-w-64 max-h-12 w-auto h-auto object-contain flex-shrink-0"
-                          />
-                        ) : (
-                          <div></div>
+                {networkProfileDoc?.state.global.logo && (
+                  <div className="bg-white rounded-lg shadow-md border border-gray-300 p-4 max-w-lg mx-auto text-sm">
+                    <div className="flex items-start justify-between gap-4">
+                      {networkProfileDoc?.state.global.logo ? (
+                        <img
+                          src={networkProfileDoc?.state.global.logo}
+                          alt="Network Profile Logo"
+                          className="mb-4 max-w-64 max-h-12 w-auto h-auto object-contain flex-shrink-0"
+                        />
+                      ) : (
+                        <div></div>
+                      )}
+                      <div className="flex flex-wrap gap-2 justify-end flex-shrink-0">
+                        {networkProfileDoc?.state.global.category.map(
+                          (category) => (
+                            <span
+                              key={category}
+                              className={`inline-flex items-center justify-center rounded-md w-fit whitespace-nowrap shrink-0 border-2 px-2 py-0 text-sm font-extrabold ${
+                                category.toLowerCase() === "oss"
+                                  ? "bg-purple-600/30 text-purple-600 border-purple-600/70"
+                                  : category.toLowerCase() === "defi"
+                                    ? "bg-blue-600/30 text-blue-600 border-blue-600/70"
+                                    : "bg-gray-500/30 text-gray-500 border-gray-500/70"
+                              }`}
+                            >
+                              {category}
+                            </span>
+                          ),
                         )}
-                        <div className="flex flex-wrap gap-2 justify-end flex-shrink-0">
-                          {networkProfileDoc?.state.global.category.map(
-                            (category) => (
-                              <span
-                                key={category}
-                                className={`inline-flex items-center justify-center rounded-md w-fit whitespace-nowrap shrink-0 border-2 px-2 py-0 text-sm font-extrabold ${
-                                  category.toLowerCase() === "oss"
-                                    ? "bg-purple-600/30 text-purple-600 border-purple-600/70"
-                                    : category.toLowerCase() === "defi"
-                                      ? "bg-blue-600/30 text-blue-600 border-blue-600/70"
-                                      : "bg-gray-500/30 text-gray-500 border-gray-500/70"
-                                }`}
-                              >
-                                {category}
-                              </span>
-                            ),
-                          )}
-                        </div>
                       </div>
-                      <p className="mt-4">
-                        {networkProfileDoc?.state.global.description}
-                      </p>
                     </div>
-                  )}
+                    <p className="mt-4">
+                      {networkProfileDoc?.state.global.description}
+                    </p>
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-3 justify-center">
                   <Button
-                    color="dark" // Customize button appearance
+                    color="dark"
                     size="sm"
                     className="cursor-pointer hover:bg-gray-600 hover:text-white"
                     title={"Create Workstream Document"}
@@ -158,28 +160,10 @@ export function DriveExplorer({ children }: EditorProps) {
                       setModalDocumentType("powerhouse/workstream");
                       setOpenModal(true);
                     }}
-                    disabled={!isNetworkProfileCreated}
                   >
                     <span className="flex items-center gap-2">
                       <WorkstreamIcon className="w-7 h-7 text-white" />
                       Create Workstream Document
-                    </span>
-                  </Button>
-
-                  <Button
-                    color="dark" // Customize button appearance
-                    size="sm"
-                    className="cursor-pointer hover:bg-gray-600 hover:text-white"
-                    title={"Create Network Profile Document"}
-                    aria-description={"Create Network Profile Document"}
-                    onClick={() => {
-                      setModalDocumentType("powerhouse/network-profile");
-                      setOpenModal(true);
-                    }}
-                    disabled={isNetworkProfileCreated}
-                  >
-                    <span className="flex items-center gap-2">
-                      Create Network Profile Document
                     </span>
                   </Button>
                 </div>
@@ -189,7 +173,7 @@ export function DriveExplorer({ children }: EditorProps) {
               {networkAdminDocuments && networkAdminDocuments.length > 0 && (
                 <div className="w-full">
                   <h3 className="mb-4 text-lg font-medium text-gray-700">
-                    📄 Documents
+                    Documents
                   </h3>
                   <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
                     <table className="w-full bg-white">
@@ -407,7 +391,130 @@ export function DriveExplorer({ children }: EditorProps) {
     }
   }, [selectedDrive?.header.id, allDocuments]);
 
+  // Handle network profile creation from welcome form
+  const handleCreateProfile = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const name = profileNameInput.trim();
+      if (!name || isCreatingProfile) return;
+
+      setIsCreatingProfile(true);
+      try {
+        const node = await addDocument(
+          selectedDrive?.header.id || "",
+          name,
+          "powerhouse/network-profile",
+          undefined,
+          undefined,
+          undefined,
+          "network-profile-editor",
+        );
+
+        if (!node?.id) {
+          console.error("Error creating network profile document");
+          return;
+        }
+
+        await dispatchActions([setProfileName({ name })], node.id);
+
+        setProfileNameInput("");
+        setSelectedRootNode("network-information");
+      } catch (error) {
+        console.error("Failed to create network profile:", error);
+      } finally {
+        setIsCreatingProfile(false);
+      }
+    },
+    [profileNameInput, isCreatingProfile, selectedDrive?.header.id],
+  );
+
   // === RENDER ===
+
+  // If no network profile exists, show the creation form (no sidebar)
+  if (!isNetworkProfileCreated) {
+    const isValid = profileNameInput.trim().length > 0;
+    return (
+      <div className="flex h-full items-center justify-center px-4 py-12">
+        <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200/50 bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/40 p-12 shadow-xl shadow-slate-200/50 backdrop-blur-sm">
+          {/* Decorative background elements */}
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-to-br from-purple-400/20 to-indigo-400/20 blur-3xl" />
+          <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-gradient-to-br from-indigo-300/20 to-purple-300/20 blur-2xl" />
+
+          {/* Content */}
+          <div className="relative z-10 text-center">
+            <div className="mb-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 p-3 shadow-lg shadow-purple-500/30">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-white"
+              >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </div>
+
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-slate-900">
+              Create your Network Profile
+            </h2>
+
+            <p className="mb-8 text-lg leading-relaxed text-slate-600">
+              Get started by creating a network profile to manage workstreams,
+              builders, and documents.
+            </p>
+
+            <form onSubmit={handleCreateProfile} className="mx-auto max-w-md">
+              <input
+                type="text"
+                value={profileNameInput}
+                onChange={(e) => setProfileNameInput(e.target.value)}
+                placeholder="Network profile name"
+                maxLength={100}
+                disabled={isCreatingProfile}
+                className="mb-6 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 placeholder-slate-400 shadow-sm outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 disabled:opacity-50"
+              />
+
+              <button
+                type="submit"
+                disabled={!isValid || isCreatingProfile}
+                className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-purple-500/40 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/50 active:scale-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-lg"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <span>
+                    {isCreatingProfile
+                      ? "Creating..."
+                      : "Create Network Profile"}
+                  </span>
+                  {!isCreatingProfile && (
+                    <svg
+                      className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  )}
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-indigo-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full">
       {/* === FULL VIEW MODE (for Scope of Work) === */}
