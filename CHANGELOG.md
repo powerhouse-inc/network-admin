@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/powerhouse-inc/network-admin/compare/v1.0.3...v1.1.0) (2026-02-16)
+
+
+### Features
+
+* **network-admin:** add welcome screen for network profile creation ([138fe5a](https://github.com/powerhouse-inc/network-admin/commit/138fe5a589aac90aae93815ff6c90736cdc54b7b))
+
 ## [1.0.3](https://github.com/powerhouse-inc/network-admin/compare/v1.0.2...v1.0.3) (2026-02-16)
 
 
