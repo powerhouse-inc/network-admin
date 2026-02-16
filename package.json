@@ -3,6 +3,10 @@
   "description": "Network Admin package for Powerhouse",
   "version": "1.0.0-staging.2",
   "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/powerhouse-inc/network-admin"
+  },
   "type": "module",
   "publishConfig": {
     "access": "public"
