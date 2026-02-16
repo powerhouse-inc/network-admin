@@ -1,3 +1,11 @@
+# [1.0.0-staging.2](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-staging.1...v1.0.0-staging.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* **ci:** switch to npm trusted publishing (remove NPM_TOKEN) ([83064a0](https://github.com/powerhouse-inc/network-admin/commit/83064a02839a060d50956f5ea61b2aacecccb5b9))
+* correct semantic-release plugin order ([3f1845e](https://github.com/powerhouse-inc/network-admin/commit/3f1845e3020bb9f19aeea4616576464393820c02))
+
 # 1.0.0-staging.1 (2026-02-16)
 
 
