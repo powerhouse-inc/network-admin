@@ -1,3 +1,10 @@
+# [1.0.0-dev.2](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-dev.1...v1.0.0-dev.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* add repository url for npm trusted publishing ([2964d73](https://github.com/powerhouse-inc/network-admin/commit/2964d730061bf5d6935e501fb7d194eba821bfd2))
+
 # 1.0.0-dev.1 (2026-02-16)
 
 
