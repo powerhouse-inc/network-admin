@@ -36,7 +36,13 @@ describe("WorkstreamOperations", () => {
 
   it("should handle editClientInfo operation", () => {
     const document = utils.createDocument();
-    const input = generateMock(EditClientInfoInputSchema());
+    const mockInput = generateMock(EditClientInfoInputSchema());
+    const input = {
+      ...mockInput,
+      // Override icon with a valid URL if provided, otherwise undefined
+      // The state schema requires icon to be a valid URL (z.url()) or null
+      icon: mockInput.icon ? "https://example.com/icon.png" : undefined,
+    };
 
     const updatedDocument = reducer(document, editClientInfo(input));
 
