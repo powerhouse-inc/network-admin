@@ -16,6 +16,7 @@ import {
 import { Button } from "@powerhousedao/document-engineering";
 import { CreateDocumentModal } from "@powerhousedao/design-system/connect";
 import { type DocumentModelModule, type PHDocument } from "document-model";
+import { isValidName } from "document-drive";
 import { WorkstreamIcon } from "./icons/WorkstreamIcon.js";
 import type { NetworkProfileDocument } from "../../../document-models/network-profile/index.js";
 import {
@@ -110,7 +111,7 @@ export function DriveExplorer({ children }: EditorProps) {
             <div className="max-w-7xl mx-auto">
               <div className="space-y-6 flex flex-col items-center justify-center mb-10">
                 <h1 className="text-2xl font-bold">
-                  Welcome to the Network Admin
+                  Welcome to the {networkProfileDoc?.state.global.name || ""} Network Admin
                 </h1>
                 {/* Card to display the network profile */}
                 {networkProfileDoc?.state.global.logo && (
@@ -432,7 +433,7 @@ export function DriveExplorer({ children }: EditorProps) {
 
   // If no network profile exists, show the creation form (no sidebar)
   if (!isNetworkProfileCreated) {
-    const isValid = profileNameInput.trim().length > 0;
+    const isValid = isValidName(profileNameInput);
     return (
       <div className="flex h-full items-center justify-center px-4 py-12">
         <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200/50 bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/40 p-12 shadow-xl shadow-slate-200/50 backdrop-blur-sm">
@@ -469,6 +470,11 @@ export function DriveExplorer({ children }: EditorProps) {
             </p>
 
             <form onSubmit={handleCreateProfile} className="mx-auto max-w-md">
+              {!isValid && profileNameInput && (
+                <div className="mb-2 text-sm text-red-500">
+                  Document name must be valid URL characters.
+                </div>
+              )}
               <input
                 type="text"
                 value={profileNameInput}

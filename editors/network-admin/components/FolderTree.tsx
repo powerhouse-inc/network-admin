@@ -251,6 +251,13 @@ export function FolderTree({
     return [workstreamsNode, networkInfoNode, buildersNode];
   }, [networkAdminDocuments, allDocuments]);
 
+  const sidebarTitle = useMemo(() => {
+    const networkProfileDoc = networkAdminDocuments?.find(
+      (doc) => doc.header.documentType === "powerhouse/network-profile",
+    ) as NetworkProfileDocument | undefined;
+    return networkProfileDoc?.state.global.name || "Network Admin";
+  }, [networkAdminDocuments]);
+
   // Handle sidebar node selection
   const handleActiveNodeChange = useCallback(
     (nodeId: string) => {
@@ -306,7 +313,7 @@ export function FolderTree({
         nodes={sidebarNodes}
         activeNodeId={activeSidebarNodeId}
         onActiveNodeChange={(node) => handleActiveNodeChange(node.id)}
-        sidebarTitle="Network Admin"
+        sidebarTitle={sidebarTitle}
         showSearchBar={true}
         allowPinning={true}
         resizable={true}
