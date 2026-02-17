@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/powerhouse-inc/network-admin/compare/v1.1.0...v1.2.0) (2026-02-17)
+
+
+### Features
+
+* **network-admin:** use network profile name in sidebar and welcome screen ([4e3906e](https://github.com/powerhouse-inc/network-admin/commit/4e3906e12259222d73326cb553ba7bed3e8bff11))
+
 # [1.1.0](https://github.com/powerhouse-inc/network-admin/compare/v1.0.3...v1.1.0) (2026-02-16)
 
 
