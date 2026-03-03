@@ -1,3 +1,10 @@
+# [1.0.0-dev.5](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-dev.4...v1.0.0-dev.5) (2026-03-03)
+
+
+### Bug Fixes
+
+* remove postinstall script for project-management package exports ([02b994f](https://github.com/powerhouse-inc/network-admin/commit/02b994faada7a1354a46a9dae188e1e3f03ccec0))
+
 # [1.0.0-dev.4](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-dev.3...v1.0.0-dev.4) (2026-02-25)
 
 # [1.0.0-dev.3](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-dev.2...v1.0.0-dev.3) (2026-02-16)
