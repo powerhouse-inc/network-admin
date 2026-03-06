@@ -1,3 +1,5 @@
+# [1.0.0-dev.6](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-dev.5...v1.0.0-dev.6) (2026-03-06)
+
 # [1.0.0-dev.5](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-dev.4...v1.0.0-dev.5) (2026-03-03)
 
 
