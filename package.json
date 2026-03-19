@@ -128,7 +128,7 @@
     "react-dom": ">=19.0.0"
   },
   "overrides": {
-    "graphql": "16.12.0"
+    "graphql": "^16.12.0"
   },
   "bugs": {
     "url": "https://github.com/powerhouse-inc/network-admin/issues"
