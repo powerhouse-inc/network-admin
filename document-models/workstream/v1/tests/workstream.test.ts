@@ -36,7 +36,10 @@ describe("WorkstreamOperations", () => {
 
   it("should handle editClientInfo operation", () => {
     const document = utils.createDocument();
-    const input = generateMock(EditClientInfoInputSchema());
+    const input = {
+      ...generateMock(EditClientInfoInputSchema()),
+      icon: "https://example.com/icon.png",
+    };
 
     const updatedDocument = reducer(document, editClientInfo(input));
 
