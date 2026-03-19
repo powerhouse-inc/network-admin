@@ -1,8 +1,7 @@
-import { Button } from "@powerhousedao/design-system";
+import { Button } from "@powerhousedao/document-engineering";
 import {
   showCreateDocumentModal,
   useAllowedDocumentModelModules,
-  useDocumentModelModules,
   useSelectedDriveId,
   type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";

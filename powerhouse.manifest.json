@@ -1,12 +1,33 @@
 {
-    "name": "",
+    "name": "v6-network-admin",
     "description": "",
     "category": "",
     "publisher": {
         "name": "",
         "url": ""
     },
-    "documentModels": [],
+    "documentModels": [
+        {
+            "id": "powerhouse/network-profile",
+            "name": "Network Profile"
+        },
+        {
+            "id": "payment-terms",
+            "name": "Payment Terms"
+        },
+        {
+            "id": "powerhouse/rfp",
+            "name": "RequestForProposals"
+        },
+        {
+            "id": "powerhouse/workstream",
+            "name": "Workstream"
+        },
+        {
+            "id": "powerhouse/builders",
+            "name": "Builders"
+        }
+    ],
     "editors": [],
     "apps": [],
     "subgraphs": [],

@@ -1,53 +1,28 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import {
-  Sidebar,
-  SidebarProvider,
-  Button,
-  type SidebarNode,
-} from "@powerhousedao/document-engineering";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Button } from "@powerhousedao/document-engineering";
 
 import {
   setSelectedNode,
-  isFileNodeKind,
-  isFolderNodeKind,
-  useNodesInSelectedDriveOrFolder,
   useSelectedDrive,
   useSelectedFolder,
   useUserPermissions,
   useDocumentsInSelectedDrive,
   useFileNodesInSelectedDrive,
   useNodeActions,
-  useSelectedDocument,
+  useSelectedDocumentSafe,
   showDeleteNodeModal,
   addDocument,
-  showCreateDocumentModal,
+  dispatchActions,
 } from "@powerhousedao/reactor-browser";
+import { CreateDocumentModal } from "@powerhousedao/design-system/connect";
 import type { EditorProps } from "document-model";
-import { type FileNode } from "document-drive";
+import { isValidName } from "document-drive";
 import { type DocumentModelModule, type PHDocument } from "document-model";
-import { PaymentIcon } from "./icons/PaymentIcon.js";
-import { RfpIcon } from "./icons/RfpIcon.js";
-import { SowIcon } from "./icons/SowIcon.js";
 import { WorkstreamIcon } from "./icons/WorkstreamIcon.js";
-import { Earth } from "lucide-react";
-import type { WorkstreamDocument } from "../../../document-models/workstream/index.js";
-import type { NetworkProfileDocument } from "../../../document-models/network-profile/index.js";
-import type { RequestForProposalsDocument } from "../../../document-models/request-for-proposals/index.js";
-import type { PaymentTermsDocument } from "../../../document-models/payment-terms/index.js";
-import { CreateDocument } from "./CreateDocument.js";
+import type { NetworkProfileDocument } from "@powerhousedao/network-admin/document-models/network-profile";
+import { actions as workstreamActions } from "@powerhousedao/network-admin/document-models/workstream";
+import { actions as networkProfileActions } from "@powerhousedao/network-admin/document-models/network-profile";
 import { FolderTree } from "./FolderTree.js";
-
-const WorkstreamStatusEnums = [
-  "RFP_DRAFT",
-  "PREWORK_RFC",
-  "RFP_CANCELLED",
-  "OPEN_FOR_PROPOSALS",
-  "PROPOSAL_SUBMITTED",
-  "NOT_AWARDED",
-  "AWARDED",
-  "IN_PROGRESS",
-  "FINISHED",
-];
 
 /**
  * Main drive explorer component with sidebar navigation and content area.
@@ -64,8 +39,10 @@ export function DriveExplorer(props: EditorProps) {
   const [selectedRootNode, setSelectedRootNode] =
     useState<string>("workstreams");
   const [modalDocumentType, setModalDocumentType] = useState<string>(
-    "powerhouse/workstream"
+    "powerhouse/workstream",
   );
+  const [profileNameInput, setProfileNameInput] = useState("");
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const selectedDocumentModel = useRef<DocumentModelModule | null>(null);
 
   // === STATE MANAGEMENT HOOKS ===
@@ -77,7 +54,7 @@ export function DriveExplorer(props: EditorProps) {
   const { onRenameNode } = useNodeActions();
 
   // Listen to global selected document state (for external editors like Scope of Work)
-  const [globalSelectedDocument] = useSelectedDocument();
+  const [globalSelectedDocument] = useSelectedDocumentSafe();
 
   const networkAdminDocuments = allDocuments?.filter(
     (doc: PHDocument) =>
@@ -85,14 +62,14 @@ export function DriveExplorer(props: EditorProps) {
       doc.header.documentType === "powerhouse/workstream" ||
       doc.header.documentType === "powerhouse/scopeofwork" ||
       doc.header.documentType === "powerhouse/rfp" ||
-      doc.header.documentType === "payment-terms"
+      doc.header.documentType === "payment-terms",
   );
 
   //check if network profile doc is created, set isNetworkProfileCreated to true
   const isNetworkProfileCreated =
     networkAdminDocuments?.some(
       (doc: PHDocument) =>
-        doc.header.documentType === "powerhouse/network-profile"
+        doc.header.documentType === "powerhouse/network-profile",
     ) || false;
 
   // Sync global selected document with local activeDocumentId
@@ -106,224 +83,6 @@ export function DriveExplorer(props: EditorProps) {
   // Check if current active document is a Scope of Work (should show in full view)
   const isScopeOfWorkFullView =
     globalSelectedDocument?.header.documentType === "powerhouse/scopeofwork";
-
-  // Convert network admin documents to SidebarNode format
-  const sidebarNodes = useMemo((): SidebarNode[] => {
-    // Group documents by type
-    const workstreamDocs = (networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/workstream"
-    ) ?? []) as WorkstreamDocument[];
-    const networkProfileDocs = (networkAdminDocuments?.filter(
-      (doc) => doc.header.documentType === "powerhouse/network-profile"
-    ) ?? []) as NetworkProfileDocument[];
-
-    const workstreamsNode: SidebarNode = {
-      id: "workstreams",
-      title: "Workstreams",
-      children: [
-        ...WorkstreamStatusEnums.map((status) => {
-          const statusTitle = status
-            .toLowerCase()
-            .split("_")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
-          return {
-            id: `workstream-status-${status}`,
-            title:
-              statusTitle +
-              (workstreamDocs.filter(
-                (doc) => doc.state.global.status === status
-              ).length > 0
-                ? ` (${workstreamDocs.filter((doc) => doc.state.global.status === status).length})`
-                : ""),
-            children: workstreamDocs
-              .filter((doc) => doc.state.global.status === status)
-              .map((doc) => {
-                let sow = null;
-                let paymentTerms = null;
-                let rfp = null;
-                if (doc.state.global.initialProposal) {
-                  sow = doc.state.global.initialProposal.sow;
-                  paymentTerms = doc.state.global.initialProposal.paymentTerms;
-                }
-
-                if (doc.state.global.rfp) {
-                  rfp = doc.state.global.rfp.id;
-                }
-
-                const sowDoc = allDocuments?.find(
-                  (doc) => doc.header.id === sow
-                ) as PHDocument | undefined;
-                const rfpDoc = allDocuments?.find(
-                  (doc) => doc.header.id === rfp
-                ) as RequestForProposalsDocument | undefined;
-                const pmtDoc = allDocuments?.find(
-                  (doc) => doc.header.id === paymentTerms
-                ) as PaymentTermsDocument | undefined;
-
-                // get alternative proposals
-                const alternativeProposals =
-                  doc.state.global.alternativeProposals;
-
-                const returnableChildren: SidebarNode = {
-                  id: `editor-${doc.header.id}`,
-                  title: `${doc.state.global.code ? doc.state.global.code + " - " : ""}${doc.state.global.title || doc.header.name}`,
-                  icon: <WorkstreamIcon className="w-5 h-5" />,
-                  children: rfpDoc
-                    ? [
-                        {
-                          id: `editor-${rfpDoc.header.id}`,
-                          title: "Request For Proposal",
-                          icon: <RfpIcon className="w-5 h-5" />,
-                        },
-                      ]
-                    : [],
-                };
-
-                // if sowDoc or pmtDoc is included in the wstrChildDocs, then add a child with the title "Initial Proposal"
-                const children: SidebarNode[] = [];
-                if (sowDoc) {
-                  children.push({
-                    id: `editor-${sowDoc.header.id}`,
-                    title: "Scope of Work",
-                    icon: <SowIcon className="w-5 h-5" />,
-                  });
-                }
-                if (pmtDoc) {
-                  children.push({
-                    id: `editor-${pmtDoc.header.id}`,
-                    title: "Payment Terms",
-                    icon: <PaymentIcon className="w-5 h-5" />,
-                  });
-                }
-                if (children.length) {
-                  returnableChildren.children = [
-                    ...(returnableChildren.children ?? []),
-                    {
-                      id: "initial-proposal",
-                      title: "Initial Proposal",
-                      children: children,
-                    },
-                  ];
-                }
-
-                if (alternativeProposals.length > 0) {
-                  returnableChildren.children = [
-                    ...(returnableChildren.children ?? []),
-                    {
-                      id: "alternative-proposals",
-                      title: `Alternative Proposals (${alternativeProposals.length})`,
-                      children: alternativeProposals.map((proposal) => {
-                        // Find documents for this specific proposal
-                        const proposalSowDoc = allDocuments?.find(
-                          (doc) => doc.header.id === proposal.sow
-                        ) as PHDocument | undefined;
-                        const proposalPaymentTermsDoc = allDocuments?.find(
-                          (doc) => doc.header.id === proposal.paymentTerms
-                        ) as PaymentTermsDocument | undefined;
-
-                        // Filter to only include documents that exist
-                        const proposalChildDocs = [
-                          proposalSowDoc,
-                          proposalPaymentTermsDoc,
-                        ].filter((doc) => doc !== undefined && doc !== null);
-
-                        return {
-                          id: `alternative-proposal-${proposal.id}`,
-                          title: `${proposal.author.name}`,
-                          children: proposalChildDocs.map((childDoc) => {
-                            const dynamicTitle =
-                              childDoc.header.documentType ===
-                              "powerhouse/scopeofwork"
-                                ? "Scope of Work"
-                                : childDoc.header.documentType ===
-                                    "payment-terms"
-                                  ? "Payment Terms"
-                                  : "";
-                            return {
-                              id: `editor-${childDoc.header.id}`,
-                              title: dynamicTitle,
-                              icon:
-                                childDoc.header.documentType ===
-                                "powerhouse/scopeofwork" ? (
-                                  <SowIcon className="w-5 h-5" />
-                                ) : (
-                                  <PaymentIcon className="w-5 h-5" />
-                                ),
-                            };
-                          }),
-                        };
-                      }),
-                    },
-                  ];
-                }
-
-                return returnableChildren;
-              }),
-          };
-        }),
-      ],
-    };
-
-    const networkInfoNode: SidebarNode = {
-      id: "network-information",
-      title: "Network Information",
-      children: [
-        // Add network profile documents
-        ...networkProfileDocs.map((doc) => ({
-          id: `editor-${doc.header.id}`,
-          title: "Network Profile",
-          icon: <Earth className="w-5 h-5" />,
-        })),
-      ],
-    };
-
-    return [workstreamsNode, networkInfoNode];
-  }, [networkAdminDocuments]);
-
-  // Handle sidebar node selection
-  const handleActiveNodeChange = useCallback(
-    (nodeId: string) => {
-      console.log("nodeId", nodeId);
-
-      // Find the node by ID
-      const findNodeById = (
-        nodes: SidebarNode[],
-        id: string
-      ): SidebarNode | null => {
-        for (const node of nodes) {
-          if (node.id === id) {
-            return node;
-          }
-          if (node.children) {
-            const found = findNodeById(node.children, id);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
-
-      const newNode = findNodeById(sidebarNodes, nodeId);
-      if (!newNode) return;
-
-      // Always update the active sidebar node ID
-      setActiveSidebarNodeId(newNode.id);
-
-      if (newNode.id === "workstreams") {
-        setSelectedNode(undefined);
-        setSelectedRootNode("workstreams");
-      } else if (newNode.id === "network-information") {
-        setSelectedNode(undefined);
-        setSelectedRootNode("network-information");
-        // Handle network information display
-      } else if (newNode.id.startsWith("editor-")) {
-        // Extract file ID from editor-{file.id} format
-        const fileId = newNode.id.replace("editor-", "");
-        setSelectedNode(fileId);
-      }
-    },
-    [setSelectedNode, sidebarNodes]
-  );
 
   // === EVENT HANDLERS ===
 
@@ -343,7 +102,7 @@ export function DriveExplorer(props: EditorProps) {
     }
 
     const networkProfileDoc = networkAdminDocuments?.find(
-      (doc) => doc.header.documentType === "powerhouse/network-profile"
+      (doc) => doc.header.documentType === "powerhouse/network-profile",
     ) as NetworkProfileDocument | undefined;
 
     switch (nodeType) {
@@ -383,7 +142,7 @@ export function DriveExplorer(props: EditorProps) {
                             >
                               {category}
                             </span>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -394,39 +153,19 @@ export function DriveExplorer(props: EditorProps) {
                 )}
                 <div className="flex flex-wrap gap-3 justify-center">
                   <Button
-                    color="dark" // Customize button appearance
+                    color="dark"
                     size="sm"
                     className="cursor-pointer hover:bg-gray-600 hover:text-white"
                     title={"Create Workstream Document"}
                     aria-description={"Create Workstream Document"}
                     onClick={() => {
-                      // setModalDocumentType("powerhouse/workstream");
-                      // setOpenModal(true);
-                      showCreateDocumentModal("powerhouse/workstream");
+                      setModalDocumentType("powerhouse/workstream");
+                      setOpenModal(true);
                     }}
-                    disabled={!isNetworkProfileCreated}
                   >
                     <span className="flex items-center gap-2">
                       <WorkstreamIcon className="w-7 h-7 text-white" />
                       Create Workstream Document
-                    </span>
-                  </Button>
-
-                  <Button
-                    color="dark" // Customize button appearance
-                    size="sm"
-                    className="cursor-pointer hover:bg-gray-600 hover:text-white"
-                    title={"Create Network Profile Document"}
-                    aria-description={"Create Network Profile Document"}
-                    onClick={() => {
-                      // setModalDocumentType("powerhouse/network-profile");
-                      // setOpenModal(true);
-                      showCreateDocumentModal("powerhouse/network-profile");
-                    }}
-                    disabled={isNetworkProfileCreated}
-                  >
-                    <span className="flex items-center gap-2">
-                      Create Network Profile Document
                     </span>
                   </Button>
                 </div>
@@ -436,7 +175,7 @@ export function DriveExplorer(props: EditorProps) {
               {networkAdminDocuments && networkAdminDocuments.length > 0 && (
                 <div className="w-full">
                   <h3 className="mb-4 text-lg font-medium text-gray-700">
-                    📄 Documents
+                    Documents
                   </h3>
                   <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
                     <table className="w-full bg-white">
@@ -458,7 +197,7 @@ export function DriveExplorer(props: EditorProps) {
                         {networkAdminDocuments.map((document) => {
                           // Find the corresponding file node for actions
                           const fileNode = fileChildren?.find(
-                            (file) => file.id === document.header.id
+                            (file) => file.id === document.header.id,
                           );
 
                           return (
@@ -502,7 +241,7 @@ export function DriveExplorer(props: EditorProps) {
                                         fileNode.name || document.header.name;
                                       const newName = prompt(
                                         "Enter new name:",
-                                        currentName
+                                        currentName,
                                       );
                                       if (
                                         newName &&
@@ -512,12 +251,12 @@ export function DriveExplorer(props: EditorProps) {
                                         try {
                                           await onRenameNode(
                                             newName.trim(),
-                                            fileNode as FileNode
+                                            fileNode,
                                           );
                                         } catch (error) {
                                           console.error(
                                             "Failed to rename document",
-                                            error
+                                            error,
                                           );
                                         }
                                       }
@@ -559,26 +298,21 @@ export function DriveExplorer(props: EditorProps) {
     async (fileName: string) => {
       setOpenModal(false);
 
-      // Use the document type that was set when the modal was opened
       const documentType = modalDocumentType;
-
-      // Determine editor type based on document type
       const editorType =
         documentType === "powerhouse/network-profile"
           ? "network-profile-editor"
           : "workstream-editor";
-
-      console.log(`Creating ${documentType} document: ${fileName}`);
 
       try {
         const node = await addDocument(
           selectedDrive?.header.id || "",
           fileName,
           documentType,
-          undefined, // creating in root folder
           undefined,
           undefined,
-          editorType
+          undefined,
+          editorType,
         );
 
         if (!node?.id) {
@@ -587,67 +321,208 @@ export function DriveExplorer(props: EditorProps) {
         }
 
         if (documentType === "powerhouse/workstream") {
-          // const networkProfileDoc = networkAdminDocuments?.find(
-          //   (doc) => doc.header.documentType === "powerhouse/network-profile"
-          // ) as NetworkProfileDocument | undefined;
-          // const actionsToDispatch = [
-          //   editWorkstream({ title: fileName }),
-          //   editClientInfo({
-          //     clientId: networkProfileDoc?.header.id || "",
-          //     name: networkProfileDoc?.state.global.name || "",
-          //     icon: networkProfileDoc?.state.global.icon || "",
-          //   }),
-          // ];
-          // await dispatchActions(actionsToDispatch, node.id);
+          const networkProfileDoc = networkAdminDocuments?.find(
+            (doc) => doc.header.documentType === "powerhouse/network-profile",
+          ) as NetworkProfileDocument | undefined;
+          const actionsToDispatch = [
+            workstreamActions.editWorkstream({ title: fileName }),
+            workstreamActions.editClientInfo({
+              clientId: networkProfileDoc?.header.id || "",
+              name: networkProfileDoc?.state.global.name || "",
+              icon: networkProfileDoc?.state.global.icon || "",
+            }),
+          ];
+          await dispatchActions(actionsToDispatch, node.id);
         }
 
         selectedDocumentModel.current = null;
 
-        console.log("Created document node", node);
-
-        if (node) {
-          // Customize: Auto-open created document by uncommenting below
-          // setActiveDocumentId(node.id);
-
-          // Refresh the sidebar by triggering a re-render
-          // Set the root node based on the document type that was created
-          if (documentType === "powerhouse/network-profile") {
-            setSelectedRootNode("network-information");
-          } else {
-            setSelectedRootNode("workstreams");
-          }
+        if (documentType === "powerhouse/network-profile") {
+          setSelectedRootNode("network-information");
+        } else {
+          setSelectedRootNode("workstreams");
         }
       } catch (error) {
         console.error("Failed to create document:", error);
       }
     },
-    [selectedDrive?.header.id, modalDocumentType]
+    [selectedDrive?.header.id, modalDocumentType, networkAdminDocuments],
   );
+
+  // Handle network profile creation from welcome form
+  const handleCreateProfile = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const name = profileNameInput.trim();
+      if (!name || isCreatingProfile) return;
+
+      setIsCreatingProfile(true);
+      try {
+        const node = await addDocument(
+          selectedDrive?.header.id || "",
+          name,
+          "powerhouse/network-profile",
+          undefined,
+          undefined,
+          undefined,
+          "network-profile-editor",
+        );
+
+        if (!node?.id) {
+          console.error("Error creating network profile document");
+          return;
+        }
+
+        await dispatchActions(
+          [networkProfileActions.setProfileName({ name })],
+          node.id,
+        );
+
+        setProfileNameInput("");
+        setSelectedRootNode("network-information");
+      } catch (error) {
+        console.error("Failed to create network profile:", error);
+      } finally {
+        setIsCreatingProfile(false);
+      }
+    },
+    [profileNameInput, isCreatingProfile, selectedDrive?.header.id],
+  );
+
+  // Create builders document
+  const createBuildersDocument = useCallback(async () => {
+    try {
+      const isCreated = allDocuments?.some(
+        (doc) => doc.header.documentType === "powerhouse/builders",
+      );
+      if (isCreated) {
+        return null;
+      }
+      const node = await addDocument(
+        selectedDrive?.header.id || "",
+        "Builders",
+        "powerhouse/builders",
+        undefined,
+        undefined,
+        undefined,
+        "builders-editor",
+      );
+
+      if (!node?.id) {
+        console.error("Error creating builders document");
+        return null;
+      }
+
+      return node;
+    } catch (error) {
+      console.error("Failed to create builders document:", error);
+      return null;
+    }
+  }, [selectedDrive?.header.id, allDocuments]);
+
   // === RENDER ===
+
+  // If no network profile exists, show the creation form
+  if (!isNetworkProfileCreated) {
+    const isValid = isValidName(profileNameInput);
+    return (
+      <div className="flex h-full items-center justify-center px-4 py-12">
+        <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200/50 bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/40 p-12 shadow-xl shadow-slate-200/50 backdrop-blur-sm">
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-to-br from-purple-400/20 to-indigo-400/20 blur-3xl" />
+          <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-gradient-to-br from-indigo-300/20 to-purple-300/20 blur-2xl" />
+
+          <div className="relative z-10 text-center">
+            <div className="mb-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 p-3 shadow-lg shadow-purple-500/30">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-white"
+              >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </div>
+
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-slate-900">
+              Create your Network Profile
+            </h2>
+
+            <p className="mb-8 text-lg leading-relaxed text-slate-600">
+              Get started by creating a network profile to manage workstreams,
+              builders, and documents.
+            </p>
+
+            <form onSubmit={handleCreateProfile} className="mx-auto max-w-md">
+              {!isValid && profileNameInput && (
+                <div className="mb-2 text-sm text-red-500">
+                  Document name must be valid URL characters.
+                </div>
+              )}
+              <input
+                type="text"
+                value={profileNameInput}
+                onChange={(e) => setProfileNameInput(e.target.value)}
+                placeholder="Network profile name"
+                maxLength={100}
+                disabled={isCreatingProfile}
+                className="mb-6 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 placeholder-slate-400 shadow-sm outline-none transition-all focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 disabled:opacity-50"
+              />
+
+              <button
+                type="submit"
+                disabled={!isValid || isCreatingProfile}
+                className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-purple-500/40 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/50 active:scale-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-lg"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <span>
+                    {isCreatingProfile
+                      ? "Creating..."
+                      : "Create Network Profile"}
+                  </span>
+                  {!isCreatingProfile && (
+                    <svg
+                      className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  )}
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-indigo-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <SidebarProvider nodes={sidebarNodes}>
+    <div className="h-full">
       {/* === FULL VIEW MODE (for Scope of Work) === */}
       {isScopeOfWorkFullView && props.children ? (
         <div className="h-full w-full">{props.children}</div>
       ) : (
         /* === NORMAL VIEW WITH SIDEBAR === */
         <div className="flex h-full">
-          <Sidebar
-            nodes={sidebarNodes}
-            activeNodeId={activeSidebarNodeId}
-            onActiveNodeChange={(node) => handleActiveNodeChange(node.id)}
-            sidebarTitle="Network Admin"
-            showSearchBar={true}
-            allowPinning={true}
-            resizable={true}
-            initialWidth={300}
-            maxWidth={500}
-            enableMacros={4}
-            handleOnTitleClick={() => {
-              setSelectedNode(undefined);
-              setActiveSidebarNodeId("workstreams");
-              setSelectedRootNode("workstreams");
-            }}
+          <FolderTree
+            activeSidebarNodeId={activeSidebarNodeId}
+            setActiveSidebarNodeId={setActiveSidebarNodeId}
+            setSelectedRootNode={setSelectedRootNode}
+            createBuildersDocument={createBuildersDocument}
           />
 
           {/* === MAIN CONTENT AREA === */}
@@ -659,15 +534,13 @@ export function DriveExplorer(props: EditorProps) {
           </div>
 
           {/* === DOCUMENT CREATION MODAL === */}
-          {/* Modal for entering document name after selecting type */}
-          {/* Note: Modal title is fixed, but document type is determined by selectedRootNode */}
-          {/* <CreateDocumentModal
+          <CreateDocumentModal
             onContinue={onCreateDocument}
             onOpenChange={(open) => setOpenModal(open)}
             open={openModal}
-          /> */}
+          />
         </div>
       )}
-    </SidebarProvider>
+    </div>
   );
 }

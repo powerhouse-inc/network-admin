@@ -8,7 +8,6 @@ export interface Workstreams {
   initial_proposal_status: string | null;
   network_phid: string | null;
   network_slug: string | null;
-  roadmap_oid: string | null;
   sow_phid: string | null;
   workstream_phid: string;
   workstream_slug: string | null;

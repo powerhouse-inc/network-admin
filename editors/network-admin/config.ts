@@ -9,5 +9,6 @@ export const editorConfig: PHDriveEditorConfig = {
     "powerhouse/scopeofwork",
     "payment-terms",
     "powerhouse/rfp",
+    "powerhouse/builders",
   ],
 };

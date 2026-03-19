@@ -1,10 +1,9 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    "noImplicitAny": true,
     // File Layout
     "outDir": "./dist",
-
+    "rootDir": ".",
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
@@ -36,9 +35,8 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
-  "files": [ "./powerhouse.manifest.json", "./vite.config.ts", "./vitest.config.ts"],
-  "include": ["**/*",],
-  "exclude": ["dist", "node_modules", ".ph", "vitest.config.ts"],
+  "include": ["**/*", "./powerhouse.manifest.json"],
+  "exclude": ["dist", "node_modules", ".ph", "vitest.config.ts"]
 }

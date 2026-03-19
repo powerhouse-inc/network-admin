@@ -1,37 +1,44 @@
-import {
-  type ProcessorRecord,
-  type IProcessorHostModule,
-} from "document-drive";
-import { type RelationalDbProcessorFilter } from "document-drive";
-import { type PHDocumentHeader } from "document-model";
+import type {
+  ProcessorRecord,
+  IProcessorHostModule,
+  ProcessorFilter,
+} from "@powerhousedao/shared/processors";
+import type { PHDocumentHeader } from "document-model";
 import { WorkstreamsProcessor } from "./index.js";
 
 export const workstreamsProcessorFactory =
   (module: IProcessorHostModule) =>
   async (driveHeader: PHDocumentHeader): Promise<ProcessorRecord[]> => {
-    // Create a namespace for the processor and the provided drive id
     const namespace = WorkstreamsProcessor.getNamespace(driveHeader.id);
+    console.log(
+      `[WorkstreamsProcessor] Factory called for drive: ${driveHeader.id}, namespace: ${namespace}`,
+    );
 
-    // Create a namespaced db for the processor
     const store =
       await module.relationalDb.createNamespace<WorkstreamsProcessor>(
         namespace,
       );
 
-    // Create a filter for the processor
-    const filter: RelationalDbProcessorFilter = {
+    const filter: ProcessorFilter = {
       branch: ["main"],
       documentId: ["*"],
-      documentType: ["powerhouse/workstream", "powerhouse/network-profile", "powerhouse/scopeofwork"],
+      documentType: ["powerhouse/workstream", "powerhouse/document-drive"],
       scope: ["global"],
     };
 
-    // Create the processor
     const processor = new WorkstreamsProcessor(namespace, filter, store);
+
+    await processor.initAndUpgrade();
+
+    console.log(
+      `[WorkstreamsProcessor] Processor created for drive: ${driveHeader.id}`,
+    );
+
     return [
       {
         processor,
         filter,
+        startFrom: "beginning" as const,
       },
     ];
   };

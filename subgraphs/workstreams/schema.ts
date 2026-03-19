@@ -7,10 +7,12 @@ export const schema: DocumentNode = gql`
   """
   type Query {
     processorWorkstreams: [ProcessorWorkstream!]!
-    workstream(filter: WorkstreamFilter!): FullQueryWorkstream
+    workstream(filter: WorkstreamFilter!): [FullQueryWorkstream!]!
     workstreams(filter: WorkstreamsFilter): [FullQueryWorkstream!]!
     rfpByWorkstream(filter: WorkstreamFilter!): [WorkstreamRfp!]!
-    scopeOfWorkByNetworkOrStatus(filter: scopeOfWorkByNetworkOrStatusFilter!): [SOW_ScopeOfWorkState!]!
+    scopeOfWorkByNetworkOrStatus(
+      filter: scopeOfWorkByNetworkOrStatusFilter!
+    ): [SOW_ScopeOfWorkState!]!
   }
 
   type ProcessorWorkstream {
@@ -21,7 +23,6 @@ export const schema: DocumentNode = gql`
     workstream_title: String
     workstream_status: WorkstreamStatus
     sow_phid: PHID
-    roadmap_oid: PHID
     final_milestone_target: DateTime
     initial_proposal_status: ProposalStatus
     initial_proposal_author: PHID
@@ -67,13 +68,14 @@ export const schema: DocumentNode = gql`
     networkName: String
     workstreamStatus: WorkstreamStatus
     workstreamStatuses: [WorkstreamStatus!]
-
   }
 
   input WorkstreamsFilter {
     networkId: PHID
     networkSlug: String
     networkName: String
+    networkNames: [String!]
+    workstreamTitle: String
     workstreamStatus: WorkstreamStatus
     workstreamStatuses: [WorkstreamStatus!]
   }
@@ -89,8 +91,8 @@ export const schema: DocumentNode = gql`
   }
 
   enum ProposalRole {
-    INITIAL,
-    ALTERNATIVE,
+    INITIAL
+    ALTERNATIVE
     AWARDED
   }
 
@@ -100,14 +102,41 @@ export const schema: DocumentNode = gql`
   type FullQueryWorkstream {
     code: String
     title: String
+    slug: String
     status: WorkstreamStatus
     client: ClientInfo
+    network: Network
     rfp: RFP
     initialProposal: FullProposal
     alternativeProposals: [FullProposal!]!
     sow: SOW_ScopeOfWorkState
     paymentTerms: PT_PaymentTermsState
     paymentRequests: [PHID!]!
+  }
+
+  type Network {
+    name: String
+    slug: String
+    icon: String
+    darkThemeIcon: String
+    logo: String
+    darkThemeLogo: String
+    logoBig: String
+    website: String
+    description: String
+    category: [NetworkCategory!]
+    x: String
+    github: String
+    discord: String
+    youtube: String
+  }
+
+  enum NetworkCategory {
+    DEFI
+    OSS
+    CRYPTO
+    NGO
+    CHARITY
   }
 
   type WorkstreamRfp {
@@ -126,7 +155,7 @@ export const schema: DocumentNode = gql`
   type RFP {
     id: PHID!
     code: String
-    title: String!
+    title: String
     status: RFPStatus
     summary: String
     submissionDeadline: DateTime
@@ -147,17 +176,15 @@ export const schema: DocumentNode = gql`
   # Must match type from Workstream subgraph to compose
   type Proposal {
     id: OID!
-    sow: PHID!
-    paymentTerms: PHID!
+    sow: PHID
+    paymentTerms: PHID
     status: ProposalStatus!
     author: ProposalAuthor!
   }
 
-  scalar JSON
-
   type LinkedDocument {
     id: PHID!
-    stateJSON: JSON
+    stateJSON: JSONObject
   }
 
   # ==========================
@@ -170,7 +197,7 @@ export const schema: DocumentNode = gql`
     deliverables: [SOW_Deliverable!]!
     projects: [SOW_Project!]!
     roadmaps: [SOW_Roadmap!]!
-    contributors: [SOW_Agent!]!
+    contributors: [Builder!]!
   }
 
   enum SOW_ScopeOfWorkStatus {
@@ -192,7 +219,8 @@ export const schema: DocumentNode = gql`
 
   type SOW_Deliverable {
     id: OID!
-    owner: ID
+    owner: Builder
+    icon: String
     title: String!
     code: String!
     description: String!
@@ -227,17 +255,29 @@ export const schema: DocumentNode = gql`
 
   union SOW_Progress = SOW_StoryPoint | SOW_Percentage | SOW_Binary
 
-  type SOW_Percentage { value: Float! }
-  type SOW_Binary { done: Boolean }
-  type SOW_StoryPoint { total: Int!, completed: Int! }
+  type SOW_Percentage {
+    value: Float!
+  }
+  type SOW_Binary {
+    done: Boolean
+  }
+  type SOW_StoryPoint {
+    total: Int!
+    completed: Int!
+  }
 
-  type SOW_KeyResult { id: OID!, title: String!, link: String! }
+  type SOW_KeyResult {
+    id: OID!
+    title: String!
+    link: String!
+  }
 
   type SOW_Project {
     id: OID!
     code: String!
     title: String!
-    projectOwner: ID
+    slug: String!
+    projectOwner: Builder
     abstract: String
     imageUrl: URL
     scope: SOW_DeliverablesSet
@@ -247,10 +287,24 @@ export const schema: DocumentNode = gql`
     expenditure: SOW_BudgetExpenditure
   }
 
-  enum SOW_PMCurrency { DAI USDS EUR USD }
-  enum SOW_BudgetType { CONTINGENCY OPEX CAPEX OVERHEAD }
+  enum SOW_PMCurrency {
+    DAI
+    USDS
+    EUR
+    USD
+  }
+  enum SOW_BudgetType {
+    CONTINGENCY
+    OPEX
+    CAPEX
+    OVERHEAD
+  }
 
-  type SOW_BudgetExpenditure { percentage: Float!, actuals: Float!, cap: Float! }
+  type SOW_BudgetExpenditure {
+    percentage: Float!
+    actuals: Float!
+    cap: Float!
+  }
 
   type SOW_Roadmap {
     id: OID!
@@ -278,26 +332,103 @@ export const schema: DocumentNode = gql`
     deliverablesCompleted: SOW_DeliverablesCompleted!
   }
 
-  type SOW_DeliverablesCompleted { total: Int!, completed: Int! }
-  enum SOW_DeliverableSetStatus { DRAFT TODO IN_PROGRESS FINISHED CANCELED }
+  type SOW_DeliverablesCompleted {
+    total: Int!
+    completed: Int!
+  }
+  enum SOW_DeliverableSetStatus {
+    DRAFT
+    TODO
+    IN_PROGRESS
+    FINISHED
+    CANCELED
+  }
 
   # ==========================
   # Payment Terms (typed)
   # ==========================
-  enum PT_PaymentTermsStatus { DRAFT SUBMITTED ACCEPTED CANCELLED }
-  enum PT_PaymentCurrency { USD EUR GBP }
-  enum PT_PaymentModel { MILESTONE COST_AND_MATERIALS RETAINER }
-  enum PT_MilestonePayoutStatus { PENDING READY_FOR_REVIEW APPROVED PAID REJECTED }
-  enum PT_BillingFrequency { WEEKLY BIWEEKLY MONTHLY }
-  enum PT_EvaluationFrequency { WEEKLY MONTHLY PER_MILESTONE }
+  enum PT_PaymentTermsStatus {
+    DRAFT
+    SUBMITTED
+    ACCEPTED
+    CANCELLED
+  }
+  enum PT_PaymentCurrency {
+    USD
+    EUR
+    GBP
+  }
+  enum PT_PaymentModel {
+    MILESTONE
+    COST_AND_MATERIALS
+    RETAINER
+  }
+  enum PT_MilestonePayoutStatus {
+    PENDING
+    READY_FOR_REVIEW
+    APPROVED
+    PAID
+    REJECTED
+  }
+  enum PT_BillingFrequency {
+    WEEKLY
+    BIWEEKLY
+    MONTHLY
+  }
+  enum PT_EvaluationFrequency {
+    WEEKLY
+    MONTHLY
+    PER_MILESTONE
+  }
 
-  type PT_Milestone { id: OID! name: String! amount: Amount! expectedCompletionDate: Date requiresApproval: Boolean! payoutStatus: PT_MilestonePayoutStatus! }
-  type PT_CostAndMaterials { hourlyRate: Amount variableCap: Amount billingFrequency: PT_BillingFrequency! timesheetRequired: Boolean! }
-  type PT_Retainer { retainerAmount: Amount! billingFrequency: PT_BillingFrequency! startDate: Date! endDate: Date autoRenew: Boolean! servicesIncluded: String! }
-  type PT_Escrow { amountHeld: Amount! proofOfFundsDocumentId: String releaseConditions: String! escrowProvider: String }
-  type PT_EvaluationTerms { evaluationFrequency: PT_EvaluationFrequency! evaluatorTeam: String! criteria: [String!]! impactsPayout: Boolean! impactsReputation: Boolean! commentsVisibleToClient: Boolean! }
-  type PT_BonusClause { id: OID! condition: String! bonusAmount: Amount! comment: String }
-  type PT_PenaltyClause { id: OID! condition: String! deductionAmount: Amount! comment: String }
+  type PT_Milestone {
+    id: OID!
+    name: String!
+    amount: Amount!
+    expectedCompletionDate: Date
+    requiresApproval: Boolean!
+    payoutStatus: PT_MilestonePayoutStatus!
+  }
+  type PT_CostAndMaterials {
+    hourlyRate: Amount
+    variableCap: Amount
+    billingFrequency: PT_BillingFrequency!
+    timesheetRequired: Boolean!
+  }
+  type PT_Retainer {
+    retainerAmount: Amount!
+    billingFrequency: PT_BillingFrequency!
+    startDate: Date!
+    endDate: Date
+    autoRenew: Boolean!
+    servicesIncluded: String!
+  }
+  type PT_Escrow {
+    amountHeld: Amount!
+    proofOfFundsDocumentId: String
+    releaseConditions: String!
+    escrowProvider: String
+  }
+  type PT_EvaluationTerms {
+    evaluationFrequency: PT_EvaluationFrequency!
+    evaluatorTeam: String!
+    criteria: [String!]!
+    impactsPayout: Boolean!
+    impactsReputation: Boolean!
+    commentsVisibleToClient: Boolean!
+  }
+  type PT_BonusClause {
+    id: OID!
+    condition: String!
+    bonusAmount: Amount!
+    comment: String
+  }
+  type PT_PenaltyClause {
+    id: OID!
+    condition: String!
+    deductionAmount: Amount!
+    comment: String
+  }
 
   type PT_PaymentTermsState {
     status: PT_PaymentTermsStatus!
@@ -324,5 +455,67 @@ export const schema: DocumentNode = gql`
     author: ProposalAuthor!
     sow: SOW_ScopeOfWorkState
     paymentTerms: PT_PaymentTermsState
+  }
+
+  # ==========================
+  # Builder (typed)
+  # ==========================
+  type Builder {
+    id: PHID
+    code: String
+    slug: String
+    name: String!
+    icon: String!
+    description: String!
+    lastModified: DateTime
+    isOperator: Boolean!
+    operationalHubMember: OpHubMember!
+    contributors: [Builder!]!
+    status: BuilderStatus
+    skills: [BuilderSkill!]!
+    scopes: [BuilderScope!]!
+    links: [BuilderLink!]!
+  }
+
+  type OpHubMember {
+    name: String
+    phid: PHID
+  }
+
+  enum BuilderStatus {
+    ACTIVE
+    INACTIVE
+    ON_HOLD
+    COMPLETED
+    ARCHIVED
+  }
+
+  enum BuilderSkill {
+    FRONTEND_DEVELOPMENT
+    BACKEND_DEVELOPMENT
+    FULL_STACK_DEVELOPMENT
+    DEVOPS_ENGINEERING
+    SMART_CONTRACT_DEVELOPMENT
+    UI_UX_DESIGN
+    TECHNICAL_WRITING
+    QA_TESTING
+    DATA_ENGINEERING
+    SECURITY_ENGINEERING
+  }
+
+  enum BuilderScope {
+    ACC
+    STA
+    SUP
+    STABILITY_SCOPE
+    SUPPORT_SCOPE
+    PROTOCOL_SCOPE
+    GOVERNANCE_SCOPE
+  }
+
+  type BuilderLink {
+    id: OID!
+    url: URL!
+    label: String
   }
 `;

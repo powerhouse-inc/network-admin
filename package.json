@@ -5,184 +5,135 @@
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/powerhouse-inc/network-admin"
+    "url": "git+https://github.com/powerhouse-inc/network-admin.git"
   },
   "type": "module",
-  "files": [
-    "/dist"
-  ],
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "/dist"
+  ],
   "exports": {
     ".": {
-      "development": "./index.ts",
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": "./dist/index.js"
     },
     "./document-models": {
-      "development": "./document-models/index.ts",
       "types": "./dist/document-models/index.d.ts",
-      "default": "./dist/document-models/index.js"
+      "import": "./dist/document-models/index.js"
     },
     "./editors": {
-      "development": "./editors/index.ts",
       "types": "./dist/editors/index.d.ts",
-      "default": "./dist/editors/index.js"
+      "import": "./dist/editors/index.js"
+    },
+    "./document-models/*": {
+      "types": "./dist/document-models/*/index.d.ts",
+      "import": "./dist/document-models/*/index.js"
+    },
+    "./editors/*": {
+      "types": "./dist/editors/*/index.d.ts",
+      "import": "./dist/editors/*/index.js"
     },
     "./subgraphs": {
-      "development": "./subgraphs/index.ts",
       "types": "./dist/subgraphs/index.d.ts",
-      "default": "./dist/subgraphs/index.js"
+      "import": "./dist/subgraphs/index.js"
     },
     "./processors": {
-      "development": "./processors/index.ts",
       "types": "./dist/processors/index.d.ts",
-      "default": "./dist/processors/index.js"
+      "import": "./dist/processors/index.js"
     },
-    "./manifest": {
-      "development": "./powerhouse.manifest.json",
-      "default": "./dist/powerhouse.manifest.json"
+    "./processors/connect": {
+      "types": "./dist/processors/connect.d.ts",
+      "import": "./dist/processors/connect.js"
     },
+    "./processors/switchboard": {
+      "types": "./dist/processors/switchboard.d.ts",
+      "import": "./dist/processors/switchboard.js"
+    },
+    "./manifest": "./dist/powerhouse.manifest.json",
     "./style.css": "./dist/style.css"
   },
   "scripts": {
-    "lint": "eslint . --cache",
-    "lint:fix": "eslint . --fix --cache",
-    "build:tsc": "tsc || true",
-    "build:tsc:watch": "tsc --watch",
-    "build:css": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css",
-    "build:css:watch": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css --watch",
-    "build": "npm run build:tsc && npm run build:css",
+    "build": "npm run tsc && npm run tailwind",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "lint": "eslint --config eslint.config.js --cache --cache-strategy content",
+    "lint:fix": "npm run lint -- --fix",
+    "tsc": "tsc",
+    "tsc:watch": "tsc --watch",
+    "tailwind": "npx @tailwindcss/cli -i ./style.css -o ./dist/style.css",
     "prepublishOnly": "npm run build",
+    "check-circular-imports": "npx dpdm -T ./index.ts",
     "generate": "ph-cli generate",
     "connect": "ph-cli connect",
     "reactor": "ph-cli reactor",
     "service": "ph-cli service",
+    "vetra": "ph-cli vetra",
     "service-startup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-startup.sh",
     "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh"
   },
   "dependencies": {
-    "@powerhousedao/builder-tools": "^5.3.5",
-    "@powerhousedao/common": "^5.3.5",
-    "@powerhousedao/design-system": "^5.3.5",
-    "@powerhousedao/document-engineering": "^1.40.1",
-    "@sentry/vite-plugin": "^4.6.0",
-    "@uiw/react-md-editor": "^4.0.8",
-    "document-model": "^5.3.5",
-    "error": "^10.4.0",
-    "graphql": "^16.10.0",
+    "@electric-sql/pglite": "0.3.15",
+    "@powerhousedao/builder-profile": "1.1.0-dev.3",
+    "@powerhousedao/builder-tools": "6.0.0-staging.0",
+    "@powerhousedao/common": "6.0.0-staging.0",
+    "@powerhousedao/design-system": "6.0.0-staging.0",
+    "@powerhousedao/document-engineering": "1.40.1",
+    "@powerhousedao/project-management": "1.0.0-dev.7",
+    "@powerhousedao/vetra": "6.0.0-staging.0",
+    "document-model": "6.0.0-staging.0",
+    "graphql": "^16.12.0",
     "graphql-tag": "^2.12.6",
-    "lucide-react": "^0.546.0",
-    "rehype-slug": "^6.0.0",
-    "remark-gfm": "^4.0.1",
-    "vite-plugin-html": "^3.2.2",
-    "vite-plugin-svgr": "^4.5.0",
-    "zod": "^3.24.2"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@openfeature/core": "^1.9.1",
-    "@electric-sql/pglite": "^0.2.17",
-    "@eslint/js": "^9.37.0",
-    "@powerhousedao/analytics-engine-core": "^0.6.4",
-    "@powerhousedao/codegen": "^5.3.5",
-    "@powerhousedao/config": "^5.3.5",
-    "@powerhousedao/connect": "^5.3.5",
-    "@powerhousedao/ph-cli": "^5.3.5",
-    "@powerhousedao/reactor-api": "^5.3.5",
-    "@powerhousedao/reactor-browser": "^5.3.5",
-    "@powerhousedao/reactor-local": "^5.3.5",
-    "@powerhousedao/scalars": "2.0.1",
-    "@powerhousedao/switchboard": "^5.3.5",
-    "@tailwindcss/cli": "^4.1.14",
-    "@types/node": "^22.13.11",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
-    "@vitejs/plugin-react": "^5.0.4",
-    "document-drive": "^5.3.5",
-    "eslint": "^9.37.0",
+    "@eslint/js": "^9.38.0",
+    "@powerhousedao/analytics-engine-core": "6.0.0-staging.0",
+    "@powerhousedao/config": "6.0.0-staging.0",
+    "@powerhousedao/connect": "6.0.0-staging.0",
+    "@powerhousedao/ph-cli": "6.0.0-staging.0",
+    "@powerhousedao/reactor-api": "6.0.0-staging.0",
+    "@powerhousedao/reactor-browser": "6.0.0-staging.0",
+    "@powerhousedao/reactor-local": "6.0.0-staging.0",
+    "@powerhousedao/switchboard": "6.0.0-staging.0",
+    "@tailwindcss/cli": "^4.1.18",
+    "@tailwindcss/vite": "4.1.18",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "^24.9.2",
+    "@types/react": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.0",
+    "document-drive": "6.0.0-staging.0",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "globals": "^16.0.0",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^16.4.0",
+    "package-manager-detector": "^0.2.8",
     "pm2": "^5.4.3",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "storybook": "^8.6.14",
-    "tailwindcss": "^4.1.14",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwindcss": "^4.1.16",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.0",
-    "vite": "^7.1.9",
+    "typescript-eslint": "^8.46.2",
+    "vite": "^6.2.3",
+    "vite-plugin-html": "3.2.2",
     "vite-plugin-node-polyfills": "^0.24.0",
-    "vitest": "^3.0.9",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "semantic-release": "^25.0.2"
+    "vite-plugin-svgr": "4.5.0",
+    "vitest": "^3.0.9"
   },
   "peerDependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
   },
   "overrides": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "graphql": "16.12.0"
   },
-  "release": {
-    "branches": [
-      "main",
-      {
-        "name": "staging",
-        "prerelease": "staging"
-      },
-      {
-        "name": "dev",
-        "prerelease": "dev"
-      }
-    ],
-    "plugins": [
-      [
-        "@semantic-release/commit-analyzer",
-        {
-          "releaseRules": [
-            {
-              "type": "chore",
-              "release": "patch"
-            },
-            {
-              "type": "ci",
-              "release": "patch"
-            },
-            {
-              "type": "docs",
-              "release": "patch"
-            },
-            {
-              "type": "refactor",
-              "release": "patch"
-            },
-            {
-              "type": "style",
-              "release": "patch"
-            },
-            {
-              "type": "test",
-              "release": "patch"
-            }
-          ]
-        }
-      ],
-      "@semantic-release/release-notes-generator",
-      "@semantic-release/changelog",
-      [
-        "@semantic-release/npm",
-        {
-          "npmPublish": false
-        }
-      ],
-      "@semantic-release/github",
-      "@semantic-release/git"
-    ]
-  }
+  "bugs": {
+    "url": "https://github.com/powerhouse-inc/network-admin/issues"
+  },
+  "readme": "ERROR: No README data found!",
+  "homepage": "https://github.com/powerhouse-inc/network-admin#readme",
+  "_id": "@powerhousedao/network-admin@1.1.0"
 }

@@ -1,6 +1,6 @@
-export {};
-export { module as Workstream } from "./workstream/index.js";
-export { module as RequestForProposals } from "./request-for-proposals/index.js";
-export { module as PaymentTerms } from "./payment-terms/index.js";
-export { module as NetworkProfile } from "./network-profile/index.js";
-export { module as NetworkAdmin } from "./network-admin/index.js";
+export { NetworkProfileEditor } from "./network-profile-editor/module.js";
+export { RfpEditor } from "./rfp-editor/module.js";
+export { PaymentTermsEditor } from "./payment-terms-editor/module.js";
+export { WorkstreamEditor } from "./workstream-editor/module.js";
+export { NetworkAdmin } from "./network-admin/module.js";
+export { BuildersEditor } from "./builders-editor/module.js";

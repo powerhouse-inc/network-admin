@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   });
 
   const additionalViteConfig: UserConfig = {
-    
+    // add your own vite config here
   };
 
   const config = mergeConfig(baseConnectViteConfig, additionalViteConfig);
