@@ -2,7 +2,7 @@ import {
   useSelectedRequestForProposalsDocument,
   actions,
 } from "@powerhousedao/network-admin/document-models/request-for-proposals";
-import type { RfpStatusInput } from "@powerhousedao/network-admin/document-models/request-for-proposals";
+import type { RfpStatus } from "@powerhousedao/network-admin/document-models/request-for-proposals";
 import {
   DatePicker,
   Select,
@@ -98,9 +98,7 @@ export default function Editor() {
                   options={statusOptions}
                   value={state.status}
                   onChange={(value) =>
-                    dispatch(
-                      actions.editRfp({ status: value as RfpStatusInput }),
-                    )
+                    dispatch(actions.editRfp({ status: value as RfpStatus }))
                   }
                 />
               </div>

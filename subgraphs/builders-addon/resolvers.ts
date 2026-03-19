@@ -140,7 +140,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               await Promise.all(
                 builderPhids.map(async (phid) => {
                   try {
-                    const doc = await reactorClient.get<PHDocument>(phid);
+                    const doc = await reactorClient.get(phid) as PHDocument;
                     return doc.header.documentType ===
                       "powerhouse/builder-profile"
                       ? doc
