@@ -16,13 +16,13 @@
       "provider": "npm"
     },
     {
-      "packageName": "@powerhousedao/project-management",
-      "version": "1.0.0-dev.7",
+      "packageName": "@powerhousedao/builder-profile",
+      "version": "1.1.0-dev.3",
       "provider": "npm"
     },
     {
-      "packageName": "@powerhousedao/builder-profile",
-      "version": "1.1.0-dev.3",
+      "packageName": "@powerhousedao/project-management",
+      "version": "1.0.0-dev.8",
       "provider": "npm"
     }
   ]

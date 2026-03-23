@@ -1,7 +1,7 @@
 {
   "name": "@powerhousedao/network-admin",
   "description": "Network Admin package for Powerhouse",
-  "version": "1.0.0-dev.6",
+  "version": "1.0.0-dev.7",
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
@@ -76,34 +76,33 @@
   "dependencies": {
     "@electric-sql/pglite": "0.3.15",
     "@powerhousedao/builder-profile": "1.1.0-dev.3",
-    "@powerhousedao/builder-tools": "6.0.0-staging.0",
-    "@powerhousedao/common": "6.0.0-staging.0",
-    "@powerhousedao/design-system": "6.0.0-staging.0",
+    "@powerhousedao/builder-tools": "6.0.0-dev.105",
+    "@powerhousedao/common": "6.0.0-dev.105",
+    "@powerhousedao/design-system": "6.0.0-dev.105",
     "@powerhousedao/document-engineering": "1.40.1",
-    "@powerhousedao/project-management": "1.0.0-dev.7",
-    "@powerhousedao/vetra": "6.0.0-staging.0",
-    "document-model": "6.0.0-staging.0",
-    "graphql": "^16.12.0",
+    "@powerhousedao/project-management": "1.0.0-dev.8",
+    "@powerhousedao/vetra": "6.0.0-dev.105",
+    "document-model": "6.0.0-dev.105",
+    "graphql": "16.12.0",
     "graphql-tag": "^2.12.6",
     "zod": "^4.3.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
-    "@powerhousedao/analytics-engine-core": "6.0.0-staging.0",
-    "@powerhousedao/config": "6.0.0-staging.0",
-    "@powerhousedao/connect": "6.0.0-staging.0",
-    "@powerhousedao/ph-cli": "6.0.0-staging.0",
-    "@powerhousedao/reactor-api": "6.0.0-staging.0",
-    "@powerhousedao/reactor-browser": "6.0.0-staging.0",
-    "@powerhousedao/reactor-local": "6.0.0-staging.0",
-    "@powerhousedao/switchboard": "6.0.0-staging.0",
+    "@powerhousedao/analytics-engine-core": "6.0.0-dev.105",
+    "@powerhousedao/config": "6.0.0-dev.105",
+    "@powerhousedao/connect": "6.0.0-dev.105",
+    "@powerhousedao/ph-cli": "6.0.0-dev.105",
+    "@powerhousedao/reactor-api": "6.0.0-dev.105",
+    "@powerhousedao/reactor-browser": "6.0.0-dev.105",
+    "@powerhousedao/reactor-local": "6.0.0-dev.105",
+    "@powerhousedao/switchboard": "6.0.0-dev.105",
     "@tailwindcss/cli": "^4.1.18",
-    "@tailwindcss/vite": "4.1.18",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^24.9.2",
     "@types/react": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.0",
-    "document-drive": "6.0.0-staging.0",
+    "document-drive": "6.0.0-dev.105",
     "eslint": "^9.38.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -118,9 +117,7 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
     "vite": "^6.2.3",
-    "vite-plugin-html": "3.2.2",
     "vite-plugin-node-polyfills": "^0.24.0",
-    "vite-plugin-svgr": "4.5.0",
     "vitest": "^3.0.9"
   },
   "peerDependencies": {
@@ -128,12 +125,12 @@
     "react-dom": ">=19.0.0"
   },
   "overrides": {
-    "graphql": "^16.12.0"
+    "graphql": "$graphql"
   },
   "bugs": {
     "url": "https://github.com/powerhouse-inc/network-admin/issues"
   },
   "readme": "ERROR: No README data found!",
   "homepage": "https://github.com/powerhouse-inc/network-admin#readme",
-  "_id": "@powerhousedao/network-admin@1.1.0"
+  "_id": "@powerhousedao/network-admin@1.0.0-dev.6"
 }
