@@ -1,3 +1,5 @@
+# [1.0.0-staging.5](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-staging.4...v1.0.0-staging.5) (2026-03-23)
+
 # [1.0.0-staging.4](https://github.com/powerhouse-inc/network-admin/compare/v1.0.0-staging.3...v1.0.0-staging.4) (2026-02-16)
 
 
