@@ -25,8 +25,7 @@ export const getResolvers = (
             reactorClient.find({ type: "powerhouse/builder-profile" }),
           ]);
 
-        const networkDocs =
-          networkResults.results as NetworkProfileDocument[];
+        const networkDocs = networkResults.results as NetworkProfileDocument[];
         const buildersDocs = buildersResults.results as BuildersDocument[];
 
         // Step 2: Collect all unique builder PHIDs from all BuildersDocuments
@@ -76,7 +75,10 @@ export const getResolvers = (
             }),
           );
           missingDocs.forEach((doc) => {
-            if (doc && doc.header.documentType === "powerhouse/builder-profile") {
+            if (
+              doc &&
+              doc.header.documentType === "powerhouse/builder-profile"
+            ) {
               builderProfileMap.set(doc.header.id, doc);
               const state = (doc.state as any).global;
               if (state?.contributors && Array.isArray(state.contributors)) {

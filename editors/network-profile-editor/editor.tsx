@@ -14,6 +14,7 @@ import {
 } from "@powerhousedao/design-system/connect";
 import { useCallback } from "react";
 import { ImageUrlInput } from "./components/ImageUrlInput.js";
+import { ToggleableImageInput } from "./components/ToggleableImageInput.js";
 
 // Category options for the dropdown
 const categoryOptions: Array<{ value: NetworkCategory; label: string }> = [
@@ -39,8 +40,14 @@ export default function Editor() {
         case "icon":
           action = actions.setIcon({ icon: value as string });
           break;
+        case "darkThemeIcon":
+          action = actions.setIcon({ darkThemeIcon: value as string });
+          break;
         case "logo":
           action = actions.setLogo({ logo: value as string });
+          break;
+        case "darkThemeLogo":
+          action = actions.setLogo({ darkThemeLogo: value as string });
           break;
         case "logoBig":
           action = actions.setLogoBig({ logoBig: value as string });
@@ -109,22 +116,30 @@ export default function Editor() {
               />
             </div>
 
-            {/* Icon URL */}
-            <ImageUrlInput
+            {/* Icon URL with Dark Theme Toggle */}
+            <ToggleableImageInput
               label="Icon:"
-              value={state.icon || ""}
-              onChange={(value) => handleFieldChange("icon", value)}
-              placeholder="PowerhouseIcon.jpg"
-              fileSize="200KB"
+              lightValue={state.icon || ""}
+              darkValue={state.darkThemeIcon || ""}
+              onLightChange={(value) => handleFieldChange("icon", value)}
+              onDarkChange={(value) =>
+                handleFieldChange("darkThemeIcon", value)
+              }
+              lightPlaceholder="icon.jpg"
+              darkPlaceholder="icon-dark.jpg"
             />
 
-            {/* Logo URL */}
-            <ImageUrlInput
+            {/* Logo URL with Dark Theme Toggle */}
+            <ToggleableImageInput
               label="Logo:"
-              value={state.logo || ""}
-              onChange={(value) => handleFieldChange("logo", value)}
-              placeholder="PowerhouseLogo.jpg"
-              fileSize="2MB"
+              lightValue={state.logo || ""}
+              darkValue={state.darkThemeLogo || ""}
+              onLightChange={(value) => handleFieldChange("logo", value)}
+              onDarkChange={(value) =>
+                handleFieldChange("darkThemeLogo", value)
+              }
+              lightPlaceholder="logo.jpg"
+              darkPlaceholder="logo-dark.jpg"
             />
 
             {/* Large Logo URL */}

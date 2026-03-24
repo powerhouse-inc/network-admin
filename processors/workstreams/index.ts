@@ -41,7 +41,12 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
         // resultingState may be wrapped in { global: ... } or be the global state directly
         state = (parsed.global ?? parsed) as WorkstreamState;
         if (actionType === "EDIT_INITIAL_PROPOSAL") {
-          console.log("[WorkstreamsProcessor] Parsed state sow:", state.sow, "initialProposal?.sow:", state.initialProposal?.sow);
+          console.log(
+            "[WorkstreamsProcessor] Parsed state sow:",
+            state.sow,
+            "initialProposal?.sow:",
+            state.initialProposal?.sow,
+          );
         }
       }
 
@@ -122,7 +127,12 @@ export class WorkstreamsProcessor extends RelationalDbProcessor<DB> {
         : "",
       workstream_title: state.title,
       workstream_status: state.status,
-      sow_phid: state.sow || (state.initialProposal?.status === "ACCEPTED" ? state.initialProposal.sow : null) || null,
+      sow_phid:
+        state.sow ||
+        (state.initialProposal?.status === "ACCEPTED"
+          ? state.initialProposal.sow
+          : null) ||
+        null,
       initial_proposal_status: state.initialProposal
         ? state.initialProposal.status
         : null,

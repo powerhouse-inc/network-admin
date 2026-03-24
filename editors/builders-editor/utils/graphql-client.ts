@@ -260,9 +260,7 @@ export async function setOpHubMemberOnBuilderProfile(
       SET_OP_HUB_MEMBER_MUTATION,
       {
         documentIdentifier: docId,
-        actions: [
-          { type: "SET_OP_HUB_MEMBER", input, scope: "global" },
-        ],
+        actions: [{ type: "SET_OP_HUB_MEMBER", input, scope: "global" }],
       },
     );
     return data?.mutateDocument != null;

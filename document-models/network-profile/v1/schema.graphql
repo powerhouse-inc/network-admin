@@ -19,18 +19,12 @@ scalar Amount_Crypto
 scalar Amount
 scalar Upload
 
-enum NetworkCategory {
-  DEFI
-  OSS
-  CRYPTO
-  NGO
-  CHARITY
-}
-
 type NetworkProfileState {
   name: String!
   icon: String!
+  darkThemeIcon: String!
   logo: String!
+  darkThemeLogo: String!
   logoBig: String!
   website: String
   description: String!
@@ -41,14 +35,24 @@ type NetworkProfileState {
   youtube: String
 }
 
+enum NetworkCategory {
+  DEFI
+  OSS
+  CRYPTO
+  NGO
+  CHARITY
+}
+
 # network-profile-management
 
 input SetIconInput {
-  icon: String!
+  icon: String
+  darkThemeIcon: String
 }
 
 input SetLogoInput {
-  logo: String!
+  logo: String
+  darkThemeLogo: String
 }
 
 input SetLogoBigInput {

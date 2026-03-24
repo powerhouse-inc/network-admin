@@ -110,11 +110,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const networkDoc = networkResults.results.find((doc: PHDocument) => {
             const state = (doc.state as any).global;
             if (!state?.name) return false;
-            const slug = state.name
-              .toLowerCase()
-              .trim()
-              .split(/\s+/)
-              .join("-");
+            const slug = state.name.toLowerCase().trim().split(/\s+/).join("-");
             return slug === targetNetworkSlug;
           });
 
@@ -127,7 +123,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
             let builderPhids: string[] = [];
             if (buildersDoc) {
-              const state = (buildersDoc.state as any).global;
+              const state = buildersDoc.state.global;
               if (Array.isArray(state?.builders)) {
                 builderPhids = state.builders.filter(
                   (id: any) => typeof id === "string",
@@ -140,7 +136,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               await Promise.all(
                 builderPhids.map(async (phid) => {
                   try {
-                    const doc = await reactorClient.get(phid) as PHDocument;
+                    const doc = (await reactorClient.get(phid)) as PHDocument;
                     return doc.header.documentType ===
                       "powerhouse/builder-profile"
                       ? doc
@@ -156,7 +152,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           // Fetch SOW and resource-template documents
           const [sowResults, rtResults] = await Promise.all([
             reactorClient.find({ type: "powerhouse/scopeofwork" }),
-            reactorClient.find({ type: "powerhouse/resource-template" }).catch(() => ({ results: [] })),
+            reactorClient
+              .find({ type: "powerhouse/resource-template" })
+              .catch(() => ({ results: [] })),
           ]);
           sowDocs = sowResults.results;
           resourceTemplateDocs = rtResults.results;
@@ -165,7 +163,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           const [bpResults, sowResults, rtResults] = await Promise.all([
             reactorClient.find({ type: "powerhouse/builder-profile" }),
             reactorClient.find({ type: "powerhouse/scopeofwork" }),
-            reactorClient.find({ type: "powerhouse/resource-template" }).catch(() => ({ results: [] })),
+            reactorClient
+              .find({ type: "powerhouse/resource-template" })
+              .catch(() => ({ results: [] })),
           ]);
           builderDocs = bpResults.results;
           sowDocs = sowResults.results;

@@ -23,7 +23,9 @@ import {
 export const initialGlobalState: NetworkProfileGlobalState = {
   name: "",
   icon: "",
+  darkThemeIcon: "",
   logo: "",
+  darkThemeLogo: "",
   logoBig: "",
   website: null,
   description: "",

@@ -27,7 +27,6 @@ function ImageModal({
     setImageLoaded(true);
   };
 
-  // Calculate modal size based on image dimensions with padding
   const getModalSize = () => {
     if (!imageLoaded) return { width: "auto", height: "auto" };
 
@@ -77,13 +76,16 @@ function ImageModal({
   );
 }
 
-// Image URL input component with preview
+function isUrl(value: string): boolean {
+  return value.startsWith("http://") || value.startsWith("https://");
+}
+
+// Image URL input component with preview — shows only the loaded image, not the URL text
 export function ImageUrlInput({
   label,
   value,
   onChange,
   placeholder,
-  fileSize = "200KB",
 }: {
   label: string;
   value: string;
@@ -94,17 +96,14 @@ export function ImageUrlInput({
   const [imageError, setImageError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Reset image error when value changes
   useEffect(() => {
     setImageError(false);
   }, [value]);
 
+  const hasValidImage = value && !imageError && isUrl(value);
+
   const handleImageClick = () => {
-    if (
-      value &&
-      !imageError &&
-      (value.startsWith("http://") || value.startsWith("https://"))
-    ) {
+    if (hasValidImage) {
       setIsModalOpen(true);
     }
   };
@@ -112,63 +111,43 @@ export function ImageUrlInput({
   return (
     <>
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          {label}
-        </label>
+        {label && (
+          <label className="block text-sm font-medium text-gray-700">
+            {label}
+          </label>
+        )}
         <div className="rounded-lg border border-gray-300 p-4">
-          <div className="flex items-center justify-between overflow-hidden">
-            <div className="flex min-w-0 items-center space-x-3">
-              <div
-                className={`flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded border bg-gray-100 ${
-                  value &&
-                  !imageError &&
-                  (value.startsWith("http://") || value.startsWith("https://"))
-                    ? "cursor-pointer transition-opacity duration-200 hover:opacity-80"
-                    : ""
-                }`}
-                onClick={handleImageClick}
-              >
-                {value &&
-                !imageError &&
-                (value.startsWith("http://") ||
-                  value.startsWith("https://")) ? (
-                  <img
-                    src={value}
-                    alt={`${label} preview`}
-                    className="h-full w-full object-cover"
-                    onError={() => setImageError(true)}
-                    onLoad={() => setImageError(false)}
-                  />
-                ) : (
-                  <Icon name="Image" size={24} className="text-gray-400" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium text-gray-900">
-                  {value || placeholder || `${label.replace(":", "")}.jpg`}
-                </div>
-                <div className="text-xs text-gray-500">
-                  File Type: jpg | File Size: {value ? fileSize : "0KB"}
-                  {imageError && value && (
-                    <div className="mt-1 text-red-500">
-                      Failed to load image
-                    </div>
-                  )}
-                  {value &&
-                    !imageError &&
-                    (value.startsWith("http://") ||
-                      value.startsWith("https://")) && (
-                      <div className="mt-1 text-blue-600">
-                        Click image to view full size
-                      </div>
-                    )}
-                </div>
-              </div>
+          <div className="flex items-center space-x-3">
+            <div
+              className={`flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded border bg-gray-100 ${
+                hasValidImage
+                  ? "cursor-pointer transition-opacity duration-200 hover:opacity-80"
+                  : ""
+              }`}
+              onClick={handleImageClick}
+            >
+              {hasValidImage ? (
+                <img
+                  key={value}
+                  src={value}
+                  alt={`${label} preview`}
+                  className="h-full w-full object-cover"
+                  onError={() => setImageError(true)}
+                  onLoad={() => setImageError(false)}
+                />
+              ) : (
+                <Icon name="Image" size={24} className="text-gray-400" />
+              )}
             </div>
-            <div className="flex-shrink-0">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200">
-                <Icon name="Image" size={16} className="text-gray-600" />
-              </div>
+            <div className="min-w-0 flex-1 text-xs text-gray-500">
+              {imageError && value && (
+                <span className="text-red-500">Failed to load image</span>
+              )}
+              {hasValidImage && (
+                <span className="text-blue-600">
+                  Click image to view full size
+                </span>
+              )}
             </div>
           </div>
           <div className="mt-3">

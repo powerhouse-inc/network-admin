@@ -15,7 +15,9 @@ export function defaultGlobalState(): NetworkProfileGlobalState {
   return {
     name: "",
     icon: "",
+    darkThemeIcon: "",
     logo: "",
+    darkThemeLogo: "",
     logoBig: "",
     website: null,
     description: "",

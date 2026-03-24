@@ -51,9 +51,8 @@ export function MarkdownEditor({
     // Use a more robust dynamic import approach
     const loadEditor = async () => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const module = await import("@uiw/react-md-editor");
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+
         setMDEditor(() => module.default);
         setIsLoaded(true);
         setLoadError(null);

@@ -3,10 +3,14 @@ import type { NetworkProfileNetworkProfileManagementOperations } from "@powerhou
 export const networkProfileNetworkProfileManagementOperations: NetworkProfileNetworkProfileManagementOperations =
   {
     setIconOperation(state, action) {
-      state.icon = action.input.icon || "";
+      if (action.input.icon) state.icon = action.input.icon;
+      if (action.input.darkThemeIcon !== undefined)
+        state.darkThemeIcon = action.input.darkThemeIcon || "";
     },
     setLogoOperation(state, action) {
-      state.logo = action.input.logo || "";
+      if (action.input.logo) state.logo = action.input.logo;
+      if (action.input.darkThemeLogo !== undefined)
+        state.darkThemeLogo = action.input.darkThemeLogo || "";
     },
     setLogoBigOperation(state, action) {
       state.logoBig = action.input.logoBig || "";
