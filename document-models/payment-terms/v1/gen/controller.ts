@@ -1,4 +1,4 @@
-import { PHDocumentController } from "document-model/core";
+import { PHDocumentController } from "document-model";
 import { PaymentTerms } from "../module.js";
 import type { PaymentTermsAction, PaymentTermsPHState } from "./types.js";
 

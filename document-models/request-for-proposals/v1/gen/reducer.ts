@@ -1,9 +1,8 @@
-// TODO: remove eslint-disable rules once refactor is done
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import type { StateReducer } from "document-model";
-import { isDocumentAction, createReducer } from "document-model/core";
-import type { RequestForProposalsPHState } from "@powerhousedao/network-admin/document-models/request-for-proposals/v1";
+import type { Reducer, StateReducer } from "document-model";
+import { isDocumentAction, createReducer } from "document-model";
+import type { RequestForProposalsPHState } from "document-models/request-for-proposals/v1";
 
 import { requestForProposalsRfpStateOperations } from "../src/reducers/rfp-state.js";
 import { requestForProposalsContexDocumentOperations } from "../src/reducers/contex-document.js";
@@ -104,4 +103,5 @@ const stateReducer: StateReducer<RequestForProposalsPHState> = (
   }
 };
 
-export const reducer = createReducer<RequestForProposalsPHState>(stateReducer);
+export const reducer: Reducer<RequestForProposalsPHState> =
+  createReducer(stateReducer);

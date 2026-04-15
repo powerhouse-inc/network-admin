@@ -17,7 +17,7 @@ import {
   assertIsNetworkProfileDocument,
   isNetworkProfileState,
   assertIsNetworkProfileState,
-} from "@powerhousedao/network-admin/document-models/network-profile/v1";
+} from "document-models/network-profile/v1";
 import { ZodError } from "zod";
 
 describe("NetworkProfile Document Model", () => {

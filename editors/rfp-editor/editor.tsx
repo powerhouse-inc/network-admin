@@ -1,8 +1,8 @@
 import {
   useSelectedRequestForProposalsDocument,
   actions,
-} from "@powerhousedao/network-admin/document-models/request-for-proposals";
-import type { RfpStatus } from "@powerhousedao/network-admin/document-models/request-for-proposals";
+} from "document-models/request-for-proposals";
+import type { RfpStatus } from "document-models/request-for-proposals";
 import {
   DatePicker,
   Select,

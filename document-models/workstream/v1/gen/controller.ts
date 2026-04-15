@@ -1,4 +1,4 @@
-import { PHDocumentController } from "document-model/core";
+import { PHDocumentController } from "document-model";
 import { Workstream } from "../module.js";
 import type { WorkstreamAction, WorkstreamPHState } from "./types.js";
 

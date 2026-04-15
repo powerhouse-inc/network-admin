@@ -2,14 +2,14 @@
  * Factory methods for creating BuildersDocument instances
  */
 import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
-import { createBaseState, defaultBaseState } from "document-model/core";
+import { createBaseState, defaultBaseState } from "document-model";
 import type {
   BuildersDocument,
-  BuildersLocalState,
   BuildersGlobalState,
+  BuildersLocalState,
   BuildersPHState,
 } from "./types.js";
-import { createDocument } from "./utils.js";
+import { utils } from "./utils.js";
 
 export function defaultGlobalState(): BuildersGlobalState {
   return {
@@ -72,7 +72,7 @@ export function createBuildersDocument(
     local?: Partial<BuildersLocalState>;
   }>,
 ): BuildersDocument {
-  const document = createDocument(
+  const document = utils.createDocument(
     state
       ? createState(
           createBaseState(state.auth, state.document),

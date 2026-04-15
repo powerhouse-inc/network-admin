@@ -5,20 +5,20 @@ import {
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model/core";
-import type {
-  NetworkProfileGlobalState,
-  NetworkProfileLocalState,
-} from "./types.js";
-import type { NetworkProfilePHState } from "./types.js";
+} from "document-model";
 import { reducer } from "./reducer.js";
 import { networkProfileDocumentType } from "./document-type.js";
 import {
-  isNetworkProfileDocument,
   assertIsNetworkProfileDocument,
-  isNetworkProfileState,
   assertIsNetworkProfileState,
+  isNetworkProfileDocument,
+  isNetworkProfileState,
 } from "./document-schema.js";
+import type {
+  NetworkProfileGlobalState,
+  NetworkProfileLocalState,
+  NetworkProfilePHState,
+} from "./types.js";
 
 export const initialGlobalState: NetworkProfileGlobalState = {
   name: "",
@@ -75,12 +75,3 @@ export const utils: DocumentModelUtils<NetworkProfilePHState> = {
     return assertIsNetworkProfileDocument(document);
   },
 };
-
-export const createDocument = utils.createDocument;
-export const createState = utils.createState;
-export const saveToFileHandle = utils.saveToFileHandle;
-export const loadFromInput = utils.loadFromInput;
-export const isStateOfType = utils.isStateOfType;
-export const assertIsStateOfType = utils.assertIsStateOfType;
-export const isDocumentOfType = utils.isDocumentOfType;
-export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

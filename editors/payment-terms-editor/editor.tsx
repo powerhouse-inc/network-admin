@@ -2,7 +2,7 @@ import {
   DocumentToolbar,
   ToastContainer,
 } from "@powerhousedao/design-system/connect";
-import { useSelectedPaymentTermsDocument } from "@powerhousedao/network-admin/document-models/payment-terms";
+import { useSelectedPaymentTermsDocument } from "document-models/payment-terms";
 import { BasicTermsTab } from "./components/BasicTermsTab.js";
 import { MilestonesTab } from "./components/MilestonesTab.js";
 import { ClausesTab } from "./components/ClausesTab.js";

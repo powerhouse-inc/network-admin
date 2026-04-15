@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/common/utils";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -14,7 +14,7 @@ import {
   UpdateMilestoneStatusInputSchema,
   DeleteMilestoneInputSchema,
   ReorderMilestonesInputSchema,
-} from "@powerhousedao/network-admin/document-models/payment-terms/v1";
+} from "document-models/payment-terms/v1";
 
 describe("MilestonesOperations", () => {
   it("should handle addMilestone operation", () => {

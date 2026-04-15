@@ -82,7 +82,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           )
           .map((doc: any) => normalizeDriveId(doc.header.id as string));
       }
-    } catch {}
+    } catch {
+      return [] as string[];
+    }
     return [] as string[];
   };
 

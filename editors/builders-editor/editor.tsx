@@ -3,7 +3,7 @@ import {
   useSelectedBuildersDocument,
   type BuildersDocument,
   actions as buildersActions,
-} from "@powerhousedao/network-admin/document-models/builders";
+} from "document-models/builders";
 import type { Action } from "document-model";
 import {
   setSelectedNode,

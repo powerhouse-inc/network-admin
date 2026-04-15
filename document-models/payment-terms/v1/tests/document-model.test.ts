@@ -17,7 +17,7 @@ import {
   assertIsPaymentTermsDocument,
   isPaymentTermsState,
   assertIsPaymentTermsState,
-} from "@powerhousedao/network-admin/document-models/payment-terms/v1";
+} from "document-models/payment-terms/v1";
 import { ZodError } from "zod";
 
 describe("PaymentTerms Document Model", () => {

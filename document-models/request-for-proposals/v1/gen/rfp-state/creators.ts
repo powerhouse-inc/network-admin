@@ -1,4 +1,4 @@
-import { createAction } from "document-model/core";
+import { createAction } from "document-model";
 import { EditRfpInputSchema } from "../schema/zod.js";
 import type { EditRfpInput } from "../types.js";
 import type { EditRfpAction } from "./actions.js";

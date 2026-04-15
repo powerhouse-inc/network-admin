@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/common/utils";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -8,7 +8,7 @@ import {
   removeBuilder,
   AddBuilderInputSchema,
   RemoveBuilderInputSchema,
-} from "@powerhousedao/network-admin/document-models/builders/v1";
+} from "document-models/builders/v1";
 
 describe("BuildersOperations", () => {
   it("should handle addBuilder operation", () => {

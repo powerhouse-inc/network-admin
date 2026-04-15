@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@powerhousedao/design-system/theme.css";
+@import "@powerhousedao/connect/style.css";
 @import './node_modules/@powerhousedao/project-management/dist/style.css';
 @import './node_modules/@powerhousedao/builder-profile/dist/style.css';
 

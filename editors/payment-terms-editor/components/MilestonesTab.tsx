@@ -15,7 +15,7 @@ import {
   type Milestone,
   type MilestonePayoutStatus,
   type PaymentTermsAction,
-} from "@powerhousedao/network-admin/document-models/payment-terms";
+} from "document-models/payment-terms";
 
 export interface MilestonesTabProps {
   milestones: Milestone[];
@@ -63,7 +63,7 @@ export function MilestonesTab({
         editable: true,
         align: "right" as ColumnAlignment,
         renderCell: (value: Milestone["amount"]) =>
-          `${value.value} ${value.unit}`,
+          value ? `${value.value} ${value.unit}` : "",
         onSave: (newValue, context) => {
           const amount = parseFloat(newValue as string);
           if (isNaN(amount)) {
