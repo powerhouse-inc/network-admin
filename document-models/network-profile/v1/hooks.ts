@@ -8,7 +8,7 @@ import {
 import type {
   NetworkProfileAction,
   NetworkProfileDocument,
-} from "@powerhousedao/network-admin/document-models/network-profile/v1";
+} from "document-models/network-profile/v1";
 import {
   assertIsNetworkProfileDocument,
   isNetworkProfileDocument,

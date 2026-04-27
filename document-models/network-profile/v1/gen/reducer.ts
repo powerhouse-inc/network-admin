@@ -1,9 +1,8 @@
-// TODO: remove eslint-disable rules once refactor is done
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import type { StateReducer } from "document-model";
-import { isDocumentAction, createReducer } from "document-model/core";
-import type { NetworkProfilePHState } from "@powerhousedao/network-admin/document-models/network-profile/v1";
+import type { Reducer, StateReducer } from "document-model";
+import { isDocumentAction, createReducer } from "document-model";
+import type { NetworkProfilePHState } from "document-models/network-profile/v1";
 
 import { networkProfileNetworkProfileManagementOperations } from "../src/reducers/network-profile-management.js";
 
@@ -167,4 +166,5 @@ const stateReducer: StateReducer<NetworkProfilePHState> = (
   }
 };
 
-export const reducer = createReducer<NetworkProfilePHState>(stateReducer);
+export const reducer: Reducer<NetworkProfilePHState> =
+  createReducer(stateReducer);

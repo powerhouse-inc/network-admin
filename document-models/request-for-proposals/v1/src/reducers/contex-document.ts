@@ -1,4 +1,4 @@
-import type { RequestForProposalsContexDocumentOperations } from "@powerhousedao/network-admin/document-models/request-for-proposals/v1";
+import type { RequestForProposalsContexDocumentOperations } from "document-models/request-for-proposals/v1";
 
 export const requestForProposalsContexDocumentOperations: RequestForProposalsContexDocumentOperations =
   {

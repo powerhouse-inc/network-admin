@@ -1,4 +1,4 @@
-import { PHDocumentController } from "document-model/core";
+import { PHDocumentController } from "document-model";
 import { NetworkProfile } from "../module.js";
 import type { NetworkProfileAction, NetworkProfilePHState } from "./types.js";
 

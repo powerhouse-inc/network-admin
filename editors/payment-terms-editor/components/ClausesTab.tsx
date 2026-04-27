@@ -15,7 +15,7 @@ import {
   type BonusClause,
   type PenaltyClause,
   type PaymentTermsAction,
-} from "@powerhousedao/network-admin/document-models/payment-terms";
+} from "document-models/payment-terms";
 
 export interface ClausesTabProps {
   bonusClauses: BonusClause[];
@@ -64,7 +64,7 @@ export function ClausesTab({
         editable: true,
         align: "right" as ColumnAlignment,
         renderCell: (value: BonusClause["bonusAmount"]) =>
-          `${value.value} ${value.unit}`,
+          value ? `${value.value} ${value.unit}` : "",
         onSave: (newValue, context) => {
           const amount = parseFloat(newValue as string);
           if (isNaN(amount)) {
@@ -126,7 +126,7 @@ export function ClausesTab({
         editable: true,
         align: "right" as ColumnAlignment,
         renderCell: (value: PenaltyClause["deductionAmount"]) =>
-          `${value.value} ${value.unit}`,
+          value ? `${value.value} ${value.unit}` : "",
         onSave: (newValue, context) => {
           const amount = parseFloat(newValue as string);
           if (isNaN(amount)) {

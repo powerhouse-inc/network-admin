@@ -2,14 +2,14 @@
  * Factory methods for creating RequestForProposalsDocument instances
  */
 import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
-import { createBaseState, defaultBaseState } from "document-model/core";
+import { createBaseState, defaultBaseState } from "document-model";
 import type {
   RequestForProposalsDocument,
-  RequestForProposalsLocalState,
   RequestForProposalsGlobalState,
+  RequestForProposalsLocalState,
   RequestForProposalsPHState,
 } from "./types.js";
-import { createDocument } from "./utils.js";
+import { utils } from "./utils.js";
 
 export function defaultGlobalState(): RequestForProposalsGlobalState {
   return {
@@ -89,7 +89,7 @@ export function createRequestForProposalsDocument(
     local?: Partial<RequestForProposalsLocalState>;
   }>,
 ): RequestForProposalsDocument {
-  const document = createDocument(
+  const document = utils.createDocument(
     state
       ? createState(
           createBaseState(state.auth, state.document),

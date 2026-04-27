@@ -19,9 +19,9 @@ import type { EditorProps } from "document-model";
 import { isValidName } from "document-drive";
 import { type DocumentModelModule, type PHDocument } from "document-model";
 import { WorkstreamIcon } from "./icons/WorkstreamIcon.js";
-import type { NetworkProfileDocument } from "@powerhousedao/network-admin/document-models/network-profile";
-import { actions as workstreamActions } from "@powerhousedao/network-admin/document-models/workstream";
-import { actions as networkProfileActions } from "@powerhousedao/network-admin/document-models/network-profile";
+import type { NetworkProfileDocument } from "document-models/network-profile";
+import { actions as workstreamActions } from "document-models/workstream";
+import { actions as networkProfileActions } from "document-models/network-profile";
 import { FolderTree } from "./FolderTree.js";
 
 /**

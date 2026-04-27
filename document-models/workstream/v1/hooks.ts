@@ -8,7 +8,7 @@ import {
 import type {
   WorkstreamAction,
   WorkstreamDocument,
-} from "@powerhousedao/network-admin/document-models/workstream/v1";
+} from "document-models/workstream/v1";
 import {
   assertIsWorkstreamDocument,
   isWorkstreamDocument,

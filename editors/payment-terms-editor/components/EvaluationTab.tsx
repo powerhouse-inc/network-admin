@@ -12,7 +12,7 @@ import {
   type PaymentTermsState,
   type EvaluationFrequency,
   type PaymentTermsAction,
-} from "@powerhousedao/network-admin/document-models/payment-terms";
+} from "document-models/payment-terms";
 
 export interface EvaluationTabProps {
   state: PaymentTermsState;

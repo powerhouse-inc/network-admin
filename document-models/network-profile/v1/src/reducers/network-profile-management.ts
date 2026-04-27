@@ -1,4 +1,4 @@
-import type { NetworkProfileNetworkProfileManagementOperations } from "@powerhousedao/network-admin/document-models/network-profile/v1";
+import type { NetworkProfileNetworkProfileManagementOperations } from "document-models/network-profile/v1";
 
 export const networkProfileNetworkProfileManagementOperations: NetworkProfileNetworkProfileManagementOperations =
   {

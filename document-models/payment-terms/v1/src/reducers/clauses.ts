@@ -4,7 +4,7 @@ import {
   DuplicatePenaltyClauseIdError,
   PenaltyClauseNotFoundError,
 } from "../../gen/clauses/error.js";
-import type { PaymentTermsClausesOperations } from "@powerhousedao/network-admin/document-models/payment-terms/v1";
+import type { PaymentTermsClausesOperations } from "document-models/payment-terms/v1";
 
 export const paymentTermsClausesOperations: PaymentTermsClausesOperations = {
   addBonusClauseOperation(state, action) {
