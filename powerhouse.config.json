@@ -12,13 +12,13 @@
   "packageRegistryUrl": "https://registry.dev.vetra.io",
   "packages": [
     {
-      "packageName": "@powerhousedao/builder-profile",
-      "version": "1.1.0-dev.6",
+      "packageName": "@powerhousedao/project-management",
+      "version": "1.0.0-dev.10",
       "provider": "registry"
     },
     {
-      "packageName": "@powerhousedao/project-management",
-      "version": "1.0.0-dev.10",
+      "packageName": "@powerhousedao/builder-profile",
+      "version": "1.1.0-dev.27",
       "provider": "registry"
     }
   ]

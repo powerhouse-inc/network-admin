@@ -1,7 +1,7 @@
 {
   "name": "@powerhousedao/network-admin",
   "description": "Network Admin package for Powerhouse",
-  "version": "1.0.0-dev.8",
+  "version": "1.0.0-dev.9",
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
@@ -63,7 +63,7 @@
     "check-circular-imports": "npx dpdm -T ./index.ts",
     "generate": "ph-cli generate",
     "connect": "ph-cli connect",
-    "build": "ph-cli build",
+    "build": "bun run build.ts",
     "reactor": "ph-cli reactor",
     "service": "ph-cli service",
     "vetra": "ph-cli vetra",
@@ -71,16 +71,15 @@
     "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh"
   },
   "dependencies": {
-    "@powerhousedao/analytics-engine-core": "6.0.0-dev.174",
-    "@powerhousedao/builder-profile": "1.1.0-dev.6",
-    "@powerhousedao/connect": "6.0.0-dev.174",
-    "@powerhousedao/design-system": "6.0.0-dev.174",
-    "@powerhousedao/document-engineering": "1.40.1",
-    "@powerhousedao/project-management": "1.0.0-dev.8",
-    "@powerhousedao/reactor-api": "6.0.0-dev.174",
-    "@powerhousedao/reactor-browser": "6.0.0-dev.174",
-    "document-drive": "6.0.0-dev.109",
-    "document-model": "6.0.0-dev.174",
+    "@powerhousedao/analytics-engine-core": "6.0.0-dev.195",
+    "@powerhousedao/builder-profile": "1.1.0-dev.27",
+    "@powerhousedao/connect": "6.0.0-dev.195",
+    "@powerhousedao/design-system": "6.0.0-dev.195",
+    "@powerhousedao/document-engineering": "1.40.2",
+    "@powerhousedao/project-management": "1.0.0-dev.10",
+    "@powerhousedao/reactor-api": "6.0.0-dev.195",
+    "@powerhousedao/reactor-browser": "6.0.0-dev.195",
+    "document-model": "6.0.0-dev.195",
     "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6",
     "react": "^19.2.3",
@@ -91,8 +90,8 @@
     "@electric-sql/pglite": "0.3.15",
     "@electric-sql/pglite-tools": "0.2.20",
     "@eslint/js": "^9.38.0",
-    "@powerhousedao/ph-cli": "6.0.0-dev.174",
-    "@powerhousedao/reactor": "6.0.0-dev.174",
+    "@powerhousedao/ph-cli": "6.0.0-dev.195",
+    "@powerhousedao/reactor": "6.0.0-dev.195",
     "@tailwindcss/cli": "^4.1.18",
     "@types/node": "^24.9.2",
     "@types/react": "^19.2.3",
@@ -120,5 +119,7 @@
   "bugs": {
     "url": "https://github.com/powerhouse-inc/network-admin/issues"
   },
-  "homepage": "https://github.com/powerhouse-inc/network-admin#readme"
+  "homepage": "https://github.com/powerhouse-inc/network-admin#readme",
+  "readme": "ERROR: No README data found!",
+  "_id": "@powerhousedao/network-admin@1.0.0-dev.8"
 }
