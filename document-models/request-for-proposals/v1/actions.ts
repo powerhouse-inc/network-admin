@@ -1,15 +1,15 @@
 import { baseActions } from "document-model";
 import {
-  rfpStateActions,
-  contexDocumentActions,
-  proposalsActions,
+  requestForProposalsRfpStateActions,
+  requestForProposalsContexDocumentActions,
+  requestForProposalsProposalsActions,
 } from "./gen/creators.js";
 
 /** Actions for the RequestForProposals document model */
 
 export const actions = {
   ...baseActions,
-  ...rfpStateActions,
-  ...contexDocumentActions,
-  ...proposalsActions,
+  ...requestForProposalsRfpStateActions,
+  ...requestForProposalsContexDocumentActions,
+  ...requestForProposalsProposalsActions,
 };

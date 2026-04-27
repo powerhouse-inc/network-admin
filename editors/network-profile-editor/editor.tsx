@@ -6,8 +6,8 @@ import {
 import {
   useSelectedNetworkProfileDocument,
   actions,
-} from "@powerhousedao/network-admin/document-models/network-profile";
-import type { NetworkCategory } from "@powerhousedao/network-admin/document-models/network-profile";
+} from "document-models/network-profile";
+import type { NetworkCategory } from "document-models/network-profile";
 import {
   DocumentToolbar,
   ToastContainer,

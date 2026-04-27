@@ -13,7 +13,7 @@ import {
   type PaymentTermsState,
   type BillingFrequency,
   type PaymentTermsAction,
-} from "@powerhousedao/network-admin/document-models/payment-terms";
+} from "document-models/payment-terms";
 
 export interface RetainerTabProps {
   state: PaymentTermsState;

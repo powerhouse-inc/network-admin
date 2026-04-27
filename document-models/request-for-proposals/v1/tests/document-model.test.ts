@@ -17,7 +17,7 @@ import {
   assertIsRequestForProposalsDocument,
   isRequestForProposalsState,
   assertIsRequestForProposalsState,
-} from "@powerhousedao/network-admin/document-models/request-for-proposals/v1";
+} from "document-models/request-for-proposals/v1";
 import { ZodError } from "zod";
 
 describe("RequestForProposals Document Model", () => {

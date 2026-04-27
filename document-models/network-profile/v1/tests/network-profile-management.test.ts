@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/common/utils";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -26,7 +26,7 @@ import {
   SetDiscordInputSchema,
   SetYoutubeInputSchema,
   SetProfileNameInputSchema,
-} from "@powerhousedao/network-admin/document-models/network-profile/v1";
+} from "document-models/network-profile/v1";
 
 describe("NetworkProfileManagementOperations", () => {
   it("should handle setIcon operation", () => {

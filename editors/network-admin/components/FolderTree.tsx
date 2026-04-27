@@ -15,11 +15,11 @@ import { RfpIcon } from "./icons/RfpIcon.js";
 import { SowIcon } from "./icons/SowIcon.js";
 import { WorkstreamIcon } from "./icons/WorkstreamIcon.js";
 import { EarthIcon } from "./icons/EarthIcon.js";
-import type { WorkstreamDocument } from "@powerhousedao/network-admin/document-models/workstream";
-import type { NetworkProfileDocument } from "@powerhousedao/network-admin/document-models/network-profile";
-import type { RequestForProposalsDocument } from "@powerhousedao/network-admin/document-models/request-for-proposals";
-import type { PaymentTermsDocument } from "@powerhousedao/network-admin/document-models/payment-terms";
-import type { BuildersDocument } from "@powerhousedao/network-admin/document-models/builders";
+import type { WorkstreamDocument } from "document-models/workstream";
+import type { NetworkProfileDocument } from "document-models/network-profile";
+import type { RequestForProposalsDocument } from "document-models/request-for-proposals";
+import type { PaymentTermsDocument } from "document-models/payment-terms";
+import type { BuildersDocument } from "document-models/builders";
 import { type PHDocument } from "document-model";
 
 const WorkstreamStatusEnums = [

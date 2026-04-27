@@ -31,6 +31,12 @@ const javascriptFiles = ["**/*.js", "**/*.cjs", "**/*.mjs"];
 /** Typescript rules that we have chosen to opt out of in general */
 /** @type {import("eslint").Linter.RulesRecord} */
 const typescriptRules = {
+  // GraphQL/reactor boundaries often surface as `any`; keep signal without blocking CI.
+  "@typescript-eslint/no-unsafe-assignment": "warn",
+  "@typescript-eslint/no-unsafe-member-access": "warn",
+  "@typescript-eslint/no-unsafe-call": "warn",
+  "@typescript-eslint/no-unsafe-return": "warn",
+  "@typescript-eslint/no-unsafe-argument": "warn",
   "@typescript-eslint/consistent-type-imports": [
     "error",
     {

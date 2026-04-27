@@ -2,7 +2,7 @@ import {
   DuplicateMilestoneIdError,
   MilestoneNotFoundError,
 } from "../../gen/milestones/error.js";
-import type { PaymentTermsMilestonesOperations } from "@powerhousedao/network-admin/document-models/payment-terms/v1";
+import type { PaymentTermsMilestonesOperations } from "document-models/payment-terms/v1";
 
 export const paymentTermsMilestonesOperations: PaymentTermsMilestonesOperations =
   {

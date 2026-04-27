@@ -1,6 +1,9 @@
 import { baseActions } from "document-model";
-import { networkProfileManagementActions } from "./gen/creators.js";
+import { networkProfileNetworkProfileManagementActions } from "./gen/creators.js";
 
 /** Actions for the NetworkProfile document model */
 
-export const actions = { ...baseActions, ...networkProfileManagementActions };
+export const actions = {
+  ...baseActions,
+  ...networkProfileNetworkProfileManagementActions,
+};

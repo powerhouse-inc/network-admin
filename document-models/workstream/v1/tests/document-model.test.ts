@@ -17,7 +17,7 @@ import {
   assertIsWorkstreamDocument,
   isWorkstreamState,
   assertIsWorkstreamState,
-} from "@powerhousedao/network-admin/document-models/workstream/v1";
+} from "document-models/workstream/v1";
 import { ZodError } from "zod";
 
 describe("Workstream Document Model", () => {

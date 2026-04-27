@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/common/utils";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -12,7 +12,7 @@ import {
   AddAlternativeProposalInputSchema,
   EditAlternativeProposalInputSchema,
   RemoveAlternativeProposalInputSchema,
-} from "@powerhousedao/network-admin/document-models/workstream/v1";
+} from "document-models/workstream/v1";
 
 describe("ProposalsOperations", () => {
   it("should handle editInitialProposal operation", () => {

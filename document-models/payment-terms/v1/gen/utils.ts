@@ -5,20 +5,20 @@ import {
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model/core";
-import type {
-  PaymentTermsGlobalState,
-  PaymentTermsLocalState,
-} from "./types.js";
-import type { PaymentTermsPHState } from "./types.js";
+} from "document-model";
 import { reducer } from "./reducer.js";
 import { paymentTermsDocumentType } from "./document-type.js";
 import {
-  isPaymentTermsDocument,
   assertIsPaymentTermsDocument,
-  isPaymentTermsState,
   assertIsPaymentTermsState,
+  isPaymentTermsDocument,
+  isPaymentTermsState,
 } from "./document-schema.js";
+import type {
+  PaymentTermsGlobalState,
+  PaymentTermsLocalState,
+  PaymentTermsPHState,
+} from "./types.js";
 
 export const initialGlobalState: PaymentTermsGlobalState = {
   status: "DRAFT",
@@ -75,12 +75,3 @@ export const utils: DocumentModelUtils<PaymentTermsPHState> = {
     return assertIsPaymentTermsDocument(document);
   },
 };
-
-export const createDocument = utils.createDocument;
-export const createState = utils.createState;
-export const saveToFileHandle = utils.saveToFileHandle;
-export const loadFromInput = utils.loadFromInput;
-export const isStateOfType = utils.isStateOfType;
-export const assertIsStateOfType = utils.assertIsStateOfType;
-export const isDocumentOfType = utils.isDocumentOfType;
-export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

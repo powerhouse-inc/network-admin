@@ -2,14 +2,14 @@
  * Factory methods for creating WorkstreamDocument instances
  */
 import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
-import { createBaseState, defaultBaseState } from "document-model/core";
+import { createBaseState, defaultBaseState } from "document-model";
 import type {
   WorkstreamDocument,
-  WorkstreamLocalState,
   WorkstreamGlobalState,
+  WorkstreamLocalState,
   WorkstreamPHState,
 } from "./types.js";
-import { createDocument } from "./utils.js";
+import { utils } from "./utils.js";
 
 export function defaultGlobalState(): WorkstreamGlobalState {
   return {
@@ -81,7 +81,7 @@ export function createWorkstreamDocument(
     local?: Partial<WorkstreamLocalState>;
   }>,
 ): WorkstreamDocument {
-  const document = createDocument(
+  const document = utils.createDocument(
     state
       ? createState(
           createBaseState(state.auth, state.document),

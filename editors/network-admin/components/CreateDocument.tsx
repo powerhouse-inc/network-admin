@@ -3,8 +3,8 @@ import {
   showCreateDocumentModal,
   useAllowedDocumentModelModules,
   useSelectedDriveId,
-  type VetraDocumentModelModule,
 } from "@powerhousedao/reactor-browser";
+import type { DocumentModelModule } from "document-model";
 
 /**
  * Document creation UI component.
@@ -14,7 +14,7 @@ export function CreateDocument() {
   const selectedDriveId = useSelectedDriveId();
   const allowedDocumentModelModules = useAllowedDocumentModelModules();
 
-  function handleAddDocument(module: VetraDocumentModelModule) {
+  function handleAddDocument(module: DocumentModelModule) {
     if (!selectedDriveId) {
       return;
     }

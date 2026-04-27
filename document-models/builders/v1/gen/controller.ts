@@ -1,4 +1,4 @@
-import { PHDocumentController } from "document-model/core";
+import { PHDocumentController } from "document-model";
 import { Builders } from "../module.js";
 import type { BuildersAction, BuildersPHState } from "./types.js";
 

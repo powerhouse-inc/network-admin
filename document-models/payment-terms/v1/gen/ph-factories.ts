@@ -2,14 +2,14 @@
  * Factory methods for creating PaymentTermsDocument instances
  */
 import type { PHAuthState, PHDocumentState, PHBaseState } from "document-model";
-import { createBaseState, defaultBaseState } from "document-model/core";
+import { createBaseState, defaultBaseState } from "document-model";
 import type {
   PaymentTermsDocument,
-  PaymentTermsLocalState,
   PaymentTermsGlobalState,
+  PaymentTermsLocalState,
   PaymentTermsPHState,
 } from "./types.js";
-import { createDocument } from "./utils.js";
+import { utils } from "./utils.js";
 
 export function defaultGlobalState(): PaymentTermsGlobalState {
   return {
@@ -84,7 +84,7 @@ export function createPaymentTermsDocument(
     local?: Partial<PaymentTermsLocalState>;
   }>,
 ): PaymentTermsDocument {
-  const document = createDocument(
+  const document = utils.createDocument(
     state
       ? createState(
           createBaseState(state.auth, state.document),

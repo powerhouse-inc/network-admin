@@ -5,20 +5,20 @@ import {
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model/core";
-import type {
-  RequestForProposalsGlobalState,
-  RequestForProposalsLocalState,
-} from "./types.js";
-import type { RequestForProposalsPHState } from "./types.js";
+} from "document-model";
 import { reducer } from "./reducer.js";
 import { requestForProposalsDocumentType } from "./document-type.js";
 import {
-  isRequestForProposalsDocument,
   assertIsRequestForProposalsDocument,
-  isRequestForProposalsState,
   assertIsRequestForProposalsState,
+  isRequestForProposalsDocument,
+  isRequestForProposalsState,
 } from "./document-schema.js";
+import type {
+  RequestForProposalsGlobalState,
+  RequestForProposalsLocalState,
+  RequestForProposalsPHState,
+} from "./types.js";
 
 export const initialGlobalState: RequestForProposalsGlobalState = {
   issuer: "placeholder-id",
@@ -80,12 +80,3 @@ export const utils: DocumentModelUtils<RequestForProposalsPHState> = {
     return assertIsRequestForProposalsDocument(document);
   },
 };
-
-export const createDocument = utils.createDocument;
-export const createState = utils.createState;
-export const saveToFileHandle = utils.saveToFileHandle;
-export const loadFromInput = utils.loadFromInput;
-export const isStateOfType = utils.isStateOfType;
-export const assertIsStateOfType = utils.assertIsStateOfType;
-export const isDocumentOfType = utils.isDocumentOfType;
-export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

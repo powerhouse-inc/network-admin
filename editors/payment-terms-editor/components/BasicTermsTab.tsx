@@ -9,7 +9,7 @@ import {
   type PaymentModel,
   type PaymentTermsStatus,
   type PaymentTermsAction,
-} from "@powerhousedao/network-admin/document-models/payment-terms";
+} from "document-models/payment-terms";
 
 export interface BasicTermsTabProps {
   state: PaymentTermsState;

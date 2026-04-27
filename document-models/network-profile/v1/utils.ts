@@ -4,7 +4,7 @@ import { utils as genUtils } from "./gen/utils.js";
 import * as customUtils from "./src/utils.js";
 
 /** Utils for the NetworkProfile document model */
-export const utils = {
+export const utils: DocumentModelUtils<NetworkProfilePHState> = {
   ...genUtils,
   ...customUtils,
-} satisfies DocumentModelUtils<NetworkProfilePHState>;
+};

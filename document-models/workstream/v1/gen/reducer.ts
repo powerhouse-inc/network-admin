@@ -1,9 +1,8 @@
-// TODO: remove eslint-disable rules once refactor is done
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import type { StateReducer } from "document-model";
-import { isDocumentAction, createReducer } from "document-model/core";
-import type { WorkstreamPHState } from "@powerhousedao/network-admin/document-models/workstream/v1";
+import type { Reducer, StateReducer } from "document-model";
+import { isDocumentAction, createReducer } from "document-model";
+import type { WorkstreamPHState } from "document-models/workstream/v1";
 
 import { workstreamWorkstreamOperations } from "../src/reducers/workstream.js";
 import { workstreamProposalsOperations } from "../src/reducers/proposals.js";
@@ -142,4 +141,4 @@ const stateReducer: StateReducer<WorkstreamPHState> = (
   }
 };
 
-export const reducer = createReducer<WorkstreamPHState>(stateReducer);
+export const reducer: Reducer<WorkstreamPHState> = createReducer(stateReducer);

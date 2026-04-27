@@ -105,6 +105,14 @@ Only **after** the codegen has produced the boilerplate files, proceed with the 
 - Separate business logic from presentation logic
 - Use TypeScript for type safety, avoid using any and type casting
 - Always check for type and lint errors after creating or modifying the editor
+- **CRITICAL**: After creating a new editor, verify that `editors/editors.ts` includes the new editor module. The codegen should update this file automatically, but if it doesn't, manually add the import and include the editor in the `editors` array. Without this registration, Connect won't find an editor for the document type. Example:
+
+  ```typescript
+  import type { EditorModule } from "document-model";
+  import { TodoListEditor } from "./todo-list-editor/module.js";
+
+  export const editors: EditorModule[] = [TodoListEditor];
+  ```
 
 ### Document Editor Implementation Pattern
 
@@ -117,7 +125,7 @@ The following section is valid for editors that edit a single document type.
 Using a "Todo" document model as example:
 
 ```typescript
-import { generateId } from "document-model/core";
+import { generateId } from "document-model";
 import { useSelectedTodoDocument } from "../hooks/useTodoDocument.js";
 import {
   addTodo,
@@ -131,6 +139,9 @@ export default function Editor() {
       dispatch(addTodo({ id: generateId(), title: values.title }));
     }
   };
+
+// Note: The `useSelectedTodoDocument` hook is auto-generated. Check the `editors/hooks` folder for the exact hook name.
+// Action creators like `addTodo` are exported from the document model's `gen/creators.js` file.
 ```
 
 The `useSelectedTodoDocument` gets generated automatically so you don't need to implement it yourself.

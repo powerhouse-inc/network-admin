@@ -5,17 +5,20 @@ import {
   baseLoadFromInput,
   defaultBaseState,
   generateId,
-} from "document-model/core";
-import type { WorkstreamGlobalState, WorkstreamLocalState } from "./types.js";
-import type { WorkstreamPHState } from "./types.js";
+} from "document-model";
 import { reducer } from "./reducer.js";
 import { workstreamDocumentType } from "./document-type.js";
 import {
-  isWorkstreamDocument,
   assertIsWorkstreamDocument,
-  isWorkstreamState,
   assertIsWorkstreamState,
+  isWorkstreamDocument,
+  isWorkstreamState,
 } from "./document-schema.js";
+import type {
+  WorkstreamGlobalState,
+  WorkstreamLocalState,
+  WorkstreamPHState,
+} from "./types.js";
 
 export const initialGlobalState: WorkstreamGlobalState = {
   code: null,
@@ -69,12 +72,3 @@ export const utils: DocumentModelUtils<WorkstreamPHState> = {
     return assertIsWorkstreamDocument(document);
   },
 };
-
-export const createDocument = utils.createDocument;
-export const createState = utils.createState;
-export const saveToFileHandle = utils.saveToFileHandle;
-export const loadFromInput = utils.loadFromInput;
-export const isStateOfType = utils.isStateOfType;
-export const assertIsStateOfType = utils.assertIsStateOfType;
-export const isDocumentOfType = utils.isDocumentOfType;
-export const assertIsDocumentOfType = utils.assertIsDocumentOfType;

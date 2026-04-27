@@ -16,11 +16,11 @@ import {
   actions,
   type WorkstreamStatus,
   type ProposalStatus,
-} from "@powerhousedao/network-admin/document-models/workstream";
+} from "document-models/workstream";
 import {
   type RequestForProposalsState,
   actions as rfpActions,
-} from "@powerhousedao/network-admin/document-models/request-for-proposals";
+} from "document-models/request-for-proposals";
 import { generateId } from "document-model/core";
 import {
   useDocumentById,
@@ -31,8 +31,8 @@ import {
   setSelectedNode,
 } from "@powerhousedao/reactor-browser";
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useSelectedWorkstreamDocument } from "@powerhousedao/network-admin/document-models/workstream";
-import type { Proposal } from "@powerhousedao/network-admin/document-models/workstream";
+import { useSelectedWorkstreamDocument } from "document-models/workstream";
+import type { Proposal } from "document-models/workstream";
 import type { FileNode } from "document-drive";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 
@@ -413,6 +413,14 @@ export default function Editor() {
       clientInfoUpdate.name = value === "" ? "" : value || undefined;
       clientInfoUpdate.icon = state.client?.icon || undefined;
     } else if (field === "icon") {
+      // State validates icon as a URL, so only dispatch empty or valid URL values
+      if (value !== "") {
+        try {
+          new URL(value);
+        } catch {
+          return;
+        }
+      }
       clientInfoUpdate.icon = value === "" ? "" : value || undefined;
       clientInfoUpdate.name = state.client?.name || undefined;
     }
