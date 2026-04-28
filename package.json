@@ -72,11 +72,11 @@
   },
   "dependencies": {
     "@powerhousedao/analytics-engine-core": "6.0.0-dev.195",
-    "@powerhousedao/builder-profile": "1.1.0-dev.27",
+    "@powerhousedao/builder-profile": "1.1.0-dev.30",
     "@powerhousedao/connect": "6.0.0-dev.195",
     "@powerhousedao/design-system": "6.0.0-dev.195",
     "@powerhousedao/document-engineering": "1.40.2",
-    "@powerhousedao/project-management": "1.0.0-dev.10",
+    "@powerhousedao/project-management": "1.0.0-dev.11",
     "@powerhousedao/reactor-api": "6.0.0-dev.195",
     "@powerhousedao/reactor-browser": "6.0.0-dev.195",
     "document-model": "6.0.0-dev.195",
