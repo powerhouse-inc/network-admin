@@ -30,7 +30,7 @@
 
 import {
   browserBuildConfig,
-  nodeBuildConfig
+  nodeBuildConfig,
 } from "@powerhousedao/shared/clis";
 import { execSync } from "node:child_process";
 import { readFile, readdir, writeFile } from "node:fs/promises";
@@ -99,7 +99,8 @@ async function patchRequireShim(browserDir: string): Promise<void> {
     const content = await readFile(filepath, "utf8");
     if (!content.includes(SHIM_MARKER) || !REQUIRE_DECL.test(content)) continue;
 
-    const slot = (spec: string) => `__ext_${spec.replace(/[^a-zA-Z0-9]/g, "_")}`;
+    const slot = (spec: string) =>
+      `__ext_${spec.replace(/[^a-zA-Z0-9]/g, "_")}`;
     const imports = REACT_EXTERNALS.map(
       (spec) => `import * as ${slot(spec)} from ${JSON.stringify(spec)};`,
     ).join("\n");

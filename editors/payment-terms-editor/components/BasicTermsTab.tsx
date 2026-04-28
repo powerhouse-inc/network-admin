@@ -1,7 +1,9 @@
 import { useState, useCallback } from "react";
-import { toast } from "@powerhousedao/design-system/connect";
 import { Select, TextInput, Button } from "@powerhousedao/document-engineering";
-import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
+import {
+  usePHToast,
+  type DocumentDispatch,
+} from "@powerhousedao/reactor-browser";
 import {
   actions,
   type PaymentTermsState,
@@ -17,6 +19,7 @@ export interface BasicTermsTabProps {
 }
 
 export function BasicTermsTab({ state, dispatch }: BasicTermsTabProps) {
+  const toast = usePHToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     proposer: state.proposer || "",
@@ -72,10 +75,10 @@ export function BasicTermsTab({ state, dispatch }: BasicTermsTabProps) {
         );
       }
 
-      toast("Basic terms updated successfully", { type: "success" });
+      toast?.("Basic terms updated successfully", { type: "success" });
       setIsEditing(false);
     },
-    [formData, dispatch, state.status, state.escrowDetails],
+    [formData, dispatch, state.status, state.escrowDetails, toast],
   );
 
   const handleCancel = useCallback(() => {

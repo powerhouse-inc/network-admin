@@ -7,9 +7,11 @@ import {
   type ColumnDef,
   type ColumnAlignment,
 } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system/connect";
 import { generateId } from "document-model/core";
-import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
+import {
+  usePHToast,
+  type DocumentDispatch,
+} from "@powerhousedao/reactor-browser";
 import {
   actions,
   type Milestone,
@@ -28,6 +30,7 @@ export function MilestonesTab({
   dispatch,
   currency = "USD",
 }: MilestonesTabProps) {
+  const toast = usePHToast();
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newMilestone, setNewMilestone] = useState({
     name: "",
@@ -51,7 +54,7 @@ export function MilestonesTab({
                 name: newValue as string,
               }),
             );
-            toast("Milestone name updated", { type: "success" });
+            toast?.("Milestone name updated", { type: "success" });
             return true;
           }
           return false;
@@ -67,7 +70,7 @@ export function MilestonesTab({
         onSave: (newValue, context) => {
           const amount = parseFloat(newValue as string);
           if (isNaN(amount)) {
-            toast("Please enter a valid amount", { type: "error" });
+            toast?.("Please enter a valid amount", { type: "error" });
             return false;
           }
           dispatch(
@@ -76,7 +79,7 @@ export function MilestonesTab({
               amount: { value: amount, unit: currency },
             }),
           );
-          toast("Milestone amount updated", { type: "success" });
+          toast?.("Milestone amount updated", { type: "success" });
           return true;
         },
       },
@@ -95,7 +98,7 @@ export function MilestonesTab({
               expectedCompletionDate: dateValue || undefined,
             }),
           );
-          toast("Expected completion date updated", { type: "success" });
+          toast?.("Expected completion date updated", { type: "success" });
           return true;
         },
       },
@@ -113,7 +116,7 @@ export function MilestonesTab({
               requiresApproval: approved,
             }),
           );
-          toast("Approval requirement updated", { type: "success" });
+          toast?.("Approval requirement updated", { type: "success" });
           return true;
         },
       },
@@ -139,7 +142,7 @@ export function MilestonesTab({
               payoutStatus: newValue as MilestonePayoutStatus,
             }),
           );
-          toast("Milestone status updated", { type: "success" });
+          toast?.("Milestone status updated", { type: "success" });
           return true;
         },
       },
@@ -152,7 +155,7 @@ export function MilestonesTab({
           <Button
             onClick={() => {
               dispatch(actions.deleteMilestone({ id: context.row.id }));
-              toast("Milestone deleted", { type: "success" });
+              toast?.("Milestone deleted", { type: "success" });
             }}
             size="sm"
             className="text-red-600 hover:text-red-800"
@@ -162,7 +165,7 @@ export function MilestonesTab({
         ),
       },
     ],
-    [currency, dispatch],
+    [currency, dispatch, toast],
   );
 
   const handleAddMilestone = useCallback(
@@ -170,11 +173,11 @@ export function MilestonesTab({
       e.preventDefault();
 
       if (!newMilestone.name.trim()) {
-        toast("Name is required", { type: "error" });
+        toast?.("Name is required", { type: "error" });
         return;
       }
       if (!newMilestone.amount || isNaN(parseFloat(newMilestone.amount))) {
-        toast("Valid amount is required", { type: "error" });
+        toast?.("Valid amount is required", { type: "error" });
         return;
       }
 
@@ -192,7 +195,7 @@ export function MilestonesTab({
       };
 
       dispatch(actions.addMilestone(milestoneData));
-      toast("Milestone added successfully", { type: "success" });
+      toast?.("Milestone added successfully", { type: "success" });
 
       setNewMilestone({
         name: "",
@@ -202,7 +205,7 @@ export function MilestonesTab({
       });
       setIsAddingNew(false);
     },
-    [newMilestone, dispatch, currency],
+    [newMilestone, dispatch, currency, toast],
   );
 
   return (
@@ -335,7 +338,7 @@ export function MilestonesTab({
                 id: (row as unknown as Milestone).id,
               }),
             );
-            toast("Milestone deleted", { type: "success" });
+            toast?.("Milestone deleted", { type: "success" });
           }}
         />
       ) : (

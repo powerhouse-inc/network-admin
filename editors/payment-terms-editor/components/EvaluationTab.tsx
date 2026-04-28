@@ -5,8 +5,10 @@ import {
   Textarea,
   Button,
 } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system/connect";
-import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
+import {
+  usePHToast,
+  type DocumentDispatch,
+} from "@powerhousedao/reactor-browser";
 import {
   actions,
   type PaymentTermsState,
@@ -20,6 +22,7 @@ export interface EvaluationTabProps {
 }
 
 export function EvaluationTab({ state, dispatch }: EvaluationTabProps) {
+  const toast = usePHToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     evaluationFrequency: state.evaluation?.evaluationFrequency || "MONTHLY",
@@ -44,12 +47,12 @@ export function EvaluationTab({ state, dispatch }: EvaluationTabProps) {
       e.preventDefault();
 
       if (!formData.evaluatorTeam.trim()) {
-        toast("Evaluator team is required", { type: "error" });
+        toast?.("Evaluator team is required", { type: "error" });
         return;
       }
 
       if (!formData.criteria.trim()) {
-        toast("Evaluation criteria are required", { type: "error" });
+        toast?.("Evaluation criteria are required", { type: "error" });
         return;
       }
 
@@ -64,10 +67,10 @@ export function EvaluationTab({ state, dispatch }: EvaluationTabProps) {
         }),
       );
 
-      toast("Evaluation terms saved", { type: "success" });
+      toast?.("Evaluation terms saved", { type: "success" });
       setIsEditing(false);
     },
-    [formData, dispatch],
+    [formData, dispatch, toast],
   );
 
   const handleCancel = useCallback(() => {

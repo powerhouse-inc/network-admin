@@ -4,8 +4,10 @@ import {
   Textarea,
   Button,
 } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system/connect";
-import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
+import {
+  usePHToast,
+  type DocumentDispatch,
+} from "@powerhousedao/reactor-browser";
 import {
   actions,
   type PaymentTermsState,
@@ -18,6 +20,7 @@ export interface EscrowTabProps {
 }
 
 export function EscrowTab({ state, dispatch }: EscrowTabProps) {
+  const toast = usePHToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     amountHeld: state.escrowDetails?.amountHeld.value?.toString() || "",
@@ -31,14 +34,14 @@ export function EscrowTab({ state, dispatch }: EscrowTabProps) {
       e.preventDefault();
 
       if (!formData.amountHeld || isNaN(parseFloat(formData.amountHeld))) {
-        toast("Please enter a valid amount to be held in escrow", {
+        toast?.("Please enter a valid amount to be held in escrow", {
           type: "error",
         });
         return;
       }
 
       if (!formData.releaseConditions.trim()) {
-        toast("Release conditions are required", { type: "error" });
+        toast?.("Release conditions are required", { type: "error" });
         return;
       }
 
@@ -54,10 +57,10 @@ export function EscrowTab({ state, dispatch }: EscrowTabProps) {
         }),
       );
 
-      toast("Escrow details saved", { type: "success" });
+      toast?.("Escrow details saved", { type: "success" });
       setIsEditing(false);
     },
-    [formData, dispatch, state.currency],
+    [formData, dispatch, state.currency, toast],
   );
 
   const handleCancel = useCallback(() => {

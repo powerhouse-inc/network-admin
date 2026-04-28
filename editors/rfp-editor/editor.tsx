@@ -9,11 +9,8 @@ import {
   TextInput,
   NumberInput,
 } from "@powerhousedao/document-engineering";
-import {
-  DocumentToolbar,
-  toast,
-  ToastContainer,
-} from "@powerhousedao/design-system/connect";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
+import { usePHToast } from "@powerhousedao/reactor-browser";
 import { MarkdownEditor } from "./components/MarkdownEditor.js";
 
 const statusOptions = [
@@ -28,13 +25,14 @@ const statusOptions = [
 
 export default function Editor() {
   const [doc, dispatch] = useSelectedRequestForProposalsDocument();
+  const toast = usePHToast();
 
   const state = doc.state.global;
 
   // Validation function for budget range
   const validateBudgetRange = (min: number | null, max: number | null) => {
     if (min !== null && max !== null && min >= max) {
-      toast("Minimum budget must be less than maximum budget", {
+      toast?.("Minimum budget must be less than maximum budget", {
         type: "error",
       });
       return false;
@@ -248,20 +246,6 @@ export default function Editor() {
             />
           </div>
         </div>
-
-        {/* Toast Container */}
-        <ToastContainer
-          position="bottom-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
       </div>
     </>
   );

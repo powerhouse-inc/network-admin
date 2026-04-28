@@ -6,8 +6,10 @@ import {
   DatePicker,
   Button,
 } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system/connect";
-import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
+import {
+  usePHToast,
+  type DocumentDispatch,
+} from "@powerhousedao/reactor-browser";
 import {
   actions,
   type PaymentTermsState,
@@ -21,6 +23,7 @@ export interface RetainerTabProps {
 }
 
 export function RetainerTab({ state, dispatch }: RetainerTabProps) {
+  const toast = usePHToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     retainerAmount:
@@ -49,17 +52,17 @@ export function RetainerTab({ state, dispatch }: RetainerTabProps) {
         !formData.retainerAmount ||
         isNaN(parseFloat(formData.retainerAmount))
       ) {
-        toast("Please enter a valid retainer amount", { type: "error" });
+        toast?.("Please enter a valid retainer amount", { type: "error" });
         return;
       }
 
       if (!formData.startDate) {
-        toast("Start date is required", { type: "error" });
+        toast?.("Start date is required", { type: "error" });
         return;
       }
 
       if (!formData.servicesIncluded.trim()) {
-        toast("Services included description is required", { type: "error" });
+        toast?.("Services included description is required", { type: "error" });
         return;
       }
 
@@ -82,10 +85,10 @@ export function RetainerTab({ state, dispatch }: RetainerTabProps) {
         }),
       );
 
-      toast("Retainer configuration saved", { type: "success" });
+      toast?.("Retainer configuration saved", { type: "success" });
       setIsEditing(false);
     },
-    [formData, dispatch, state.currency],
+    [formData, dispatch, state.currency, toast],
   );
 
   const handleCancel = useCallback(() => {

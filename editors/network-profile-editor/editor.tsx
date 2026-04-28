@@ -8,10 +8,7 @@ import {
   actions,
 } from "document-models/network-profile";
 import type { NetworkCategory } from "document-models/network-profile";
-import {
-  DocumentToolbar,
-  ToastContainer,
-} from "@powerhousedao/design-system/connect";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import { useCallback } from "react";
 import { ImageUrlInput } from "./components/ImageUrlInput.js";
 import { ToggleableImageInput } from "./components/ToggleableImageInput.js";
@@ -261,9 +258,6 @@ export default function Editor() {
             </div>
           </div>
         </div>
-
-        {/* Toast Container */}
-        <ToastContainer />
       </div>
     </div>
   );

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '/payment-terms-editor\\\\/components\\\\/ClausesTab.tsx/,/^$/')",
+      "Bash(awk '/payment-terms-editor\\\\/components\\\\/MilestonesTab.tsx/,/^$/')"
+    ]
+  }
+}

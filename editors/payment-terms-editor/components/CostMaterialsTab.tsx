@@ -1,7 +1,9 @@
 import { useState, useCallback } from "react";
 import { TextInput, Select, Button } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system/connect";
-import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
+import {
+  usePHToast,
+  type DocumentDispatch,
+} from "@powerhousedao/reactor-browser";
 import {
   actions,
   type PaymentTermsState,
@@ -15,6 +17,7 @@ export interface CostMaterialsTabProps {
 }
 
 export function CostMaterialsTab({ state, dispatch }: CostMaterialsTabProps) {
+  const toast = usePHToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     hourlyRate: state.costAndMaterials?.hourlyRate?.value?.toString() || "",
@@ -46,10 +49,10 @@ export function CostMaterialsTab({ state, dispatch }: CostMaterialsTabProps) {
         }),
       );
 
-      toast("Cost & Materials configuration saved", { type: "success" });
+      toast?.("Cost & Materials configuration saved", { type: "success" });
       setIsEditing(false);
     },
-    [formData, dispatch, state.currency],
+    [formData, dispatch, state.currency, toast],
   );
 
   const handleCancel = useCallback(() => {

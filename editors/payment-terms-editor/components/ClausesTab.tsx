@@ -7,9 +7,11 @@ import {
   type ColumnDef,
   type ColumnAlignment,
 } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system/connect";
 import { generateId } from "document-model/core";
-import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
+import {
+  usePHToast,
+  type DocumentDispatch,
+} from "@powerhousedao/reactor-browser";
 import {
   actions,
   type BonusClause,
@@ -30,6 +32,7 @@ export function ClausesTab({
   dispatch,
   currency = "USD",
 }: ClausesTabProps) {
+  const toast = usePHToast();
   const [activeSubTab, setActiveSubTab] = useState<"bonus" | "penalty">(
     "bonus",
   );
@@ -54,7 +57,7 @@ export function ClausesTab({
               condition: newValue as string,
             }),
           );
-          toast("Bonus clause condition updated", { type: "success" });
+          toast?.("Bonus clause condition updated", { type: "success" });
           return true;
         },
       },
@@ -68,7 +71,7 @@ export function ClausesTab({
         onSave: (newValue, context) => {
           const amount = parseFloat(newValue as string);
           if (isNaN(amount)) {
-            toast("Please enter a valid amount", { type: "error" });
+            toast?.("Please enter a valid amount", { type: "error" });
             return false;
           }
           dispatch(
@@ -77,7 +80,7 @@ export function ClausesTab({
               bonusAmount: { value: amount, unit: currency },
             }),
           );
-          toast("Bonus amount updated", { type: "success" });
+          toast?.("Bonus amount updated", { type: "success" });
           return true;
         },
       },
@@ -94,12 +97,12 @@ export function ClausesTab({
               comment: (newValue as string) || undefined,
             }),
           );
-          toast("Bonus clause comment updated", { type: "success" });
+          toast?.("Bonus clause comment updated", { type: "success" });
           return true;
         },
       },
     ],
-    [currency, dispatch],
+    [currency, dispatch, toast],
   );
 
   const penaltyColumns = useMemo<Array<ColumnDef<PenaltyClause>>>(
@@ -116,7 +119,7 @@ export function ClausesTab({
               condition: newValue as string,
             }),
           );
-          toast("Penalty clause condition updated", { type: "success" });
+          toast?.("Penalty clause condition updated", { type: "success" });
           return true;
         },
       },
@@ -130,7 +133,7 @@ export function ClausesTab({
         onSave: (newValue, context) => {
           const amount = parseFloat(newValue as string);
           if (isNaN(amount)) {
-            toast("Please enter a valid amount", { type: "error" });
+            toast?.("Please enter a valid amount", { type: "error" });
             return false;
           }
           dispatch(
@@ -139,7 +142,7 @@ export function ClausesTab({
               deductionAmount: { value: amount, unit: currency },
             }),
           );
-          toast("Deduction amount updated", { type: "success" });
+          toast?.("Deduction amount updated", { type: "success" });
           return true;
         },
       },
@@ -156,12 +159,12 @@ export function ClausesTab({
               comment: (newValue as string) || undefined,
             }),
           );
-          toast("Penalty clause comment updated", { type: "success" });
+          toast?.("Penalty clause comment updated", { type: "success" });
           return true;
         },
       },
     ],
-    [currency, dispatch],
+    [currency, dispatch, toast],
   );
 
   const handleAddClause = useCallback(
@@ -169,11 +172,11 @@ export function ClausesTab({
       e.preventDefault();
 
       if (!newClause.condition.trim()) {
-        toast("Condition is required", { type: "error" });
+        toast?.("Condition is required", { type: "error" });
         return;
       }
       if (!newClause.amount || isNaN(parseFloat(newClause.amount))) {
-        toast("Valid amount is required", { type: "error" });
+        toast?.("Valid amount is required", { type: "error" });
         return;
       }
 
@@ -189,7 +192,7 @@ export function ClausesTab({
             comment: newClause.comment || undefined,
           }),
         );
-        toast("Bonus clause added successfully", { type: "success" });
+        toast?.("Bonus clause added successfully", { type: "success" });
       } else {
         dispatch(
           actions.addPenaltyClause({
@@ -202,13 +205,13 @@ export function ClausesTab({
             comment: newClause.comment || undefined,
           }),
         );
-        toast("Penalty clause added successfully", { type: "success" });
+        toast?.("Penalty clause added successfully", { type: "success" });
       }
 
       setNewClause({ condition: "", amount: "", comment: "" });
       setIsAddingNew(false);
     },
-    [newClause, activeSubTab, dispatch, currency],
+    [newClause, activeSubTab, dispatch, currency, toast],
   );
 
   const currentClauses =
@@ -338,7 +341,7 @@ export function ClausesTab({
                   id: (row as unknown as BonusClause).id,
                 }),
               );
-              toast("Bonus clause deleted", { type: "success" });
+              toast?.("Bonus clause deleted", { type: "success" });
             }}
           />
         ) : (
@@ -352,7 +355,7 @@ export function ClausesTab({
                   id: (row as unknown as PenaltyClause).id,
                 }),
               );
-              toast("Penalty clause deleted", { type: "success" });
+              toast?.("Penalty clause deleted", { type: "success" });
             }}
           />
         )

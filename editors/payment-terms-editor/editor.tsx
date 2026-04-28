@@ -1,7 +1,4 @@
-import {
-  DocumentToolbar,
-  ToastContainer,
-} from "@powerhousedao/design-system/connect";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import { useSelectedPaymentTermsDocument } from "document-models/payment-terms";
 import { BasicTermsTab } from "./components/BasicTermsTab.js";
 import { MilestonesTab } from "./components/MilestonesTab.js";
@@ -223,7 +220,6 @@ export default function Editor() {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </>
   );
 }

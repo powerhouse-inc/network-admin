@@ -1,6 +1,5 @@
 import type { Action, PHDocument, PHDocumentState } from "document-model";
 import { Button } from "@powerhousedao/document-engineering";
-import { ToastContainer } from "@powerhousedao/design-system/connect";
 import {
   TextInput,
   Select,
@@ -1356,9 +1355,6 @@ export default function Editor() {
             )}
           </div>
         ) : null}
-
-        {/* Toast Container */}
-        <ToastContainer />
       </div>
     </div>
   );
