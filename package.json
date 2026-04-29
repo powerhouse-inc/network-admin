@@ -1,7 +1,7 @@
 {
   "name": "@powerhousedao/network-admin",
   "description": "Network Admin package for Powerhouse",
-  "version": "1.0.0-dev.13",
+  "version": "1.0.0-dev.14",
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
@@ -71,15 +71,15 @@
     "service-unstartup": "bash ./node_modules/@powerhousedao/ph-cli/dist/scripts/service-unstartup.sh"
   },
   "dependencies": {
-    "@powerhousedao/analytics-engine-core": "6.0.0-dev.202",
+    "@powerhousedao/analytics-engine-core": "6.0.0-dev.207",
     "@powerhousedao/builder-profile": "1.1.0-dev.30",
-    "@powerhousedao/connect": "6.0.0-dev.202",
-    "@powerhousedao/design-system": "6.0.0-dev.202",
+    "@powerhousedao/connect": "6.0.0-dev.207",
+    "@powerhousedao/design-system": "6.0.0-dev.207",
     "@powerhousedao/document-engineering": "1.40.2",
     "@powerhousedao/project-management": "1.0.0-dev.11",
-    "@powerhousedao/reactor-api": "6.0.0-dev.202",
-    "@powerhousedao/reactor-browser": "6.0.0-dev.202",
-    "document-model": "6.0.0-dev.202",
+    "@powerhousedao/reactor-api": "6.0.0-dev.207",
+    "@powerhousedao/reactor-browser": "6.0.0-dev.207",
+    "document-model": "6.0.0-dev.207",
     "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6",
     "react": "^19.2.3",
@@ -90,8 +90,8 @@
     "@electric-sql/pglite": "0.3.15",
     "@electric-sql/pglite-tools": "0.2.20",
     "@eslint/js": "^9.38.0",
-    "@powerhousedao/ph-cli": "6.0.0-dev.202",
-    "@powerhousedao/reactor": "6.0.0-dev.202",
+    "@powerhousedao/ph-cli": "6.0.0-dev.207",
+    "@powerhousedao/reactor": "6.0.0-dev.207",
     "@tailwindcss/cli": "^4.1.18",
     "@types/node": "^24.9.2",
     "@types/react": "^19.2.3",
@@ -121,5 +121,5 @@
   },
   "homepage": "https://github.com/powerhouse-inc/network-admin#readme",
   "readme": "ERROR: No README data found!",
-  "_id": "@powerhousedao/network-admin@1.0.0-dev.11"
+  "_id": "@powerhousedao/network-admin@1.0.0-dev.13"
 }
