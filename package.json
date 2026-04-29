@@ -1,7 +1,7 @@
 {
   "name": "@powerhousedao/network-admin",
   "description": "Network Admin package for Powerhouse",
-  "version": "1.0.0-dev.14",
+  "version": "1.0.0-dev.15",
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
@@ -72,11 +72,11 @@
   },
   "dependencies": {
     "@powerhousedao/analytics-engine-core": "6.0.0-dev.207",
-    "@powerhousedao/builder-profile": "1.1.0-dev.30",
+    "@powerhousedao/builder-profile": "1.1.0-dev.32",
     "@powerhousedao/connect": "6.0.0-dev.207",
     "@powerhousedao/design-system": "6.0.0-dev.207",
     "@powerhousedao/document-engineering": "1.40.2",
-    "@powerhousedao/project-management": "1.0.0-dev.11",
+    "@powerhousedao/project-management": "1.0.0-dev.12",
     "@powerhousedao/reactor-api": "6.0.0-dev.207",
     "@powerhousedao/reactor-browser": "6.0.0-dev.207",
     "document-model": "6.0.0-dev.207",
