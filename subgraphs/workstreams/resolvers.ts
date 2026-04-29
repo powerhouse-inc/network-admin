@@ -1,7 +1,7 @@
 import { type ISubgraph } from "@powerhousedao/reactor-api";
 import { WorkstreamsProcessor } from "../../processors/workstreams/index.js";
-import { type RequestForProposalsDocument } from "@powerhousedao/network-admin/document-models/request-for-proposals";
-import { type WorkstreamDocument } from "@powerhousedao/network-admin/document-models/workstream";
+import type { RequestForProposalsDocument } from "@powerhousedao/network-admin/document-models/request-for-proposals";
+import type { WorkstreamDocument } from "@powerhousedao/network-admin/document-models/workstream";
 import type { NetworkProfileDocument } from "@powerhousedao/network-admin/document-models/network-profile";
 import type { PHDocument } from "document-model";
 import { sql, type ExpressionBuilder } from "kysely";
