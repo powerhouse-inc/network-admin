@@ -13,12 +13,12 @@
   "packages": [
     {
       "packageName": "@powerhousedao/project-management",
-      "version": "1.0.0-dev.12",
+      "version": "1.0.0-dev.13",
       "provider": "registry"
     },
     {
       "packageName": "@powerhousedao/builder-profile",
-      "version": "1.1.0-dev.32",
+      "version": "1.1.0-dev.33",
       "provider": "registry"
     }
   ]
