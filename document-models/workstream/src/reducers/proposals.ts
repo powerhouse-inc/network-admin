@@ -1,4 +1,4 @@
-import type { WorkstreamProposalsOperations } from "@powerhousedao/network-admin/document-models/workstream";
+import type { WorkstreamProposalsOperations } from "document-models/workstream";
 
 export const workstreamProposalsOperations: WorkstreamProposalsOperations = {
   editInitialProposalOperation(state, action) {

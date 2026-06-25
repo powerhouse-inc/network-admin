@@ -4,7 +4,7 @@ import type {
   PHDocument,
   PHDocumentState,
 } from "document-model";
-import { toast, ToastContainer } from "@powerhousedao/design-system/connect";
+import { toast, ToastContainer } from "@powerhousedao/design-system/connect/toast";
 import {
   TextInput,
   Select,
@@ -21,11 +21,11 @@ import {
   actions,
   type WorkstreamStatusInput,
   type ProposalStatusInput,
-} from "../../document-models/workstream/index.js";
+} from "document-models/workstream";
 import {
   type RequestForProposalsState,
   actions as rfpActions,
-} from "../../document-models/request-for-proposals/index.js";
+} from "document-models/request-for-proposals";
 import { ScopeOfWork } from "@powerhousedao/project-management/document-models";
 import { generateId } from "document-model/core";
 
@@ -48,8 +48,8 @@ import {
   dispatchActions,
 } from "@powerhousedao/reactor-browser";
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useSelectedWorkstreamDocument } from "../../document-models/workstream/hooks.js";
-import type { Proposal } from "../../document-models/workstream/gen/schema/types.js";
+import { useSelectedWorkstreamDocument } from "document-models/workstream";
+import type { Proposal } from "document-models/workstream";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 export type IProps = EditorProps;
 
@@ -933,7 +933,7 @@ export default function Editor() {
 
   return (
     <div className="w-full bg-gray-50">
-      <DocumentToolbar document={doc} onClose={handleClose} />
+      <DocumentToolbar />
       <div className="p-6 max-w-4xl mx-auto min-h-screen">
         {/* Header Section */}
         <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">

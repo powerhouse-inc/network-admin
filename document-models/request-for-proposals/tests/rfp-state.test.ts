@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -6,7 +6,7 @@ import {
   isRequestForProposalsDocument,
   editRfp,
   EditRfpInputSchema,
-} from "@powerhousedao/network-admin/document-models/request-for-proposals";
+} from "document-models/request-for-proposals";
 
 describe("RfpStateOperations", () => {
   it("should handle editRfp operation", () => {

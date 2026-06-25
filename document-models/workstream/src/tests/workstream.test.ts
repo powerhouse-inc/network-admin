@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import {
   reducer,
   utils,
@@ -20,7 +20,7 @@ import {
   removePaymentRequest,
   RemovePaymentRequestInputSchema,
   assertIsWorkstreamDocument,
-} from "@powerhousedao/network-admin/document-models/workstream";
+} from "document-models/workstream";
 
 describe("Workstream Operations", () => {
   it("should handle editWorkstream operation", () => {

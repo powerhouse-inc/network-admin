@@ -1,7 +1,7 @@
 import { setName } from "document-model";
 import type { FormEventHandler, MouseEventHandler } from "react";
 import { useState } from "react";
-import { useSelectedNetworkProfileDocument } from "@powerhousedao/network-admin/document-models/network-profile";
+import { useSelectedNetworkProfileDocument } from "document-models/network-profile";
 
 /** Displays the name of the selected NetworkProfile document and allows editing it */
 export function EditNetworkProfileName() {

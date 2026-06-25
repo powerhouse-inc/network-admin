@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -8,7 +8,7 @@ import {
   removeContextDocument,
   AddContextDocumentInputSchema,
   RemoveContextDocumentInputSchema,
-} from "@powerhousedao/network-admin/document-models/request-for-proposals";
+} from "document-models/request-for-proposals";
 
 describe("ContexDocumentOperations", () => {
   it("should handle addContextDocument operation", () => {

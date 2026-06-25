@@ -1,8 +1,8 @@
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
-import { useSelectedBuildersDocument } from "../../document-models/builders/hooks.js";
-import type { BuildersDocument } from "../../document-models/builders/index.js";
+import { useSelectedBuildersDocument } from "document-models/builders";
+import type { BuildersDocument } from "document-models/builders";
 import type { Action } from "document-model";
-import { actions as buildersActions } from "../../document-models/builders/actions.js";
+import { actions as buildersActions } from "document-models/builders";
 import {
   setSelectedNode,
   useParentFolderForSelectedNode,
@@ -414,7 +414,7 @@ export default function Editor() {
 
   return (
     <div className="w-full bg-gray-50">
-      <DocumentToolbar document={doc} onClose={handleClose} />
+      <DocumentToolbar />
       <div className="p-2 max-w-4xl mx-auto min-h-screen">
         <div className="bg-white rounded-lg p-6 mb-6 shadow-sm text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Builders</h1>

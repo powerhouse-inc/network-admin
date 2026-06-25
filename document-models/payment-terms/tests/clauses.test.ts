@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -16,7 +16,7 @@ import {
   AddPenaltyClauseInputSchema,
   UpdatePenaltyClauseInputSchema,
   DeletePenaltyClauseInputSchema,
-} from "@powerhousedao/network-admin/document-models/payment-terms";
+} from "document-models/payment-terms";
 
 describe("ClausesOperations", () => {
   it("should handle addBonusClause operation", () => {

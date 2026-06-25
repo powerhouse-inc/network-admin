@@ -1,4 +1,4 @@
-import type { RequestForProposalsProposalsOperations } from "@powerhousedao/network-admin/document-models/request-for-proposals";
+import type { RequestForProposalsProposalsOperations } from "document-models/request-for-proposals";
 
 export const requestForProposalsProposalsOperations: RequestForProposalsProposalsOperations =
   {

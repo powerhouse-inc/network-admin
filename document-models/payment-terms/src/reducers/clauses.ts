@@ -1,4 +1,4 @@
-import type { PaymentTermsClausesOperations } from "@powerhousedao/network-admin/document-models/payment-terms";
+import type { PaymentTermsClausesOperations } from "document-models/payment-terms";
 
 export const paymentTermsClausesOperations: PaymentTermsClausesOperations = {
   addBonusClauseOperation(state, action) {

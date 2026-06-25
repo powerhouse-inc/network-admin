@@ -18,12 +18,12 @@ import { CreateDocumentModal } from "@powerhousedao/design-system/connect";
 import { type DocumentModelModule, type PHDocument } from "document-model";
 import { isValidName } from "document-drive";
 import { WorkstreamIcon } from "./icons/WorkstreamIcon.js";
-import type { NetworkProfileDocument } from "../../../document-models/network-profile/index.js";
+import type { NetworkProfileDocument } from "document-models/network-profile";
 import {
   editClientInfo,
   editWorkstream,
-} from "../../../document-models/workstream/gen/creators.js";
-import { setProfileName } from "../../../document-models/network-profile/gen/creators.js";
+} from "document-models/workstream";
+import { setProfileName } from "document-models/network-profile";
 import { FolderTree } from "./FolderTree.js";
 
 /**

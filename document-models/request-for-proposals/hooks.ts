@@ -8,7 +8,7 @@ import {
 import type {
   RequestForProposalsAction,
   RequestForProposalsDocument,
-} from "@powerhousedao/network-admin/document-models/request-for-proposals";
+} from "document-models/request-for-proposals";
 import {
   assertIsRequestForProposalsDocument,
   isRequestForProposalsDocument,

@@ -8,7 +8,7 @@ import {
 import type {
   PaymentTermsAction,
   PaymentTermsDocument,
-} from "@powerhousedao/network-admin/document-models/payment-terms";
+} from "document-models/payment-terms";
 import {
   assertIsPaymentTermsDocument,
   isPaymentTermsDocument,

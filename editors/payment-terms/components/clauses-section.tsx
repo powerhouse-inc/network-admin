@@ -5,14 +5,14 @@ import {
   type ColumnDef,
   type ColumnAlignment,
 } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system/connect";
+import { toast } from "@powerhousedao/design-system/connect/toast";
 import { generateId } from "document-model/core";
 import type {
   BonusClause,
   PenaltyClause,
   PaymentTermsAction,
-} from "../../../document-models/payment-terms/gen/types.js";
-import { type actions as paymentTermsActions } from "../../../document-models/payment-terms/index.js";
+} from "document-models/payment-terms";
+import { type actions as paymentTermsActions } from "document-models/payment-terms";
 
 interface ClausesSectionProps {
   bonusClauses: BonusClause[];

@@ -3,16 +3,16 @@ import {
   type RequestForProposalsDocument,
   actions,
   type RfpStatusInput,
-} from "../../document-models/request-for-proposals/index.js";
+} from "document-models/request-for-proposals";
 import {
   DatePicker,
   Select,
   TextInput,
   NumberInput,
 } from "@powerhousedao/document-engineering";
-import { toast, ToastContainer } from "@powerhousedao/design-system/connect";
+import { toast, ToastContainer } from "@powerhousedao/design-system/connect/toast";
 import { MarkdownEditor } from "./markdown-editor.js";
-import { useSelectedRequestForProposalsDocument } from "../../document-models/request-for-proposals/hooks.js";
+import { useSelectedRequestForProposalsDocument } from "document-models/request-for-proposals";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
@@ -60,7 +60,7 @@ export default function Editor() {
 
   return (
     <>
-      <DocumentToolbar document={doc} onClose={handleClose} />
+      <DocumentToolbar />
       <div className="w-full bg-gray-50">
         <div className="p-6 max-w-4xl mx-auto min-h-screen">
           {/* Header Section */}

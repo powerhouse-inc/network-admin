@@ -11,10 +11,10 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { TextInput, Textarea } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system/connect";
-import type { PaymentTermsState } from "../../../document-models/payment-terms/gen/types.js";
-import type { PaymentTermsAction } from "../../../document-models/payment-terms/gen/actions.js";
-import { type actions as paymentTermsActions } from "../../../document-models/payment-terms/index.js";
+import { toast } from "@powerhousedao/design-system/connect/toast";
+import type { PaymentTermsState } from "document-models/payment-terms";
+import type { PaymentTermsAction } from "document-models/payment-terms";
+import { type actions as paymentTermsActions } from "document-models/payment-terms";
 
 interface EscrowSectionProps {
   state: PaymentTermsState;

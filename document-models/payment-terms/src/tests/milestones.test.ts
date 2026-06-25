@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import {
   reducer,
   utils,
@@ -19,7 +19,7 @@ import {
   DeleteMilestoneInputSchema,
   reorderMilestones,
   ReorderMilestonesInputSchema,
-} from "@powerhousedao/network-admin/document-models/payment-terms";
+} from "document-models/payment-terms";
 
 describe("Milestones Operations", () => {
   it("should handle addMilestone operation", () => {

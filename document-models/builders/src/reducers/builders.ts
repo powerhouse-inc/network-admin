@@ -1,4 +1,4 @@
-import type { BuildersBuildersOperations } from "@powerhousedao/network-admin/document-models/builders";
+import type { BuildersBuildersOperations } from "document-models/builders";
 
 export const buildersBuildersOperations: BuildersBuildersOperations = {
   addBuilderOperation(state, action) {
