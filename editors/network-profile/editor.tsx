@@ -5,13 +5,13 @@ import {
   Select,
   Icon,
 } from "@powerhousedao/document-engineering";
-import { toast, ToastContainer } from "@powerhousedao/design-system/connect";
+import { toast, ToastContainer } from "@powerhousedao/design-system/connect/toast";
 import {
   actions,
   type NetworkCategory,
-} from "../../document-models/network-profile/index.js";
+} from "document-models/network-profile";
 import { useCallback, useState, useEffect } from "react";
-import { useSelectedNetworkProfileDocument } from "../../document-models/network-profile/hooks.js";
+import { useSelectedNetworkProfileDocument } from "document-models/network-profile";
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import {
   setSelectedNode,
@@ -395,7 +395,7 @@ export default function Editor() {
 
   return (
     <div className="w-full bg-gray-50 min-h-screen">
-      <DocumentToolbar document={doc} onClose={handleClose} />
+      <DocumentToolbar />
       <div className="p-6 max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">

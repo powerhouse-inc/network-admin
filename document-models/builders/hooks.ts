@@ -8,7 +8,7 @@ import {
 import type {
   BuildersAction,
   BuildersDocument,
-} from "@powerhousedao/network-admin/document-models/builders";
+} from "document-models/builders";
 import {
   assertIsBuildersDocument,
   isBuildersDocument,

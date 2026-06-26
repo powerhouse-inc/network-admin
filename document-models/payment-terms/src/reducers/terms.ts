@@ -1,4 +1,4 @@
-import type { PaymentTermsTermsOperations } from "@powerhousedao/network-admin/document-models/payment-terms";
+import type { PaymentTermsTermsOperations } from "document-models/payment-terms";
 
 export const paymentTermsTermsOperations: PaymentTermsTermsOperations = {
   setBasicTermsOperation(state, action) {

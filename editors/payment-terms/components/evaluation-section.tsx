@@ -15,13 +15,13 @@ import {
   Trash2,
 } from "lucide-react";
 import { TextInput, Select } from "@powerhousedao/document-engineering";
-import { toast } from "@powerhousedao/design-system/connect";
+import { toast } from "@powerhousedao/design-system/connect/toast";
 import type {
   PaymentTermsState,
   EvaluationFrequency,
-} from "../../../document-models/payment-terms/gen/types.js";
-import type { PaymentTermsAction } from "../../../document-models/payment-terms/gen/actions.js";
-import { type actions as paymentTermsActions } from "../../../document-models/payment-terms/index.js";
+} from "document-models/payment-terms";
+import type { PaymentTermsAction } from "document-models/payment-terms";
+import { type actions as paymentTermsActions } from "document-models/payment-terms";
 
 interface EvaluationSectionProps {
   state: PaymentTermsState;

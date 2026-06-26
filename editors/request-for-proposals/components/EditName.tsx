@@ -1,7 +1,7 @@
 import { setName } from "document-model";
 import type { FormEventHandler, MouseEventHandler } from "react";
 import { useState } from "react";
-import { useSelectedRequestForProposalsDocument } from "@powerhousedao/network-admin/document-models/request-for-proposals";
+import { useSelectedRequestForProposalsDocument } from "document-models/request-for-proposals";
 
 /** Displays the name of the selected RequestForProposals document and allows editing it */
 export function EditRequestForProposalsName() {

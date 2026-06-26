@@ -1,4 +1,4 @@
-import type { WorkstreamWorkstreamOperations } from "@powerhousedao/network-admin/document-models/workstream";
+import type { WorkstreamWorkstreamOperations } from "document-models/workstream";
 
 export const workstreamWorkstreamOperations: WorkstreamWorkstreamOperations = {
   editWorkstreamOperation(state, action) {

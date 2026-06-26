@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import {
   reducer,
   utils,
@@ -31,7 +31,7 @@ import {
   SetYoutubeInputSchema,
   setProfileName,
   SetProfileNameInputSchema,
-} from "@powerhousedao/network-admin/document-models/network-profile";
+} from "document-models/network-profile";
 
 describe("NetworkProfileManagement Operations", () => {
   it("should handle setIcon operation", () => {

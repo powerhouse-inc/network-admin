@@ -15,11 +15,11 @@ import { RfpIcon } from "./icons/RfpIcon.js";
 import { SowIcon } from "./icons/SowIcon.js";
 import { WorkstreamIcon } from "./icons/WorkstreamIcon.js";
 import { Earth } from "lucide-react";
-import type { WorkstreamDocument } from "../../../document-models/workstream/index.js";
-import type { NetworkProfileDocument } from "../../../document-models/network-profile/index.js";
-import type { RequestForProposalsDocument } from "../../../document-models/request-for-proposals/index.js";
-import type { PaymentTermsDocument } from "../../../document-models/payment-terms/index.js";
-import type { BuildersDocument } from "../../../document-models/builders/index.js";
+import type { WorkstreamDocument } from "document-models/workstream";
+import type { NetworkProfileDocument } from "document-models/network-profile";
+import type { RequestForProposalsDocument } from "document-models/request-for-proposals";
+import type { PaymentTermsDocument } from "document-models/payment-terms";
+import type { BuildersDocument } from "document-models/builders";
 import { type PHDocument } from "document-model";
 
 const WorkstreamStatusEnums = [

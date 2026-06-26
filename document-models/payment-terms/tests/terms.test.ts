@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -14,7 +14,7 @@ import {
   SetTimeAndMaterialsInputSchema,
   SetEscrowDetailsInputSchema,
   SetEvaluationTermsInputSchema,
-} from "@powerhousedao/network-admin/document-models/payment-terms";
+} from "document-models/payment-terms";
 
 describe("TermsOperations", () => {
   it("should handle setBasicTerms operation", () => {

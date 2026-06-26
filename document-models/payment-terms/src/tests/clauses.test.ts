@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import {
   reducer,
   utils,
@@ -21,7 +21,7 @@ import {
   UpdatePenaltyClauseInputSchema,
   deletePenaltyClause,
   DeletePenaltyClauseInputSchema,
-} from "@powerhousedao/network-admin/document-models/payment-terms";
+} from "document-models/payment-terms";
 
 describe("Clauses Operations", () => {
   it("should handle addBonusClause operation", () => {

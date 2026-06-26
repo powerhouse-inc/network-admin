@@ -4,14 +4,14 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import {
   reducer,
   utils,
   isRequestForProposalsDocument,
   editRfp,
   EditRfpInputSchema,
-} from "@powerhousedao/network-admin/document-models/request-for-proposals";
+} from "document-models/request-for-proposals";
 
 describe("RfpState Operations", () => {
   it("should handle editRfp operation", () => {

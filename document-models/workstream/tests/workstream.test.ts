@@ -1,4 +1,4 @@
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import { describe, expect, it } from "vitest";
 import {
   reducer,
@@ -14,7 +14,7 @@ import {
   SetRequestForProposalInputSchema,
   AddPaymentRequestInputSchema,
   RemovePaymentRequestInputSchema,
-} from "@powerhousedao/network-admin/document-models/workstream";
+} from "document-models/workstream";
 
 describe("WorkstreamOperations", () => {
   it("should handle editWorkstream operation", () => {

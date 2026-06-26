@@ -17,7 +17,7 @@ import {
   assertIsBuildersDocument,
   isBuildersState,
   assertIsBuildersState,
-} from "@powerhousedao/network-admin/document-models/builders";
+} from "document-models/builders";
 import { ZodError } from "zod";
 
 describe("Builders Document Model", () => {

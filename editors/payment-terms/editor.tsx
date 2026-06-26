@@ -3,16 +3,14 @@ import {
   setSelectedNode,
   useParentFolderForSelectedNode,
 } from "@powerhousedao/reactor-browser";
-import {
-  ToastContainer,
-  DocumentToolbar,
-} from "@powerhousedao/design-system/connect";
+import { DocumentToolbar } from "@powerhousedao/design-system/connect";
+import { ToastContainer } from "@powerhousedao/design-system/connect/toast";
 import type { Action } from "document-model";
 import {
   type PaymentTermsDocument,
   actions,
-} from "../../document-models/payment-terms/index.js";
-import { useSelectedPaymentTermsDocument } from "../../document-models/payment-terms/hooks.js";
+} from "document-models/payment-terms";
+import { useSelectedPaymentTermsDocument } from "document-models/payment-terms";
 import { HeaderSection } from "./components/header-section.js";
 import { PartiesSection } from "./components/parties-section.js";
 import { PaymentConfigSection } from "./components/payment-config-section.js";
@@ -79,7 +77,7 @@ export default function Editor() {
 
   return (
     <>
-      <DocumentToolbar document={displayDoc} onClose={handleClose} />
+      <DocumentToolbar />
       <div className="min-h-screen bg-stone-50 font-sans text-slate-800">
         <div className="max-w-[1400px] mx-auto p-6">
           {/* Header with status and key metrics */}

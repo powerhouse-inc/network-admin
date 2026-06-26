@@ -14,7 +14,7 @@ type BuildersFilter = {
 };
 
 export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
-  const reactor = subgraph.reactor;
+  const reactorClient = (subgraph as any).reactorClient;
 
   const extractPhid = (value: unknown): string | null => {
     if (typeof value === "string") {
@@ -30,14 +30,6 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       return id.trim() || null;
     }
     return null;
-  };
-
-  const getCandidateDrives = async (): Promise<string[]> => {
-    try {
-      const drives = await (reactor as any).getDrives?.();
-      if (Array.isArray(drives) && drives.length > 0) return drives as string[];
-    } catch {}
-    return [] as string[];
   };
 
   const applyFilters = (builder: any, filter?: BuildersFilter): boolean => {
@@ -100,106 +92,51 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
   return {
     Query: {
       builders: async (parent: unknown, args: { filter?: BuildersFilter }) => {
-        const drives = await getCandidateDrives();
         const filter = args.filter;
 
         let builderDocs: PHDocument[] = [];
-        const sowDocs: PHDocument[] = [];
-        const resourceTemplateDocs: PHDocument[] = [];
-        const allowedDriveIds = new Set<string>(drives);
+        let sowDocs: PHDocument[] = [];
+        let resourceTemplateDocs: PHDocument[] = [];
 
-        // Step 1: If networkSlug is provided, identify the network drive and valid builder PHIDs
+        // If networkSlug is provided, find the network and its builders list
         if (filter?.networkSlug) {
-          allowedDriveIds.clear();
           const targetNetworkSlug = filter.networkSlug.toLowerCase().trim();
-          let targetDriveId: string | null = null;
-          let builderPhids: string[] = [];
 
-          // Find the network drive matching the slug
-          for (const driveId of drives) {
-            try {
-              const docIds = await reactor.getDocuments(driveId);
-              const docs = await Promise.all(
-                docIds.map(async (docId) => {
-                  try {
-                    return await reactor.getDocument<PHDocument>(docId);
-                  } catch {
-                    return null;
-                  }
-                }),
-              );
+          // Find network profiles
+          const networkResults = await reactorClient.find({
+            type: "powerhouse/network-profile",
+          });
 
-              const networkDoc = docs.find((doc) => {
-                if (
-                  !doc ||
-                  doc.header.documentType !== "powerhouse/network-profile"
-                )
-                  return false;
-                const state = (doc.state as any).global;
-                if (!state?.name) return false;
-                const slug = state.name
-                  .toLowerCase()
-                  .trim()
-                  .split(/\s+/)
-                  .join("-");
-                return slug === targetNetworkSlug;
-              });
+          const networkDoc = networkResults.results.find((doc: PHDocument) => {
+            const state = (doc.state as any).global;
+            if (!state?.name) return false;
+            const slug = state.name.toLowerCase().trim().split(/\s+/).join("-");
+            return slug === targetNetworkSlug;
+          });
 
-              if (networkDoc) {
-                targetDriveId = driveId;
+          if (networkDoc) {
+            // Find the builders list document
+            const buildersResults = await reactorClient.find({
+              type: "powerhouse/builders",
+            });
+            const buildersDoc = buildersResults.results[0];
 
-                // Get the builders list from this drive
-                const buildersDoc = docs.find(
-                  (doc) =>
-                    doc && doc.header.documentType === "powerhouse/builders",
+            let builderPhids: string[] = [];
+            if (buildersDoc) {
+              const state = buildersDoc.state.global;
+              if (Array.isArray(state?.builders)) {
+                builderPhids = state.builders.filter(
+                  (id: any) => typeof id === "string",
                 );
-
-                if (buildersDoc) {
-                  const state = (buildersDoc.state as any).global;
-                  if (Array.isArray(state.builders)) {
-                    builderPhids = state.builders.filter(
-                      (id: any) => typeof id === "string",
-                    );
-                  }
-                }
-                break;
               }
-            } catch (error) {
-              console.warn(`Failed to inspect drive ${driveId}:`, error);
-            }
-          }
-
-          if (targetDriveId) {
-            allowedDriveIds.add(targetDriveId);
-
-            // Fetch SOWs from the network drive
-            try {
-              const docIds = await reactor.getDocuments(targetDriveId);
-              for (const docId of docIds) {
-                try {
-                  const doc = await reactor.getDocument<PHDocument>(docId);
-                  if (doc.header.documentType === "powerhouse/scopeofwork") {
-                    sowDocs.push(doc);
-                  } else if (
-                    doc.header.documentType === "powerhouse/resource-template"
-                  ) {
-                    resourceTemplateDocs.push(doc);
-                  }
-                } catch {}
-              }
-            } catch (e) {
-              console.warn(
-                `Failed to fetch SOWs from drive ${targetDriveId}`,
-                e,
-              );
             }
 
-            // Fetch specific builder profiles
+            // Fetch specific builder profiles by PHID
             builderDocs = (
               await Promise.all(
                 builderPhids.map(async (phid) => {
                   try {
-                    const doc = await reactor.getDocument<PHDocument>(phid);
+                    const doc = (await reactorClient.get(phid)) as PHDocument;
                     return doc.header.documentType ===
                       "powerhouse/builder-profile"
                       ? doc
@@ -211,40 +148,28 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               )
             ).filter((doc): doc is PHDocument => doc !== null);
           }
+
+          // Fetch SOW and resource-template documents
+          const [sowResults, rtResults] = await Promise.all([
+            reactorClient.find({ type: "powerhouse/scopeofwork" }),
+            reactorClient
+              .find({ type: "powerhouse/resource-template" })
+              .catch(() => ({ results: [] })),
+          ]);
+          sowDocs = sowResults.results;
+          resourceTemplateDocs = rtResults.results;
         } else {
-          // Default behavior: Scan all drives
-          for (const driveId of drives) {
-            try {
-              const docIds = await reactor.getDocuments(driveId);
-              const docs = await Promise.all(
-                docIds.map(async (docId) => {
-                  try {
-                    return await reactor.getDocument<PHDocument>(docId);
-                  } catch {
-                    return null;
-                  }
-                }),
-              );
-
-              for (const doc of docs) {
-                if (!doc) continue;
-
-                if (doc.header.documentType === "powerhouse/builder-profile") {
-                  builderDocs.push(doc);
-                } else if (
-                  doc.header.documentType === "powerhouse/scopeofwork"
-                ) {
-                  sowDocs.push(doc);
-                } else if (
-                  doc.header.documentType === "powerhouse/resource-template"
-                ) {
-                  resourceTemplateDocs.push(doc);
-                }
-              }
-            } catch (error) {
-              console.warn(`Failed to process drive ${driveId}:`, error);
-            }
-          }
+          // Default: fetch all builder profiles, SOWs, and resource templates
+          const [bpResults, sowResults, rtResults] = await Promise.all([
+            reactorClient.find({ type: "powerhouse/builder-profile" }),
+            reactorClient.find({ type: "powerhouse/scopeofwork" }),
+            reactorClient
+              .find({ type: "powerhouse/resource-template" })
+              .catch(() => ({ results: [] })),
+          ]);
+          builderDocs = bpResults.results;
+          sowDocs = sowResults.results;
+          resourceTemplateDocs = rtResults.results;
         }
 
         // Step 2: Build a map of deliverable OID -> deliverable object for each SOW
@@ -287,7 +212,6 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
             const ownerPhid = extractPhid(project.projectOwner);
             if (!ownerPhid) continue;
 
-            // Resolve scope deliverables from OIDs to actual deliverable objects
             let resolvedScope = null;
             if (project.scope && typeof project.scope === "object") {
               try {
@@ -303,8 +227,6 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                     const deliverable = deliverablesMap.get(oid);
                     if (!deliverable || typeof deliverable !== "object")
                       return null;
-
-                    // Transform to SOW_Deliverable format with error handling
                     try {
                       return {
                         id: deliverable.id || "",
@@ -323,17 +245,12 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                           : [],
                         budgetAnchor: deliverable.budgetAnchor ?? null,
                       };
-                    } catch (error) {
-                      console.warn(
-                        `Failed to transform deliverable ${oid}:`,
-                        error,
-                      );
+                    } catch {
                       return null;
                     }
                   })
                   .filter((d: any) => d !== null);
 
-                // Build resolved scope with error handling
                 resolvedScope = {
                   deliverables: resolvedDeliverables,
                   status:
@@ -347,12 +264,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                     completed: 0,
                   },
                 };
-              } catch (error) {
-                console.warn(
-                  `Failed to resolve scope for project ${project.id}:`,
-                  error,
-                );
-                // Fallback to empty scope
+              } catch {
                 resolvedScope = {
                   deliverables: [],
                   status: "DRAFT",
@@ -362,7 +274,6 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               }
             }
 
-            // Transform project to BuilderProject format with error handling
             try {
               const builderProject = {
                 id: project.id || "",
@@ -382,15 +293,13 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
                 projectsByOwner.set(ownerPhid, []);
               }
               projectsByOwner.get(ownerPhid)!.push(builderProject);
-            } catch (error) {
-              console.warn(`Failed to transform project ${project.id}:`, error);
-              // Skip this project if transformation fails
+            } catch {
               continue;
             }
           }
         }
 
-        // Step 3b: Extract products from resource-template documents and group by operatorId
+        // Step 3b: Extract products from resource-template documents
         const productsByOperator = new Map<string, any[]>();
 
         for (const rtDoc of resourceTemplateDocs) {
@@ -439,11 +348,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               productsByOperator.set(operatorId, []);
             }
             productsByOperator.get(operatorId)!.push(product);
-          } catch (error) {
-            console.warn(
-              `Failed to transform resource-template ${rtDoc.header.id}:`,
-              error,
-            );
+          } catch {
+            // Skip on error
           }
         }
 
@@ -452,7 +358,6 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
           .map((doc) => {
             const state = (doc.state as any).global;
 
-            // Ensure all non-nullable fields are properly handled
             const name = String(state?.name ?? doc.header?.name ?? "");
             const icon = String(state?.icon ?? "");
             const description = String(state?.description ?? state?.slug ?? "");
@@ -462,7 +367,6 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               name: null,
               phid: null,
             };
-            // Document model uses 'skils' (typo), but GraphQL schema uses 'skills'
             const skills = Array.isArray(state?.skils)
               ? state.skils
               : Array.isArray(state?.skills)
@@ -474,7 +378,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               ? state.contributors
               : [];
 
-            const builder = {
+            return {
               id: doc.header.id,
               code: state?.code ?? null,
               slug: state?.slug ?? null,
@@ -493,17 +397,8 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               projects: projectsByOwner.get(doc.header.id) || [],
               products: productsByOperator.get(doc.header.id) || [],
             };
-
-            return builder;
           })
-          .filter((builder) => {
-            // Apply standard filters
-            if (!applyFilters(builder, filter)) {
-              return false;
-            }
-
-            return true;
-          });
+          .filter((builder) => applyFilters(builder, filter));
 
         return builders;
       },

@@ -1,15 +1,26 @@
 {
+  "id": "powerhouse/builders",
+  "name": "Builders",
   "author": {
     "name": "Powerhouse",
     "website": "https://powerhouse.inc"
   },
-  "description": "A list of builders that a SNO can have",
   "extension": "",
-  "id": "powerhouse/builders",
-  "name": "Builders",
+  "description": "A list of builders that a SNO can have",
   "specifications": [
     {
-      "changeLog": [],
+      "state": {
+        "local": {
+          "schema": "",
+          "examples": [],
+          "initialValue": ""
+        },
+        "global": {
+          "schema": "type BuildersState {\n  builders: [PHID!]!\n}",
+          "examples": [],
+          "initialValue": "{\n  \"builders\": []\n}"
+        }
+      },
       "modules": [
         {
           "id": "6a2edfaa-812d-486f-86ee-9f9282e9a26c",
@@ -41,19 +52,8 @@
           ]
         }
       ],
-      "state": {
-        "global": {
-          "examples": [],
-          "initialValue": "{\n  \"builders\": []\n}",
-          "schema": "type BuildersState {\n  builders: [PHID!]!\n}"
-        },
-        "local": {
-          "examples": [],
-          "initialValue": "",
-          "schema": ""
-        }
-      },
-      "version": 1
+      "version": 1,
+      "changeLog": []
     }
   ]
 }

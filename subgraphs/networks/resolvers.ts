@@ -1,12 +1,12 @@
 import { type BaseSubgraph } from "@powerhousedao/reactor-api";
-import type { NetworkProfileDocument } from "../../document-models/network-profile/index.js";
-import type { BuildersDocument } from "../../document-models/builders/index.js";
+import type { NetworkProfileDocument } from "document-models/network-profile";
+import type { BuildersDocument } from "document-models/builders";
 import type { PHDocument } from "document-model";
 
 export const getResolvers = (
   subgraph: BaseSubgraph,
 ): Record<string, unknown> => {
-  const reactor = subgraph.reactor;
+  const reactorClient = subgraph.reactorClient;
 
   // Shared state for builder profile resolution (used by field resolvers)
   let getBuilderProfileByPhid: ((phid: string) => any) | null = null;
@@ -17,41 +17,20 @@ export const getResolvers = (
         _: unknown,
         args: { filter?: { networkSlug?: string } },
       ) => {
-        const drives = await reactor.getDrives();
+        // Step 1: Find all network-profile and builders documents
+        const [networkResults, buildersResults, builderProfileResults] =
+          await Promise.all([
+            reactorClient.find({ type: "powerhouse/network-profile" }),
+            reactorClient.find({ type: "powerhouse/builders" }),
+            reactorClient.find({ type: "powerhouse/builder-profile" }),
+          ]);
 
-        // Step 1: Collect all network profile documents and builders documents with their drive IDs
-        const networkDocsWithDriveId: Array<{
-          doc: NetworkProfileDocument;
-          driveId: string;
-        }> = [];
-        const driveIdToBuildersDoc = new Map<string, BuildersDocument>();
-
-        for (const driveId of drives) {
-          const docsIds = await reactor.getDocuments(driveId);
-
-          // Fetch all documents in the drive
-          const docs = await Promise.all(
-            docsIds.map(async (docId) =>
-              reactor.getDocument<PHDocument>(docId),
-            ),
-          );
-
-          // Find network profile and builders documents
-          for (const doc of docs) {
-            if (doc.header.documentType === "powerhouse/network-profile") {
-              networkDocsWithDriveId.push({
-                doc: doc as NetworkProfileDocument,
-                driveId: driveId,
-              });
-            } else if (doc.header.documentType === "powerhouse/builders") {
-              driveIdToBuildersDoc.set(driveId, doc as BuildersDocument);
-            }
-          }
-        }
+        const networkDocs = networkResults.results as NetworkProfileDocument[];
+        const buildersDocs = buildersResults.results as BuildersDocument[];
 
         // Step 2: Collect all unique builder PHIDs from all BuildersDocuments
         const allBuilderPhids = new Set<string>();
-        driveIdToBuildersDoc.forEach((buildersDoc) => {
+        buildersDocs.forEach((buildersDoc) => {
           const builders = buildersDoc.state.global.builders;
           if (Array.isArray(builders)) {
             builders.forEach((phid) => {
@@ -62,27 +41,14 @@ export const getResolvers = (
           }
         });
 
-        // Also collect contributor PHIDs from builder profiles (we'll fetch them later)
+        // Also collect contributor PHIDs from builder profiles
         const contributorPhids = new Set<string>();
 
-        // Step 3: Fetch all builder-profile documents from all drives using the PHIDs
-        const builderProfileDocs = await Promise.all(
-          Array.from(allBuilderPhids).map(async (phid) => {
-            try {
-              return await reactor.getDocument<PHDocument>(phid);
-            } catch (error) {
-              console.warn(`Failed to fetch builder profile ${phid}:`, error);
-              return null;
-            }
-          }),
-        );
-
-        // Step 4: Create a map of PHID to builder profile document and collect contributor PHIDs
+        // Step 3: Build map of builder profile documents
         const builderProfileMap = new Map<string, PHDocument>();
-        builderProfileDocs.forEach((doc) => {
-          if (doc && doc.header.documentType === "powerhouse/builder-profile") {
+        builderProfileResults.results.forEach((doc) => {
+          if (doc.header.documentType === "powerhouse/builder-profile") {
             builderProfileMap.set(doc.header.id, doc);
-            // Collect contributor PHIDs from this builder profile
             const state = (doc.state as any).global;
             if (state?.contributors && Array.isArray(state.contributors)) {
               state.contributors.forEach((phid: string) => {
@@ -94,17 +60,45 @@ export const getResolvers = (
           }
         });
 
-        // Step 4b: Fetch contributor builder profiles if any were found
+        // Fetch any builder profiles by PHID that weren't found via find()
+        const missingPhids = Array.from(allBuilderPhids).filter(
+          (phid) => !builderProfileMap.has(phid),
+        );
+        if (missingPhids.length > 0) {
+          const missingDocs = await Promise.all(
+            missingPhids.map(async (phid) => {
+              try {
+                return await reactorClient.get<PHDocument>(phid);
+              } catch {
+                return null;
+              }
+            }),
+          );
+          missingDocs.forEach((doc) => {
+            if (
+              doc &&
+              doc.header.documentType === "powerhouse/builder-profile"
+            ) {
+              builderProfileMap.set(doc.header.id, doc);
+              const state = (doc.state as any).global;
+              if (state?.contributors && Array.isArray(state.contributors)) {
+                state.contributors.forEach((phid: string) => {
+                  if (phid && !builderProfileMap.has(phid)) {
+                    contributorPhids.add(phid);
+                  }
+                });
+              }
+            }
+          });
+        }
+
+        // Step 4: Fetch contributor builder profiles if any were found
         if (contributorPhids.size > 0) {
           const contributorDocs = await Promise.all(
             Array.from(contributorPhids).map(async (phid) => {
               try {
-                return await reactor.getDocument<PHDocument>(phid);
-              } catch (error) {
-                console.warn(
-                  `Failed to fetch contributor builder profile ${phid}:`,
-                  error,
-                );
+                return await reactorClient.get<PHDocument>(phid);
+              } catch {
                 return null;
               }
             }),
@@ -126,8 +120,7 @@ export const getResolvers = (
           if (!doc) return null;
 
           const state = (doc.state as any).global;
-          // Store contributor PHIDs separately - they'll be resolved by the field resolver
-          const contributorPhids = state?.contributors || [];
+          const cpPhids = state?.contributors || [];
           return {
             id: doc.header.id,
             code: state?.code || null,
@@ -141,7 +134,7 @@ export const getResolvers = (
               name: null,
               phid: null,
             },
-            _contributorPhids: contributorPhids, // Internal field for resolver
+            _contributorPhids: cpPhids,
             status: state?.status || null,
             skills: state?.skils || state?.skills || [],
             scopes: state?.scopes || [],
@@ -149,19 +142,18 @@ export const getResolvers = (
           };
         };
 
-        // Step 6: Map each network to its builders from the same drive
-        const allNetworks = networkDocsWithDriveId.map(({ doc, driveId }) => {
+        // Step 6: Map each network to its builders
+        const allNetworks = networkDocs.map((doc) => {
           const state = doc.state.global;
 
-          // Get the BuildersDocument from the same drive as the network
-          const buildersDoc = driveIdToBuildersDoc.get(driveId);
+          // Find a builders doc (use first one found — in practice there's one per drive)
+          const buildersDoc = buildersDocs[0];
 
-          // Get builders list from the BuildersDocument and map to builder profiles
           const builders =
             buildersDoc && getBuilderProfileByPhid
               ? (buildersDoc.state.global.builders || [])
                   .map((phid: string) => getBuilderProfileByPhid!(phid))
-                  .filter((builder) => builder !== null)
+                  .filter((builder: unknown) => builder !== null)
               : [];
 
           return {
@@ -173,9 +165,9 @@ export const getResolvers = (
                 ? state.name.toLowerCase().trim().split(/\s+/).join("-")
                 : null,
               icon: state.icon,
-              darkThemeIcon: state.darkThemeIcon ?? null,
+              darkThemeIcon: (state as any).darkThemeIcon ?? null,
               logo: state.logo,
-              darkThemeLogo: state.darkThemeLogo ?? null,
+              darkThemeLogo: (state as any).darkThemeLogo ?? null,
               logoBig: state.logoBig,
               website: state.website ?? null,
               description: state.description,
@@ -202,7 +194,6 @@ export const getResolvers = (
     },
     Builder: {
       contributors: (parent: { _contributorPhids?: string[] }) => {
-        // Resolve contributor PHIDs to Builder objects
         if (
           !parent._contributorPhids ||
           parent._contributorPhids.length === 0
@@ -214,7 +205,7 @@ export const getResolvers = (
         }
         return parent._contributorPhids
           .map((phid: string) => getBuilderProfileByPhid!(phid))
-          .filter((builder) => builder !== null);
+          .filter((builder: unknown) => builder !== null);
       },
     },
   };

@@ -1,6 +1,6 @@
 import type { SetIconAction } from "../../gen/network-profile-management/actions.js";
 import type { NetworkProfileState } from "../../gen/types.js";
-import type { NetworkProfileNetworkProfileManagementOperations } from "@powerhousedao/network-admin/document-models/network-profile";
+import type { NetworkProfileNetworkProfileManagementOperations } from "document-models/network-profile";
 
 export const networkProfileNetworkProfileManagementOperations: NetworkProfileNetworkProfileManagementOperations =
   {

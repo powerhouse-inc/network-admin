@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { generateMock } from "@powerhousedao/codegen";
+import { generateMock } from "document-model";
 import {
   reducer,
   utils,
@@ -15,7 +15,7 @@ import {
   ChangeProposalStatusInputSchema,
   removeProposal,
   RemoveProposalInputSchema,
-} from "@powerhousedao/network-admin/document-models/request-for-proposals";
+} from "document-models/request-for-proposals";
 
 describe("Proposals Operations", () => {
   it("should handle addProposal operation", () => {

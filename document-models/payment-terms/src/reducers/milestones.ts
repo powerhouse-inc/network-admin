@@ -1,4 +1,4 @@
-import type { PaymentTermsMilestonesOperations } from "@powerhousedao/network-admin/document-models/payment-terms";
+import type { PaymentTermsMilestonesOperations } from "document-models/payment-terms";
 
 export const paymentTermsMilestonesOperations: PaymentTermsMilestonesOperations =
   {

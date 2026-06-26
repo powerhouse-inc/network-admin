@@ -10,7 +10,7 @@ import type {
   EditWorkstreamInput,
   EditAlternativeProposalInput,
   Proposal,
-} from "@powerhousedao/network-admin/document-models/workstream";
+} from "document-models/workstream";
 import { up } from "./migrations.js";
 import type { DB } from "./schema.js";
 

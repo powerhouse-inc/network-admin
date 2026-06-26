@@ -1,8 +1,8 @@
 import { type ISubgraph } from "@powerhousedao/reactor-api";
 import { WorkstreamsProcessor } from "../../processors/workstreams/index.js";
-import { type RequestForProposalsDocument } from "../../document-models/request-for-proposals/index.js";
-import { type WorkstreamDocument } from "../../document-models/workstream/index.js";
-import type { NetworkProfileDocument } from "../../document-models/network-profile/index.js";
+import { type RequestForProposalsDocument } from "document-models/request-for-proposals";
+import { type WorkstreamDocument } from "document-models/workstream";
+import type { NetworkProfileDocument } from "document-models/network-profile";
 import type { PHDocument } from "document-model";
 import { sql, type ExpressionBuilder } from "kysely";
 import type { DB } from "../../processors/workstreams/schema.js";
@@ -38,7 +38,7 @@ type ScopeOfWorkFilterArgs = {
 };
 
 export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
-  const reactor = subgraph.reactor;
+  const reactorClient = (subgraph as any).reactorClient;
   const db = subgraph.relationalDb;
 
   // Shared state for builder profile resolution (used by field resolvers)
@@ -75,18 +75,26 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
   const getCandidateDrives = async (): Promise<string[]> => {
     try {
-      const drives = await (reactor as any).getDrives?.();
-      if (Array.isArray(drives) && drives.length > 0) {
-        return (drives as string[]).map(normalizeDriveId);
+      const result = await reactorClient.find({
+        type: "powerhouse/document-drive",
+      });
+      if (result?.results?.length > 0) {
+        return result.results
+          .filter(
+            (doc: any) => doc.header?.meta?.preferredEditor === "network-admin",
+          )
+          .map((doc: any) => normalizeDriveId(doc.header.id as string));
       }
-    } catch {}
+    } catch {
+      return [] as string[];
+    }
     return [] as string[];
   };
 
   const loadLinkedDocument = async (id?: string | null) => {
     if (!id) return null;
     try {
-      const linked = await reactor.getDocument<any>(id);
+      const linked = await reactorClient.get(id);
       return { id, stateJSON: linked.state.global };
     } catch {
       return { id, stateJSON: null };
@@ -101,9 +109,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     }
 
     try {
-      const rfpDoc = await reactor.getDocument<RequestForProposalsDocument>(
+      const rfpDoc = (await reactorClient.get(
         rfpRef.id,
-      );
+      )) as RequestForProposalsDocument;
       const rfpState = rfpDoc.state.global as any;
 
       return {
@@ -144,8 +152,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
     }
 
     try {
-      const networkDoc =
-        await reactor.getDocument<NetworkProfileDocument>(networkId);
+      const networkDoc = (await reactorClient.get(
+        networkId,
+      )) as NetworkProfileDocument;
       const state = networkDoc.state.global as any;
 
       return {
@@ -199,7 +208,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
       const builderProfileDocs = await Promise.all(
         Array.from(contributorPhids).map(async (phid) => {
           try {
-            return await reactor.getDocument<PHDocument>(phid);
+            return (await reactorClient.get(phid)) as PHDocument;
           } catch (error) {
             console.warn(`Failed to fetch builder profile ${phid}:`, error);
             return null;
@@ -230,7 +239,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         const nestedContributorDocs = await Promise.all(
           nestedContributorPhids.map(async (phid) => {
             try {
-              return await reactor.getDocument<PHDocument>(phid);
+              return (await reactorClient.get(phid)) as PHDocument;
             } catch (error) {
               console.warn(
                 `Failed to fetch contributor builder profile ${phid}:`,
@@ -254,9 +263,9 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
 
   const hydrateWorkstreamRow = async (row: any) => {
     try {
-      const doc = await reactor.getDocument<WorkstreamDocument>(
+      const doc = (await reactorClient.get(
         row.workstream_phid,
-      );
+      )) as WorkstreamDocument;
       const state = doc.state.global as any;
 
       const initialProposalBase = state.initialProposal
@@ -451,7 +460,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
               `[WorkstreamsProcessor] Resolver querying drive: ${driveId}, namespace: ${namespace}`,
             );
             try {
-              return await WorkstreamsProcessor.query(driveId, db)
+              return await WorkstreamsProcessor.query(driveId, db as any)
                 .selectFrom("workstreams")
                 .selectAll()
                 .execute();
@@ -496,7 +505,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         const contributorPhids = new Set<string>();
 
         for (const driveId of candidateDrives) {
-          let qb = WorkstreamsProcessor.query(driveId, db)
+          let qb = WorkstreamsProcessor.query(driveId, db as any)
             .selectFrom("workstreams")
             .selectAll();
 
@@ -628,7 +637,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         const contributorPhids = new Set<string>();
 
         for (const driveId of candidateDrives) {
-          let qb = WorkstreamsProcessor.query(driveId, db)
+          let qb = WorkstreamsProcessor.query(driveId, db as any)
             .selectFrom("workstreams")
             .selectAll();
 
@@ -750,7 +759,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         const results: any[] = [];
 
         for (const driveId of candidateDrives) {
-          let qb = WorkstreamsProcessor.query(driveId, db)
+          let qb = WorkstreamsProcessor.query(driveId, db as any)
             .selectFrom("workstreams")
             .selectAll();
 
@@ -792,7 +801,7 @@ export const getResolvers = (subgraph: ISubgraph): Record<string, unknown> => {
         const contributorPhids = new Set<string>();
 
         for (const driveId of candidateDrives) {
-          let qb = WorkstreamsProcessor.query(driveId, db)
+          let qb = WorkstreamsProcessor.query(driveId, db as any)
             .selectFrom("workstreams")
             .selectAll();
 
